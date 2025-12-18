@@ -1,4 +1,5 @@
 import { FeedHeader } from "@/components/feed/FeedHeader";
+import { FeedStories } from "@/components/feed/FeedStories";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 
@@ -79,6 +80,8 @@ const Feed = () => {
       <FeedHeader />
       
       <main className="pt-28">
+        <FeedStories />
+        
         {posts.map((post) => (
           <FeedPost key={post.id} post={post} />
         ))}
