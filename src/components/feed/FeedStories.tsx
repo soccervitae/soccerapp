@@ -5,7 +5,7 @@ const stories = [
   {
     id: 0,
     isAddStory: true,
-    name: "Seu story",
+    name: "Seu replay",
     avatar: "",
     image: "",
   },
@@ -80,7 +80,7 @@ export const FeedStories = () => {
                       </div>
                     </div>
                     <div className="bg-background px-2 py-3 text-center">
-                      <p className="text-xs font-semibold text-foreground truncate">Criar story</p>
+                      <p className="text-xs font-semibold text-foreground truncate">Criar replay</p>
                     </div>
                   </div>
                 ) : (
