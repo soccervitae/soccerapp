@@ -25,6 +25,7 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>(null);
   const [displayIndex, setDisplayIndex] = useState(initialStoryIndex);
+  const [isPaused, setIsPaused] = useState(false);
 
   const viewableStories = stories.filter(s => !s.isAddStory);
   const currentStory = viewableStories[displayIndex];
@@ -34,7 +35,7 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
     
     setProgress(0);
     const interval = setInterval(() => {
-      if (isTransitioning) return;
+      if (isTransitioning || isPaused) return;
       
       setProgress(prev => {
         if (prev >= 100) {
@@ -51,7 +52,10 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isOpen, currentIndex, viewableStories.length, onClose, isTransitioning]);
+  }, [isOpen, currentIndex, viewableStories.length, onClose, isTransitioning, isPaused]);
+
+  const handlePauseStart = () => setIsPaused(true);
+  const handlePauseEnd = () => setIsPaused(false);
 
   useEffect(() => {
     setCurrentIndex(initialStoryIndex);
@@ -156,8 +160,15 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
             />
           </div>
 
-          {/* Navigation areas */}
-          <div className="absolute inset-0 flex z-10">
+          {/* Navigation areas with pause on hold */}
+          <div 
+            className="absolute inset-0 flex z-10"
+            onMouseDown={handlePauseStart}
+            onMouseUp={handlePauseEnd}
+            onMouseLeave={handlePauseEnd}
+            onTouchStart={handlePauseStart}
+            onTouchEnd={handlePauseEnd}
+          >
             <button 
               onClick={goToPrevious} 
               className="w-1/3 h-full focus:outline-none"
@@ -170,6 +181,15 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
               aria-label="Próximo story"
             />
           </div>
+
+          {/* Pause indicator */}
+          {isPaused && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+              <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center animate-scale-in">
+                <span className="material-symbols-outlined text-white text-[32px]">pause</span>
+              </div>
+            </div>
+          )}
 
           {/* Footer with input */}
           <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
