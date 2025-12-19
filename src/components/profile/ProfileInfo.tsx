@@ -24,7 +24,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
   return (
     <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
-      <div className="w-screen h-32 -ml-[50vw] left-1/2 relative overflow-hidden">
+      <div className="w-full h-32 relative overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"
           alt="Cover photo"
@@ -56,7 +56,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
       </div>
 
       {/* Physical Stats */}
-      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 border border-border shadow-sm w-full mt-2">
+      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 border border-border shadow-sm w-full mt-2 mx-4">
         <div className="flex flex-col gap-1 p-2 text-center">
           <p className="text-foreground text-sm font-bold">22</p>
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
@@ -76,7 +76,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex w-full max-w-xs gap-3 mt-2">
+      <div className="flex w-full max-w-xs gap-3 mt-2 px-4">
         <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
           <span className="material-symbols-outlined text-[20px]">person_add</span>
           Seguir
