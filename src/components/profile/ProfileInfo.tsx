@@ -77,11 +77,11 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
 
       {/* Action Buttons */}
       <div className="flex w-full max-w-xs gap-3 mt-2 px-4">
-        <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
-          <span className="material-symbols-outlined text-[20px]">person_add</span>
-          Seguir
+        <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-lg font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
+          <span className="material-symbols-outlined text-[20px]">favorite</span>
+          Torcer
         </button>
-        <button className="flex-1 bg-background hover:bg-muted text-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors border border-border flex items-center justify-center gap-2 shadow-sm">
+        <button className="flex-1 bg-background hover:bg-muted text-foreground h-11 rounded-lg font-bold text-sm tracking-wide transition-colors border border-border flex items-center justify-center gap-2 shadow-sm">
           <span className="material-symbols-outlined text-[20px]">chat</span>
           Mensagem
         </button>
