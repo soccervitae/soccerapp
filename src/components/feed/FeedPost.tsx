@@ -101,26 +101,24 @@ export const FeedPost = ({ post }: FeedPostProps) => {
 
       {/* Actions */}
       <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={handleLike}
-              className={`flex items-center gap-1 transition-all active:scale-125 ${liked ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}
-            >
-              <span className={`material-symbols-outlined text-[26px] ${liked ? 'fill-1' : ''}`}>
-                {liked ? 'favorite' : 'favorite_border'}
-              </span>
-            </button>
-            <button 
-              onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-1 text-foreground hover:text-muted-foreground transition-colors"
-            >
-              <span className="material-symbols-outlined text-[26px]">chat_bubble_outline</span>
-            </button>
-            <button className="flex items-center gap-1 text-foreground hover:text-muted-foreground transition-colors">
-              <span className="material-symbols-outlined text-[26px]">send</span>
-            </button>
-          </div>
+        <div className="flex items-center justify-center gap-6 mb-3">
+          <button 
+            onClick={handleLike}
+            className={`flex items-center gap-1 transition-all active:scale-125 ${liked ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}
+          >
+            <span className={`material-symbols-outlined text-[26px] ${liked ? 'fill-1' : ''}`}>
+              {liked ? 'favorite' : 'favorite_border'}
+            </span>
+          </button>
+          <button 
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center gap-1 text-foreground hover:text-muted-foreground transition-colors"
+          >
+            <span className="material-symbols-outlined text-[26px]">chat_bubble_outline</span>
+          </button>
+          <button className="flex items-center gap-1 text-foreground hover:text-muted-foreground transition-colors">
+            <span className="material-symbols-outlined text-[26px]">send</span>
+          </button>
           <button className="text-foreground hover:text-muted-foreground transition-colors">
             <span className="material-symbols-outlined text-[26px]">bookmark_border</span>
           </button>
