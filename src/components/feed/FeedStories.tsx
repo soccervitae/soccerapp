@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { StoryViewer } from "./StoryViewer";
+import { CreateReplaySheet } from "./CreateReplaySheet";
 
-const stories = [
+interface Story {
+  id: number;
+  name: string;
+  avatar: string;
+  image: string;
+  hasNewStory?: boolean;
+  isAddStory?: boolean;
+}
+
+const initialStories: Story[] = [
   {
     id: 0,
     isAddStory: true,
@@ -47,11 +57,16 @@ const stories = [
 ];
 
 export const FeedStories = () => {
+  const [stories, setStories] = useState<Story[]>(initialStories);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [createReplayOpen, setCreateReplayOpen] = useState(false);
 
   const handleStoryClick = (storyId: number, isAddStory?: boolean) => {
-    if (isAddStory) return;
+    if (isAddStory) {
+      setCreateReplayOpen(true);
+      return;
+    }
     
     const viewableStories = stories.filter(s => !s.isAddStory);
     const index = viewableStories.findIndex(s => s.id === storyId);
@@ -59,6 +74,24 @@ export const FeedStories = () => {
       setSelectedStoryIndex(index);
       setViewerOpen(true);
     }
+  };
+
+  const handleReplayCreated = (replay: { image: string; caption: string }) => {
+    const newReplay: Story = {
+      id: Date.now(),
+      name: "Você",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      image: replay.image,
+      hasNewStory: true,
+    };
+    
+    // Adiciona o novo replay após o botão "Criar replay"
+    setStories(prev => {
+      const addStoryIndex = prev.findIndex(s => s.isAddStory);
+      const newStories = [...prev];
+      newStories.splice(addStoryIndex + 1, 0, newReplay);
+      return newStories;
+    });
   };
 
   return (
@@ -120,6 +153,12 @@ export const FeedStories = () => {
         initialStoryIndex={selectedStoryIndex}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}
+      />
+
+      <CreateReplaySheet
+        open={createReplayOpen}
+        onOpenChange={setCreateReplayOpen}
+        onReplayCreated={handleReplayCreated}
       />
     </>
   );
