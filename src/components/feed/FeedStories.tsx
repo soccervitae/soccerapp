@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { StoryViewer } from "./StoryViewer";
+
 const stories = [
   {
     id: 0,
@@ -44,60 +47,80 @@ const stories = [
 ];
 
 export const FeedStories = () => {
-  return (
-    <div className="bg-background border-b border-border">
-      <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
-        {stories.map((story) => (
-          <div
-            key={story.id}
-            className="flex-none w-28 cursor-pointer group"
-          >
-            <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
-              {story.isAddStory ? (
-                // Add Story Card
-                <div className="w-full h-full bg-muted flex flex-col">
-                  <div className="flex-1 bg-gradient-to-b from-primary/20 to-primary/5 flex items-center justify-center">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                      <span className="material-symbols-outlined text-[24px] text-primary-foreground">add</span>
-                    </div>
-                  </div>
-                  <div className="bg-background px-2 py-3 text-center">
-                    <p className="text-xs font-semibold text-foreground truncate">Criar story</p>
-                  </div>
-                </div>
-              ) : (
-                // Regular Story Card
-                <>
-                  <img
-                    src={story.image}
-                    alt={story.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
-                  
-                  {/* Avatar */}
-                  <div className="absolute top-2 left-2">
-                    <div className={`w-9 h-9 rounded-full p-[2px] ${story.hasNewStory ? 'bg-gradient-to-tr from-primary to-emerald-400' : 'bg-muted'}`}>
-                      <img
-                        src={story.avatar}
-                        alt={story.name}
-                        className="w-full h-full rounded-full border-2 border-background object-cover"
-                      />
-                    </div>
-                  </div>
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
 
-                  {/* Name */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <p className="text-xs font-semibold text-white truncate drop-shadow-md">
-                      {story.name?.split(' ')[0]}
-                    </p>
+  const handleStoryClick = (storyId: number, isAddStory?: boolean) => {
+    if (isAddStory) return;
+    
+    const viewableStories = stories.filter(s => !s.isAddStory);
+    const index = viewableStories.findIndex(s => s.id === storyId);
+    if (index !== -1) {
+      setSelectedStoryIndex(index);
+      setViewerOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-background border-b border-border">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
+          {stories.map((story) => (
+            <div
+              key={story.id}
+              className="flex-none w-28 cursor-pointer group"
+              onClick={() => handleStoryClick(story.id, story.isAddStory)}
+            >
+              <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
+                {story.isAddStory ? (
+                  <div className="w-full h-full bg-muted flex flex-col">
+                    <div className="flex-1 bg-gradient-to-b from-primary/20 to-primary/5 flex items-center justify-center">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                        <span className="material-symbols-outlined text-[24px] text-primary-foreground">add</span>
+                      </div>
+                    </div>
+                    <div className="bg-background px-2 py-3 text-center">
+                      <p className="text-xs font-semibold text-foreground truncate">Criar story</p>
+                    </div>
                   </div>
-                </>
-              )}
+                ) : (
+                  <>
+                    <img
+                      src={story.image}
+                      alt={story.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+                    
+                    <div className="absolute top-2 left-2">
+                      <div className={`w-9 h-9 rounded-full p-[2px] ${story.hasNewStory ? 'bg-gradient-to-tr from-primary to-emerald-400' : 'bg-muted'}`}>
+                        <img
+                          src={story.avatar}
+                          alt={story.name}
+                          className="w-full h-full rounded-full border-2 border-background object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 p-2">
+                      <p className="text-xs font-semibold text-white truncate drop-shadow-md">
+                        {story.name?.split(' ')[0]}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+
+      <StoryViewer
+        stories={stories}
+        initialStoryIndex={selectedStoryIndex}
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+      />
+    </>
   );
 };
