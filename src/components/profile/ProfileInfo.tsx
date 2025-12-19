@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface Athlete {
   name: string;
   username: string;
@@ -21,6 +23,8 @@ const defaultAthlete: Athlete = {
 };
 
 export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
+  const [isCheering, setIsCheering] = useState(false);
+
   return (
     <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
@@ -77,9 +81,18 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
 
       {/* Action Buttons */}
       <div className="flex w-full max-w-xs gap-3 mt-2 px-4">
-        <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-lg font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
-          <span className="material-symbols-outlined text-[20px]">favorite</span>
-          Torcer
+        <button 
+          onClick={() => setIsCheering(!isCheering)}
+          className={`flex-1 h-11 rounded-lg font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${
+            isCheering 
+              ? "bg-primary/10 text-primary border border-primary hover:bg-primary/20" 
+              : "bg-primary hover:bg-primary-dark text-primary-foreground shadow-primary-glow"
+          }`}
+        >
+          <span className={`material-symbols-outlined text-[20px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} style={{ fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0" }}>
+            favorite
+          </span>
+          {isCheering ? "Torcendo" : "Torcer"}
         </button>
         <button className="flex-1 bg-background hover:bg-muted text-foreground h-11 rounded-lg font-bold text-sm tracking-wide transition-colors border border-border flex items-center justify-center gap-2 shadow-sm">
           <span className="material-symbols-outlined text-[20px]">chat</span>
