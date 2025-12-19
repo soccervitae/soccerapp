@@ -55,18 +55,6 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
         <p className="text-muted-foreground font-medium text-sm">{athlete.position} | {athlete.team}</p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex w-full max-w-xs gap-3 mt-2">
-        <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
-          <span className="material-symbols-outlined text-[20px]">person_add</span>
-          Seguir
-        </button>
-        <button className="flex-1 bg-background hover:bg-muted text-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors border border-border flex items-center justify-center gap-2 shadow-sm">
-          <span className="material-symbols-outlined text-[20px]">chat</span>
-          Mensagem
-        </button>
-      </div>
-
       {/* Physical Stats */}
       <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 border border-border shadow-sm w-full mt-2">
         <div className="flex flex-col gap-1 p-2 text-center">
@@ -85,6 +73,18 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
           <p className="text-foreground text-sm font-bold">Direito</p>
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
         </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex w-full max-w-xs gap-3 mt-2">
+        <button className="flex-1 bg-primary hover:bg-primary-dark text-primary-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2 shadow-primary-glow">
+          <span className="material-symbols-outlined text-[20px]">person_add</span>
+          Seguir
+        </button>
+        <button className="flex-1 bg-background hover:bg-muted text-foreground h-11 rounded-xl font-bold text-sm tracking-wide transition-colors border border-border flex items-center justify-center gap-2 shadow-sm">
+          <span className="material-symbols-outlined text-[20px]">chat</span>
+          Mensagem
+        </button>
       </div>
     </section>
   );
