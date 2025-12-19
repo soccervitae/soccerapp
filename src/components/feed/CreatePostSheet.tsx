@@ -47,7 +47,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+      <SheetContent side="bottom" className="h-full rounded-t-none">
         <SheetHeader className="pb-4 border-b border-border">
           <div className="flex items-center justify-between">
             <button 
