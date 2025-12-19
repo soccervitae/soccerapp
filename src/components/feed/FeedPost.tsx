@@ -116,6 +116,14 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         />
       </div>
 
+      {/* Caption - below media */}
+      <div className="px-4 pt-3">
+        <p className="text-sm text-foreground">
+          <span className="font-bold">{post.athlete.username}</span>{" "}
+          {post.caption}
+        </p>
+      </div>
+
       {/* Actions */}
       <div className="p-4">
         {/* Actions Card */}
@@ -151,11 +159,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           {formatNumber(likesCount)} curtidas
         </p>
 
-        {/* Caption */}
-        <p className="text-sm text-foreground mb-1">
-          <span className="font-bold">{post.athlete.username}</span>{" "}
-          {post.caption}
-        </p>
 
         {/* Comments count */}
         <button 
