@@ -17,22 +17,29 @@ interface StoryViewerProps {
   onClose: () => void;
 }
 
+type TransitionDirection = "next" | "prev" | null;
+
 export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: StoryViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>(null);
+  const [displayIndex, setDisplayIndex] = useState(initialStoryIndex);
 
   const viewableStories = stories.filter(s => !s.isAddStory);
-  const currentStory = viewableStories[currentIndex];
+  const currentStory = viewableStories[displayIndex];
 
   useEffect(() => {
     if (!isOpen) return;
     
     setProgress(0);
     const interval = setInterval(() => {
+      if (isTransitioning) return;
+      
       setProgress(prev => {
         if (prev >= 100) {
           if (currentIndex < viewableStories.length - 1) {
-            setCurrentIndex(i => i + 1);
+            handleTransition("next", currentIndex + 1);
             return 0;
           } else {
             onClose();
@@ -44,35 +51,63 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isOpen, currentIndex, viewableStories.length, onClose]);
+  }, [isOpen, currentIndex, viewableStories.length, onClose, isTransitioning]);
 
   useEffect(() => {
     setCurrentIndex(initialStoryIndex);
+    setDisplayIndex(initialStoryIndex);
     setProgress(0);
   }, [initialStoryIndex]);
 
-  const goToPrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(i => i - 1);
+  const handleTransition = (direction: TransitionDirection, newIndex: number) => {
+    if (isTransitioning) return;
+    
+    setTransitionDirection(direction);
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setDisplayIndex(newIndex);
+      setCurrentIndex(newIndex);
       setProgress(0);
+      
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setTransitionDirection(null);
+      }, 300);
+    }, 150);
+  };
+
+  const goToPrevious = () => {
+    if (currentIndex > 0 && !isTransitioning) {
+      handleTransition("prev", currentIndex - 1);
     }
   };
 
   const goToNext = () => {
-    if (currentIndex < viewableStories.length - 1) {
-      setCurrentIndex(i => i + 1);
-      setProgress(0);
-    } else {
+    if (currentIndex < viewableStories.length - 1 && !isTransitioning) {
+      handleTransition("next", currentIndex + 1);
+    } else if (!isTransitioning) {
       onClose();
     }
   };
 
   if (!currentStory) return null;
 
+  const getTransitionClasses = () => {
+    if (!isTransitioning) return "opacity-100 scale-100 translate-x-0";
+    
+    if (transitionDirection === "next") {
+      return "opacity-0 scale-95 -translate-x-4";
+    } else if (transitionDirection === "prev") {
+      return "opacity-0 scale-95 translate-x-4";
+    }
+    return "";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md w-full h-[100dvh] max-h-[100dvh] p-0 border-0 bg-black rounded-none sm:rounded-2xl sm:h-[90vh] sm:max-h-[800px]">
-        <div className="relative w-full h-full flex flex-col">
+        <div className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Progress bars */}
           <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
             {viewableStories.map((_, index) => (
@@ -87,8 +122,10 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
             ))}
           </div>
 
-          {/* Header */}
-          <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4">
+          {/* Header with transition */}
+          <div 
+            className={`absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4 transition-all duration-300 ease-out ${getTransitionClasses()}`}
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-400">
                 <img
@@ -110,12 +147,12 @@ export const StoryViewer = ({ stories, initialStoryIndex, isOpen, onClose }: Sto
             </button>
           </div>
 
-          {/* Story Image */}
-          <div className="flex-1 flex items-center justify-center bg-black">
+          {/* Story Image with transition */}
+          <div className="flex-1 flex items-center justify-center bg-black relative">
             <img
               src={currentStory.image}
               alt={currentStory.name}
-              className="w-full h-full object-contain"
+              className={`w-full h-full object-contain transition-all duration-300 ease-out ${getTransitionClasses()}`}
             />
           </div>
 
