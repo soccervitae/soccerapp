@@ -1,6 +1,5 @@
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileInfo } from "@/components/profile/ProfileInfo";
-import { StatsSection } from "@/components/profile/StatsSection";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { PostsGrid } from "@/components/profile/PostsGrid";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
@@ -34,7 +33,6 @@ const Profile = () => {
       
       <div className="pt-16 px-4 flex flex-col gap-6">
         <ProfileInfo athlete={athlete} />
-        <StatsSection />
         <HighlightsSection />
         <PostsGrid />
       </div>
