@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Athlete {
   name: string;
@@ -25,10 +26,19 @@ interface FeedPostProps {
 }
 
 export const FeedPost = ({ post }: FeedPostProps) => {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(post.liked);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
+
+  const handleProfileClick = () => {
+    navigate("/profile", { 
+      state: { 
+        athlete: post.athlete 
+      } 
+    });
+  };
 
   const handleLike = () => {
     if (liked) {
@@ -50,7 +60,10 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     <article className="border-b border-border bg-background">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
+        <div 
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={handleProfileClick}
+        >
           <div className="relative">
             <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-600">
               <img
@@ -67,7 +80,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-foreground">{post.athlete.username}</span>
+              <span className="font-bold text-sm text-foreground hover:underline">{post.athlete.username}</span>
             </div>
             <p className="text-xs text-muted-foreground">{post.athlete.position} • {post.athlete.team}</p>
           </div>

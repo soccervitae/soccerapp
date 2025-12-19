@@ -1,4 +1,26 @@
-export const ProfileInfo = () => {
+interface Athlete {
+  name: string;
+  username: string;
+  avatar: string;
+  position: string;
+  team: string;
+  verified: boolean;
+}
+
+interface ProfileInfoProps {
+  athlete?: Athlete;
+}
+
+const defaultAthlete: Athlete = {
+  name: "Lucas Silva",
+  username: "lucas.silva_10",
+  avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuB18b2e4H8Vilu_1rtxonCQj9vAbC1EoysVCEWwBgUUgbOF-Bn6rkp0yDuDlhC79_hCKp-GBhEYsWYVUNvfnntM12RTwF5uu9JD6jn_qN37Woe4qQ5a7YR1CcruWB-DzMIG1d3H39Vzkuk62xFJV4y2aBs-rS2A3zj9NtTjH2DCUzCz_eveY6i6w4PFt7B2vJi13Ows29u2Vt-I0ROOVImcd5oa-LNy__PIB-223eqMByqUaHUp9I_EGjWk0NBo6Mk9BHdwc63_G10",
+  position: "Ponta Esquerda",
+  team: "São Paulo FC",
+  verified: true,
+};
+
+export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
   return (
     <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
@@ -14,21 +36,23 @@ export const ProfileInfo = () => {
       {/* Profile Picture */}
       <div className="relative -mt-16 z-10">
         <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
-          <div 
-            className="w-full h-full rounded-full border-4 border-background bg-muted bg-cover bg-center"
-            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB18b2e4H8Vilu_1rtxonCQj9vAbC1EoysVCEWwBgUUgbOF-Bn6rkp0yDuDlhC79_hCKp-GBhEYsWYVUNvfnntM12RTwF5uu9JD6jn_qN37Woe4qQ5a7YR1CcruWB-DzMIG1d3H39Vzkuk62xFJV4y2aBs-rS2A3zj9NtTjH2DCUzCz_eveY6i6w4PFt7B2vJi13Ows29u2Vt-I0ROOVImcd5oa-LNy__PIB-223eqMByqUaHUp9I_EGjWk0NBo6Mk9BHdwc63_G10')" }}
-            aria-label="Portrait of soccer player Lucas Silva smiling"
+          <img 
+            src={athlete.avatar}
+            alt={athlete.name}
+            className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
           />
         </div>
-        <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
-          <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
-        </div>
+        {athlete.verified && (
+          <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
+            <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
+          </div>
+        )}
       </div>
 
       {/* Name and Position */}
       <div className="text-center space-y-1">
-        <h2 className="text-2xl font-bold text-foreground leading-tight">Lucas Silva</h2>
-        <p className="text-muted-foreground font-medium text-sm">Ponta Esquerda | São Paulo FC</p>
+        <h2 className="text-2xl font-bold text-foreground leading-tight">{athlete.name}</h2>
+        <p className="text-muted-foreground font-medium text-sm">{athlete.position} | {athlete.team}</p>
       </div>
 
       {/* Action Buttons */}
