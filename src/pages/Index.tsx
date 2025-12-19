@@ -79,7 +79,7 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-24">
       <FeedHeader />
       
-      <main className="pt-28">
+      <main className="pt-16">
         <FeedStories />
         
         {posts.map((post) => (
