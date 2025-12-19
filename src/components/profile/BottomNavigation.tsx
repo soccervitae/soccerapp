@@ -8,7 +8,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : "home");
+  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : "home");
 
   return (
     <nav className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
@@ -19,8 +19,11 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         >
           <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
         </button>
-        <button className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
-          <span className="material-symbols-outlined text-[26px]">search</span>
+        <button 
+          onClick={() => navigate("/explore")}
+          className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+        >
+          <span className={`material-symbols-outlined text-[26px] ${currentTab === "search" ? "fill-1" : ""}`}>search</span>
         </button>
         <button className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary transition-colors">
           <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground -mt-4 border-4 border-background shadow-lg shadow-emerald-glow">
