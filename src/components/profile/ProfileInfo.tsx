@@ -24,7 +24,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
   return (
     <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
-      <div className="w-full h-32 -mx-4 -mt-4 relative overflow-hidden rounded-b-2xl">
+      <div className="w-screen h-32 -ml-[50vw] left-1/2 relative overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"
           alt="Cover photo"
