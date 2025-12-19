@@ -90,8 +90,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               />
             </div>
             {post.athlete.verified && (
-              <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full p-0.5 border-2 border-background">
-                <span className="material-symbols-outlined text-[10px] font-bold">verified</span>
+              <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
+                <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
               </div>
             )}
           </div>
