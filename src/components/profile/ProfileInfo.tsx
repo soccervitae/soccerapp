@@ -80,7 +80,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex w-full max-w-xs gap-2 mt-2 px-4">
+      <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
         <button 
           onClick={() => setIsCheering(!isCheering)}
           className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-300 flex items-center justify-center gap-1.5 ${
