@@ -57,7 +57,7 @@ export const ProfileInfo = ({ athlete = defaultAthlete }: ProfileInfoProps) => {
       <div className="text-center space-y-1">
         <h2 className="text-2xl font-bold text-foreground leading-tight">{athlete.name}</h2>
         <p className="text-muted-foreground font-medium text-sm">{athlete.position} | {athlete.team}</p>
-        <p className="text-muted-foreground text-xs italic px-6">⚽ Vivendo o sonho em cada jogada. Fé e trabalho!</p>
+        <p className="text-muted-foreground text-xs italic px-6 line-clamp-2">⚽ Vivendo o sonho em cada jogada. Fé e trabalho!</p>
       </div>
 
       {/* Physical Stats */}
