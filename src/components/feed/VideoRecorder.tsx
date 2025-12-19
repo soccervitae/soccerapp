@@ -271,7 +271,7 @@ export const VideoRecorder = ({ onVideoRecorded, onClose }: VideoRecorderProps) 
         {/* Max duration warning */}
         {isRecording && (
           <p className="text-center text-white/60 text-xs mt-4">
-            Máximo 60 segundos
+            Máximo 45 segundos
           </p>
         )}
       </div>
