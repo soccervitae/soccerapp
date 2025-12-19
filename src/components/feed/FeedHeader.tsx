@@ -4,7 +4,7 @@ export const FeedHeader = () => {
       <img 
         src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png" 
         alt="Soccer Vitae"
-        className="h-8 object-contain"
+        className="h-6 object-contain"
       />
       <div className="flex items-center gap-2">
         <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors">
