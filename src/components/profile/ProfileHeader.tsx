@@ -8,7 +8,7 @@ export const ProfileHeader = ({ username }: ProfileHeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-12 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
       <button 
         onClick={() => navigate(-1)}
         className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"

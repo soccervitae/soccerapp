@@ -8,12 +8,9 @@ import { BottomNavigation } from "@/components/profile/BottomNavigation";
 const Profile = () => {
   return (
     <main className="bg-background min-h-screen relative pb-24">
-      {/* Status bar spacer */}
-      <div className="h-12 w-full bg-background/95 backdrop-blur-md fixed top-0 z-50" />
-      
       <ProfileHeader username="lucas.silva_10" />
       
-      <div className="pt-28 px-4 flex flex-col gap-6">
+      <div className="pt-16 px-4 flex flex-col gap-6">
         <ProfileInfo />
         <StatsSection />
         <HighlightsSection />
