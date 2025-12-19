@@ -131,9 +131,16 @@ export const useVideoRecorder = () => {
       mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
 
-      // Update timer
+      // Update timer and auto-stop at 45 seconds
       timerRef.current = setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setRecordingTime(elapsed);
+        
+        if (elapsed >= 45) {
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+          }
+        }
       }, 1000);
 
     } catch (err: any) {
