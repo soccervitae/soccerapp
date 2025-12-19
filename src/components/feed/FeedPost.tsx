@@ -118,29 +118,30 @@ export const FeedPost = ({ post }: FeedPostProps) => {
 
       {/* Actions */}
       <div className="p-4">
-        <div className="flex items-center justify-center gap-6 mb-3">
+        {/* Actions Card */}
+        <div className="grid grid-cols-4 bg-card rounded-2xl border border-border shadow-sm mb-3">
           <button 
             onClick={handleLike}
-            className={`flex flex-col items-center gap-1 transition-all active:scale-110 ${liked ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}
+            className={`flex flex-col items-center justify-center gap-1 p-3 transition-all active:scale-110 ${liked ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}
           >
-            <span className={`material-symbols-outlined text-[26px] ${liked ? 'fill-1' : ''}`}>
+            <span className={`material-symbols-outlined text-[24px] ${liked ? 'fill-1' : ''}`}>
               {liked ? 'favorite' : 'favorite_border'}
             </span>
             <span className="text-[10px] font-medium">Curtir</span>
           </button>
           <button 
             onClick={() => setShowComments(!showComments)}
-            className="flex flex-col items-center gap-1 text-foreground hover:text-muted-foreground transition-colors"
+            className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
           >
-            <span className="material-symbols-outlined text-[26px]">chat_bubble_outline</span>
+            <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
             <span className="text-[10px] font-medium">Comentar</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[26px]">send</span>
+          <button className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+            <span className="material-symbols-outlined text-[24px]">send</span>
             <span className="text-[10px] font-medium">Enviar</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[26px]">bookmark_border</span>
+          <button className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+            <span className="material-symbols-outlined text-[24px]">bookmark_border</span>
             <span className="text-[10px] font-medium">Salvar</span>
           </button>
         </div>
