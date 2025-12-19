@@ -6,26 +6,37 @@ export interface RecordedVideo {
   duration: number;
 }
 
+export type CameraFacing = 'user' | 'environment';
+
 export const useVideoRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [recordedVideo, setRecordedVideo] = useState<RecordedVideo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [cameraFacing, setCameraFacing] = useState<CameraFacing>('environment');
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
 
-  const startPreview = useCallback(async (videoElement: HTMLVideoElement) => {
+  const startPreview = useCallback(async (videoElement: HTMLVideoElement, facing: CameraFacing = 'environment') => {
     try {
       setError(null);
+      
+      // Stop existing stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'environment',
+          facingMode: facing,
           width: { ideal: 1080 },
           height: { ideal: 1920 },
         },
@@ -38,6 +49,7 @@ export const useVideoRecorder = () => {
       videoElement.muted = true;
       await videoElement.play();
       setIsPreviewing(true);
+      setCameraFacing(facing);
 
       return true;
     } catch (err: any) {
@@ -46,6 +58,13 @@ export const useVideoRecorder = () => {
       return false;
     }
   }, []);
+
+  const switchCamera = useCallback(async () => {
+    if (!videoPreviewRef.current) return;
+    
+    const newFacing: CameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+    await startPreview(videoPreviewRef.current, newFacing);
+  }, [cameraFacing, startPreview]);
 
   const stopPreview = useCallback(() => {
     if (streamRef.current) {
@@ -123,6 +142,35 @@ export const useVideoRecorder = () => {
     }
   }, []);
 
+  const startRecordingWithCountdown = useCallback((seconds: number = 3) => {
+    setCountdown(seconds);
+    
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+          }
+          // Start recording when countdown ends
+          setTimeout(() => {
+            startRecording();
+          }, 100);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [startRecording]);
+
+  const cancelCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    setCountdown(null);
+  }, []);
+
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
@@ -149,9 +197,10 @@ export const useVideoRecorder = () => {
     stopRecording();
     stopPreview();
     discardVideo();
+    cancelCountdown();
     setRecordingTime(0);
     setError(null);
-  }, [stopRecording, stopPreview, discardVideo]);
+  }, [stopRecording, stopPreview, discardVideo, cancelCountdown]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -166,11 +215,16 @@ export const useVideoRecorder = () => {
     recordingTime,
     formattedTime: formatTime(recordingTime),
     error,
+    cameraFacing,
+    countdown,
     startPreview,
     stopPreview,
     startRecording,
+    startRecordingWithCountdown,
+    cancelCountdown,
     stopRecording,
     toggleRecording,
+    switchCamera,
     discardVideo,
     cleanup,
   };
