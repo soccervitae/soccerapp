@@ -1,8 +1,18 @@
 export const ProfileInfo = () => {
   return (
     <section className="flex flex-col items-center gap-4">
+      {/* Cover Photo */}
+      <div className="w-full h-32 -mx-4 -mt-4 relative overflow-hidden rounded-b-2xl">
+        <img
+          src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"
+          alt="Cover photo"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+      </div>
+
       {/* Profile Picture */}
-      <div className="relative">
+      <div className="relative -mt-16 z-10">
         <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
           <div 
             className="w-full h-full rounded-full border-4 border-background bg-muted bg-cover bg-center"
