@@ -17,6 +17,7 @@ export const VideoRecorder = ({ onVideoRecorded, onClose }: VideoRecorderProps) 
     isRecording,
     isPreviewing,
     recordedVideo,
+    recordingTime,
     formattedTime,
     error,
     cameraFacing,
@@ -29,6 +30,10 @@ export const VideoRecorder = ({ onVideoRecorded, onClose }: VideoRecorderProps) 
     discardVideo,
     cleanup,
   } = useVideoRecorder();
+
+  const MAX_DURATION = 45;
+  const progressPercentage = isRecording ? (recordingTime / MAX_DURATION) * 100 : 0;
+  const remainingTime = MAX_DURATION - recordingTime;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -74,6 +79,16 @@ export const VideoRecorder = ({ onVideoRecorded, onClose }: VideoRecorderProps) 
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
+      {/* Recording Progress Bar */}
+      {isRecording && (
+        <div className="absolute top-0 left-0 right-0 z-30 h-1 bg-white/20">
+          <div 
+            className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 transition-all duration-1000 ease-linear"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 pt-6">
         <button 
@@ -84,9 +99,16 @@ export const VideoRecorder = ({ onVideoRecorded, onClose }: VideoRecorderProps) 
         </button>
 
         {isRecording && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-red-500/90 backdrop-blur-sm rounded-full">
-            <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-            <span className="text-white font-semibold text-sm">{formattedTime}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-500/90 backdrop-blur-sm rounded-full">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <span className="text-white font-semibold text-sm">{formattedTime}</span>
+            </div>
+            <div className="px-3 py-2 bg-black/50 backdrop-blur-sm rounded-full">
+              <span className="text-white/80 text-xs font-medium">
+                -{remainingTime}s
+              </span>
+            </div>
           </div>
         )}
 
