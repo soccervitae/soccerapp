@@ -10,6 +10,12 @@ interface Athlete {
   verified: boolean;
 }
 
+interface Viewer {
+  id: number;
+  name: string;
+  avatar: string;
+}
+
 interface Post {
   id: number;
   athlete: Athlete;
@@ -19,6 +25,7 @@ interface Post {
   comments: number;
   timeAgo: string;
   liked: boolean;
+  viewers?: Viewer[];
 }
 
 interface FeedPostProps {
@@ -31,6 +38,16 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [likesCount, setLikesCount] = useState(post.likes);
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
+
+
+  // Mock viewers data
+  const mockViewers: Viewer[] = post.viewers || [
+    { id: 1, name: "Carlos", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+    { id: 2, name: "Ana", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" },
+    { id: 3, name: "Pedro", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" },
+    { id: 4, name: "Julia", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" },
+    { id: 5, name: "Lucas", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" },
+  ];
 
   const handleProfileClick = () => {
     navigate("/profile", { 
@@ -146,6 +163,29 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         >
           Ver todos os {post.comments} comentários
         </button>
+
+        {/* Viewers */}
+        <div className="flex items-center gap-2 mt-3 mb-2">
+          <div className="flex items-center -space-x-2">
+            {mockViewers.slice(0, 4).map((viewer) => (
+              <img
+                key={viewer.id}
+                src={viewer.avatar}
+                alt={viewer.name}
+                className="w-6 h-6 rounded-full border-2 border-background object-cover"
+              />
+            ))}
+            {mockViewers.length > 4 && (
+              <div className="w-6 h-6 rounded-full border-2 border-background bg-muted flex items-center justify-center">
+                <span className="text-[9px] font-bold text-muted-foreground">+{mockViewers.length - 4}</span>
+              </div>
+            )}
+          </div>
+          <span className="text-xs text-muted-foreground">
+            Visto por <span className="font-semibold text-foreground">{mockViewers[0]?.name}</span>
+            {mockViewers.length > 1 && ` e mais ${mockViewers.length - 1}`}
+          </span>
+        </div>
 
         {/* Time */}
         <p className="text-xs text-muted-foreground uppercase">{post.timeAgo}</p>
