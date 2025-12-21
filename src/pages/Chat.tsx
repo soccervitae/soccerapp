@@ -6,6 +6,7 @@ import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { ChatInput } from "@/components/messages/ChatInput";
 import { TypingIndicator } from "@/components/messages/TypingIndicator";
+import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -17,7 +18,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Chat = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user } = useAuth();
-  const { messages, isLoading, isSending, sendMessage } = useMessages(conversationId || null);
+  const { messages, isLoading, isSending, isOffline, sendMessage } = useMessages(conversationId || null);
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
@@ -106,8 +107,15 @@ const Chat = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <ChatHeader participant={participant} />
 
+      {/* Offline indicator */}
+      {isOffline && (
+        <div className="fixed top-14 left-0 right-0 z-40 px-4 py-2">
+          <OfflineIndicator />
+        </div>
+      )}
+
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto pt-16 pb-24 px-4">
+      <div className={`flex-1 overflow-y-auto pb-24 px-4 ${isOffline ? 'pt-28' : 'pt-16'}`}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <span className="material-symbols-outlined text-5xl text-muted-foreground mb-3">

@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { MessageWithSender } from "@/hooks/useMessages";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, CheckCheck, Play, Pause } from "lucide-react";
+import { Check, CheckCheck, Play, Pause, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MessageBubbleProps {
@@ -153,8 +153,20 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
             {formatTime(message.created_at)}
           </span>
           {isOwn && (
-            <span className={`${isRead ? "text-primary-foreground" : "text-primary-foreground/50"}`}>
-              {isRead ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+            <span className={`${
+              message.isPending 
+                ? "text-primary-foreground/50" 
+                : isRead 
+                  ? "text-primary-foreground" 
+                  : "text-primary-foreground/50"
+            }`}>
+              {message.isPending ? (
+                <Clock className="h-3 w-3" />
+              ) : isRead ? (
+                <CheckCheck className="h-3 w-3" />
+              ) : (
+                <Check className="h-3 w-3" />
+              )}
             </span>
           )}
         </div>
