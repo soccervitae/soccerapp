@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useMessages } from "@/hooks/useMessages";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { ChatInput } from "@/components/messages/ChatInput";
+import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -16,9 +18,11 @@ const Chat = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user } = useAuth();
   const { messages, isLoading, isSending, sendMessage } = useMessages(conversationId || null);
+  const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch other participant
   useEffect(() => {
@@ -45,10 +49,24 @@ const Chat = () => {
     fetchParticipant();
   }, [conversationId, user]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages or typing
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isAnyoneTyping]);
+
+  const handleTyping = useCallback(() => {
+    startTyping();
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      stopTyping();
+    }, 2000);
+  }, [startTyping, stopTyping]);
 
   const handleSend = async (
     content: string,
@@ -56,12 +74,25 @@ const Chat = () => {
     mediaType?: string,
     replyToMessageId?: string
   ) => {
+    stopTyping();
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
     await sendMessage(content, mediaUrl, mediaType, replyToMessageId);
   };
 
   const handleReply = (message: MessageWithSender) => {
     setReplyTo(message);
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -97,6 +128,12 @@ const Chat = () => {
                 <MessageBubble message={message} onReply={handleReply} />
               </div>
             ))}
+
+            {/* Typing indicator */}
+            {isAnyoneTyping && (
+              <TypingIndicator username={typingUsers[0]?.username} />
+            )}
+
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -109,6 +146,7 @@ const Chat = () => {
           isSending={isSending}
           replyTo={replyTo}
           onCancelReply={() => setReplyTo(null)}
+          onTyping={handleTyping}
         />
       </div>
     </div>
