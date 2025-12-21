@@ -3,39 +3,76 @@ import { ProfileInfo } from "@/components/profile/ProfileInfo";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { PostsGrid } from "@/components/profile/PostsGrid";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
-import { useLocation } from "react-router-dom";
-
-interface Athlete {
-  name: string;
-  username: string;
-  avatar: string;
-  position: string;
-  team: string;
-  verified: boolean;
-}
-
-const defaultAthlete: Athlete = {
-  name: "Lucas Silva",
-  username: "lucas.silva_10",
-  avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuB18b2e4H8Vilu_1rtxonCQj9vAbC1EoysVCEWwBgUUgbOF-Bn6rkp0yDuDlhC79_hCKp-GBhEYsWYVUNvfnntM12RTwF5uu9JD6jn_qN37Woe4qQ5a7YR1CcruWB-DzMIG1d3H39Vzkuk62xFJV4y2aBs-rS2A3zj9NtTjH2DCUzCz_eveY6i6w4PFt7B2vJi13Ows29u2Vt-I0ROOVImcd5oa-LNy__PIB-223eqMByqUaHUp9I_EGjWk0NBo6Mk9BHdwc63_G10",
-  position: "Ponta Esquerda",
-  team: "São Paulo FC",
-  verified: true,
-};
+import { useParams } from "react-router-dom";
+import { useProfile, useFollowStats, useUserPosts, useProfileView } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
 
 const Profile = () => {
-  const location = useLocation();
-  const athlete: Athlete = location.state?.athlete || defaultAthlete;
+  const { userId } = useParams<{ userId?: string }>();
+  const { user } = useAuth();
+  
+  // If no userId in params, show current user's profile
+  const targetUserId = userId || user?.id;
+  
+  const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
+  const { data: followStats, isLoading: statsLoading } = useFollowStats(targetUserId);
+  const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId);
+  const profileView = useProfileView();
+
+  // Record profile view
+  useEffect(() => {
+    if (targetUserId && user && targetUserId !== user.id) {
+      profileView.mutate(targetUserId);
+    }
+  }, [targetUserId, user?.id]);
+
+  const isOwnProfile = user?.id === targetUserId;
+  const isLoading = profileLoading || statsLoading;
+
+  if (isLoading) {
+    return (
+      <main className="bg-background min-h-screen relative pb-24">
+        <div className="pt-16">
+          <Skeleton className="w-full h-32" />
+          <div className="flex flex-col items-center -mt-16 px-4">
+            <Skeleton className="w-28 h-28 rounded-full" />
+            <Skeleton className="h-6 w-40 mt-4" />
+            <Skeleton className="h-4 w-32 mt-2" />
+            <Skeleton className="h-20 w-full mt-4 rounded-xl" />
+          </div>
+        </div>
+        <BottomNavigation activeTab="profile" />
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <main className="bg-background min-h-screen relative pb-24 flex items-center justify-center">
+        <div className="text-center">
+          <span className="material-symbols-outlined text-[64px] text-muted-foreground">person_off</span>
+          <p className="text-muted-foreground mt-2">Perfil não encontrado</p>
+        </div>
+        <BottomNavigation activeTab="profile" />
+      </main>
+    );
+  }
 
   return (
     <main className="bg-background min-h-screen relative pb-24">
-      <ProfileHeader username={athlete.username} />
+      <ProfileHeader username={profile.username} />
       
       <div className="pt-16 flex flex-col gap-6">
-        <ProfileInfo athlete={athlete} />
+        <ProfileInfo 
+          profile={profile} 
+          followStats={followStats}
+          isOwnProfile={isOwnProfile}
+        />
         <div className="px-4 flex flex-col gap-6">
           <HighlightsSection />
-          <PostsGrid />
+          <PostsGrid posts={posts || []} isLoading={postsLoading} />
         </div>
       </div>
       

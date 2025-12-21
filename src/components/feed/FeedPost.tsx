@@ -1,32 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface Athlete {
-  name: string;
-  username: string;
-  avatar: string;
-  position: string;
-  team: string;
-  verified: boolean;
-}
-
-interface Viewer {
-  id: number;
-  name: string;
-  avatar: string;
-}
-
-interface Post {
-  id: number;
-  athlete: Athlete;
-  image: string;
-  caption: string;
-  likes: number;
-  comments: number;
-  timeAgo: string;
-  liked: boolean;
-  viewers?: Viewer[];
-}
+import { useLikePost, useSavePost, useCreateComment, type Post } from "@/hooks/usePosts";
+import { useAuth } from "@/contexts/AuthContext";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface FeedPostProps {
   post: Post;
@@ -34,36 +11,45 @@ interface FeedPostProps {
 
 export const FeedPost = ({ post }: FeedPostProps) => {
   const navigate = useNavigate();
-  const [liked, setLiked] = useState(post.liked);
-  const [likesCount, setLikesCount] = useState(post.likes);
+  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
 
-
-  // Mock viewers data
-  const mockViewers: Viewer[] = post.viewers || [
-    { id: 1, name: "Carlos", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
-    { id: 2, name: "Ana", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" },
-    { id: 3, name: "Pedro", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" },
-    { id: 4, name: "Julia", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" },
-    { id: 5, name: "Lucas", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" },
-  ];
+  const likePost = useLikePost();
+  const savePost = useSavePost();
+  const createComment = useCreateComment();
 
   const handleProfileClick = () => {
-    navigate("/profile", { 
-      state: { 
-        athlete: post.athlete 
-      } 
-    });
+    navigate(`/profile/${post.profile.id}`);
   };
 
   const handleLike = () => {
-    if (liked) {
-      setLikesCount(likesCount - 1);
-    } else {
-      setLikesCount(likesCount + 1);
+    if (!user) {
+      navigate("/login");
+      return;
     }
-    setLiked(!liked);
+    likePost.mutate({ postId: post.id, isLiked: post.liked_by_user });
+  };
+
+  const handleSave = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    savePost.mutate({ postId: post.id, isSaved: post.saved_by_user });
+  };
+
+  const handleComment = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (!comment.trim()) return;
+    
+    createComment.mutate(
+      { postId: post.id, content: comment },
+      { onSuccess: () => setComment("") }
+    );
   };
 
   const formatNumber = (num: number) => {
@@ -72,6 +58,11 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     }
     return num.toString();
   };
+
+  const timeAgo = formatDistanceToNow(new Date(post.created_at), {
+    addSuffix: false,
+    locale: ptBR,
+  });
 
   return (
     <article className="border-b border-border bg-background">
@@ -84,12 +75,12 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           <div className="relative">
             <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-600">
               <img
-                src={post.athlete.avatar}
-                alt={post.athlete.name}
+                src={post.profile.avatar_url || "/placeholder.svg"}
+                alt={post.profile.full_name || post.profile.username}
                 className="w-full h-full rounded-full border-2 border-background object-cover"
               />
             </div>
-            {post.athlete.verified && (
+            {post.profile.conta_verificada && (
               <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
                 <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
               </div>
@@ -97,9 +88,13 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-foreground hover:underline">{post.athlete.username}</span>
+              <span className="font-bold text-sm text-foreground hover:underline">{post.profile.username}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{post.athlete.position} • {post.athlete.team}</p>
+            <p className="text-xs text-muted-foreground">
+              {post.profile.position && post.profile.team 
+                ? `${post.profile.position} • ${post.profile.team}` 
+                : post.profile.full_name}
+            </p>
           </div>
         </div>
         <button className="p-2 hover:bg-muted rounded-full transition-colors">
@@ -107,33 +102,46 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         </button>
       </div>
 
-      {/* Image */}
-      <div className="relative aspect-square bg-muted">
-        <img
-          src={post.image}
-          alt="Post"
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {/* Media */}
+      {post.media_url && (
+        <div className="relative aspect-square bg-muted">
+          {post.media_type === "video" ? (
+            <video
+              src={post.media_url}
+              className="w-full h-full object-cover"
+              controls
+              playsInline
+            />
+          ) : (
+            <img
+              src={post.media_url}
+              alt="Post"
+              className="w-full h-full object-cover"
+            />
+          )}
+        </div>
+      )}
 
-      {/* Caption - below media */}
+      {/* Caption */}
       <div className="px-4 pt-3">
         <p className="text-sm text-foreground">
-          <span className="font-bold">{post.athlete.username}</span>{" "}
-          {post.caption}
+          <span className="font-bold">{post.profile.username}</span>{" "}
+          {post.content}
         </p>
       </div>
 
       {/* Actions */}
       <div className="p-4">
-        {/* Actions Card */}
         <div className="grid grid-cols-4 bg-card rounded-2xl border border-border shadow-sm mb-3">
           <button 
             onClick={handleLike}
-            className={`flex flex-col items-center justify-center gap-1 p-3 transition-all active:scale-110 ${liked ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}
+            disabled={likePost.isPending}
+            className={`flex flex-col items-center justify-center gap-1 p-3 transition-all active:scale-110 ${
+              post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
+            }`}
           >
-            <span className={`material-symbols-outlined text-[24px] ${liked ? 'fill-1' : ''}`}>
-              {liked ? 'favorite' : 'favorite_border'}
+            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''}`}>
+              {post.liked_by_user ? 'favorite' : 'favorite_border'}
             </span>
             <span className="text-[10px] font-medium">Curtir</span>
           </button>
@@ -148,68 +156,67 @@ export const FeedPost = ({ post }: FeedPostProps) => {
             <span className="material-symbols-outlined text-[24px]">send</span>
             <span className="text-[10px] font-medium">Enviar</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[24px]">bookmark_border</span>
+          <button 
+            onClick={handleSave}
+            disabled={savePost.isPending}
+            className={`flex flex-col items-center justify-center gap-1 p-3 border-l border-border transition-colors ${
+              post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
+            }`}
+          >
+            <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
+              {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
+            </span>
             <span className="text-[10px] font-medium">Salvar</span>
           </button>
         </div>
 
         {/* Likes */}
         <p className="font-bold text-sm text-foreground mb-2">
-          {formatNumber(likesCount)} curtidas
+          {formatNumber(post.likes_count || 0)} curtidas
         </p>
 
-
         {/* Comments count */}
-        <button 
-          onClick={() => setShowComments(!showComments)}
-          className="text-sm text-muted-foreground mb-1"
-        >
-          Ver todos os {post.comments} comentários
-        </button>
-
-        {/* Viewers */}
-        <div className="flex items-center gap-2 mt-3 mb-2">
-          <div className="flex items-center -space-x-2">
-            {mockViewers.slice(0, 4).map((viewer) => (
-              <img
-                key={viewer.id}
-                src={viewer.avatar}
-                alt={viewer.name}
-                className="w-6 h-6 rounded-full border-2 border-background object-cover"
-              />
-            ))}
-            {mockViewers.length > 4 && (
-              <div className="w-6 h-6 rounded-full border-2 border-background bg-muted flex items-center justify-center">
-                <span className="text-[9px] font-bold text-muted-foreground">+{mockViewers.length - 4}</span>
-              </div>
-            )}
-          </div>
-          <span className="text-xs text-muted-foreground">
-            Visto por <span className="font-semibold text-foreground">{mockViewers[0]?.name}</span>
-            {mockViewers.length > 1 && ` e mais ${mockViewers.length - 1}`}
-          </span>
-        </div>
+        {(post.comments_count || 0) > 0 && (
+          <button 
+            onClick={() => setShowComments(!showComments)}
+            className="text-sm text-muted-foreground mb-1"
+          >
+            Ver todos os {post.comments_count} comentários
+          </button>
+        )}
 
         {/* Time */}
-        <p className="text-xs text-muted-foreground uppercase">{post.timeAgo}</p>
+        <p className="text-xs text-muted-foreground uppercase mt-2">{timeAgo}</p>
 
         {/* Comment input */}
         {showComments && (
           <div className="mt-4 pt-4 border-t border-border animate-fade-in">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                <span className="material-symbols-outlined text-[16px] text-muted-foreground">person</span>
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                {user ? (
+                  <img 
+                    src={"/placeholder.svg"} 
+                    alt="You" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="material-symbols-outlined text-[16px] text-muted-foreground">person</span>
+                )}
               </div>
               <input
                 type="text"
                 placeholder="Adicione um comentário..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleComment()}
                 className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />
               {comment && (
-                <button className="text-primary font-bold text-sm hover:text-primary/80 transition-colors">
+                <button 
+                  onClick={handleComment}
+                  disabled={createComment.isPending}
+                  className="text-primary font-bold text-sm hover:text-primary/80 transition-colors disabled:opacity-50"
+                >
                   Publicar
                 </button>
               )}
