@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { ConversationItem } from "@/components/messages/ConversationItem";
+import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -152,6 +153,11 @@ const Messages = () => {
 
       {/* Content */}
       <div className="pt-14 px-2">
+        {/* Notification permission prompt */}
+        <div className="p-3 flex justify-center">
+          <NotificationPermissionButton />
+        </div>
+
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

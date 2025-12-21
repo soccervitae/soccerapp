@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import type { Database } from "@/integrations/supabase/types";
 
 type Conversation = Database["public"]["Tables"]["conversations"]["Row"];
@@ -18,6 +19,8 @@ export const useConversations = () => {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalUnread, setTotalUnread] = useState(0);
+  const { showNotification, isGranted } = usePushNotifications();
+  const previousMessagesRef = useRef<Map<string, string>>(new Map());
 
   const fetchConversations = async () => {
     if (!user) return;
@@ -106,6 +109,53 @@ export const useConversations = () => {
     }
   };
 
+  const handleNewMessage = useCallback(
+    async (payload: { new: Message }) => {
+      const newMessage = payload.new;
+      
+      // Don't notify for own messages
+      if (newMessage.sender_id === user?.id) return;
+
+      // Check if we've already notified about this message
+      const previousMessageId = previousMessagesRef.current.get(newMessage.conversation_id);
+      if (previousMessageId === newMessage.id) return;
+      
+      previousMessagesRef.current.set(newMessage.conversation_id, newMessage.id);
+
+      // Fetch sender info
+      const { data: sender } = await supabase
+        .from("profiles")
+        .select("full_name, username")
+        .eq("id", newMessage.sender_id)
+        .single();
+
+      const senderName = sender?.full_name || sender?.username || "Alguém";
+      let messagePreview = newMessage.content;
+      
+      if (newMessage.media_type === "audio") {
+        messagePreview = "🎤 Mensagem de voz";
+      } else if (newMessage.media_type === "image") {
+        messagePreview = "📷 Foto";
+      } else if (newMessage.media_type === "video") {
+        messagePreview = "🎥 Vídeo";
+      }
+
+      // Show push notification
+      if (isGranted) {
+        showNotification(
+          senderName,
+          messagePreview,
+          `/messages/${newMessage.conversation_id}`,
+          newMessage.conversation_id
+        );
+      }
+
+      // Refresh conversations
+      fetchConversations();
+    },
+    [user, isGranted, showNotification]
+  );
+
   useEffect(() => {
     fetchConversations();
   }, [user]);
@@ -119,7 +169,18 @@ export const useConversations = () => {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          handleNewMessage({ new: payload.new as Message });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
           schema: "public",
           table: "messages",
         },
@@ -143,7 +204,7 @@ export const useConversations = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, handleNewMessage]);
 
   return {
     conversations,
