@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
-import { ImagePlus, Send, X, Loader2 } from "lucide-react";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { ImagePlus, Send, X, Loader2, Mic, Square, Trash2, Play, Pause } from "lucide-react";
 import type { MessageWithSender } from "@/hooks/useMessages";
 
 interface ChatInputProps {
@@ -15,8 +16,19 @@ interface ChatInputProps {
 export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [mediaPreview, setMediaPreview] = useState<{ url: string; type: string; file: File } | null>(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const { uploadMedia, isUploading } = useUploadMedia();
+  const {
+    isRecording,
+    recordedAudio,
+    formattedTime,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    discardAudio,
+  } = useAudioRecorder();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -28,12 +40,19 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInp
   };
 
   const handleSend = async () => {
-    if ((!message.trim() && !mediaPreview) || isSending || isUploading) return;
+    if ((!message.trim() && !mediaPreview && !recordedAudio) || isSending || isUploading) return;
 
     let mediaUrl: string | undefined;
     let mediaType: string | undefined;
 
-    if (mediaPreview) {
+    if (recordedAudio) {
+      const uploadedUrl = await uploadMedia(recordedAudio.blob, "message-media", `voice_${Date.now()}.webm`);
+      if (uploadedUrl) {
+        mediaUrl = uploadedUrl;
+        mediaType = "audio";
+      }
+      discardAudio();
+    } else if (mediaPreview) {
       const uploadedUrl = await uploadMedia(mediaPreview.file, "message-media");
       if (uploadedUrl) {
         mediaUrl = uploadedUrl;
@@ -43,7 +62,7 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInp
       setMediaPreview(null);
     }
 
-    onSend(message.trim() || "📷", mediaUrl, mediaType, replyTo?.id);
+    onSend(message.trim() || (mediaType === "audio" ? "🎤" : "📷"), mediaUrl, mediaType, replyTo?.id);
     setMessage("");
     if (onCancelReply) onCancelReply();
   };
@@ -61,6 +80,125 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInp
       setMediaPreview(null);
     }
   };
+
+  const toggleAudioPreview = () => {
+    if (!audioPreviewRef.current) return;
+    
+    if (isPlayingPreview) {
+      audioPreviewRef.current.pause();
+    } else {
+      audioPreviewRef.current.play();
+    }
+    setIsPlayingPreview(!isPlayingPreview);
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlayingPreview(false);
+  };
+
+  // Recording mode UI
+  if (isRecording) {
+    return (
+      <div className="border-t border-border bg-background p-3">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={cancelRecording}
+            className="text-destructive"
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+            <span className="font-mono text-lg">{formattedTime}</span>
+          </div>
+
+          <Button
+            variant="default"
+            size="icon"
+            onClick={stopRecording}
+          >
+            <Square className="h-4 w-4 fill-current" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Audio preview mode UI
+  if (recordedAudio) {
+    return (
+      <div className="border-t border-border bg-background p-3">
+        {replyTo && (
+          <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
+            <div className="flex-1 text-sm text-muted-foreground truncate">
+              <span className="font-medium text-foreground">
+                Respondendo a {replyTo.sender?.full_name || replyTo.sender?.username}
+              </span>
+              <p className="truncate">{replyTo.content}</p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={onCancelReply} className="h-6 w-6">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={discardAudio}
+            className="text-destructive flex-shrink-0"
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+
+          <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-3 py-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleAudioPreview}
+              className="h-8 w-8"
+            >
+              {isPlayingPreview ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+            <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
+              <div className="h-full bg-primary w-full" />
+            </div>
+            <span className="text-xs text-muted-foreground font-mono">
+              {Math.floor(recordedAudio.duration)}s
+            </span>
+          </div>
+
+          <audio
+            ref={audioPreviewRef}
+            src={recordedAudio.url}
+            onEnded={handleAudioEnded}
+            className="hidden"
+          />
+
+          <Button
+            onClick={handleSend}
+            disabled={isSending || isUploading}
+            size="icon"
+            className="flex-shrink-0"
+          >
+            {isSending || isUploading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-t border-border bg-background p-3">
@@ -126,18 +264,29 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInp
           rows={1}
         />
 
-        <Button
-          onClick={handleSend}
-          disabled={(!message.trim() && !mediaPreview) || isSending || isUploading}
-          size="icon"
-          className="flex-shrink-0"
-        >
-          {isSending || isUploading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Send className="h-5 w-5" />
-          )}
-        </Button>
+        {!message.trim() && !mediaPreview ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={startRecording}
+            className="flex-shrink-0"
+          >
+            <Mic className="h-5 w-5" />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSend}
+            disabled={(!message.trim() && !mediaPreview) || isSending || isUploading}
+            size="icon"
+            className="flex-shrink-0"
+          >
+            {isSending || isUploading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
