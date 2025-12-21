@@ -1,0 +1,342 @@
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useUploadMedia } from "@/hooks/useUploadMedia";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Camera, ArrowLeft, Loader2 } from "lucide-react";
+
+const EditProfile = () => {
+  const navigate = useNavigate();
+  const { data: profile, isLoading } = useProfile();
+  const updateProfile = useUpdateProfile();
+  const uploadMedia = useUploadMedia();
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const [formData, setFormData] = useState({
+    full_name: "",
+    username: "",
+    bio: "",
+    position: "",
+    team: "",
+    height: "",
+    weight: "",
+    birth_date: "",
+    preferred_foot: "",
+  });
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize form when profile loads
+  useState(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || "",
+        username: profile.username || "",
+        bio: profile.bio || "",
+        position: profile.position || "",
+        team: profile.team || "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        birth_date: profile.birth_date || "",
+        preferred_foot: profile.preferred_foot || "",
+      });
+    }
+  });
+
+  // Update form when profile changes
+  if (profile && !formData.username) {
+    setFormData({
+      full_name: profile.full_name || "",
+      username: profile.username || "",
+      bio: profile.bio || "",
+      position: profile.position || "",
+      team: profile.team || "",
+      height: profile.height?.toString() || "",
+      weight: profile.weight?.toString() || "",
+      birth_date: profile.birth_date || "",
+      preferred_foot: profile.preferred_foot || "",
+    });
+  }
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      let avatarUrl = profile?.avatar_url;
+      let coverUrl = profile?.cover_url;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const url = await uploadMedia.uploadMedia(avatarFile, "avatars");
+        if (url) avatarUrl = url;
+      }
+
+      // Upload cover if changed
+      if (coverFile) {
+        const url = await uploadMedia.uploadMedia(coverFile, "covers");
+        if (url) coverUrl = url;
+      }
+
+      // Update profile
+      await updateProfile.mutateAsync({
+        full_name: formData.full_name || null,
+        username: formData.username,
+        bio: formData.bio || null,
+        position: formData.position || null,
+        team: formData.team || null,
+        height: formData.height ? Number(formData.height) : null,
+        weight: formData.weight ? Number(formData.weight) : null,
+        birth_date: formData.birth_date || null,
+        preferred_foot: formData.preferred_foot || null,
+        avatar_url: avatarUrl,
+        cover_url: coverUrl,
+      });
+
+      navigate("/profile");
+    } catch (error) {
+      toast.error("Erro ao salvar perfil");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main className="bg-background min-h-screen">
+        <div className="p-4 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-24 w-24 rounded-full mx-auto" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="bg-background min-h-screen">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="flex items-center justify-between px-4 h-14">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 text-foreground hover:bg-muted rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-semibold text-foreground">Editar Perfil</h1>
+          <div className="w-9" />
+        </div>
+      </header>
+
+      <form onSubmit={handleSubmit} className="pt-14 pb-8">
+        {/* Cover Photo */}
+        <div className="relative">
+          <div className="w-full h-36 bg-muted overflow-hidden">
+            <img
+              src={coverPreview || profile?.cover_url || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"}
+              alt="Capa"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
+          <button
+            type="button"
+            onClick={() => coverInputRef.current?.click()}
+            className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm text-foreground p-2 rounded-full hover:bg-background transition-colors"
+          >
+            <Camera className="w-5 h-5" />
+          </button>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleCoverChange}
+            className="hidden"
+          />
+        </div>
+
+        {/* Avatar */}
+        <div className="flex justify-center -mt-12 relative z-10">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
+              <img
+                src={avatarPreview || profile?.avatar_url || "/placeholder.svg"}
+                alt="Avatar"
+                className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
+            >
+              <Camera className="w-4 h-4" />
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* Form Fields */}
+        <div className="px-4 mt-6 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="full_name">Nome Completo</Label>
+            <Input
+              id="full_name"
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              placeholder="Seu nome completo"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="username">Nome de Usuário</Label>
+            <Input
+              id="username"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder="@usuario"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              placeholder="Fale um pouco sobre você..."
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="position">Posição</Label>
+              <Input
+                id="position"
+                value={formData.position}
+                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                placeholder="Ex: Atacante"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="team">Time</Label>
+              <Input
+                id="team"
+                value={formData.team}
+                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                placeholder="Ex: Flamengo"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="height">Altura (cm)</Label>
+              <Input
+                id="height"
+                type="number"
+                value={formData.height}
+                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                placeholder="175"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="weight">Peso (kg)</Label>
+              <Input
+                id="weight"
+                type="number"
+                value={formData.weight}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                placeholder="70"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="birth_date">Data de Nascimento</Label>
+              <Input
+                id="birth_date"
+                type="date"
+                value={formData.birth_date}
+                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="preferred_foot">Pé Preferido</Label>
+              <select
+                id="preferred_foot"
+                value={formData.preferred_foot}
+                onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Selecione</option>
+                <option value="right">Direito</option>
+                <option value="left">Esquerdo</option>
+                <option value="both">Ambos</option>
+              </select>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full mt-6"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Salvar Alterações"
+            )}
+          </Button>
+        </div>
+      </form>
+    </main>
+  );
+};
+
+export default EditProfile;
