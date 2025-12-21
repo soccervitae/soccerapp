@@ -11,9 +11,10 @@ interface ChatInputProps {
   isSending: boolean;
   replyTo?: MessageWithSender | null;
   onCancelReply?: () => void;
+  onTyping?: () => void;
 }
 
-export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInputProps) => {
+export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [mediaPreview, setMediaPreview] = useState<{ url: string; type: string; file: File } | null>(null);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
@@ -257,7 +258,10 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply }: ChatInp
 
         <Textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            onTyping?.();
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Digite uma mensagem..."
           className="min-h-[44px] max-h-32 resize-none"
