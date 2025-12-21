@@ -2,6 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import {
+  cacheConversations,
+  getCachedConversations,
+  isOnline,
+} from "@/lib/offlineStorage";
 import type { Database } from "@/integrations/supabase/types";
 
 type Conversation = Database["public"]["Tables"]["conversations"]["Row"];
@@ -19,11 +24,39 @@ export const useConversations = () => {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [isOffline, setIsOffline] = useState(!isOnline());
   const { showNotification, isGranted } = usePushNotifications();
   const previousMessagesRef = useRef<Map<string, string>>(new Map());
 
+  // Listen for online/offline changes
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const fetchConversations = async () => {
     if (!user) return;
+
+    // If offline, load from cache
+    if (!isOnline()) {
+      try {
+        const cached = await getCachedConversations() as ConversationWithDetails[];
+        setConversations(cached);
+        setTotalUnread(cached.reduce((acc: number, c: ConversationWithDetails) => acc + (c.unreadCount || 0), 0));
+      } catch (error) {
+        console.error("Error loading cached conversations:", error);
+      }
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // Get all conversation IDs where user is participant
@@ -102,8 +135,24 @@ export const useConversations = () => {
 
       setConversations(conversationsWithDetails);
       setTotalUnread(conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0));
+
+      // Cache conversations for offline use
+      try {
+        await cacheConversations(conversationsWithDetails);
+      } catch (cacheError) {
+        console.error("Error caching conversations:", cacheError);
+      }
     } catch (error) {
       console.error("Error fetching conversations:", error);
+      // Try to load from cache on error
+      try {
+        const cached = await getCachedConversations();
+        if (cached.length > 0) {
+          setConversations(cached as ConversationWithDetails[]);
+        }
+      } catch (cacheError) {
+        console.error("Error loading cached conversations:", cacheError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -209,6 +258,7 @@ export const useConversations = () => {
   return {
     conversations,
     isLoading,
+    isOffline,
     totalUnread,
     refetch: fetchConversations,
   };

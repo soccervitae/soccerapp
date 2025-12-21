@@ -4,6 +4,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { ConversationItem } from "@/components/messages/ConversationItem";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
+import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -153,8 +154,13 @@ const Messages = () => {
 
       {/* Content */}
       <div className="pt-14 px-2">
+        {/* Offline indicator */}
+        <div className="p-3">
+          <OfflineIndicator />
+        </div>
+
         {/* Notification permission prompt */}
-        <div className="p-3 flex justify-center">
+        <div className="px-3 pb-3 flex justify-center">
           <NotificationPermissionButton />
         </div>
 
