@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
+import { PhotoFilterEditor } from "@/components/feed/PhotoFilterEditor";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useCreatePost } from "@/hooks/usePosts";
 import { useImageCompression } from "@/hooks/useImageCompression";
@@ -20,6 +21,12 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import {
+  ImageFilters,
+  applyFiltersToBlob,
+  areFiltersDefault,
+  getCSSFilterWithFade,
+} from "@/hooks/useImageFilters";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -27,13 +34,14 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder";
+type ViewMode = "default" | "video-recorder" | "photo-editor";
 
 interface MediaItem {
   url: string;
   blob?: Blob;
   file?: File;
   isLocal: boolean;
+  filters?: ImageFilters;
 }
 
 const MAX_PHOTOS = 10;
@@ -46,6 +54,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
 
   const { takePhoto, pickMultipleFromGallery, isLoading, error } = useDeviceCamera();
   const { uploadMedia, isUploading, progress } = useUploadMedia();
@@ -126,14 +135,20 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         // Video blob - upload directly without compression
         uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
       } else if (media.isLocal && media.url) {
-        // Local image URL - fetch, compress, then upload
+        // Local image URL - apply filters, compress, then upload
         try {
           const response = await fetch(media.url);
-          const blob = await response.blob();
+          let blob = await response.blob();
+          
+          // Apply filters if any
+          if (media.filters && !areFiltersDefault(media.filters)) {
+            blob = await applyFiltersToBlob(blob, media.filters);
+          }
+          
           const compressed = await compressImage(blob);
           uploadedUrl = await uploadMedia(compressed, "post-media", `${Date.now()}.jpg`);
         } catch (err) {
-          console.error("Error compressing/uploading image:", err);
+          console.error("Error processing/uploading image:", err);
         }
       } else if (media.url) {
         // Already uploaded URL
@@ -207,7 +222,26 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setSelectedMediaType("photo");
     setViewMode("default");
     setCurrentIndex(0);
+    setEditingPhotoIndex(null);
     onOpenChange(false);
+  };
+
+  const handleEditPhoto = (index: number) => {
+    setEditingPhotoIndex(index);
+    setViewMode("photo-editor");
+  };
+
+  const handleApplyFilters = (filters: ImageFilters) => {
+    if (editingPhotoIndex !== null) {
+      setSelectedMediaList((prev) =>
+        prev.map((item, i) =>
+          i === editingPhotoIndex ? { ...item, filters } : item
+        )
+      );
+      toast.success("Filtros aplicados!");
+    }
+    setEditingPhotoIndex(null);
+    setViewMode("default");
   };
 
   const handleRemoveCurrentMedia = () => {
@@ -229,6 +263,25 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       <Sheet open={open} onOpenChange={handleClose}>
         <SheetContent side="bottom" className="h-full rounded-t-none p-0">
           <VideoRecorder onVideoRecorded={(videoUrl, blob) => handleVideoRecorded(videoUrl, blob)} onClose={() => setViewMode("default")} />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  if (viewMode === "photo-editor" && editingPhotoIndex !== null) {
+    const mediaToEdit = selectedMediaList[editingPhotoIndex];
+    return (
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
+          <PhotoFilterEditor
+            imageUrl={mediaToEdit.url}
+            initialFilters={mediaToEdit.filters}
+            onApply={handleApplyFilters}
+            onCancel={() => {
+              setEditingPhotoIndex(null);
+              setViewMode("default");
+            }}
+          />
         </SheetContent>
       </Sheet>
     );
@@ -314,12 +367,24 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   </div>
                 </>
               ) : selectedMediaList.length === 1 ? (
-                <img src={selectedMediaList[0]?.url} alt="Preview" className="w-full aspect-square object-cover rounded-lg" />
+                <img 
+                  src={selectedMediaList[0]?.url} 
+                  alt="Preview" 
+                  className="w-full aspect-square object-cover rounded-lg" 
+                  style={selectedMediaList[0]?.filters ? getCSSFilterWithFade(selectedMediaList[0].filters) : undefined}
+                />
               ) : (
                 <Carousel setApi={setCarouselApi} className="w-full">
                   <CarouselContent>
                     {selectedMediaList.map((media, index) => (
-                      <CarouselItem key={index}><img src={media.url} alt={`Foto ${index + 1}`} className="w-full aspect-square object-cover rounded-lg" /></CarouselItem>
+                      <CarouselItem key={index}>
+                        <img 
+                          src={media.url} 
+                          alt={`Foto ${index + 1}`} 
+                          className="w-full aspect-square object-cover rounded-lg" 
+                          style={media.filters ? getCSSFilterWithFade(media.filters) : undefined}
+                        />
+                      </CarouselItem>
                     ))}
                   </CarouselContent>
                 </Carousel>
@@ -329,6 +394,15 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   <span className="material-symbols-outlined text-[14px] text-foreground">photo_library</span>
                   <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
                 </div>
+              )}
+              {/* Edit button for current photo */}
+              {selectedMediaType === "photo" && !isPublishing && (
+                <button 
+                  onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
+                  className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
+                </button>
               )}
               <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
                 <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
