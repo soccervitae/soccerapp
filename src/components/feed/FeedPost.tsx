@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +30,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 interface FeedPostProps {
   post: Post;
@@ -55,6 +61,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [editContent, setEditContent] = useState(post.content);
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const likePost = useLikePost();
   const savePost = useSavePost();
@@ -64,6 +72,29 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const reportPost = useReportPost();
 
   const isOwner = user?.id === post.user_id;
+
+  // Carousel effect
+  useEffect(() => {
+    if (!carouselApi) return;
+    const onSelect = () => setCurrentIndex(carouselApi.selectedScrollSnap());
+    carouselApi.on("select", onSelect);
+    return () => { carouselApi.off("select", onSelect); };
+  }, [carouselApi]);
+
+  // Helper to parse media URLs
+  const getMediaUrls = (): string[] => {
+    if (!post.media_url) return [];
+    try {
+      const parsed = JSON.parse(post.media_url);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not JSON, single URL
+    }
+    return [post.media_url];
+  };
+
+  const mediaUrls = getMediaUrls();
+  const isCarousel = post.media_type === "carousel" || mediaUrls.length > 1;
 
   const handleProfileClick = () => {
     navigate(`/profile/${post.profile.id}`);
@@ -242,9 +273,45 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               controls
               playsInline
             />
+          ) : isCarousel ? (
+            <>
+              <Carousel setApi={setCarouselApi} className="w-full h-full">
+                <CarouselContent className="h-full">
+                  {mediaUrls.map((url, index) => (
+                    <CarouselItem key={index} className="h-full">
+                      <img
+                        src={url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+              {/* Carousel Counter */}
+              <div className="absolute top-3 right-3 px-2.5 py-1 bg-background/80 backdrop-blur-sm rounded-full">
+                <span className="text-xs font-medium text-foreground">
+                  {currentIndex + 1}/{mediaUrls.length}
+                </span>
+              </div>
+              {/* Carousel Indicators */}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                {mediaUrls.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => carouselApi?.scrollTo(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentIndex 
+                        ? "bg-primary w-4" 
+                        : "bg-background/60"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <img
-              src={post.media_url}
+              src={mediaUrls[0]}
               alt="Post"
               className="w-full h-full object-cover"
             />
