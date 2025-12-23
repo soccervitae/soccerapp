@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,10 +140,18 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     return num.toString();
   };
 
-  const timeAgo = formatDistanceToNow(new Date(post.created_at), {
-    addSuffix: false,
-    locale: ptBR,
-  });
+  const getTimeAgo = () => {
+    const now = new Date();
+    const postDate = new Date(post.created_at);
+    const diffInSeconds = Math.floor((now.getTime() - postDate.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return "agora";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} h`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} d`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} sem`;
+    return postDate.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+  };
 
   return (
     <article className="border-b border-border bg-background">
@@ -307,7 +313,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         )}
 
         {/* Time */}
-        <p className="text-xs text-muted-foreground uppercase mt-2">{timeAgo}</p>
+        <p className="text-xs text-muted-foreground uppercase mt-2">{getTimeAgo()}</p>
 
         {/* Comment input */}
         {showComments && (
