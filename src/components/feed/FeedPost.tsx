@@ -1,9 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLikePost, useSavePost, useCreateComment, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FeedPostProps {
   post: Post;
@@ -14,10 +39,17 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
 
   const likePost = useLikePost();
   const savePost = useSavePost();
   const createComment = useCreateComment();
+  const updatePost = useUpdatePost();
+  const deletePost = useDeletePost();
+
+  const isOwner = user?.id === post.user_id;
 
   const handleProfileClick = () => {
     navigate(`/profile/${post.profile.id}`);
@@ -50,6 +82,25 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       { postId: post.id, content: comment },
       { onSuccess: () => setComment("") }
     );
+  };
+
+  const handleEdit = () => {
+    setEditContent(post.content);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editContent.trim()) return;
+    updatePost.mutate(
+      { postId: post.id, content: editContent },
+      { onSuccess: () => setIsEditDialogOpen(false) }
+    );
+  };
+
+  const handleDelete = () => {
+    deletePost.mutate(post.id, {
+      onSuccess: () => setIsDeleteDialogOpen(false),
+    });
   };
 
   const formatNumber = (num: number) => {
@@ -97,9 +148,35 @@ export const FeedPost = ({ post }: FeedPostProps) => {
             )}
           </div>
         </div>
-        <button className="p-2 hover:bg-muted rounded-full transition-colors">
-          <span className="material-symbols-outlined text-[20px] text-foreground">more_horiz</span>
-        </button>
+        
+        {isOwner && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                <span className="material-symbols-outlined text-[20px] text-foreground">more_horiz</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+                <span className="material-symbols-outlined text-[18px] mr-2">edit</span>
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setIsDeleteDialogOpen(true)} 
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <span className="material-symbols-outlined text-[18px] mr-2">delete</span>
+                Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {!isOwner && (
+          <button className="p-2 hover:bg-muted rounded-full transition-colors">
+            <span className="material-symbols-outlined text-[20px] text-foreground">more_horiz</span>
+          </button>
+        )}
       </div>
 
       {/* Media */}
@@ -224,6 +301,56 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar publicação</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="O que você está pensando?"
+              className="min-h-[100px] resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveEdit} 
+              disabled={updatePost.isPending || !editContent.trim()}
+            >
+              {updatePost.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir publicação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A publicação será permanentemente excluída.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deletePost.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletePost.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 };
