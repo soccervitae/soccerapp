@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +63,9 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTags, setShowTags] = useState(false);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const lastTapRef = useRef<number>(0);
 
   const { data: postTags = [] } = usePostTags(post.id);
 
@@ -106,7 +109,22 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       navigate("/login");
       return;
     }
+    setIsLikeAnimating(true);
+    setTimeout(() => setIsLikeAnimating(false), 300);
     likePost.mutate({ postId: post.id, isLiked: post.liked_by_user });
+  };
+
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      // Double tap detected
+      if (!post.liked_by_user) {
+        handleLike();
+      }
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1000);
+    }
+    lastTapRef.current = now;
   };
 
   const handleSave = () => {
@@ -272,6 +290,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                         src={url}
                         alt={`Foto ${index + 1}`}
                         className="w-full h-full object-cover"
+                        onClick={handleDoubleTap}
                       />
                       {/* Tags overlay for this image */}
                       {showTags && postTags
@@ -321,6 +340,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                 src={mediaUrls[0]}
                 alt="Post"
                 className="w-full h-full object-cover"
+                onClick={handleDoubleTap}
               />
               {/* Tags overlay for single image */}
               {showTags && postTags
@@ -340,6 +360,15 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                 ))
               }
             </>
+          )}
+
+          {/* Heart animation overlay */}
+          {showHeartAnimation && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+              <span className="material-symbols-outlined fill-1 text-white text-[100px] animate-heart-burst drop-shadow-lg">
+                favorite
+              </span>
+            </div>
           )}
 
           {/* Tags toggle button */}
@@ -373,7 +402,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
-            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''}`}>
+            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
               {post.liked_by_user ? 'favorite' : 'favorite_border'}
             </span>
           </button>
