@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 
 export interface GalleryMedia {
@@ -9,32 +9,40 @@ export interface GalleryMedia {
   createdAt?: number;
 }
 
+interface LoadOptions {
+  limit?: number;
+  startAt?: number;
+  type?: 'image' | 'video' | 'all';
+}
+
 export const useDeviceGallery = () => {
   const [media, setMedia] = useState<GalleryMedia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const lastOptionsRef = useRef<LoadOptions>({});
 
   const isNative = Capacitor.isNativePlatform();
 
-  const loadGallery = useCallback(async (options?: { 
-    limit?: number; 
-    startAt?: number; 
-    type?: 'image' | 'video' | 'all' 
-  }) => {
+  const loadGallery = useCallback(async (options?: LoadOptions) => {
     if (!isNative) {
       setError('Galeria disponível apenas em dispositivos móveis');
       return [];
     }
 
-    setIsLoading(true);
+    const isLoadingMoreItems = (options?.startAt || 0) > 0;
+    
+    if (isLoadingMoreItems) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
     setError(null);
 
     try {
-      // Dynamically import to avoid issues on web
       const { GalleryPlus } = await import('capacitor-gallery-plus');
       
-      // Check permissions
       const { status } = await GalleryPlus.checkPermissions();
       if (status !== 'granted') {
         const { status: newStatus } = await GalleryPlus.requestPermissions();
@@ -47,6 +55,9 @@ export const useDeviceGallery = () => {
       const limit = options?.limit || 50;
       const startAt = options?.startAt || 0;
       const mediaType = options?.type || 'all';
+
+      // Save options for loadMore
+      lastOptionsRef.current = { limit, type: mediaType };
 
       const result = await GalleryPlus.getMediaList({
         type: mediaType === 'all' ? 'all' : mediaType,
@@ -79,8 +90,20 @@ export const useDeviceGallery = () => {
       return [];
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [isNative]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoading || isLoadingMore || !hasMore) return [];
+    
+    const { limit = 50, type = 'all' } = lastOptionsRef.current;
+    return loadGallery({ 
+      limit, 
+      startAt: media.length, 
+      type 
+    });
+  }, [loadGallery, media.length, isLoading, isLoadingMore, hasMore]);
 
   const getMediaPath = useCallback(async (id: string): Promise<string | null> => {
     if (!isNative) return null;
@@ -102,14 +125,17 @@ export const useDeviceGallery = () => {
     setMedia([]);
     setHasMore(true);
     setError(null);
+    lastOptionsRef.current = {};
   }, []);
 
   return {
     media,
     loadGallery,
+    loadMore,
     getMediaPath,
     clearGallery,
     isLoading,
+    isLoadingMore,
     error,
     hasMore,
     isNative,
