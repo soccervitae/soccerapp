@@ -247,7 +247,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       {/* Caption */}
       <div className="px-4 pt-3">
         <p className="text-sm text-foreground">
-          <span className="font-bold">{post.profile.username}</span>{" "}
           {post.content}
         </p>
       </div>
