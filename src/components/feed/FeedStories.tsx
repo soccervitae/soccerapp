@@ -63,9 +63,9 @@ export const FeedStories = () => {
           >
             <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
               <div className="w-full h-full bg-muted flex flex-col">
-                <div className="flex-1 bg-gradient-to-b from-primary/20 to-primary/5 flex items-center justify-center">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                    <span className="material-symbols-outlined text-[24px] text-primary-foreground">add</span>
+                <div className="flex-1 bg-gradient-to-b from-nav-active/20 to-nav-active/5 flex items-center justify-center">
+                  <div className="w-10 h-10 bg-nav-active rounded-full flex items-center justify-center shadow-lg">
+                    <span className="material-symbols-outlined text-[24px] text-white">add</span>
                   </div>
                 </div>
                 <div className="bg-background px-2 py-3 text-center">
