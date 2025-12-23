@@ -88,13 +88,13 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </div>
           <div>
             <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-foreground hover:underline">{post.profile.username}</span>
+              <span className="font-bold text-sm text-foreground hover:underline">
+                {post.profile.nickname || post.profile.full_name || post.profile.username}
+              </span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {post.profile.position && post.profile.team 
-                ? `${post.profile.position} • ${post.profile.team}` 
-                : post.profile.full_name}
-            </p>
+            {post.profile.position && (
+              <p className="text-xs text-muted-foreground">{post.profile.position}</p>
+            )}
           </div>
         </div>
         <button className="p-2 hover:bg-muted rounded-full transition-colors">

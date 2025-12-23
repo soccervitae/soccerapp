@@ -16,6 +16,7 @@ export interface Post {
     id: string;
     username: string;
     full_name: string | null;
+    nickname: string | null;
     avatar_url: string | null;
     position: string | null;
     team: string | null;
@@ -39,6 +40,7 @@ export const usePosts = () => {
             id,
             username,
             full_name,
+            nickname,
             avatar_url,
             position,
             team,
