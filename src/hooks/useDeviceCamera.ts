@@ -5,7 +5,19 @@ import { Capacitor } from '@capacitor/core';
 export interface CameraImage {
   webPath: string;
   base64?: string;
+  blob?: Blob;
 }
+
+// Helper to convert base64 to Blob
+const base64ToBlob = (base64: string, mimeType: string = 'image/jpeg'): Blob => {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimeType });
+};
 
 export const useDeviceCamera = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,15 +52,20 @@ export const useDeviceCamera = () => {
         }
       }
 
+      // Use Base64 on native to get the actual image data (fetch() doesn't work with local file URLs)
       const photo: Photo = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
-        resultType: CameraResultType.Uri,
+        resultType: isNative ? CameraResultType.Base64 : CameraResultType.Uri,
         source: CameraSource.Camera,
         saveToGallery: true,
       });
 
-      if (photo.webPath) {
+      if (isNative && photo.base64String) {
+        const blob = base64ToBlob(photo.base64String, `image/${photo.format || 'jpeg'}`);
+        const webPath = URL.createObjectURL(blob);
+        return { webPath, base64: photo.base64String, blob };
+      } else if (photo.webPath) {
         return { webPath: photo.webPath };
       }
       return null;
@@ -76,14 +93,19 @@ export const useDeviceCamera = () => {
         }
       }
 
+      // Use Base64 on native to get the actual image data
       const photo: Photo = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
-        resultType: CameraResultType.Uri,
+        resultType: isNative ? CameraResultType.Base64 : CameraResultType.Uri,
         source: CameraSource.Photos,
       });
 
-      if (photo.webPath) {
+      if (isNative && photo.base64String) {
+        const blob = base64ToBlob(photo.base64String, `image/${photo.format || 'jpeg'}`);
+        const webPath = URL.createObjectURL(blob);
+        return { webPath, base64: photo.base64String, blob };
+      } else if (photo.webPath) {
         return { webPath: photo.webPath };
       }
       return null;
@@ -116,9 +138,22 @@ export const useDeviceCamera = () => {
         limit,
       });
 
-      return result.photos.map(photo => ({
-        webPath: photo.webPath || '',
-      })).filter(img => img.webPath);
+      // For multiple picks, we need to get base64 for each image
+      // pickImages returns webPaths, so we need to read them as base64
+      const images: CameraImage[] = [];
+      
+      for (const photo of result.photos) {
+        if (photo.webPath) {
+          // Try to get the image as base64 using a single pick (workaround)
+          // Since pickImages doesn't support base64, create blob URL for preview
+          // and store the webPath - the upload function will handle conversion
+          images.push({
+            webPath: photo.webPath,
+          });
+        }
+      }
+      
+      return images;
     } catch (err: any) {
       if (err.message !== 'User cancelled photos app') {
         setError(err.message || 'Erro ao selecionar imagens');

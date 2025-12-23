@@ -39,7 +39,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType }[]>([]);
+  const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType; blob?: Blob }[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +50,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     loadGallery, 
     loadMore,
     getMediaPath,
+    getMediaBlob,
     clearGallery,
     isLoading: isGalleryLoading,
     isLoadingMore,
@@ -84,15 +85,16 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const handleTakePhoto = async () => {
     const photo = await takePhoto();
     if (photo?.webPath) {
-      setCapturedMedia(prev => [{ url: photo.webPath, type: "photo" }, ...prev]);
+      // Use blob URL if available (for preview), store the blob for upload
+      setCapturedMedia(prev => [{ url: photo.webPath, type: "photo", blob: photo.blob }, ...prev]);
       setSelectedMedia(photo.webPath);
       setSelectedMediaType("photo");
       toast.success("Foto capturada!");
     }
   };
 
-  const handleVideoRecorded = (videoUrl: string, _blob: Blob) => {
-    setCapturedMedia(prev => [{ url: videoUrl, type: "video" }, ...prev]);
+  const handleVideoRecorded = (videoUrl: string, blob: Blob) => {
+    setCapturedMedia(prev => [{ url: videoUrl, type: "video", blob }, ...prev]);
     setSelectedMedia(videoUrl);
     setSelectedMediaType("video");
     setViewMode("gallery");
@@ -103,15 +105,15 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     if (multiSelect) {
       const photos = await pickMultipleFromGallery(10);
       if (photos.length > 0) {
-        const newImages = photos.map(p => p.webPath);
-        setCapturedMedia(prev => [...newImages.map(url => ({ url, type: "photo" as MediaType })), ...prev]);
-        setSelectedImages(newImages);
+        const newItems = photos.map(p => ({ url: p.webPath, type: "photo" as MediaType, blob: p.blob }));
+        setCapturedMedia(prev => [...newItems, ...prev]);
+        setSelectedImages(photos.map(p => p.webPath));
         toast.success(`${photos.length} imagem(ns) selecionada(s)!`);
       }
     } else {
       const photo = await pickFromGallery();
       if (photo?.webPath) {
-        setCapturedMedia(prev => [{ url: photo.webPath, type: "photo" }, ...prev]);
+        setCapturedMedia(prev => [{ url: photo.webPath, type: "photo", blob: photo.blob }, ...prev]);
         setSelectedMedia(photo.webPath);
         setSelectedMediaType("photo");
       }
