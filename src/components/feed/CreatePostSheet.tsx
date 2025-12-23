@@ -69,9 +69,12 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const { 
     media: deviceGallery, 
     loadGallery, 
+    loadMore,
     getMediaPath,
     clearGallery,
-    isLoading: isGalleryLoading, 
+    isLoading: isGalleryLoading,
+    isLoadingMore,
+    hasMore,
     isNative: isGalleryNative 
   } = useDeviceGallery();
   const { uploadMedia, isUploading, progress } = useUploadMedia();
@@ -434,7 +437,16 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           </div>
 
           {/* Gallery Grid */}
-          <div className="flex-1 overflow-y-auto p-1">
+          <div 
+            className="flex-1 overflow-y-auto p-1"
+            onScroll={(e) => {
+              const target = e.currentTarget;
+              const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+              if (isNearBottom && hasMore && !isLoadingMore && isGalleryNative) {
+                loadMore();
+              }
+            }}
+          >
             {isGalleryLoading ? (
               <div className="w-full h-64 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
@@ -448,52 +460,68 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                 <p className="text-sm text-muted-foreground">Nenhuma foto encontrada</p>
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-0.5">
-                {deviceGallery.map((item, index) => {
-                  const isSelected = selectedMediaList.some(m => m.url === item.webPath);
-                  const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
-                  
-                  return (
-                    <button
-                      key={`${item.id}-${index}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedMediaList(prev => prev.filter(m => m.url !== item.webPath));
-                        } else {
-                          handleGallerySelect(item);
-                        }
-                      }}
-                      className="relative aspect-square overflow-hidden"
-                    >
-                      <img
-                        src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
-                        alt={`Gallery ${index + 1}`}
-                        className={`w-full h-full object-cover transition-all duration-200 ${
-                          isSelected ? 'scale-90 rounded-lg' : ''
-                        }`}
-                      />
-                      
-                      {/* Selection indicator */}
-                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isSelected 
-                          ? 'bg-primary border-primary' 
-                          : 'bg-black/30 border-white/70'
-                      }`}>
-                        {isSelected && (
-                          <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
-                        )}
-                      </div>
-
-                      {/* Video indicator */}
-                      {item.type === 'video' && (
-                        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
-                          <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
+              <>
+                <div className="grid grid-cols-4 gap-0.5">
+                  {deviceGallery.map((item, index) => {
+                    const isSelected = selectedMediaList.some(m => m.url === item.webPath);
+                    const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
+                    
+                    return (
+                      <button
+                        key={`${item.id}-${index}`}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedMediaList(prev => prev.filter(m => m.url !== item.webPath));
+                          } else {
+                            handleGallerySelect(item);
+                          }
+                        }}
+                        className="relative aspect-square overflow-hidden"
+                      >
+                        <img
+                          src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
+                          alt={`Gallery ${index + 1}`}
+                          className={`w-full h-full object-cover transition-all duration-200 ${
+                            isSelected ? 'scale-90 rounded-lg' : ''
+                          }`}
+                        />
+                        
+                        {/* Selection indicator */}
+                        <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          isSelected 
+                            ? 'bg-primary border-primary' 
+                            : 'bg-black/30 border-white/70'
+                        }`}>
+                          {isSelected && (
+                            <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
+                          )}
                         </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+
+                        {/* Video indicator */}
+                        {item.type === 'video' && (
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
+                            <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Loading more indicator */}
+                {isLoadingMore && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+
+                {/* End of gallery indicator */}
+                {!hasMore && deviceGallery.length > 0 && (
+                  <div className="flex items-center justify-center py-4">
+                    <span className="text-xs text-muted-foreground">Fim da galeria</span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </SheetContent>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Sheet,
   SheetContent,
@@ -42,15 +42,19 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType }[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { takePhoto, pickFromGallery, pickMultipleFromGallery, isLoading, error, isNative } = useDeviceCamera();
   const { 
     media: deviceGallery, 
     loadGallery, 
+    loadMore,
     getMediaPath,
     clearGallery,
-    isLoading: isGalleryLoading, 
+    isLoading: isGalleryLoading,
+    isLoadingMore,
     error: galleryError,
+    hasMore,
     isNative: isGalleryNative 
   } = useDeviceGallery();
 
@@ -375,7 +379,17 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
           )}
 
           {/* Gallery Grid */}
-          <div className="flex-1 overflow-y-auto">
+          <div 
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto"
+            onScroll={(e) => {
+              const target = e.currentTarget;
+              const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+              if (isNearBottom && hasMore && !isLoadingMore && isGalleryNative) {
+                loadMore();
+              }
+            }}
+          >
             <div className="grid grid-cols-4 gap-0.5">
               {/* Camera tile */}
               <button
@@ -469,6 +483,20 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
                 );
               })}
             </div>
+
+            {/* Loading more indicator */}
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {/* End of gallery indicator */}
+            {!hasMore && deviceGallery.length > 0 && (
+              <div className="flex items-center justify-center py-4">
+                <span className="text-xs text-muted-foreground">Fim da galeria</span>
+              </div>
+            )}
           </div>
         </div>
       </SheetContent>
