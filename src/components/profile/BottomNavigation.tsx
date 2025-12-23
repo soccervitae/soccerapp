@@ -19,30 +19,30 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         <div className="flex justify-around items-center">
           <button 
             onClick={() => navigate("/")}
-            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
           </button>
           <button 
             onClick={() => navigate("/explore")}
-            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "search" ? "fill-1" : ""}`}>search</span>
           </button>
           <button 
             onClick={() => setIsCreatePostOpen(true)}
-            className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-primary transition-colors"
+            className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-nav-active transition-colors"
           >
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground -mt-4 border-4 border-background shadow-lg shadow-emerald-glow">
+            <div className="w-10 h-10 bg-nav-active rounded-full flex items-center justify-center text-white -mt-4 border-4 border-background shadow-lg">
               <span className="material-symbols-outlined text-[24px]">add</span>
             </div>
           </button>
-          <button className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "analytics" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
+          <button className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "analytics" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}>
             <span className="material-symbols-outlined text-[26px]">analytics</span>
           </button>
           <button 
             onClick={() => navigate("/profile")}
-            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "profile" ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+            className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "profile" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "profile" ? "fill-1" : ""}`}>person</span>
           </button>
