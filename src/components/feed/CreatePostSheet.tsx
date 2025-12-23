@@ -5,6 +5,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -56,6 +58,7 @@ interface MediaItem {
 const MAX_PHOTOS = 10;
 
 export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) => {
+  const { data: profile } = useProfile();
   const [caption, setCaption] = useState("");
   const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
@@ -748,15 +751,19 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           )}
 
           <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 p-[2px] flex-shrink-0">
-              <div className="w-full h-full rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span></div>
-            </div>
+            <Avatar className="w-10 h-10 flex-shrink-0">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "Usuário"} />
+              <AvatarFallback className="bg-muted">
+                <span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span>
+              </AvatarFallback>
+            </Avatar>
             <Textarea 
               placeholder="Escreva uma legenda..." 
               value={caption} 
               onChange={(e) => setCaption(e.target.value)} 
               className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" 
               disabled={isPublishing}
+              autoFocus={false}
             />
           </div>
 
