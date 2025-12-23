@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
+import { usePostTags } from "@/hooks/usePostTags";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +64,9 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [reportDescription, setReportDescription] = useState("");
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showTags, setShowTags] = useState(false);
+
+  const { data: postTags = [] } = usePostTags(post.id);
 
   const likePost = useLikePost();
   const savePost = useSavePost();
@@ -278,12 +282,29 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
                   {mediaUrls.map((url, index) => (
-                    <CarouselItem key={index} className="h-full">
+                    <CarouselItem key={index} className="h-full relative">
                       <img
                         src={url}
                         alt={`Foto ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      {/* Tags overlay for this image */}
+                      {showTags && postTags
+                        .filter((tag) => tag.photo_index === index)
+                        .map((tag) => (
+                          <button
+                            key={tag.id}
+                            onClick={() => navigate(`/profile/${tag.profile.id}`)}
+                            className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10"
+                            style={{
+                              left: `${tag.x_position}%`,
+                              top: `${tag.y_position}%`,
+                            }}
+                          >
+                            @{tag.profile.username}
+                          </button>
+                        ))
+                      }
                     </CarouselItem>
                   ))}
                 </CarouselContent>
@@ -310,11 +331,42 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               </div>
             </>
           ) : (
-            <img
-              src={mediaUrls[0]}
-              alt="Post"
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={mediaUrls[0]}
+                alt="Post"
+                className="w-full h-full object-cover"
+              />
+              {/* Tags overlay for single image */}
+              {showTags && postTags
+                .filter((tag) => tag.photo_index === 0)
+                .map((tag) => (
+                  <button
+                    key={tag.id}
+                    onClick={() => navigate(`/profile/${tag.profile.id}`)}
+                    className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10"
+                    style={{
+                      left: `${tag.x_position}%`,
+                      top: `${tag.y_position}%`,
+                    }}
+                  >
+                    @{tag.profile.username}
+                  </button>
+                ))
+              }
+            </>
+          )}
+
+          {/* Tags toggle button */}
+          {postTags.length > 0 && post.media_type !== "video" && (
+            <button
+              onClick={() => setShowTags(!showTags)}
+              className={`absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                showTags ? "bg-foreground text-background" : "bg-background/80 backdrop-blur-sm text-foreground"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">person</span>
+            </button>
           )}
         </div>
       )}

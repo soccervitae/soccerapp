@@ -555,6 +555,51 @@ export type Database = {
         }
         Relationships: []
       }
+      post_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          photo_index: number
+          post_id: string
+          user_id: string
+          x_position: number
+          y_position: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          photo_index?: number
+          post_id: string
+          user_id: string
+          x_position: number
+          y_position: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          photo_index?: number
+          post_id?: string
+          user_id?: string
+          x_position?: number
+          y_position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_tags_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_tags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           comments_count: number | null

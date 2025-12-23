@@ -29,6 +29,9 @@ import {
   getCSSFilterWithFade,
 } from "@/hooks/useImageFilters";
 import { CropData, getCroppedImg, hasCropData } from "@/hooks/useImageCrop";
+import { PhotoTagEditor } from "@/components/feed/PhotoTagEditor";
+import { PhotoTag, useCreatePostTags } from "@/hooks/usePostTags";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -36,7 +39,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag";
 
 interface MediaItem {
   url: string;
@@ -45,7 +48,8 @@ interface MediaItem {
   isLocal: boolean;
   filters?: ImageFilters;
   cropData?: CropData;
-  croppedUrl?: string; // URL for cropped preview
+  croppedUrl?: string;
+  tags?: PhotoTag[];
 }
 
 const MAX_PHOTOS = 10;
@@ -64,6 +68,8 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const { uploadMedia, isUploading, progress } = useUploadMedia();
   const { compressImage, isCompressing } = useImageCompression();
   const createPost = useCreatePost();
+  const createPostTags = useCreatePostTags();
+  const [allTags, setAllTags] = useState<PhotoTag[]>([]);
 
   useEffect(() => {
     if (error) {
@@ -206,17 +212,27 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           ? "carousel" 
           : "image";
 
-      await createPost.mutateAsync({
+      const result = await createPost.mutateAsync({
         content: caption || "",
         mediaUrl,
         mediaType,
       });
+
+      // Save tags if any
+      if (allTags.length > 0 && result?.id) {
+        try {
+          await createPostTags.mutateAsync({ postId: result.id, tags: allTags });
+        } catch (err) {
+          console.error("Error saving tags:", err);
+        }
+      }
 
       // Reset state
       setCaption("");
       setSelectedMediaList([]);
       setSelectedMediaType("photo");
       setCurrentIndex(0);
+      setAllTags([]);
       onOpenChange(false);
     } catch (err) {
       console.error("Error publishing post:", err);
@@ -234,7 +250,20 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setViewMode("default");
     setCurrentIndex(0);
     setEditingPhotoIndex(null);
+    setAllTags([]);
     onOpenChange(false);
+  };
+
+  const handleTagPhoto = (index: number) => {
+    setEditingPhotoIndex(index);
+    setViewMode("photo-tag");
+  };
+
+  const handleApplyTags = (tags: PhotoTag[]) => {
+    setAllTags(tags);
+    setEditingPhotoIndex(null);
+    setViewMode("default");
+    toast.success("Marcações aplicadas!");
   };
 
   const handleEditPhoto = (index: number) => {
@@ -337,6 +366,26 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             imageUrl={mediaToEdit.url}
             initialCropData={mediaToEdit.cropData}
             onApply={handleApplyCrop}
+            onCancel={() => {
+              setEditingPhotoIndex(null);
+              setViewMode("default");
+            }}
+          />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  if (viewMode === "photo-tag" && editingPhotoIndex !== null) {
+    const mediaToEdit = selectedMediaList[editingPhotoIndex];
+    return (
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
+          <PhotoTagEditor
+            imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
+            photoIndex={editingPhotoIndex}
+            initialTags={allTags}
+            onApply={handleApplyTags}
             onCancel={() => {
               setEditingPhotoIndex(null);
               setViewMode("default");
@@ -527,8 +576,17 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
               <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">location_on</span><span className="text-sm text-foreground">Adicionar localização</span></div>
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
-              <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">person_add</span><span className="text-sm text-foreground">Marcar pessoas</span></div>
+            <button 
+              onClick={() => selectedMediaType === "photo" && selectedMediaList.length > 0 && handleTagPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)}
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+              disabled={isPublishing || selectedMediaType !== "photo" || selectedMediaList.length === 0}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px] text-foreground">person_add</span>
+                <span className="text-sm text-foreground">
+                  Marcar pessoas {allTags.length > 0 && `(${allTags.length})`}
+                </span>
+              </div>
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
             </button>
             <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
