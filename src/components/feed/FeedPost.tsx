@@ -4,8 +4,6 @@ import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, 
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -229,8 +227,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR })}
+          <span className="text-xs text-muted-foreground uppercase">
+            {getTimeAgo()}
           </span>
           
           {isOwner && (
