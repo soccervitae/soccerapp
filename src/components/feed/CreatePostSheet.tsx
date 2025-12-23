@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
+import { useDeviceGallery } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { PhotoFilterEditor } from "@/components/feed/PhotoFilterEditor";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
@@ -39,7 +40,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker";
 
 interface MediaItem {
   url: string;
@@ -65,6 +66,14 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
 
   const { takePhoto, pickMultipleFromGallery, isLoading, error } = useDeviceCamera();
+  const { 
+    media: deviceGallery, 
+    loadGallery, 
+    getMediaPath,
+    clearGallery,
+    isLoading: isGalleryLoading, 
+    isNative: isGalleryNative 
+  } = useDeviceGallery();
   const { uploadMedia, isUploading, progress } = useUploadMedia();
   const { compressImage, isCompressing } = useImageCompression();
   const createPost = useCreatePost();
@@ -85,6 +94,14 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   }, [carouselApi]);
 
   const handlePickFromGallery = async () => {
+    // If native, show gallery picker view
+    if (isGalleryNative) {
+      await loadGallery({ type: 'image', limit: 50 });
+      setViewMode("gallery-picker");
+      return;
+    }
+    
+    // Fallback to native picker
     const images = await pickMultipleFromGallery(MAX_PHOTOS);
     if (images.length > 0) {
       const mediaItems: MediaItem[] = images
@@ -97,6 +114,33 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setSelectedMediaType("photo");
       setCurrentIndex(0);
       toast.success(`${mediaItems.length} foto${mediaItems.length > 1 ? "s" : ""} selecionada${mediaItems.length > 1 ? "s" : ""}!`);
+    }
+  };
+
+  const handleGallerySelect = async (galleryItem: { id: string; thumbnail: string; webPath: string; type: 'image' | 'video' }) => {
+    if (selectedMediaList.length >= MAX_PHOTOS) {
+      toast.error(`Máximo de ${MAX_PHOTOS} fotos atingido`);
+      return;
+    }
+
+    // Get full path
+    let mediaUrl = galleryItem.webPath;
+    const fullPath = await getMediaPath(galleryItem.id);
+    if (fullPath) {
+      mediaUrl = fullPath;
+    }
+
+    setSelectedMediaList((prev) => [...prev, { url: mediaUrl, isLocal: true }]);
+    setSelectedMediaType("photo");
+  };
+
+  const handleGalleryDone = () => {
+    if (selectedMediaList.length > 0) {
+      setViewMode("default");
+      clearGallery();
+      toast.success(`${selectedMediaList.length} foto${selectedMediaList.length > 1 ? "s" : ""} selecionada${selectedMediaList.length > 1 ? "s" : ""}!`);
+    } else {
+      toast.error("Selecione pelo menos uma foto");
     }
   };
 
@@ -251,6 +295,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setCurrentIndex(0);
     setEditingPhotoIndex(null);
     setAllTags([]);
+    clearGallery();
     onOpenChange(false);
   };
 
@@ -352,6 +397,105 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
               setViewMode("default");
             }}
           />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  if (viewMode === "gallery-picker") {
+    return (
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-[95vh] rounded-t-3xl p-0 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <button 
+              onClick={() => {
+                setViewMode("default");
+                clearGallery();
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+            >
+              <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
+            </button>
+            
+            <span className="text-base font-semibold text-foreground">
+              Selecionar Fotos {selectedMediaList.length > 0 && `(${selectedMediaList.length}/${MAX_PHOTOS})`}
+            </span>
+            
+            <Button 
+              onClick={handleGalleryDone}
+              size="sm"
+              variant="ghost"
+              className="text-primary font-semibold text-sm hover:bg-transparent"
+              disabled={selectedMediaList.length === 0}
+            >
+              Concluir
+            </Button>
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="flex-1 overflow-y-auto p-1">
+            {isGalleryLoading ? (
+              <div className="w-full h-64 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm text-muted-foreground">Carregando galeria...</span>
+                </div>
+              </div>
+            ) : deviceGallery.length === 0 ? (
+              <div className="w-full h-64 flex flex-col items-center justify-center gap-3">
+                <span className="material-symbols-outlined text-[48px] text-muted-foreground">photo_library</span>
+                <p className="text-sm text-muted-foreground">Nenhuma foto encontrada</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-0.5">
+                {deviceGallery.map((item, index) => {
+                  const isSelected = selectedMediaList.some(m => m.url === item.webPath);
+                  const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
+                  
+                  return (
+                    <button
+                      key={`${item.id}-${index}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedMediaList(prev => prev.filter(m => m.url !== item.webPath));
+                        } else {
+                          handleGallerySelect(item);
+                        }
+                      }}
+                      className="relative aspect-square overflow-hidden"
+                    >
+                      <img
+                        src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
+                        alt={`Gallery ${index + 1}`}
+                        className={`w-full h-full object-cover transition-all duration-200 ${
+                          isSelected ? 'scale-90 rounded-lg' : ''
+                        }`}
+                      />
+                      
+                      {/* Selection indicator */}
+                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        isSelected 
+                          ? 'bg-primary border-primary' 
+                          : 'bg-black/30 border-white/70'
+                      }`}>
+                        {isSelected && (
+                          <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
+                        )}
+                      </div>
+
+                      {/* Video indicator */}
+                      {item.type === 'video' && (
+                        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
+                          <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </SheetContent>
       </Sheet>
     );

@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
+import { useDeviceGallery, GalleryMedia } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "./VideoRecorder";
 
 interface CreateReplaySheetProps {
@@ -38,24 +39,41 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [galleryImages] = useState<string[]>(fallbackGalleryImages);
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType }[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
 
   const { takePhoto, pickFromGallery, pickMultipleFromGallery, isLoading, error, isNative } = useDeviceCamera();
+  const { 
+    media: deviceGallery, 
+    loadGallery, 
+    getMediaPath,
+    clearGallery,
+    isLoading: isGalleryLoading, 
+    error: galleryError,
+    isNative: isGalleryNative 
+  } = useDeviceGallery();
+
+  // Load gallery when sheet opens
+  useEffect(() => {
+    if (open && isGalleryNative) {
+      const tabType = activeTab === "all" ? "all" : activeTab === "photos" ? "image" : "video";
+      loadGallery({ type: tabType, limit: 50 });
+    }
+  }, [open, isGalleryNative, activeTab, loadGallery]);
 
   useEffect(() => {
-    if (error) {
-      toast.error(error);
+    if (error || galleryError) {
+      toast.error(error || galleryError);
     }
-  }, [error]);
+  }, [error, galleryError]);
 
   useEffect(() => {
     if (!open) {
       setViewMode("gallery");
+      clearGallery();
     }
-  }, [open]);
+  }, [open, clearGallery]);
 
   const handleTakePhoto = async () => {
     const photo = await takePhoto();
@@ -94,16 +112,27 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     }
   };
 
-  const handleMediaSelect = (url: string, type: MediaType = "photo") => {
+  const handleMediaSelect = async (media: { url: string; originalPath: string; id: string; type: MediaType }) => {
+    // For device gallery items, try to get the full path
+    let mediaUrl = media.originalPath || media.url;
+    
+    // If it's a device gallery item (not fallback/captured), get the actual path
+    if (media.id.startsWith('data:') === false && !media.id.startsWith('fallback-') && !media.id.startsWith('captured-') && isGalleryNative) {
+      const fullPath = await getMediaPath(media.id);
+      if (fullPath) {
+        mediaUrl = fullPath;
+      }
+    }
+
     if (multiSelect) {
       setSelectedImages(prev => 
-        prev.includes(url) 
-          ? prev.filter(img => img !== url)
-          : [...prev, url]
+        prev.includes(mediaUrl) 
+          ? prev.filter(img => img !== mediaUrl)
+          : [...prev, mediaUrl]
       );
     } else {
-      setSelectedMedia(url);
-      setSelectedMediaType(type);
+      setSelectedMedia(mediaUrl);
+      setSelectedMediaType(media.type);
     }
   };
 
@@ -147,13 +176,27 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
 
   const hasSelection = multiSelect ? selectedImages.length > 0 : !!selectedMedia;
   
-  // Combine captured media with fallback gallery
+  // Combine captured media with device gallery or fallback
+  const deviceGalleryMedia = deviceGallery.map((item) => ({
+    url: item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`,
+    originalPath: item.webPath,
+    id: item.id,
+    type: (item.type === "video" ? "video" : "photo") as MediaType
+  }));
+
+  const fallbackMedia = !isGalleryNative || deviceGallery.length === 0 
+    ? fallbackGalleryImages.map((url, index) => ({ 
+        url, 
+        originalPath: url,
+        id: `fallback-${index}`,
+        type: (index % 4 === 2 ? "video" : "photo") as MediaType 
+      }))
+    : [];
+
   const allMedia = [
-    ...capturedMedia,
-    ...galleryImages.map((url, index) => ({ 
-      url, 
-      type: (index % 4 === 2 ? "video" : "photo") as MediaType 
-    }))
+    ...capturedMedia.map(m => ({ ...m, originalPath: m.url, id: `captured-${m.url}` })),
+    ...deviceGalleryMedia,
+    ...fallbackMedia
   ];
 
   const filteredMedia = allMedia.filter(media => {
@@ -360,15 +403,15 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
               {/* Gallery items */}
               {filteredMedia.map((media, index) => {
                 const isSelected = multiSelect 
-                  ? selectedImages.includes(media.url)
-                  : selectedMedia === media.url;
-                const selectionIndex = multiSelect ? selectedImages.indexOf(media.url) + 1 : 0;
-                const isCaptured = capturedMedia.some(c => c.url === media.url);
+                  ? selectedImages.includes(media.originalPath)
+                  : selectedMedia === media.originalPath;
+                const selectionIndex = multiSelect ? selectedImages.indexOf(media.originalPath) + 1 : 0;
+                const isCaptured = media.id.startsWith('captured-');
                 
                 return (
                   <button
-                    key={`${media.url}-${index}`}
-                    onClick={() => handleMediaSelect(media.url, media.type)}
+                    key={`${media.id}-${index}`}
+                    onClick={() => handleMediaSelect(media)}
                     className="relative aspect-square overflow-hidden"
                   >
                     {media.type === "video" ? (
