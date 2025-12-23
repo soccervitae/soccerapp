@@ -12,6 +12,7 @@ import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useCreatePost } from "@/hooks/usePosts";
+import { useImageCompression } from "@/hooks/useImageCompression";
 import {
   Carousel,
   CarouselContent,
@@ -46,7 +47,8 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [isPublishing, setIsPublishing] = useState(false);
 
   const { takePhoto, pickMultipleFromGallery, isLoading, error } = useDeviceCamera();
-  const { uploadMedia, uploadFromUrl, isUploading, progress } = useUploadMedia();
+  const { uploadMedia, isUploading, progress } = useUploadMedia();
+  const { compressImage, isCompressing } = useImageCompression();
   const createPost = useCreatePost();
 
   useEffect(() => {
@@ -119,13 +121,19 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     for (const media of selectedMediaList) {
       let uploadedUrl: string | null = null;
       
-      if (media.blob) {
-        // Video blob
-        const ext = selectedMediaType === "video" ? "webm" : "jpg";
-        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.${ext}`);
+      if (media.blob && selectedMediaType === "video") {
+        // Video blob - upload directly without compression
+        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
       } else if (media.isLocal && media.url) {
-        // Local image URL - need to fetch and upload
-        uploadedUrl = await uploadFromUrl(media.url, "post-media");
+        // Local image URL - fetch, compress, then upload
+        try {
+          const response = await fetch(media.url);
+          const blob = await response.blob();
+          const compressed = await compressImage(blob);
+          uploadedUrl = await uploadMedia(compressed, "post-media", `${Date.now()}.jpg`);
+        } catch (err) {
+          console.error("Error compressing/uploading image:", err);
+        }
       } else if (media.url) {
         // Already uploaded URL
         uploadedUrl = media.url;
@@ -213,7 +221,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     });
   };
 
-  const isButtonDisabled = selectedMediaList.length === 0 || isLoading || isUploading || isPublishing || createPost.isPending;
+  const isButtonDisabled = selectedMediaList.length === 0 || isLoading || isUploading || isCompressing || isPublishing || createPost.isPending;
 
   if (viewMode === "video-recorder") {
     return (
