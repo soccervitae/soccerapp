@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
+import { useUploadMedia } from "@/hooks/useUploadMedia";
+import { useCreatePost } from "@/hooks/usePosts";
 import {
   Carousel,
   CarouselContent,
@@ -25,17 +27,27 @@ interface CreatePostSheetProps {
 type MediaType = "photo" | "video";
 type ViewMode = "default" | "video-recorder";
 
+interface MediaItem {
+  url: string;
+  blob?: Blob;
+  file?: File;
+  isLocal: boolean;
+}
+
 const MAX_PHOTOS = 10;
 
 export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) => {
   const [caption, setCaption] = useState("");
-  const [selectedMediaList, setSelectedMediaList] = useState<string[]>([]);
+  const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [viewMode, setViewMode] = useState<ViewMode>("default");
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const { takePhoto, pickMultipleFromGallery, isLoading, error } = useDeviceCamera();
+  const { uploadMedia, uploadFromUrl, isUploading, progress } = useUploadMedia();
+  const createPost = useCreatePost();
 
   useEffect(() => {
     if (error) {
@@ -53,11 +65,16 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const handlePickFromGallery = async () => {
     const images = await pickMultipleFromGallery(MAX_PHOTOS);
     if (images.length > 0) {
-      const urls = images.map((img) => img.webPath).filter(Boolean) as string[];
-      setSelectedMediaList(urls);
+      const mediaItems: MediaItem[] = images
+        .filter((img) => img.webPath)
+        .map((img) => ({
+          url: img.webPath!,
+          isLocal: true,
+        }));
+      setSelectedMediaList(mediaItems);
       setSelectedMediaType("photo");
       setCurrentIndex(0);
-      toast.success(`${urls.length} foto${urls.length > 1 ? "s" : ""} selecionada${urls.length > 1 ? "s" : ""}!`);
+      toast.success(`${mediaItems.length} foto${mediaItems.length > 1 ? "s" : ""} selecionada${mediaItems.length > 1 ? "s" : ""}!`);
     }
   };
 
@@ -66,9 +83,14 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     if (remaining <= 0) { toast.error(`Máximo de ${MAX_PHOTOS} fotos atingido`); return; }
     const images = await pickMultipleFromGallery(remaining);
     if (images.length > 0) {
-      const urls = images.map((img) => img.webPath).filter(Boolean) as string[];
-      setSelectedMediaList((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} foto${urls.length > 1 ? "s" : ""} adicionada${urls.length > 1 ? "s" : ""}!`);
+      const mediaItems: MediaItem[] = images
+        .filter((img) => img.webPath)
+        .map((img) => ({
+          url: img.webPath!,
+          isLocal: true,
+        }));
+      setSelectedMediaList((prev) => [...prev, ...mediaItems]);
+      toast.success(`${mediaItems.length} foto${mediaItems.length > 1 ? "s" : ""} adicionada${mediaItems.length > 1 ? "s" : ""}!`);
     }
   };
 
@@ -77,29 +99,105 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     if (photo?.webPath) {
       setSelectedMediaList((prev) => {
         if (prev.length >= MAX_PHOTOS) { toast.error(`Máximo de ${MAX_PHOTOS} fotos atingido`); return prev; }
-        return [...prev, photo.webPath];
+        return [...prev, { url: photo.webPath, isLocal: true }];
       });
       setSelectedMediaType("photo");
       toast.success("Foto capturada!");
     }
   };
 
-  const handleVideoRecorded = (url: string, _blob: Blob) => {
-    setSelectedMediaList([url]);
+  const handleVideoRecorded = (url: string, blob: Blob) => {
+    setSelectedMediaList([{ url, blob, isLocal: true }]);
     setSelectedMediaType("video");
     setViewMode("default");
     toast.success("Vídeo gravado!");
   };
 
-  const handlePost = () => {
-    if (selectedMediaList.length === 0) { toast.error("Selecione uma foto ou vídeo para postar"); return; }
-    toast.success("Post publicado com sucesso!");
-    setCaption(""); setSelectedMediaList([]); setSelectedMediaType("photo"); setCurrentIndex(0);
-    onOpenChange(false);
+  const uploadAllMedia = async (): Promise<string[]> => {
+    const uploadedUrls: string[] = [];
+    
+    for (const media of selectedMediaList) {
+      let uploadedUrl: string | null = null;
+      
+      if (media.blob) {
+        // Video blob
+        const ext = selectedMediaType === "video" ? "webm" : "jpg";
+        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.${ext}`);
+      } else if (media.isLocal && media.url) {
+        // Local image URL - need to fetch and upload
+        uploadedUrl = await uploadFromUrl(media.url, "post-media");
+      } else if (media.url) {
+        // Already uploaded URL
+        uploadedUrl = media.url;
+      }
+      
+      if (uploadedUrl) {
+        uploadedUrls.push(uploadedUrl);
+      }
+    }
+    
+    return uploadedUrls;
+  };
+
+  const handlePost = async () => {
+    if (selectedMediaList.length === 0) { 
+      toast.error("Selecione uma foto ou vídeo para postar"); 
+      return; 
+    }
+
+    setIsPublishing(true);
+    
+    try {
+      toast.loading("Enviando mídia...", { id: "upload-progress" });
+      
+      const uploadedUrls = await uploadAllMedia();
+      
+      if (uploadedUrls.length === 0) {
+        toast.dismiss("upload-progress");
+        toast.error("Erro ao fazer upload das mídias");
+        return;
+      }
+
+      toast.dismiss("upload-progress");
+      
+      // For now, store the first URL (for single media) or all URLs as JSON (for carousel)
+      const mediaUrl = uploadedUrls.length === 1 
+        ? uploadedUrls[0] 
+        : JSON.stringify(uploadedUrls);
+      
+      const mediaType = selectedMediaType === "video" 
+        ? "video" 
+        : uploadedUrls.length > 1 
+          ? "carousel" 
+          : "image";
+
+      await createPost.mutateAsync({
+        content: caption || "",
+        mediaUrl,
+        mediaType,
+      });
+
+      // Reset state
+      setCaption("");
+      setSelectedMediaList([]);
+      setSelectedMediaType("photo");
+      setCurrentIndex(0);
+      onOpenChange(false);
+    } catch (err) {
+      console.error("Error publishing post:", err);
+      toast.error("Erro ao publicar post");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const handleClose = () => {
-    setCaption(""); setSelectedMediaList([]); setSelectedMediaType("photo"); setViewMode("default"); setCurrentIndex(0);
+    if (isPublishing) return;
+    setCaption("");
+    setSelectedMediaList([]);
+    setSelectedMediaType("photo");
+    setViewMode("default");
+    setCurrentIndex(0);
     onOpenChange(false);
   };
 
@@ -107,10 +205,15 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     if (selectedMediaList.length <= 1) { setSelectedMediaList([]); setCurrentIndex(0); return; }
     setSelectedMediaList((prev) => {
       const newList = prev.filter((_, i) => i !== currentIndex);
-      if (currentIndex >= newList.length) { setCurrentIndex(Math.max(0, newList.length - 1)); carouselApi?.scrollTo(Math.max(0, newList.length - 1)); }
+      if (currentIndex >= newList.length) { 
+        setCurrentIndex(Math.max(0, newList.length - 1)); 
+        carouselApi?.scrollTo(Math.max(0, newList.length - 1)); 
+      }
       return newList;
     });
   };
+
+  const isButtonDisabled = selectedMediaList.length === 0 || isLoading || isUploading || isPublishing || createPost.isPending;
 
   if (viewMode === "video-recorder") {
     return (
@@ -127,13 +230,36 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       <SheetContent side="bottom" className="h-full rounded-t-none">
         <SheetHeader className="pb-4 border-b border-border">
           <div className="flex items-center justify-between">
-            <button onClick={handleClose} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cancelar</button>
+            <button 
+              onClick={handleClose} 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              disabled={isPublishing}
+            >
+              Cancelar
+            </button>
             <SheetTitle className="text-base font-bold">Nova Publicação</SheetTitle>
-            <Button onClick={handlePost} size="sm" className="rounded font-semibold text-xs h-8 px-4" disabled={selectedMediaList.length === 0 || isLoading}>Publicar</Button>
+            <Button 
+              onClick={handlePost} 
+              size="sm" 
+              className="rounded font-semibold text-xs h-8 px-4" 
+              disabled={isButtonDisabled}
+            >
+              {isPublishing ? "Publicando..." : "Publicar"}
+            </Button>
           </div>
         </SheetHeader>
 
         <div className="flex flex-col gap-4 mt-4 h-[calc(100%-80px)] overflow-y-auto">
+          {/* Upload Progress */}
+          {isPublishing && (
+            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300" 
+                style={{ width: `${progress}%` }} 
+              />
+            </div>
+          )}
+
           {selectedMediaList.length === 0 ? (
             <div className="w-full aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-6 p-6">
               {isLoading ? (
@@ -172,19 +298,19 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             <div className="relative">
               {selectedMediaType === "video" ? (
                 <>
-                  <video src={selectedMediaList[0]} controls className="w-full aspect-square object-cover rounded-lg" />
+                  <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-lg" />
                   <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px] text-foreground">videocam</span>
                     <span className="text-xs font-medium text-foreground">VÍDEO</span>
                   </div>
                 </>
               ) : selectedMediaList.length === 1 ? (
-                <img src={selectedMediaList[0]} alt="Preview" className="w-full aspect-square object-cover rounded-lg" />
+                <img src={selectedMediaList[0]?.url} alt="Preview" className="w-full aspect-square object-cover rounded-lg" />
               ) : (
                 <Carousel setApi={setCarouselApi} className="w-full">
                   <CarouselContent>
                     {selectedMediaList.map((media, index) => (
-                      <CarouselItem key={index}><img src={media} alt={`Foto ${index + 1}`} className="w-full aspect-square object-cover rounded-lg" /></CarouselItem>
+                      <CarouselItem key={index}><img src={media.url} alt={`Foto ${index + 1}`} className="w-full aspect-square object-cover rounded-lg" /></CarouselItem>
                     ))}
                   </CarouselContent>
                 </Carousel>
@@ -195,7 +321,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
                 </div>
               )}
-              <button onClick={handleRemoveCurrentMedia} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors">
+              <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
                 <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
               </button>
               {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
@@ -205,7 +331,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   ))}
                 </div>
               )}
-              {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && (
+              {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && !isPublishing && (
                 <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors disabled:opacity-50">
                   <span className="material-symbols-outlined text-[20px] text-foreground">add_photo_alternate</span>
                   <span className="text-sm font-medium text-foreground">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
@@ -218,19 +344,25 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 p-[2px] flex-shrink-0">
               <div className="w-full h-full rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span></div>
             </div>
-            <Textarea placeholder="Escreva uma legenda..." value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" />
+            <Textarea 
+              placeholder="Escreva uma legenda..." 
+              value={caption} 
+              onChange={(e) => setCaption(e.target.value)} 
+              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" 
+              disabled={isPublishing}
+            />
           </div>
 
           <div className="border-t border-border pt-4 space-y-1">
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
               <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">location_on</span><span className="text-sm text-foreground">Adicionar localização</span></div>
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
               <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">person_add</span><span className="text-sm text-foreground">Marcar pessoas</span></div>
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
               <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">music_note</span><span className="text-sm text-foreground">Adicionar música</span></div>
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
             </button>
