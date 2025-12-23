@@ -133,6 +133,38 @@ export const useDeviceGallery = () => {
     }
   }, [isNative]);
 
+  // Get media blob from gallery item - useful for uploading
+  // Since gallery plugin doesn't return base64 directly, we need to use Camera plugin to re-pick
+  const getMediaBlob = useCallback(async (id: string): Promise<Blob | null> => {
+    if (!supportsGalleryPlugin) return null;
+
+    try {
+      // The gallery plugin doesn't support getting base64 data directly
+      // For iOS, the path returned can be accessed via fetch in some cases
+      const { GalleryPlus } = await import('capacitor-gallery-plus');
+      const result = await GalleryPlus.getMedia({ 
+        id, 
+        includePath: true
+      });
+      
+      if (result.path) {
+        // Try to fetch the local file (may not work on all platforms)
+        try {
+          const response = await fetch(result.path);
+          if (response.ok) {
+            return await response.blob();
+          }
+        } catch (fetchErr) {
+          console.warn('Could not fetch local path:', fetchErr);
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('Error getting media blob:', err);
+      return null;
+    }
+  }, [supportsGalleryPlugin]);
+
   const clearGallery = useCallback(() => {
     setMedia([]);
     setHasMore(true);
@@ -145,6 +177,7 @@ export const useDeviceGallery = () => {
     loadGallery,
     loadMore,
     getMediaPath,
+    getMediaBlob,
     clearGallery,
     isLoading,
     isLoadingMore,

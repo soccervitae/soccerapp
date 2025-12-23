@@ -71,6 +71,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     loadGallery, 
     loadMore,
     getMediaPath,
+    getMediaBlob,
     clearGallery,
     isLoading: isGalleryLoading,
     isLoadingMore,
@@ -111,6 +112,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         .filter((img) => img.webPath)
         .map((img) => ({
           url: img.webPath!,
+          blob: img.blob, // Store blob if available
           isLocal: true,
         }));
       setSelectedMediaList(mediaItems);
@@ -133,7 +135,10 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       mediaUrl = fullPath;
     }
 
-    setSelectedMediaList((prev) => [...prev, { url: mediaUrl, isLocal: true }]);
+    // Try to get blob for upload
+    const blob = await getMediaBlob(galleryItem.id);
+
+    setSelectedMediaList((prev) => [...prev, { url: mediaUrl, blob: blob || undefined, isLocal: true }]);
     setSelectedMediaType("photo");
   };
 
@@ -156,6 +161,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         .filter((img) => img.webPath)
         .map((img) => ({
           url: img.webPath!,
+          blob: img.blob, // Store blob if available
           isLocal: true,
         }));
       setSelectedMediaList((prev) => [...prev, ...mediaItems]);
@@ -168,7 +174,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     if (photo?.webPath) {
       setSelectedMediaList((prev) => {
         if (prev.length >= MAX_PHOTOS) { toast.error(`Máximo de ${MAX_PHOTOS} fotos atingido`); return prev; }
-        return [...prev, { url: photo.webPath, isLocal: true }];
+        return [...prev, { url: photo.webPath, blob: photo.blob, isLocal: true }];
       });
       setSelectedMediaType("photo");
       toast.success("Foto capturada!");
@@ -191,17 +197,28 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       if (media.blob && selectedMediaType === "video") {
         // Video blob - upload directly without compression
         uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
-      } else if (media.isLocal && media.url) {
-        // Local image URL - apply crop, filters, compress, then upload
+      } else if (media.isLocal && (media.blob || media.url)) {
+        // Local image - apply crop, filters, compress, then upload
         try {
           let blob: Blob;
           
           // Apply crop if any
           if (hasCropData(media.cropData)) {
             blob = await getCroppedImg(media.url, media.cropData!.croppedAreaPixels);
+          } else if (media.blob) {
+            // Use blob directly if available (from camera/gallery on native)
+            blob = media.blob;
           } else {
-            const response = await fetch(media.url);
-            blob = await response.blob();
+            // Try to fetch - this works for web/remote URLs
+            try {
+              const response = await fetch(media.url);
+              if (!response.ok) throw new Error('Fetch failed');
+              blob = await response.blob();
+            } catch (fetchErr) {
+              console.error("Failed to fetch image:", fetchErr);
+              // Skip this image if we can't get the blob
+              continue;
+            }
           }
           
           // Apply filters if any
@@ -214,7 +231,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         } catch (err) {
           console.error("Error processing/uploading image:", err);
         }
-      } else if (media.url) {
+      } else if (media.url && !media.isLocal) {
         // Already uploaded URL
         uploadedUrl = media.url;
       }
