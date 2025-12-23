@@ -398,29 +398,33 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           <button 
             onClick={handleLike}
             disabled={likePost.isPending}
-            className={`flex flex-col items-center justify-center p-3 gap-1 transition-all active:scale-110 ${
+            className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${
               post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
             <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
               {post.liked_by_user ? 'favorite' : 'favorite_border'}
             </span>
-            <span className="text-xs font-medium">{formatNumber(post.likes_count || 0)}</span>
+            {(post.likes_count || 0) >= 1 && (
+              <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>
+            )}
           </button>
           <button 
             onClick={() => setIsCommentsSheetOpen(true)}
-            className="flex flex-col items-center justify-center p-3 gap-1 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
+            className="flex items-center justify-center p-3 gap-1.5 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
           >
             <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
-            <span className="text-xs font-medium">{formatNumber(post.comments_count || 0)}</span>
+            {(post.comments_count || 0) >= 1 && (
+              <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>
+            )}
           </button>
-          <button className="flex flex-col items-center justify-center p-3 gap-1 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
             <span className="material-symbols-outlined text-[24px]">send</span>
           </button>
           <button 
             onClick={handleSave}
             disabled={savePost.isPending}
-            className={`flex flex-col items-center justify-center p-3 gap-1 border-l border-border transition-colors ${
+            className={`flex items-center justify-center p-3 border-l border-border transition-colors ${
               post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
