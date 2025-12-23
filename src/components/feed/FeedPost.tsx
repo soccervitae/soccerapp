@@ -229,6 +229,9 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground uppercase">
             {getTimeAgo()}
+            {post.updated_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 60000 && (
+              <span className="ml-1 normal-case">(editado)</span>
+            )}
           </span>
           
           {isOwner && (
