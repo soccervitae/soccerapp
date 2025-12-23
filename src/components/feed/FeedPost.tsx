@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
@@ -53,9 +53,7 @@ const REPORT_REASONS = [
 export const FeedPost = ({ post }: FeedPostProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showComments, setShowComments] = useState(false);
   const [isCommentsSheetOpen, setIsCommentsSheetOpen] = useState(false);
-  const [comment, setComment] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -70,7 +68,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
 
   const likePost = useLikePost();
   const savePost = useSavePost();
-  const createComment = useCreateComment();
   const updatePost = useUpdatePost();
   const deletePost = useDeletePost();
   const reportPost = useReportPost();
@@ -120,18 +117,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     savePost.mutate({ postId: post.id, isSaved: post.saved_by_user });
   };
 
-  const handleComment = () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (!comment.trim()) return;
-    
-    createComment.mutate(
-      { postId: post.id, content: comment },
-      { onSuccess: () => setComment("") }
-    );
-  };
 
   const handleEdit = () => {
     setEditContent(post.content);
@@ -384,93 +369,45 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           <button 
             onClick={handleLike}
             disabled={likePost.isPending}
-            className={`flex flex-col items-center justify-center gap-1 p-3 transition-all active:scale-110 ${
+            className={`flex items-center justify-center p-3 transition-all active:scale-110 ${
               post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
             <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''}`}>
               {post.liked_by_user ? 'favorite' : 'favorite_border'}
             </span>
-            <span className="text-[10px] font-medium">Curtir</span>
           </button>
           <button 
-            onClick={() => setShowComments(!showComments)}
-            className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
+            onClick={() => setIsCommentsSheetOpen(true)}
+            className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
           >
             <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
-            <span className="text-[10px] font-medium">Comentar</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-1 p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
             <span className="material-symbols-outlined text-[24px]">send</span>
-            <span className="text-[10px] font-medium">Enviar</span>
           </button>
           <button 
             onClick={handleSave}
             disabled={savePost.isPending}
-            className={`flex flex-col items-center justify-center gap-1 p-3 border-l border-border transition-colors ${
+            className={`flex items-center justify-center p-3 border-l border-border transition-colors ${
               post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
             <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
               {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
             </span>
-            <span className="text-[10px] font-medium">Salvar</span>
           </button>
         </div>
 
-        {/* Likes */}
-        <p className="font-bold text-sm text-foreground mb-2">
-          {formatNumber(post.likes_count || 0)} curtidas
-        </p>
-
-        {/* Comments count */}
-        {(post.comments_count || 0) > 0 && (
-          <button 
-            onClick={() => setIsCommentsSheetOpen(true)}
-            className="text-sm text-muted-foreground mb-1"
-          >
-            Ver todos os {post.comments_count} comentários
-          </button>
-        )}
+        {/* Counters */}
+        <div className="flex items-center gap-3 text-sm mb-2">
+          <span className="font-semibold text-foreground">{formatNumber(post.likes_count || 0)} curtidas</span>
+          <span className="text-muted-foreground">•</span>
+          <span className="text-muted-foreground">{formatNumber(post.comments_count || 0)} comentários</span>
+        </div>
 
         {/* Time */}
-        <p className="text-xs text-muted-foreground uppercase mt-2">{getTimeAgo()}</p>
-
-        {/* Comment input */}
-        {showComments && (
-          <div className="mt-4 pt-4 border-t border-border animate-fade-in">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                {user ? (
-                  <img 
-                    src={"/placeholder.svg"} 
-                    alt="You" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="material-symbols-outlined text-[16px] text-muted-foreground">person</span>
-                )}
-              </div>
-              <input
-                type="text"
-                placeholder="Adicione um comentário..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleComment()}
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              />
-              {comment && (
-                <button 
-                  onClick={handleComment}
-                  disabled={createComment.isPending}
-                  className="text-primary font-bold text-sm hover:text-primary/80 transition-colors disabled:opacity-50"
-                >
-                  Publicar
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+        <p className="text-xs text-muted-foreground uppercase">{getTimeAgo()}</p>
       </div>
 
       {/* Edit Dialog */}
