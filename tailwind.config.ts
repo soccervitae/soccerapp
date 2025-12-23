@@ -60,6 +60,9 @@ export default {
           700: "hsl(var(--emerald-700))",
           950: "hsl(var(--emerald-950))",
         },
+        nav: {
+          active: "hsl(var(--nav-active))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
