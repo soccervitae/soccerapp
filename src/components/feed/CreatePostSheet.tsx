@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { PhotoFilterEditor } from "@/components/feed/PhotoFilterEditor";
+import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useCreatePost } from "@/hooks/usePosts";
 import { useImageCompression } from "@/hooks/useImageCompression";
@@ -27,6 +28,7 @@ import {
   areFiltersDefault,
   getCSSFilterWithFade,
 } from "@/hooks/useImageFilters";
+import { CropData, getCroppedImg, hasCropData } from "@/hooks/useImageCrop";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -34,7 +36,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop";
 
 interface MediaItem {
   url: string;
@@ -42,6 +44,8 @@ interface MediaItem {
   file?: File;
   isLocal: boolean;
   filters?: ImageFilters;
+  cropData?: CropData;
+  croppedUrl?: string; // URL for cropped preview
 }
 
 const MAX_PHOTOS = 10;
@@ -135,10 +139,17 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         // Video blob - upload directly without compression
         uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
       } else if (media.isLocal && media.url) {
-        // Local image URL - apply filters, compress, then upload
+        // Local image URL - apply crop, filters, compress, then upload
         try {
-          const response = await fetch(media.url);
-          let blob = await response.blob();
+          let blob: Blob;
+          
+          // Apply crop if any
+          if (hasCropData(media.cropData)) {
+            blob = await getCroppedImg(media.url, media.cropData!.croppedAreaPixels);
+          } else {
+            const response = await fetch(media.url);
+            blob = await response.blob();
+          }
           
           // Apply filters if any
           if (media.filters && !areFiltersDefault(media.filters)) {
@@ -244,6 +255,36 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setViewMode("default");
   };
 
+  const handleCropPhoto = (index: number) => {
+    setEditingPhotoIndex(index);
+    setViewMode("photo-crop");
+  };
+
+  const handleApplyCrop = async (cropData: CropData) => {
+    if (editingPhotoIndex !== null) {
+      const media = selectedMediaList[editingPhotoIndex];
+      try {
+        // Generate cropped preview URL
+        const croppedBlob = await getCroppedImg(media.url, cropData.croppedAreaPixels);
+        const croppedUrl = URL.createObjectURL(croppedBlob);
+        
+        setSelectedMediaList((prev) =>
+          prev.map((item, i) =>
+            i === editingPhotoIndex 
+              ? { ...item, cropData, croppedUrl } 
+              : item
+          )
+        );
+        toast.success("Recorte aplicado!");
+      } catch (err) {
+        console.error("Error applying crop:", err);
+        toast.error("Erro ao aplicar recorte");
+      }
+    }
+    setEditingPhotoIndex(null);
+    setViewMode("default");
+  };
+
   const handleRemoveCurrentMedia = () => {
     if (selectedMediaList.length <= 1) { setSelectedMediaList([]); setCurrentIndex(0); return; }
     setSelectedMediaList((prev) => {
@@ -274,9 +315,28 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       <Sheet open={open} onOpenChange={handleClose}>
         <SheetContent side="bottom" className="h-full rounded-t-none p-0">
           <PhotoFilterEditor
-            imageUrl={mediaToEdit.url}
+            imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
             initialFilters={mediaToEdit.filters}
             onApply={handleApplyFilters}
+            onCancel={() => {
+              setEditingPhotoIndex(null);
+              setViewMode("default");
+            }}
+          />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  if (viewMode === "photo-crop" && editingPhotoIndex !== null) {
+    const mediaToEdit = selectedMediaList[editingPhotoIndex];
+    return (
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
+          <PhotoCropEditor
+            imageUrl={mediaToEdit.url}
+            initialCropData={mediaToEdit.cropData}
+            onApply={handleApplyCrop}
             onCancel={() => {
               setEditingPhotoIndex(null);
               setViewMode("default");
@@ -368,7 +428,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                 </>
               ) : selectedMediaList.length === 1 ? (
                 <img 
-                  src={selectedMediaList[0]?.url} 
+                  src={selectedMediaList[0]?.croppedUrl || selectedMediaList[0]?.url} 
                   alt="Preview" 
                   className="w-full aspect-square object-cover rounded-lg" 
                   style={selectedMediaList[0]?.filters ? getCSSFilterWithFade(selectedMediaList[0].filters) : undefined}
@@ -379,7 +439,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                     {selectedMediaList.map((media, index) => (
                       <CarouselItem key={index}>
                         <img 
-                          src={media.url} 
+                          src={media.croppedUrl || media.url} 
                           alt={`Foto ${index + 1}`} 
                           className="w-full aspect-square object-cover rounded-lg" 
                           style={media.filters ? getCSSFilterWithFade(media.filters) : undefined}
@@ -395,14 +455,24 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
                 </div>
               )}
-              {/* Edit button for current photo */}
+              {/* Crop and Edit buttons for current photo */}
               {selectedMediaType === "photo" && !isPublishing && (
-                <button 
-                  onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
-                  className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
-                </button>
+                <>
+                  <button 
+                    onClick={() => handleCropPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
+                    className="absolute top-2 right-[5.5rem] w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    title="Recortar"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-foreground">crop</span>
+                  </button>
+                  <button 
+                    onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
+                    className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    title="Filtros"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
+                  </button>
+                </>
               )}
               <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
                 <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
