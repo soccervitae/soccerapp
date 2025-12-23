@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
+import { CommentsSheet } from "./CommentsSheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
+  const [isCommentsSheetOpen, setIsCommentsSheetOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -305,7 +307,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         {/* Comments count */}
         {(post.comments_count || 0) > 0 && (
           <button 
-            onClick={() => setShowComments(!showComments)}
+            onClick={() => setIsCommentsSheetOpen(true)}
             className="text-sm text-muted-foreground mb-1"
           >
             Ver todos os {post.comments_count} comentários
@@ -447,6 +449,13 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Comments Sheet */}
+      <CommentsSheet 
+        post={post} 
+        open={isCommentsSheetOpen} 
+        onOpenChange={setIsCommentsSheetOpen} 
+      />
     </article>
   );
 };
