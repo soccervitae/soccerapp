@@ -282,3 +282,35 @@ export const useDeletePost = () => {
     },
   });
 };
+
+export const useReportPost = () => {
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ postId, reason, description }: { postId: string; reason: string; description?: string }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("reports")
+        .insert({
+          reporter_id: user.id,
+          post_id: postId,
+          reason,
+          description: description || null,
+        });
+
+      if (error) {
+        if (error.code === "23505") {
+          throw new Error("Você já denunciou esta publicação");
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Denúncia enviada. Obrigado pelo feedback!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erro ao enviar denúncia");
+    },
+  });
+};

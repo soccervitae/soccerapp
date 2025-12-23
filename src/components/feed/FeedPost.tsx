@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useCreateComment, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -29,10 +29,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface FeedPostProps {
   post: Post;
 }
+
+const REPORT_REASONS = [
+  { value: "spam", label: "Spam ou conteúdo enganoso" },
+  { value: "inappropriate", label: "Conteúdo impróprio" },
+  { value: "harassment", label: "Assédio ou bullying" },
+  { value: "violence", label: "Violência ou ameaças" },
+  { value: "other", label: "Outro motivo" },
+];
 
 export const FeedPost = ({ post }: FeedPostProps) => {
   const navigate = useNavigate();
@@ -41,13 +51,17 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [comment, setComment] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
 
   const likePost = useLikePost();
   const savePost = useSavePost();
   const createComment = useCreateComment();
   const updatePost = useUpdatePost();
   const deletePost = useDeletePost();
+  const reportPost = useReportPost();
 
   const isOwner = user?.id === post.user_id;
 
@@ -101,6 +115,24 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     deletePost.mutate(post.id, {
       onSuccess: () => setIsDeleteDialogOpen(false),
     });
+  };
+
+  const handleReport = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (!reportReason) return;
+    reportPost.mutate(
+      { postId: post.id, reason: reportReason, description: reportDescription || undefined },
+      {
+        onSuccess: () => {
+          setIsReportDialogOpen(false);
+          setReportReason("");
+          setReportDescription("");
+        },
+      }
+    );
   };
 
   const formatNumber = (num: number) => {
@@ -173,9 +205,22 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         )}
 
         {!isOwner && (
-          <button className="p-2 hover:bg-muted rounded-full transition-colors">
-            <span className="material-symbols-outlined text-[20px] text-foreground">more_horiz</span>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                <span className="material-symbols-outlined text-[20px] text-foreground">more_horiz</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem 
+                onClick={() => setIsReportDialogOpen(true)} 
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <span className="material-symbols-outlined text-[18px] mr-2">flag</span>
+                Denunciar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
@@ -351,6 +396,52 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Report Dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Denunciar publicação</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-3">
+              <Label>Por que você está denunciando esta publicação?</Label>
+              <RadioGroup value={reportReason} onValueChange={setReportReason}>
+                {REPORT_REASONS.map((reason) => (
+                  <div key={reason.value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={reason.value} id={reason.value} />
+                    <Label htmlFor={reason.value} className="font-normal cursor-pointer">
+                      {reason.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Detalhes adicionais (opcional)</Label>
+              <Textarea
+                id="description"
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                placeholder="Forneça mais informações sobre a denúncia..."
+                className="min-h-[80px] resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleReport} 
+              disabled={reportPost.isPending || !reportReason}
+              variant="destructive"
+            >
+              {reportPost.isPending ? "Enviando..." : "Denunciar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </article>
   );
 };

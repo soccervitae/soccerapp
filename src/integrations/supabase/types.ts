@@ -724,6 +724,51 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          post_id: string
+          reason: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          post_id: string
+          reason: string
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          post_id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_posts: {
         Row: {
           created_at: string
