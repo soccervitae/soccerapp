@@ -398,27 +398,29 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           <button 
             onClick={handleLike}
             disabled={likePost.isPending}
-            className={`flex items-center justify-center p-3 transition-all active:scale-110 ${
+            className={`flex flex-col items-center justify-center p-3 gap-1 transition-all active:scale-110 ${
               post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
             <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
               {post.liked_by_user ? 'favorite' : 'favorite_border'}
             </span>
+            <span className="text-xs font-medium">{formatNumber(post.likes_count || 0)}</span>
           </button>
           <button 
             onClick={() => setIsCommentsSheetOpen(true)}
-            className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
+            className="flex flex-col items-center justify-center p-3 gap-1 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
           >
             <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
+            <span className="text-xs font-medium">{formatNumber(post.comments_count || 0)}</span>
           </button>
-          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+          <button className="flex flex-col items-center justify-center p-3 gap-1 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
             <span className="material-symbols-outlined text-[24px]">send</span>
           </button>
           <button 
             onClick={handleSave}
             disabled={savePost.isPending}
-            className={`flex items-center justify-center p-3 border-l border-border transition-colors ${
+            className={`flex flex-col items-center justify-center p-3 gap-1 border-l border-border transition-colors ${
               post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
             }`}
           >
@@ -426,13 +428,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
             </span>
           </button>
-        </div>
-
-        {/* Counters */}
-        <div className="flex items-center gap-3 text-sm mb-2">
-          <span className="font-semibold text-foreground">{formatNumber(post.likes_count || 0)} curtidas</span>
-          <span className="text-muted-foreground">•</span>
-          <span className="text-muted-foreground">{formatNumber(post.comments_count || 0)} comentários</span>
         </div>
 
         {/* Time */}
