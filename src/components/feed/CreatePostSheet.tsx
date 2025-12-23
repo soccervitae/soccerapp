@@ -13,6 +13,7 @@ import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useCreatePost } from "@/hooks/usePosts";
 import { useImageCompression } from "@/hooks/useImageCompression";
+import { SortablePhotoThumbnails } from "@/components/feed/SortablePhotoThumbnails";
 import {
   Carousel,
   CarouselContent,
@@ -338,6 +339,22 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                     <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />
                   ))}
                 </div>
+              )}
+              {/* Sortable Thumbnails for Reordering */}
+              {selectedMediaType === "photo" && !isPublishing && (
+                <SortablePhotoThumbnails
+                  items={selectedMediaList}
+                  onReorder={(newList) => {
+                    setSelectedMediaList(newList);
+                    toast.success("Ordem das fotos atualizada!");
+                  }}
+                  currentIndex={currentIndex}
+                  onSelect={(index) => {
+                    setCurrentIndex(index);
+                    carouselApi?.scrollTo(index);
+                  }}
+                  disabled={isPublishing}
+                />
               )}
               {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && !isPublishing && (
                 <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors disabled:opacity-50">
