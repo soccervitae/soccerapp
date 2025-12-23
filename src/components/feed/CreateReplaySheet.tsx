@@ -55,16 +55,18 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     isLoadingMore,
     error: galleryError,
     hasMore,
-    isNative: isGalleryNative 
+    isNative: isGalleryNative,
+    isAndroid,
+    supportsGalleryPlugin
   } = useDeviceGallery();
 
-  // Load gallery when sheet opens
+  // Load gallery when sheet opens (only on iOS, Android uses native picker)
   useEffect(() => {
-    if (open && isGalleryNative) {
+    if (open && supportsGalleryPlugin) {
       const tabType = activeTab === "all" ? "all" : activeTab === "photos" ? "image" : "video";
       loadGallery({ type: tabType, limit: 50 });
     }
-  }, [open, isGalleryNative, activeTab, loadGallery]);
+  }, [open, supportsGalleryPlugin, activeTab, loadGallery]);
 
   useEffect(() => {
     if (error || galleryError) {
@@ -369,11 +371,28 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
           </div>
 
           {/* Native device info banner */}
-          {isNative && (
+          {isNative && !isAndroid && (
             <div className="px-4 py-2 bg-primary/10 border-b border-border">
               <p className="text-xs text-primary flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">smartphone</span>
                 Acesso à câmera e galeria do dispositivo ativado
+              </p>
+            </div>
+          )}
+
+          {/* Android native picker banner */}
+          {isAndroid && (
+            <div className="px-4 py-2 bg-primary/10 border-b border-border">
+              <button 
+                onClick={handlePickFromGallery}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[20px]">photo_library</span>
+                Escolher da Galeria
+              </button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Toque acima para abrir a galeria do seu dispositivo
               </p>
             </div>
           )}
@@ -385,7 +404,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
             onScroll={(e) => {
               const target = e.currentTarget;
               const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
-              if (isNearBottom && hasMore && !isLoadingMore && isGalleryNative) {
+              if (isNearBottom && hasMore && !isLoadingMore && supportsGalleryPlugin) {
                 loadMore();
               }
             }}

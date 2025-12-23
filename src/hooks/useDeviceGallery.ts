@@ -23,10 +23,22 @@ export const useDeviceGallery = () => {
   const [hasMore, setHasMore] = useState(true);
   const lastOptionsRef = useRef<LoadOptions>({});
 
+  const platform = Capacitor.getPlatform(); // 'ios', 'android', 'web'
   const isNative = Capacitor.isNativePlatform();
+  const isIOS = platform === 'ios';
+  const isAndroid = platform === 'android';
+  
+  // Gallery plugin only works on iOS - Android support is "Planned"
+  const supportsGalleryPlugin = isIOS;
 
   const loadGallery = useCallback(async (options?: LoadOptions) => {
-    if (!isNative) {
+    // Only try to load gallery on iOS (Android doesn't support the plugin)
+    if (!supportsGalleryPlugin) {
+      if (isAndroid) {
+        // Android: Don't show error, just return empty (UI will show native picker button)
+        setIsLoading(false);
+        return [];
+      }
       setError('Galeria disponível apenas em dispositivos móveis');
       return [];
     }
@@ -139,5 +151,8 @@ export const useDeviceGallery = () => {
     error,
     hasMore,
     isNative,
+    isIOS,
+    isAndroid,
+    supportsGalleryPlugin,
   };
 };
