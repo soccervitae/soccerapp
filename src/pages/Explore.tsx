@@ -169,34 +169,25 @@ const Explore = () => {
                 <img
                   src={athlete.avatar}
                   alt={athlete.name}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
+                  className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
                 />
                 {athlete.verified && (
-                  <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-5 h-5 text-primary fill-primary" />
+                  <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground text-sm truncate">
                   {athlete.name}
                 </h3>
-                <p className="text-xs text-muted-foreground truncate">
-                  @{athlete.username}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-primary font-medium">
-                    {athlete.position}
-                  </span>
-                  <span className="text-xs text-muted-foreground">•</span>
-                  <span className="text-xs text-muted-foreground truncate">
-                    {athlete.team}
-                  </span>
-                </div>
+                <span className="text-xs text-primary font-medium">
+                  {athlete.position}
+                </span>
               </div>
               <Button
                 size="sm"
                 variant={followingUsers.has(athlete.username) ? "outline" : "default"}
                 onClick={(e) => handleFollowClick(e, athlete.username)}
-                className="shrink-0"
+                className="shrink-0 h-7 px-3 text-xs"
               >
                 {followingUsers.has(athlete.username) ? "Seguindo" : "Seguir"}
               </Button>
