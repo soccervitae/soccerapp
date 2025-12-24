@@ -442,8 +442,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </button>
         </div>
 
-        {/* Time */}
-        <p className="text-xs text-muted-foreground uppercase">{getTimeAgo()}</p>
       </div>
 
       {/* Edit Dialog */}
