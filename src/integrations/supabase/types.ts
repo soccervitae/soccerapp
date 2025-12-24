@@ -694,6 +694,7 @@ export type Database = {
           gender: string | null
           height: number | null
           id: string
+          is_private: boolean | null
           nationality: number | null
           nickname: string | null
           notify_new_device: boolean | null
@@ -703,6 +704,8 @@ export type Database = {
           position: string | null
           preferred_foot: string | null
           role: string | null
+          show_activity_status: boolean | null
+          show_profile_to: string | null
           team: string | null
           updated_at: string
           username: string
@@ -721,6 +724,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id: string
+          is_private?: boolean | null
           nationality?: number | null
           nickname?: string | null
           notify_new_device?: boolean | null
@@ -730,6 +734,8 @@ export type Database = {
           position?: string | null
           preferred_foot?: string | null
           role?: string | null
+          show_activity_status?: boolean | null
+          show_profile_to?: string | null
           team?: string | null
           updated_at?: string
           username: string
@@ -748,6 +754,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id?: string
+          is_private?: boolean | null
           nationality?: number | null
           nickname?: string | null
           notify_new_device?: boolean | null
@@ -757,6 +764,8 @@ export type Database = {
           position?: string | null
           preferred_foot?: string | null
           role?: string | null
+          show_activity_status?: boolean | null
+          show_profile_to?: string | null
           team?: string | null
           updated_at?: string
           username?: string

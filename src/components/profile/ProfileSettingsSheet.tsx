@@ -45,9 +45,9 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
-  const handleEditProfile = () => {
+  const handleNavigation = (path: string) => {
     onOpenChange(false);
-    navigate("/settings/profile");
+    navigate(path);
   };
 
   const handleComingSoon = (feature: string) => {
@@ -74,12 +74,12 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
             <SettingsItem
               icon="person"
               label="Editar perfil"
-              onClick={handleEditProfile}
+              onClick={() => handleNavigation("/settings/profile")}
             />
             <SettingsItem
               icon="lock"
               label="Privacidade"
-              onClick={() => handleComingSoon("Privacidade")}
+              onClick={() => handleNavigation("/settings/privacy")}
             />
             <SettingsItem
               icon="shield"
