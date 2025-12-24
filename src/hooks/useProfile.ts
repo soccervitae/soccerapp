@@ -297,3 +297,149 @@ export const useUserTaggedPosts = (userId?: string) => {
     enabled: !!targetUserId,
   });
 };
+
+// Fetch achievement types for dropdown
+export const useAchievementTypes = () => {
+  return useQuery({
+    queryKey: ["achievement-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("achievement_types")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+// Add championship
+export const useAddChampionship = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (championship: {
+      custom_championship_name: string;
+      year: number;
+      team_name?: string;
+      position_achieved?: string;
+      games_played?: number;
+      goals_scored?: number;
+    }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_championships")
+        .insert({
+          user_id: user.id,
+          ...championship,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-championships"] });
+      toast.success("Campeonato adicionado!");
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar campeonato");
+    },
+  });
+};
+
+// Delete championship
+export const useDeleteChampionship = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (championshipId: string) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("user_championships")
+        .delete()
+        .eq("id", championshipId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-championships"] });
+      toast.success("Campeonato removido!");
+    },
+    onError: () => {
+      toast.error("Erro ao remover campeonato");
+    },
+  });
+};
+
+// Add achievement
+export const useAddAchievement = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (achievement: {
+      achievement_type_id?: string;
+      custom_achievement_name?: string;
+      championship_name?: string;
+      team_name?: string;
+      year: number;
+      description?: string;
+    }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_achievements")
+        .insert({
+          user_id: user.id,
+          ...achievement,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      toast.success("Conquista adicionada!");
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar conquista");
+    },
+  });
+};
+
+// Delete achievement
+export const useDeleteAchievement = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (achievementId: string) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("user_achievements")
+        .delete()
+        .eq("id", achievementId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      toast.success("Conquista removida!");
+    },
+    onError: () => {
+      toast.error("Erro ao remover conquista");
+    },
+  });
+};

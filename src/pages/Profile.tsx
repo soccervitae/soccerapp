@@ -92,6 +92,7 @@ const Profile = () => {
             isChampionshipsLoading={championshipsLoading}
             isAchievementsLoading={achievementsLoading}
             isTaggedLoading={taggedLoading}
+            isOwnProfile={isOwnProfile}
           />
         </div>
       </div>

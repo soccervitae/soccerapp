@@ -48,6 +48,7 @@ interface PostsGridProps {
   isChampionshipsLoading?: boolean;
   isAchievementsLoading?: boolean;
   isTaggedLoading?: boolean;
+  isOwnProfile?: boolean;
 }
 
 type Tab = "posts" | "videos" | "fotos" | "campeonatos" | "conquistas" | "tagged";
@@ -70,6 +71,7 @@ export const PostsGrid = ({
   isChampionshipsLoading = false,
   isAchievementsLoading = false,
   isTaggedLoading = false,
+  isOwnProfile = false,
 }: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
@@ -213,7 +215,8 @@ export const PostsGrid = ({
           <div className="flex-[0_0_100%] min-w-0">
             <ChampionshipsTab 
               championships={championships} 
-              isLoading={isChampionshipsLoading} 
+              isLoading={isChampionshipsLoading}
+              isOwnProfile={isOwnProfile}
             />
           </div>
           
@@ -221,7 +224,8 @@ export const PostsGrid = ({
           <div className="flex-[0_0_100%] min-w-0">
             <AchievementsTab 
               achievements={achievements} 
-              isLoading={isAchievementsLoading} 
+              isLoading={isAchievementsLoading}
+              isOwnProfile={isOwnProfile}
             />
           </div>
           

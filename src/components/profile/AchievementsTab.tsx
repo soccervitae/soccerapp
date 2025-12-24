@@ -1,3 +1,17 @@
+import { useState } from "react";
+import { useDeleteAchievement } from "@/hooks/useProfile";
+import { AddAchievementSheet } from "./AddAchievementSheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 interface Achievement {
   id: string;
   year: number;
@@ -16,6 +30,7 @@ interface Achievement {
 interface AchievementsTabProps {
   achievements: Achievement[];
   isLoading?: boolean;
+  isOwnProfile?: boolean;
 }
 
 const getColorClasses = (color: string | null) => {
@@ -37,7 +52,17 @@ const getColorClasses = (color: string | null) => {
   }
 };
 
-export const AchievementsTab = ({ achievements, isLoading = false }: AchievementsTabProps) => {
+export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile = false }: AchievementsTabProps) => {
+  const [showAddSheet, setShowAddSheet] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteAchievement = useDeleteAchievement();
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    await deleteAchievement.mutateAsync(deleteId);
+    setDeleteId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3 px-1">
@@ -56,71 +81,116 @@ export const AchievementsTab = ({ achievements, isLoading = false }: Achievement
     );
   }
 
-  if (achievements.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">military_tech</span>
-        <p className="text-muted-foreground text-sm mt-2">Nenhuma conquista ainda</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-3 px-1 pb-8">
-      {achievements.map((achievement) => {
-        const achievementName = achievement.achievement_type?.name || achievement.custom_achievement_name || "Conquista";
-        const colorClasses = getColorClasses(achievement.achievement_type?.color);
-        
-        return (
-          <div 
-            key={achievement.id} 
-            className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors"
+    <>
+      <div className="space-y-3 px-1 pb-8">
+        {/* Add button for own profile */}
+        {isOwnProfile && (
+          <button
+            onClick={() => setShowAddSheet(true)}
+            className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
-            <div className="flex gap-3">
-              {/* Icon */}
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border ${colorClasses}`}>
-                <span className="material-symbols-outlined text-[24px]">
-                  {achievement.achievement_type?.icon || "emoji_events"}
-                </span>
-              </div>
-              
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-foreground truncate">{achievementName}</h3>
-                  {achievement.achievement_type?.category && (
-                    <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
-                      {achievement.achievement_type.category}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                  <span>{achievement.year}</span>
-                  {achievement.championship_name && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate">{achievement.championship_name}</span>
-                    </>
-                  )}
-                  {achievement.team_name && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate">{achievement.team_name}</span>
-                    </>
-                  )}
-                </div>
-                
-                {achievement.description && (
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                    {achievement.description}
-                  </p>
-                )}
-              </div>
-            </div>
+            <span className="material-symbols-outlined">add</span>
+            Adicionar Conquista
+          </button>
+        )}
+
+        {achievements.length === 0 && !isOwnProfile ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">military_tech</span>
+            <p className="text-muted-foreground text-sm mt-2">Nenhuma conquista ainda</p>
           </div>
-        );
-      })}
-    </div>
+        ) : (
+          achievements.map((achievement) => {
+            const achievementName = achievement.achievement_type?.name || achievement.custom_achievement_name || "Conquista";
+            const colorClasses = getColorClasses(achievement.achievement_type?.color);
+            
+            return (
+              <div 
+                key={achievement.id} 
+                className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors group"
+              >
+                <div className="flex gap-3">
+                  {/* Icon */}
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border ${colorClasses}`}>
+                    <span className="material-symbols-outlined text-[24px]">
+                      {achievement.achievement_type?.icon || "emoji_events"}
+                    </span>
+                  </div>
+                  
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground truncate">{achievementName}</h3>
+                      {achievement.achievement_type?.category && (
+                        <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+                          {achievement.achievement_type.category}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <span>{achievement.year}</span>
+                      {achievement.championship_name && (
+                        <>
+                          <span>•</span>
+                          <span className="truncate">{achievement.championship_name}</span>
+                        </>
+                      )}
+                      {achievement.team_name && (
+                        <>
+                          <span>•</span>
+                          <span className="truncate">{achievement.team_name}</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    {achievement.description && (
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                        {achievement.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Delete button */}
+                  {isOwnProfile && (
+                    <button
+                      onClick={() => setDeleteId(achievement.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-muted-foreground hover:text-destructive"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Add Sheet */}
+      <AddAchievementSheet open={showAddSheet} onOpenChange={setShowAddSheet} />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Conquista?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A conquista será removida permanentemente do seu perfil.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
