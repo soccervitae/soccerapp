@@ -84,7 +84,7 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
             <SettingsItem
               icon="shield"
               label="Segurança"
-              onClick={() => handleComingSoon("Segurança")}
+              onClick={() => handleNavigation("/settings/security")}
             />
             <SettingsItem
               icon="notifications"
