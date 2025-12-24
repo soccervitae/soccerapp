@@ -210,3 +210,90 @@ export const calculateAge = (birthDate: string | null): number | null => {
   }
   return age;
 };
+
+// Fetch user championships
+export const useUserChampionships = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+
+  return useQuery({
+    queryKey: ["user-championships", targetUserId],
+    queryFn: async () => {
+      if (!targetUserId) return [];
+
+      const { data, error } = await supabase
+        .from("user_championships")
+        .select(`
+          *,
+          championship:championships(name, logo_url)
+        `)
+        .eq("user_id", targetUserId)
+        .order("year", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!targetUserId,
+  });
+};
+
+// Fetch user achievements
+export const useUserAchievements = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+
+  return useQuery({
+    queryKey: ["user-achievements", targetUserId],
+    queryFn: async () => {
+      if (!targetUserId) return [];
+
+      const { data, error } = await supabase
+        .from("user_achievements")
+        .select(`
+          *,
+          achievement_type:achievement_types(name, icon, color, category)
+        `)
+        .eq("user_id", targetUserId)
+        .order("year", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!targetUserId,
+  });
+};
+
+// Fetch posts where user is tagged
+export const useUserTaggedPosts = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+
+  return useQuery({
+    queryKey: ["user-tagged-posts", targetUserId],
+    queryFn: async () => {
+      if (!targetUserId) return [];
+
+      const { data, error } = await supabase
+        .from("post_tags")
+        .select(`
+          id,
+          post:posts(id, media_url, media_type, content)
+        `)
+        .eq("user_id", targetUserId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      // Extract unique posts
+      const postsMap = new Map();
+      data.forEach(tag => {
+        if (tag.post && !postsMap.has(tag.post.id)) {
+          postsMap.set(tag.post.id, tag.post);
+        }
+      });
+      
+      return Array.from(postsMap.values());
+    },
+    enabled: !!targetUserId,
+  });
+};

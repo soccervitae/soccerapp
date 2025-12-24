@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import { ChampionshipsTab } from "./ChampionshipsTab";
+import { AchievementsTab } from "./AchievementsTab";
 
 interface Post {
   id: string;
@@ -7,28 +10,154 @@ interface Post {
   content: string;
 }
 
-interface PostsGridProps {
-  posts: Post[];
-  isLoading?: boolean;
+interface Championship {
+  id: string;
+  year: number;
+  team_name: string | null;
+  position_achieved: string | null;
+  games_played: number | null;
+  goals_scored: number | null;
+  custom_championship_name: string | null;
+  championship: {
+    name: string;
+    logo_url: string | null;
+  } | null;
 }
 
-type Tab = "posts" | "videos" | "tagged";
+interface Achievement {
+  id: string;
+  year: number;
+  team_name: string | null;
+  championship_name: string | null;
+  custom_achievement_name: string | null;
+  description: string | null;
+  achievement_type: {
+    name: string;
+    icon: string;
+    color: string | null;
+    category: string | null;
+  } | null;
+}
 
-export const PostsGrid = ({ posts, isLoading = false }: PostsGridProps) => {
+interface PostsGridProps {
+  posts: Post[];
+  taggedPosts?: Post[];
+  championships?: Championship[];
+  achievements?: Achievement[];
+  isLoading?: boolean;
+  isChampionshipsLoading?: boolean;
+  isAchievementsLoading?: boolean;
+  isTaggedLoading?: boolean;
+}
+
+type Tab = "posts" | "videos" | "fotos" | "campeonatos" | "conquistas" | "tagged";
+
+const tabs: { id: Tab; label: string; icon: string }[] = [
+  { id: "posts", label: "Posts", icon: "grid_view" },
+  { id: "videos", label: "Vídeos", icon: "movie" },
+  { id: "fotos", label: "Fotos", icon: "photo_camera" },
+  { id: "campeonatos", label: "Campeonatos", icon: "emoji_events" },
+  { id: "conquistas", label: "Conquistas", icon: "military_tech" },
+  { id: "tagged", label: "Marcado", icon: "assignment_ind" },
+];
+
+export const PostsGrid = ({ 
+  posts, 
+  taggedPosts = [],
+  championships = [],
+  achievements = [],
+  isLoading = false,
+  isChampionshipsLoading = false,
+  isAchievementsLoading = false,
+  isTaggedLoading = false,
+}: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
 
-  const filteredPosts = posts.filter(post => {
-    if (activeTab === "videos") return post.media_type === "video";
-    if (activeTab === "posts") return post.media_type !== "video";
-    return true;
-  });
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setActiveTab(tabs[index].id);
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (!emblaApi) return;
+    emblaApi.scrollTo(index);
+  }, [emblaApi]);
+
+  const handleTabClick = (tab: Tab, index: number) => {
+    setActiveTab(tab);
+    scrollTo(index);
+  };
+
+  const getFilteredPosts = (tab: Tab) => {
+    if (tab === "videos") return posts.filter(post => post.media_type === "video");
+    if (tab === "fotos") return posts.filter(post => post.media_type === "image");
+    if (tab === "posts") return posts;
+    if (tab === "tagged") return taggedPosts;
+    return [];
+  };
+
+  const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
+    if (filteredPosts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
+          <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">{emptyIcon}</span>
+          <p className="text-muted-foreground text-sm mt-2">{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-1 mb-8">
+        {filteredPosts.map((post) => (
+          <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden cursor-pointer">
+            {post.media_url ? (
+              post.media_type === "video" ? (
+                <>
+                  <video 
+                    src={post.media_url}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
+                    <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
+                  </div>
+                </>
+              ) : (
+                <img 
+                  src={post.media_url} 
+                  alt={post.content}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-2">
+                <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors" />
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
       <section>
-        <div className="flex border-b border-border mb-4">
-          {["posts", "videos", "tagged"].map((tab) => (
-            <div key={tab} className="flex-1 pb-3 flex items-center justify-center">
+        <div className="flex border-b border-border mb-4 overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => (
+            <div key={tab.id} className="flex-shrink-0 min-w-[80px] pb-3 flex items-center justify-center">
               <div className="w-16 h-4 bg-muted rounded animate-pulse" />
             </div>
           ))}
@@ -44,77 +173,72 @@ export const PostsGrid = ({ posts, isLoading = false }: PostsGridProps) => {
 
   return (
     <section>
-      {/* Tabs */}
-      <div className="flex border-b border-border mb-4 sticky top-[100px] bg-background z-20 pt-2">
-        <button 
-          onClick={() => setActiveTab("posts")}
-          className={`flex-1 pb-3 text-sm font-bold transition-colors relative ${
-            activeTab === "posts" ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[20px] align-bottom mr-1">grid_view</span>
-          Posts
-        </button>
-        <button 
-          onClick={() => setActiveTab("videos")}
-          className={`flex-1 pb-3 text-sm font-bold transition-colors relative ${
-            activeTab === "videos" ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[20px] align-bottom mr-1">movie</span>
-          Vídeos
-        </button>
-        <button 
-          onClick={() => setActiveTab("tagged")}
-          className={`flex-1 pb-3 text-sm font-bold transition-colors relative ${
-            activeTab === "tagged" ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[20px] align-bottom mr-1">assignment_ind</span>
-          Marcado
-        </button>
+      {/* Tabs - scrollable */}
+      <div className="flex border-b border-border mb-4 sticky top-[100px] bg-background z-20 pt-2 overflow-x-auto scrollbar-hide">
+        {tabs.map((tab, index) => (
+          <button 
+            key={tab.id}
+            onClick={() => handleTabClick(tab.id, index)}
+            className={`flex-shrink-0 min-w-[80px] px-3 pb-3 text-xs font-bold transition-colors relative whitespace-nowrap ${
+              activeTab === tab.id 
+                ? "text-foreground border-b-2 border-foreground" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px] align-bottom mr-1">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Grid */}
-      {filteredPosts.length > 0 ? (
-        <div className="grid grid-cols-3 gap-1 mb-8">
-          {filteredPosts.map((post) => (
-            <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden cursor-pointer">
-              {post.media_url ? (
-                post.media_type === "video" ? (
-                  <>
-                    <video 
-                      src={post.media_url}
-                      className="w-full h-full object-cover"
-                      muted
-                      playsInline
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
-                      <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
-                    </div>
-                  </>
-                ) : (
-                  <img 
-                    src={post.media_url} 
-                    alt={post.content}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                )
-              ) : (
-                <div className="w-full h-full flex items-center justify-center p-2">
-                  <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors" />
-            </div>
-          ))}
+      {/* Swipeable content */}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {/* Posts */}
+          <div className="flex-[0_0_100%] min-w-0">
+            {renderPostGrid(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library")}
+          </div>
+          
+          {/* Videos */}
+          <div className="flex-[0_0_100%] min-w-0">
+            {renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie")}
+          </div>
+          
+          {/* Fotos */}
+          <div className="flex-[0_0_100%] min-w-0">
+            {renderPostGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
+          </div>
+          
+          {/* Campeonatos */}
+          <div className="flex-[0_0_100%] min-w-0">
+            <ChampionshipsTab 
+              championships={championships} 
+              isLoading={isChampionshipsLoading} 
+            />
+          </div>
+          
+          {/* Conquistas */}
+          <div className="flex-[0_0_100%] min-w-0">
+            <AchievementsTab 
+              achievements={achievements} 
+              isLoading={isAchievementsLoading} 
+            />
+          </div>
+          
+          {/* Tagged */}
+          <div className="flex-[0_0_100%] min-w-0">
+            {isTaggedLoading ? (
+              <div className="grid grid-cols-3 gap-1 mb-8">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="aspect-square bg-muted animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              renderPostGrid(getFilteredPosts("tagged"), "Não marcado em nenhum post", "assignment_ind")
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12">
-          <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">photo_library</span>
-          <p className="text-muted-foreground text-sm mt-2">Nenhum post ainda</p>
-        </div>
-      )}
+      </div>
     </section>
   );
 };
