@@ -1,3 +1,17 @@
+import { useState } from "react";
+import { useDeleteChampionship } from "@/hooks/useProfile";
+import { AddChampionshipSheet } from "./AddChampionshipSheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 interface Championship {
   id: string;
   year: number;
@@ -15,9 +29,20 @@ interface Championship {
 interface ChampionshipsTabProps {
   championships: Championship[];
   isLoading?: boolean;
+  isOwnProfile?: boolean;
 }
 
-export const ChampionshipsTab = ({ championships, isLoading = false }: ChampionshipsTabProps) => {
+export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfile = false }: ChampionshipsTabProps) => {
+  const [showAddSheet, setShowAddSheet] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteChampionship = useDeleteChampionship();
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    await deleteChampionship.mutateAsync(deleteId);
+    setDeleteId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3 px-1">
@@ -36,78 +61,123 @@ export const ChampionshipsTab = ({ championships, isLoading = false }: Champions
     );
   }
 
-  if (championships.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">emoji_events</span>
-        <p className="text-muted-foreground text-sm mt-2">Nenhum campeonato ainda</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-3 px-1 pb-8">
-      {championships.map((champ) => {
-        const champName = champ.championship?.name || champ.custom_championship_name || "Campeonato";
-        
-        return (
-          <div 
-            key={champ.id} 
-            className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors"
+    <>
+      <div className="space-y-3 px-1 pb-8">
+        {/* Add button for own profile */}
+        {isOwnProfile && (
+          <button
+            onClick={() => setShowAddSheet(true)}
+            className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
-            <div className="flex gap-3">
-              {/* Logo */}
-              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                {champ.championship?.logo_url ? (
-                  <img 
-                    src={champ.championship.logo_url} 
-                    alt={champName}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <span className="material-symbols-outlined text-[24px] text-muted-foreground">emoji_events</span>
-                )}
-              </div>
-              
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground truncate">{champName}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{champ.year}</span>
-                  {champ.team_name && (
-                    <>
-                      <span>•</span>
-                      <span className="truncate">{champ.team_name}</span>
-                    </>
-                  )}
-                </div>
-                
-                {/* Stats */}
-                <div className="flex gap-4 mt-2">
-                  {champ.position_achieved && (
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="material-symbols-outlined text-[14px] text-primary">military_tech</span>
-                      <span className="text-foreground">{champ.position_achieved}</span>
-                    </div>
-                  )}
-                  {champ.games_played !== null && champ.games_played > 0 && (
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="material-symbols-outlined text-[14px] text-muted-foreground">sports_soccer</span>
-                      <span className="text-muted-foreground">{champ.games_played} jogos</span>
-                    </div>
-                  )}
-                  {champ.goals_scored !== null && champ.goals_scored > 0 && (
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="material-symbols-outlined text-[14px] text-muted-foreground">target</span>
-                      <span className="text-muted-foreground">{champ.goals_scored} gols</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <span className="material-symbols-outlined">add</span>
+            Adicionar Campeonato
+          </button>
+        )}
+
+        {championships.length === 0 && !isOwnProfile ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">emoji_events</span>
+            <p className="text-muted-foreground text-sm mt-2">Nenhum campeonato ainda</p>
           </div>
-        );
-      })}
-    </div>
+        ) : (
+          championships.map((champ) => {
+            const champName = champ.championship?.name || champ.custom_championship_name || "Campeonato";
+            
+            return (
+              <div 
+                key={champ.id} 
+                className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors group"
+              >
+                <div className="flex gap-3">
+                  {/* Logo */}
+                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {champ.championship?.logo_url ? (
+                      <img 
+                        src={champ.championship.logo_url} 
+                        alt={champName}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-[24px] text-muted-foreground">emoji_events</span>
+                    )}
+                  </div>
+                  
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground truncate">{champName}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{champ.year}</span>
+                      {champ.team_name && (
+                        <>
+                          <span>•</span>
+                          <span className="truncate">{champ.team_name}</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    {/* Stats */}
+                    <div className="flex gap-4 mt-2">
+                      {champ.position_achieved && (
+                        <div className="flex items-center gap-1 text-xs">
+                          <span className="material-symbols-outlined text-[14px] text-primary">military_tech</span>
+                          <span className="text-foreground">{champ.position_achieved}</span>
+                        </div>
+                      )}
+                      {champ.games_played !== null && champ.games_played > 0 && (
+                        <div className="flex items-center gap-1 text-xs">
+                          <span className="material-symbols-outlined text-[14px] text-muted-foreground">sports_soccer</span>
+                          <span className="text-muted-foreground">{champ.games_played} jogos</span>
+                        </div>
+                      )}
+                      {champ.goals_scored !== null && champ.goals_scored > 0 && (
+                        <div className="flex items-center gap-1 text-xs">
+                          <span className="material-symbols-outlined text-[14px] text-muted-foreground">target</span>
+                          <span className="text-muted-foreground">{champ.goals_scored} gols</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Delete button */}
+                  {isOwnProfile && (
+                    <button
+                      onClick={() => setDeleteId(champ.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-muted-foreground hover:text-destructive"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Add Sheet */}
+      <AddChampionshipSheet open={showAddSheet} onOpenChange={setShowAddSheet} />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Campeonato?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O campeonato será removido permanentemente do seu perfil.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
