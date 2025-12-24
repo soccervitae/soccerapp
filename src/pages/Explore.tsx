@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Search, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Athlete {
   name: string;
@@ -85,6 +86,7 @@ const Explore = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("Todos");
+  const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
 
   const filteredAthletes = athletes.filter((athlete) => {
     const matchesSearch =
@@ -101,6 +103,19 @@ const Explore = () => {
 
   const handleAthleteClick = (athlete: Athlete) => {
     navigate("/profile", { state: { athlete } });
+  };
+
+  const handleFollowClick = (e: React.MouseEvent, username: string) => {
+    e.stopPropagation();
+    setFollowingUsers((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(username)) {
+        newSet.delete(username);
+      } else {
+        newSet.add(username);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -177,6 +192,14 @@ const Explore = () => {
                   </span>
                 </div>
               </div>
+              <Button
+                size="sm"
+                variant={followingUsers.has(athlete.username) ? "outline" : "default"}
+                onClick={(e) => handleFollowClick(e, athlete.username)}
+                className="shrink-0"
+              >
+                {followingUsers.has(athlete.username) ? "Seguindo" : "Seguir"}
+              </Button>
             </button>
           ))}
         </div>
