@@ -70,14 +70,18 @@ export const ProfileInfo = ({
       </div>
 
       {/* Name and Position */}
-      <div className="text-center space-y-1">
+      <div className="text-center space-y-1.5">
         <h2 className="text-2xl font-bold text-foreground leading-tight">
           {profile.full_name || profile.username}
         </h2>
         <p className="text-muted-foreground font-medium text-sm">
           {profile.position && profile.team ? `${profile.position} | ${profile.team}` : profile.position || profile.team || `@${profile.username}`}
         </p>
-        {profile.bio && <p className="text-muted-foreground text-xs italic px-6 line-clamp-2">{profile.bio}</p>}
+        {profile.bio && (
+          <p className="text-muted-foreground/80 text-xs px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
+            {profile.bio}
+          </p>
+        )}
       </div>
 
       {/* Stats Row */}
