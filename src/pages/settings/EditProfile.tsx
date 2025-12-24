@@ -1,14 +1,15 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Camera, ArrowLeft, Loader2 } from "lucide-react";
+import { Camera, ArrowLeft, Loader2, Check, X } from "lucide-react";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -36,6 +37,61 @@ const EditProfile = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Check username availability
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameStatus("idle");
+      return;
+    }
+
+    // Don't check if it's the current user's username
+    if (profile && username === profile.username) {
+      setUsernameStatus("available");
+      return;
+    }
+
+    setUsernameStatus("checking");
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", username)
+      .maybeSingle();
+
+    if (error) {
+      setUsernameStatus("idle");
+      return;
+    }
+
+    setUsernameStatus(data ? "taken" : "available");
+  };
+
+  const handleUsernameChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (sanitized.length <= 20) {
+      setFormData({ ...formData, username: sanitized });
+
+      // Debounce the check
+      if (usernameCheckTimeout.current) {
+        clearTimeout(usernameCheckTimeout.current);
+      }
+      usernameCheckTimeout.current = setTimeout(() => {
+        checkUsernameAvailability(sanitized);
+      }, 500);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (usernameCheckTimeout.current) {
+        clearTimeout(usernameCheckTimeout.current);
+      }
+    };
+  }, []);
 
   // Initialize form when profile loads
   useState(() => {
@@ -227,22 +283,33 @@ const EditProfile = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="username">Nome de Usuário</Label>
-              <span className={`text-xs ${formData.username.length > 20 ? "text-destructive" : "text-muted-foreground"}`}>
-                {formData.username.length}/20
-              </span>
+              <div className="flex items-center gap-2">
+                {usernameStatus === "checking" && (
+                  <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                )}
+                {usernameStatus === "available" && (
+                  <span className="flex items-center gap-1 text-xs text-green-500">
+                    <Check className="w-3 h-3" /> Disponível
+                  </span>
+                )}
+                {usernameStatus === "taken" && (
+                  <span className="flex items-center gap-1 text-xs text-destructive">
+                    <X className="w-3 h-3" /> Indisponível
+                  </span>
+                )}
+                <span className={`text-xs ${formData.username.length > 20 ? "text-destructive" : "text-muted-foreground"}`}>
+                  {formData.username.length}/20
+                </span>
+              </div>
             </div>
             <Input
               id="username"
               value={formData.username}
-              onChange={(e) => {
-                const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
-                if (value.length <= 20) {
-                  setFormData({ ...formData, username: value });
-                }
-              }}
+              onChange={(e) => handleUsernameChange(e.target.value)}
               placeholder="usuario"
               required
               maxLength={20}
+              className={usernameStatus === "taken" ? "border-destructive focus-visible:ring-destructive" : ""}
             />
             <p className="text-xs text-muted-foreground">
               Apenas letras, números e underline (_)
@@ -345,7 +412,7 @@ const EditProfile = () => {
 
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
             className="w-full mt-6"
           >
             {isSubmitting ? (
