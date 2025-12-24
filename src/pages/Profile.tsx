@@ -4,7 +4,15 @@ import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { PostsGrid } from "@/components/profile/PostsGrid";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { useParams } from "react-router-dom";
-import { useProfile, useFollowStats, useUserPosts, useProfileView } from "@/hooks/useProfile";
+import { 
+  useProfile, 
+  useFollowStats, 
+  useUserPosts, 
+  useProfileView,
+  useUserChampionships,
+  useUserAchievements,
+  useUserTaggedPosts
+} from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
@@ -19,6 +27,9 @@ const Profile = () => {
   const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
   const { data: followStats, isLoading: statsLoading } = useFollowStats(targetUserId);
   const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId);
+  const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
+  const { data: achievements, isLoading: achievementsLoading } = useUserAchievements(targetUserId);
+  const { data: taggedPosts, isLoading: taggedLoading } = useUserTaggedPosts(targetUserId);
   const profileView = useProfileView();
 
   // Record profile view
@@ -72,7 +83,16 @@ const Profile = () => {
         />
         <div className="px-4 flex flex-col gap-6">
           <HighlightsSection />
-          <PostsGrid posts={posts || []} isLoading={postsLoading} />
+          <PostsGrid 
+            posts={posts || []} 
+            taggedPosts={taggedPosts || []}
+            championships={championships || []}
+            achievements={achievements || []}
+            isLoading={postsLoading} 
+            isChampionshipsLoading={championshipsLoading}
+            isAchievementsLoading={achievementsLoading}
+            isTaggedLoading={taggedLoading}
+          />
         </div>
       </div>
       
