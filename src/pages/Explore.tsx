@@ -141,37 +141,38 @@ const Explore = () => {
         </div>
       </div>
 
-      {/* Athletes Grid */}
+      {/* Athletes List */}
       <div className="px-4 py-2">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-2">
           {filteredAthletes.map((athlete) => (
             <button
               key={athlete.username}
               onClick={() => handleAthleteClick(athlete)}
-              className="bg-card border border-border rounded-2xl p-4 text-left hover:bg-muted/50 hover:border-primary/30 transition-all group"
+              className="bg-card border border-border rounded-xl p-3 text-left hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="relative mb-3">
-                  <img
-                    src={athlete.avatar}
-                    alt={athlete.name}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
-                  />
-                  {athlete.verified && (
-                    <CheckCircle className="absolute -bottom-1 -right-1 w-6 h-6 text-primary fill-primary" />
-                  )}
-                </div>
-                <h3 className="font-semibold text-foreground text-sm truncate w-full">
+              <div className="relative shrink-0">
+                <img
+                  src={athlete.avatar}
+                  alt={athlete.name}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
+                />
+                {athlete.verified && (
+                  <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-5 h-5 text-primary fill-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-sm truncate">
                   {athlete.name}
                 </h3>
-                <p className="text-xs text-muted-foreground truncate w-full">
+                <p className="text-xs text-muted-foreground truncate">
                   @{athlete.username}
                 </p>
-                <div className="mt-2 flex flex-col gap-1">
+                <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-primary font-medium">
                     {athlete.position}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate w-full">
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground truncate">
                     {athlete.team}
                   </span>
                 </div>
