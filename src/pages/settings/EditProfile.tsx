@@ -225,14 +225,28 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Nome de Usuário</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="username">Nome de Usuário</Label>
+              <span className={`text-xs ${formData.username.length > 20 ? "text-destructive" : "text-muted-foreground"}`}>
+                {formData.username.length}/20
+              </span>
+            </div>
             <Input
               id="username"
               value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              placeholder="@usuario"
+              onChange={(e) => {
+                const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                if (value.length <= 20) {
+                  setFormData({ ...formData, username: value });
+                }
+              }}
+              placeholder="usuario"
               required
+              maxLength={20}
             />
+            <p className="text-xs text-muted-foreground">
+              Apenas letras, números e underline (_)
+            </p>
           </div>
 
           <div className="space-y-2">
