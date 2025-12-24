@@ -64,21 +64,21 @@ export const CreateMenuSheet = ({
           <SheetTitle className="text-center">O que você quer criar?</SheetTitle>
         </SheetHeader>
 
-        <div className="grid grid-cols-2 gap-3 px-2">
+        <div className="flex flex-col gap-2 px-2">
           {menuOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-muted/50 hover:bg-muted transition-colors active:scale-95"
+              className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors active:scale-[0.98]"
             >
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${option.colorClass}`}>
-                <span className="material-symbols-outlined text-[28px]">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${option.colorClass}`}>
+                <span className="material-symbols-outlined text-[24px]">
                   {option.icon}
                 </span>
               </div>
-              <div className="text-center">
+              <div className="text-left">
                 <p className="font-medium text-foreground">{option.label}</p>
-                <p className="text-xs text-muted-foreground">{option.description}</p>
+                <p className="text-sm text-muted-foreground">{option.description}</p>
               </div>
             </button>
           ))}
