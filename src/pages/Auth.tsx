@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -293,12 +293,12 @@ const LoginForm = () => {
           </button>
         </div>
         <div className="text-right">
-          <button
-            type="button"
+          <Link
+            to="/forgot-password"
             className="text-sm text-primary hover:underline"
           >
             Esqueceu a senha?
-          </button>
+          </Link>
         </div>
       </div>
 
