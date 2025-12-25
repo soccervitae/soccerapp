@@ -1,4 +1,14 @@
 project_id = "wdgpmpgdlauiawbtbxmn"
 
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
 [functions.send-2fa-code]
 verify_jwt = false
+
+[functions.send-new-device-notification]
+verify_jwt = true
