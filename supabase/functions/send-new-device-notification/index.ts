@@ -154,7 +154,15 @@ const handler = async (req: Request): Promise<Response> => {
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json();
       console.error("Error sending email:", errorData);
-      throw new Error("Failed to send email");
+      // Don't throw - return success with warning so login isn't blocked
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: "Email notification failed but login allowed",
+          warning: "Resend domain not verified - emails only work for account owner"
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     console.log("New device notification email sent successfully");
