@@ -3,6 +3,7 @@ import { ProfileInfo } from "@/components/profile/ProfileInfo";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { PostsGrid } from "@/components/profile/PostsGrid";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
+import GuestBanner from "@/components/common/GuestBanner";
 import { useParams } from "react-router-dom";
 import { 
   useProfile, 
@@ -103,7 +104,11 @@ const Profile = () => {
         </div>
       </div>
       
-      <BottomNavigation activeTab="profile" />
+      {user ? (
+        <BottomNavigation activeTab="profile" />
+      ) : (
+        <GuestBanner />
+      )}
     </main>
   );
 };

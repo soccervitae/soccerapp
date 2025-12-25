@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
+import GuestBanner from "@/components/common/GuestBanner";
 import { Search, CheckCircle, Loader2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -174,7 +175,11 @@ const Explore = () => {
         </div>
       </div>
 
-      <BottomNavigation activeTab="search" />
+      {user ? (
+        <BottomNavigation activeTab="search" />
+      ) : (
+        <GuestBanner />
+      )}
     </div>
   );
 };
