@@ -39,7 +39,7 @@ const AnimatedRoutes = () => {
         <Route path="/followers" element={<ProtectedRoute><PageTransition><FollowList /></PageTransition></ProtectedRoute>} />
         <Route path="/:username" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/:username/followers" element={<PageTransition><FollowList /></PageTransition>} />
-        <Route path="/explore" element={<ProtectedRoute><PageTransition><Explore /></PageTransition></ProtectedRoute>} />
+        <Route path="/explore" element={<PageTransition><Explore /></PageTransition>} />
         <Route path="/settings/profile" element={<ProtectedRoute><PageTransition><EditProfile /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/privacy" element={<ProtectedRoute><PageTransition><Privacy /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/security" element={<ProtectedRoute><PageTransition><Security /></PageTransition></ProtectedRoute>} />
