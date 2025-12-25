@@ -73,7 +73,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
                     className="w-9 h-9 rounded-full object-cover flex-shrink-0 cursor-pointer"
                     onClick={() => {
                       onOpenChange(false);
-                      navigate(`/@${c.profile?.username}`);
+                      navigate(`/${c.profile?.username}`);
                     }}
                   />
                   <div className="flex-1 min-w-0">
@@ -82,7 +82,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
                         className="font-semibold text-sm text-foreground cursor-pointer hover:underline"
                         onClick={() => {
                           onOpenChange(false);
-                          navigate(`/@${c.profile?.username}`);
+                          navigate(`/${c.profile?.username}`);
                         }}
                       >
                         {c.profile?.username}

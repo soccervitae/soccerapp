@@ -31,7 +31,7 @@ const FollowList = () => {
   const { data: following, isLoading: loadingFollowing } = useFollowing(userId);
 
   const handleUserClick = (userUsername: string) => {
-    navigate(`/@${userUsername}`);
+    navigate(`/${userUsername}`);
   };
 
   const renderUserList = (users: typeof followers, loading: boolean) => {

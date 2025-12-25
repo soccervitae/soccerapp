@@ -34,7 +34,7 @@ const Explore = () => {
   const isLoading = isSearchActive ? isSearchLoading : isPopularLoading;
 
   const handleProfileClick = (username: string) => {
-    navigate(`/@${username}`);
+    navigate(`/${username}`);
   };
 
   const handleFollowClick = (e: React.MouseEvent, userId: string, isFollowing: boolean) => {

@@ -28,7 +28,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 
-  const profileUrl = `${window.location.origin}/@${username}`;
+  const profileUrl = `${window.location.origin}/${username}`;
 
   const handleShareProfile = async () => {
     try {

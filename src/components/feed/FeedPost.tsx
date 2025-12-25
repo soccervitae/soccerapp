@@ -101,7 +101,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const isCarousel = post.media_type === "carousel" || mediaUrls.length > 1;
 
   const handleProfileClick = () => {
-    navigate(`/@${post.profile.username}`);
+    navigate(`/${post.profile.username}`);
   };
 
   const handleLike = () => {
@@ -306,7 +306,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                         .map((tag) => (
                           <button
                             key={tag.id}
-                            onClick={() => navigate(`/@${tag.profile.username}`)}
+                            onClick={() => navigate(`/${tag.profile.username}`)}
                             className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10"
                             style={{
                               left: `${tag.x_position}%`,
@@ -356,7 +356,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                 .map((tag) => (
                   <button
                     key={tag.id}
-                    onClick={() => navigate(`/@${tag.profile.username}`)}
+                    onClick={() => navigate(`/${tag.profile.username}`)}
                     className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10"
                     style={{
                       left: `${tag.x_position}%`,
