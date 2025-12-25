@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfileSettingsSheet } from "./ProfileSettingsSheet";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ProfileHeaderProps {
   username: string;
@@ -17,15 +25,16 @@ interface ProfileHeaderProps {
 export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderProps) => {
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const profileUrl = `${window.location.origin}/@${username}`;
 
   const handleShareProfile = async () => {
-    const profileUrl = `${window.location.origin}/@${username}`;
-    
     try {
       await navigator.clipboard.writeText(profileUrl);
       toast.success("Link do perfil copiado!");
     } catch {
-      // Fallback for older browsers
       const textArea = document.createElement("textarea");
       textArea.value = profileUrl;
       document.body.appendChild(textArea);
@@ -37,8 +46,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
   };
 
   const handleNativeShare = async () => {
-    const profileUrl = `${window.location.origin}/@${username}`;
-    
     if (navigator.share) {
       try {
         await navigator.share({
@@ -46,7 +53,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
           url: profileUrl,
         });
       } catch (err) {
-        // User cancelled or error
         if ((err as Error).name !== "AbortError") {
           handleShareProfile();
         }
@@ -54,6 +60,31 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
     } else {
       handleShareProfile();
     }
+  };
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      const pngUrl = canvas.toDataURL("image/png");
+      
+      const link = document.createElement("a");
+      link.download = `qrcode-${username}.png`;
+      link.href = pngUrl;
+      link.click();
+      toast.success("QR Code salvo!");
+    };
+
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   return (
@@ -78,6 +109,10 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
                 <span className="material-symbols-outlined text-[18px] mr-2">link</span>
                 Copiar link
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
+                <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
+                QR Code
+              </DropdownMenuItem>
               {typeof navigator.share === "function" && (
                 <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
                   <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
@@ -100,6 +135,48 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
       {isOwnProfile && (
         <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
       )}
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-center">QR Code do Perfil</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div 
+              ref={qrRef}
+              className="bg-white p-4 rounded-xl"
+            >
+              <QRCodeSVG 
+                value={profileUrl}
+                size={200}
+                level="H"
+                includeMargin={false}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              @{username}
+            </p>
+            <div className="flex gap-2 w-full">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={handleShareProfile}
+              >
+                <span className="material-symbols-outlined text-[18px] mr-2">link</span>
+                Copiar
+              </Button>
+              <Button 
+                className="flex-1"
+                onClick={handleDownloadQR}
+              >
+                <span className="material-symbols-outlined text-[18px] mr-2">download</span>
+                Salvar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
