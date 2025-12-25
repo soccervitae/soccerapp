@@ -707,6 +707,7 @@ export type Database = {
           show_activity_status: boolean | null
           show_profile_to: string | null
           team: string | null
+          two_factor_enabled: boolean | null
           updated_at: string
           username: string
           weight: number | null
@@ -737,6 +738,7 @@ export type Database = {
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null
+          two_factor_enabled?: boolean | null
           updated_at?: string
           username: string
           weight?: number | null
@@ -767,6 +769,7 @@ export type Database = {
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null
+          two_factor_enabled?: boolean | null
           updated_at?: string
           username?: string
           weight?: number | null
