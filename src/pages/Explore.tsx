@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
-import { Search, CheckCircle, Loader2 } from "lucide-react";
+import { Search, CheckCircle, Loader2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSearchProfiles, useFollowingIds } from "@/hooks/useSearchProfiles";
+import { useSearchProfiles, useFollowingIds, usePopularProfiles } from "@/hooks/useSearchProfiles";
 import { useFollowUser } from "@/hooks/useProfile";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,14 +18,20 @@ const Explore = () => {
   const [selectedPosition, setSelectedPosition] = useState("Todos");
 
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
+  const isSearchActive = debouncedQuery.trim().length > 0 || selectedPosition !== "Todos";
 
-  const { data: profiles, isLoading } = useSearchProfiles(
+  const { data: searchResults, isLoading: isSearchLoading } = useSearchProfiles(
     { query: debouncedQuery, position: selectedPosition },
     user?.id
   );
 
+  const { data: popularProfiles, isLoading: isPopularLoading } = usePopularProfiles(user?.id);
+
   const { data: followingIds } = useFollowingIds(user?.id);
   const { mutate: toggleFollow, isPending: isFollowPending } = useFollowUser();
+
+  const profiles = isSearchActive ? searchResults : popularProfiles;
+  const isLoading = isSearchActive ? isSearchLoading : isPopularLoading;
 
   const handleProfileClick = (username: string) => {
     navigate(`/@${username}`);
@@ -77,6 +83,14 @@ const Explore = () => {
           ))}
         </div>
       </div>
+
+      {/* Section Title */}
+      {!isSearchActive && (
+        <div className="px-4 pt-2 pb-1 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">Sugestões para você</h2>
+        </div>
+      )}
 
       {/* Profiles List */}
       <div className="px-4 py-2">

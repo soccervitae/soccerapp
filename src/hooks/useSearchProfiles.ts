@@ -14,6 +14,7 @@ export interface SearchProfile {
   position: string | null;
   team: string | null;
   conta_verificada: boolean;
+  followers_count?: number;
 }
 
 export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string) => {
@@ -45,6 +46,52 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
       const { data, error } = await query.limit(50);
       if (error) throw error;
       return (data as SearchProfile[]) || [];
+    },
+  });
+};
+
+export const usePopularProfiles = (currentUserId?: string) => {
+  return useQuery({
+    queryKey: ["popular-profiles", currentUserId],
+    queryFn: async () => {
+      // Buscar perfis verificados primeiro
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url, position, team, conta_verificada")
+        .neq("id", currentUserId || "")
+        .order("conta_verificada", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      if (!profiles || profiles.length === 0) return [];
+
+      // Buscar contagem de seguidores para cada perfil
+      const profileIds = profiles.map(p => p.id);
+      const { data: followCounts } = await supabase
+        .from("follows")
+        .select("following_id")
+        .in("following_id", profileIds);
+
+      // Contar seguidores por perfil
+      const followerCountMap = new Map<string, number>();
+      followCounts?.forEach(f => {
+        const count = followerCountMap.get(f.following_id) || 0;
+        followerCountMap.set(f.following_id, count + 1);
+      });
+
+      // Adicionar contagem e ordenar por popularidade
+      const profilesWithCount = profiles.map(p => ({
+        ...p,
+        followers_count: followerCountMap.get(p.id) || 0,
+      }));
+
+      // Ordenar: verificados primeiro, depois por seguidores
+      return profilesWithCount.sort((a, b) => {
+        if (a.conta_verificada !== b.conta_verificada) {
+          return a.conta_verificada ? -1 : 1;
+        }
+        return b.followers_count - a.followers_count;
+      }) as SearchProfile[];
     },
   });
 };
