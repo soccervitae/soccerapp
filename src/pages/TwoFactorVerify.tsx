@@ -4,6 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import TwoFactorInput from "@/components/auth/TwoFactorInput";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { trustCurrentDevice } from "@/services/deviceService";
 
 interface LocationState {
   email: string;
@@ -17,6 +20,7 @@ const TwoFactorVerify = () => {
   const { toast } = useToast();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
 
   const state = location.state as LocationState | null;
 
@@ -71,6 +75,11 @@ const TwoFactorVerify = () => {
         .from("profiles")
         .update({ codigo: null, codigo_expira_em: null })
         .eq("id", state.userId);
+
+      // If remember device is checked, trust the device for 30 days
+      if (rememberDevice) {
+        await trustCurrentDevice(state.userId);
+      }
 
       toast({
         title: "Verificação concluída!",
@@ -152,6 +161,24 @@ const TwoFactorVerify = () => {
             isResending={isResending}
             maskedEmail={state.maskedEmail}
           />
+
+          {/* Remember device checkbox */}
+          <div className="flex items-center gap-2 mt-6 p-4 bg-muted/50 rounded-lg">
+            <Checkbox
+              id="rememberDevice"
+              checked={rememberDevice}
+              onCheckedChange={(checked) => setRememberDevice(checked === true)}
+            />
+            <Label 
+              htmlFor="rememberDevice" 
+              className="text-sm cursor-pointer flex-1"
+            >
+              Lembrar este dispositivo por 30 dias
+            </Label>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Ao marcar esta opção, você não precisará verificar o código neste dispositivo por 30 dias.
+          </p>
 
           <div className="mt-8 text-center">
             <Link
