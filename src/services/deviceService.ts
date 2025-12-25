@@ -1,8 +1,32 @@
 import { supabase } from "@/integrations/supabase/client";
 import { generateDeviceFingerprint } from "@/hooks/useDeviceFingerprint";
 
+// Send notification email for new device
+const sendNewDeviceNotification = async (
+  userId: string,
+  email: string,
+  deviceInfo: { deviceName: string; browser: string; os: string; deviceType: string }
+) => {
+  try {
+    await supabase.functions.invoke("send-new-device-notification", {
+      body: {
+        user_id: userId,
+        email: email,
+        device_name: deviceInfo.deviceName,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        device_type: deviceInfo.deviceType,
+      },
+    });
+    console.log("New device notification sent");
+  } catch (error) {
+    console.error("Error sending new device notification:", error);
+    // Don't throw - notification failure shouldn't block login
+  }
+};
+
 // Register or update device on login
-export const registerDevice = async (userId: string): Promise<string | null> => {
+export const registerDevice = async (userId: string, userEmail?: string): Promise<string | null> => {
   try {
     const deviceInfo = await generateDeviceFingerprint();
     
@@ -48,6 +72,11 @@ export const registerDevice = async (userId: string): Promise<string | null> => 
     if (insertError) {
       console.error("Error registering device:", insertError);
       return null;
+    }
+
+    // Send notification email for new device (async, don't wait)
+    if (userEmail) {
+      sendNewDeviceNotification(userId, userEmail, deviceInfo);
     }
     
     return newDevice?.id || null;

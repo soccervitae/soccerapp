@@ -40,8 +40,8 @@ const Login = () => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-      // Register device automatically
-      await registerDevice(user.id);
+      // Register device automatically (pass email for new device notification)
+      await registerDevice(user.id, email);
 
       // Check if user has 2FA enabled
       const { data: profile } = await supabase
