@@ -1142,6 +1142,7 @@ export type Database = {
           last_location: string | null
           last_used_at: string
           os: string | null
+          trusted_until: string | null
           user_agent: string | null
           user_id: string
         }
@@ -1158,6 +1159,7 @@ export type Database = {
           last_location?: string | null
           last_used_at?: string
           os?: string | null
+          trusted_until?: string | null
           user_agent?: string | null
           user_id: string
         }
@@ -1174,6 +1176,7 @@ export type Database = {
           last_location?: string | null
           last_used_at?: string
           os?: string | null
+          trusted_until?: string | null
           user_agent?: string | null
           user_id?: string
         }

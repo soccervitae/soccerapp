@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import TwoFactorInput from "@/components/auth/TwoFactorInput";
+import { getCurrentDeviceFingerprint, trustCurrentDevice } from "@/services/deviceService";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ interface UserDevice {
   os: string | null;
   last_used_at: string;
   is_trusted: boolean | null;
+  trusted_until: string | null;
   device_fingerprint: string;
 }
 
@@ -68,6 +70,18 @@ const Security = () => {
   const [isVerifying2FA, setIsVerifying2FA] = useState(false);
   const [isResending2FA, setIsResending2FA] = useState(false);
   const [maskedEmail, setMaskedEmail] = useState("");
+
+  // Current device fingerprint
+  const [currentFingerprint, setCurrentFingerprint] = useState<string | null>(null);
+
+  // Load current device fingerprint
+  useEffect(() => {
+    const loadFingerprint = async () => {
+      const fingerprint = await getCurrentDeviceFingerprint();
+      setCurrentFingerprint(fingerprint);
+    };
+    loadFingerprint();
+  }, []);
 
   // Fetch user profile for security settings
   const { data: profile } = useQuery({
@@ -162,6 +176,22 @@ const Security = () => {
     },
     onError: () => {
       toast({ variant: "destructive", title: "Erro ao remover dispositivo" });
+    },
+  });
+
+  // Renew trust mutation
+  const renewDeviceTrust = useMutation({
+    mutationFn: async (deviceId: string) => {
+      if (!user?.id) throw new Error("User not found");
+      const success = await trustCurrentDevice(user.id);
+      if (!success) throw new Error("Failed to renew trust");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-devices"] });
+      toast({ title: "Confiança renovada por mais 30 dias" });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "Erro ao renovar confiança" });
     },
   });
 
@@ -509,57 +539,94 @@ const Security = () => {
             </div>
           ) : devices && devices.length > 0 ? (
             <div className="space-y-3">
-              {devices.map((device) => (
-                <div
-                  key={device.id}
-                  className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg"
-                >
-                  <div className="text-muted-foreground">
-                    {getDeviceIcon(device.device_type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm truncate">
-                        {getDeviceDisplayName(device)}
+              {devices.map((device) => {
+                const isCurrentDevice = device.device_fingerprint === currentFingerprint;
+                const trustExpired = device.trusted_until && new Date(device.trusted_until) < new Date();
+                const isTrustedAndValid = device.is_trusted && !trustExpired;
+                
+                return (
+                  <div
+                    key={device.id}
+                    className={`flex items-start gap-3 p-4 rounded-lg ${
+                      isCurrentDevice ? "bg-primary/5 border border-primary/20" : "bg-muted/50"
+                    }`}
+                  >
+                    <div className="text-muted-foreground">
+                      {getDeviceIcon(device.device_type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-sm truncate">
+                          {getDeviceDisplayName(device)}
+                        </p>
+                        {isCurrentDevice && (
+                          <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                            Este dispositivo
+                          </span>
+                        )}
+                        {isTrustedAndValid && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                            Confiável
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Última atividade:{" "}
+                        {formatDistanceToNow(new Date(device.last_used_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
                       </p>
-                      {device.is_trusted && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                          Confiável
-                        </span>
+                      {device.is_trusted && device.trusted_until && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {trustExpired ? (
+                            <span className="text-destructive">Confiança expirada</span>
+                          ) : (
+                            <>Confiança expira em {format(new Date(device.trusted_until), "dd/MM/yyyy", { locale: ptBR })}</>
+                          )}
+                        </p>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Última atividade:{" "}
-                      {formatDistanceToNow(new Date(device.last_used_at), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })}
-                    </p>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {isCurrentDevice && device.is_trusted && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => renewDeviceTrust.mutate(device.id)}
+                          disabled={renewDeviceTrust.isPending}
+                          title="Renovar confiança por 30 dias"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${renewDeviceTrust.isPending ? "animate-spin" : ""}`} />
+                        </Button>
+                      )}
+                      {!isCurrentDevice && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            toggleDeviceTrust.mutate({
+                              deviceId: device.id,
+                              isTrusted: !device.is_trusted,
+                            })
+                          }
+                        >
+                          {device.is_trusted ? "Desconfiar" : "Confiar"}
+                        </Button>
+                      )}
+                      {!isCurrentDevice && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeviceToRemove(device.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        toggleDeviceTrust.mutate({
-                          deviceId: device.id,
-                          isTrusted: !device.is_trusted,
-                        })
-                      }
-                    >
-                      {device.is_trusted ? "Desconfiar" : "Confiar"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => setDeviceToRemove(device.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">

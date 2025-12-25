@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,10 +36,14 @@ const Login = () => {
       return;
     }
 
-    // Check if user has 2FA enabled
+    // Get user after successful login
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
+      // Register device automatically
+      await registerDevice(user.id);
+
+      // Check if user has 2FA enabled
       const { data: profile } = await supabase
         .from("profiles")
         .select("two_factor_enabled")
@@ -46,7 +51,21 @@ const Login = () => {
         .single();
 
       if (profile?.two_factor_enabled) {
-        // Send 2FA code
+        // Check if current device is trusted
+        const trusted = await isDeviceTrusted(user.id);
+        
+        if (trusted) {
+          // Device is trusted, skip 2FA
+          toast({
+            title: "Bem-vindo de volta!",
+            description: "Login realizado com sucesso.",
+          });
+          navigate("/");
+          setLoading(false);
+          return;
+        }
+
+        // Device not trusted, send 2FA code
         const { data, error: sendError } = await supabase.functions.invoke("send-2fa-code", {
           body: {
             email: email,
@@ -61,7 +80,6 @@ const Login = () => {
             title: "Erro ao enviar código",
             description: "Não foi possível enviar o código de verificação.",
           });
-          // Sign out since 2FA is required but failed
           await supabase.auth.signOut();
           setLoading(false);
           return;
