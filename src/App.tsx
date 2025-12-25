@@ -35,6 +35,7 @@ const AnimatedRoutes = () => {
         <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
         <Route path="/" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+        <Route path="/@:username" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/explore" element={<ProtectedRoute><PageTransition><Explore /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/profile" element={<ProtectedRoute><PageTransition><EditProfile /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/privacy" element={<ProtectedRoute><PageTransition><Privacy /></PageTransition></ProtectedRoute>} />
