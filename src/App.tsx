@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
+import FollowList from "./pages/FollowList";
 import Explore from "./pages/Explore";
 import Auth from "./pages/Auth";
 import EditProfile from "./pages/settings/EditProfile";
@@ -35,7 +36,9 @@ const AnimatedRoutes = () => {
         <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
         <Route path="/" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+        <Route path="/followers" element={<ProtectedRoute><PageTransition><FollowList /></PageTransition></ProtectedRoute>} />
         <Route path="/@:username" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/@:username/followers" element={<PageTransition><FollowList /></PageTransition>} />
         <Route path="/explore" element={<ProtectedRoute><PageTransition><Explore /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/profile" element={<ProtectedRoute><PageTransition><EditProfile /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/privacy" element={<ProtectedRoute><PageTransition><Privacy /></PageTransition></ProtectedRoute>} />

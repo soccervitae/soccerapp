@@ -86,14 +86,20 @@ export const ProfileInfo = ({
 
       {/* Stats Row */}
       {followStats && <div className="flex items-center gap-8 py-2">
-          <div className="text-center">
+          <button 
+            onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/@${profile.username}/followers?tab=followers`)}
+            className="text-center hover:opacity-70 transition-opacity"
+          >
             <p className="text-foreground font-bold">{followStats.followers}</p>
             <p className="text-muted-foreground text-xs">Torcedores</p>
-          </div>
-          <div className="text-center">
+          </button>
+          <button 
+            onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/@${profile.username}/followers?tab=following`)}
+            className="text-center hover:opacity-70 transition-opacity"
+          >
             <p className="text-foreground font-bold">{followStats.following}</p>
             <p className="text-muted-foreground text-xs">Torcendo</p>
-          </div>
+          </button>
         </div>}
 
       {/* Physical Stats */}
