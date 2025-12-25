@@ -6,6 +6,7 @@ import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { useParams } from "react-router-dom";
 import { 
   useProfile, 
+  useProfileByUsername,
   useFollowStats, 
   useUserPosts, 
   useProfileView,
@@ -18,13 +19,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 
 const Profile = () => {
-  const { userId } = useParams<{ userId?: string }>();
+  const { username } = useParams<{ username?: string }>();
   const { user } = useAuth();
   
-  // If no userId in params, show current user's profile
-  const targetUserId = userId || user?.id;
+  // If username in URL, fetch by username; otherwise show current user's profile
+  const { data: profileByUsername, isLoading: usernameLoading } = useProfileByUsername(username || "");
+  const { data: profileById, isLoading: idLoading } = useProfile(!username ? user?.id : undefined);
   
-  const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
+  // Use the appropriate profile based on route
+  const profile = username ? profileByUsername : profileById;
+  const profileLoading = username ? usernameLoading : idLoading;
+  const targetUserId = profile?.id;
+  
   const { data: followStats, isLoading: statsLoading } = useFollowStats(targetUserId);
   const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId);
   const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
