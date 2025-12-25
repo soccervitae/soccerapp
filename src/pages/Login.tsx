@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,13 +31,61 @@ const Login = () => {
           ? "Email ou senha incorretos" 
           : error.message,
       });
-    } else {
-      toast({
-        title: "Bem-vindo de volta!",
-        description: "Login realizado com sucesso.",
-      });
-      navigate("/");
+      setLoading(false);
+      return;
     }
+
+    // Check if user has 2FA enabled
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("two_factor_enabled")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.two_factor_enabled) {
+        // Send 2FA code
+        const { data, error: sendError } = await supabase.functions.invoke("send-2fa-code", {
+          body: {
+            email: email,
+            user_id: user.id,
+          },
+        });
+
+        if (sendError) {
+          console.error("Error sending 2FA code:", sendError);
+          toast({
+            variant: "destructive",
+            title: "Erro ao enviar código",
+            description: "Não foi possível enviar o código de verificação.",
+          });
+          // Sign out since 2FA is required but failed
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        // Redirect to 2FA verification page
+        navigate("/two-factor-verify", {
+          state: {
+            email: email,
+            userId: user.id,
+            maskedEmail: data?.masked_email || email,
+          },
+          replace: true,
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
+    toast({
+      title: "Bem-vindo de volta!",
+      description: "Login realizado com sucesso.",
+    });
+    navigate("/");
 
     setLoading(false);
   };

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,8 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import TwoFactorInput from "@/components/auth/TwoFactorInput";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UserDevice {
   id: string;
@@ -54,6 +62,13 @@ const Security = () => {
   // Device to remove
   const [deviceToRemove, setDeviceToRemove] = useState<string | null>(null);
 
+  // 2FA state
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [showEnableTwoFactorDialog, setShowEnableTwoFactorDialog] = useState(false);
+  const [isVerifying2FA, setIsVerifying2FA] = useState(false);
+  const [isResending2FA, setIsResending2FA] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState("");
+
   // Fetch user profile for security settings
   const { data: profile } = useQuery({
     queryKey: ["profile-security", user?.id],
@@ -61,7 +76,7 @@ const Security = () => {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("notify_new_device, notify_security_events")
+        .select("notify_new_device, notify_security_events, two_factor_enabled")
         .eq("id", user.id)
         .single();
       if (error) throw error;
@@ -70,13 +85,14 @@ const Security = () => {
     enabled: !!user?.id,
   });
 
-  // Update security settings when profile loads
-  useState(() => {
+  // Update state when profile loads
+  useEffect(() => {
     if (profile) {
       setNotifyNewDevice(profile.notify_new_device ?? true);
       setNotifySecurityEvents(profile.notify_security_events ?? true);
+      setTwoFactorEnabled(profile.two_factor_enabled ?? false);
     }
-  });
+  }, [profile]);
 
   // Fetch user devices
   const { data: devices, isLoading: loadingDevices } = useQuery({
@@ -204,6 +220,147 @@ const Security = () => {
     updateSecuritySettings.mutate({ notify_security_events: checked });
   };
 
+  const handleEnableTwoFactor = async () => {
+    if (!user?.email || !user?.id) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-2fa-code", {
+        body: {
+          email: user.email,
+          user_id: user.id,
+        },
+      });
+
+      if (error) throw error;
+
+      setMaskedEmail(data?.masked_email || user.email);
+      setShowEnableTwoFactorDialog(true);
+    } catch (error) {
+      console.error("Error sending 2FA code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar código",
+        description: "Não foi possível enviar o código de verificação.",
+      });
+    }
+  };
+
+  const handleVerify2FACode = async (code: string) => {
+    setIsVerifying2FA(true);
+
+    try {
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("codigo, codigo_expira_em")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) throw error;
+
+      if (profileData.codigo_expira_em && new Date(profileData.codigo_expira_em) < new Date()) {
+        toast({
+          variant: "destructive",
+          title: "Código expirado",
+          description: "Solicite um novo código de verificação.",
+        });
+        setIsVerifying2FA(false);
+        return;
+      }
+
+      if (profileData.codigo !== code) {
+        toast({
+          variant: "destructive",
+          title: "Código inválido",
+          description: "O código informado não está correto.",
+        });
+        setIsVerifying2FA(false);
+        return;
+      }
+
+      // Enable 2FA
+      await supabase
+        .from("profiles")
+        .update({ 
+          two_factor_enabled: true,
+          codigo: null, 
+          codigo_expira_em: null 
+        })
+        .eq("id", user?.id);
+
+      setTwoFactorEnabled(true);
+      setShowEnableTwoFactorDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["profile-security"] });
+      
+      toast({
+        title: "Verificação em duas etapas ativada!",
+        description: "Sua conta está mais segura agora.",
+      });
+    } catch (error) {
+      console.error("Error verifying 2FA code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro na verificação",
+        description: "Ocorreu um erro ao verificar o código.",
+      });
+    }
+
+    setIsVerifying2FA(false);
+  };
+
+  const handleResend2FACode = async () => {
+    if (!user?.email || !user?.id) return;
+    setIsResending2FA(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-2fa-code", {
+        body: {
+          email: user.email,
+          user_id: user.id,
+        },
+      });
+
+      if (error) throw error;
+
+      setMaskedEmail(data?.masked_email || user.email);
+      toast({
+        title: "Código reenviado!",
+        description: "Verifique sua caixa de entrada.",
+      });
+    } catch (error) {
+      console.error("Error resending 2FA code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao reenviar",
+        description: "Não foi possível reenviar o código.",
+      });
+    }
+
+    setIsResending2FA(false);
+  };
+
+  const handleDisableTwoFactor = async () => {
+    try {
+      await supabase
+        .from("profiles")
+        .update({ two_factor_enabled: false })
+        .eq("id", user?.id);
+
+      setTwoFactorEnabled(false);
+      queryClient.invalidateQueries({ queryKey: ["profile-security"] });
+      
+      toast({
+        title: "Verificação em duas etapas desativada",
+      });
+    } catch (error) {
+      console.error("Error disabling 2FA:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao desativar",
+        description: "Não foi possível desativar a verificação em duas etapas.",
+      });
+    }
+  };
+
   const getDeviceIcon = (deviceType: string | null) => {
     switch (deviceType?.toLowerCase()) {
       case "mobile":
@@ -297,6 +454,44 @@ const Security = () => {
               )}
             </Button>
           </form>
+        </section>
+
+        <Separator />
+
+        {/* Two-Factor Authentication Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <h2 className="text-base font-semibold">Verificação em Duas Etapas</h2>
+          </div>
+
+          <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="font-medium text-sm">
+                  {twoFactorEnabled ? "Ativada" : "Desativada"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {twoFactorEnabled
+                    ? "Um código será enviado para seu email ao fazer login"
+                    : "Adicione uma camada extra de segurança à sua conta"}
+                </p>
+              </div>
+              {twoFactorEnabled ? (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                  Ativo
+                </span>
+              ) : null}
+            </div>
+
+            <Button
+              variant={twoFactorEnabled ? "outline" : "default"}
+              className="w-full"
+              onClick={twoFactorEnabled ? handleDisableTwoFactor : handleEnableTwoFactor}
+            >
+              {twoFactorEnabled ? "Desativar verificação" : "Ativar verificação"}
+            </Button>
+          </div>
         </section>
 
         <Separator />
@@ -432,6 +627,30 @@ const Security = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Enable 2FA Dialog */}
+      <Dialog open={showEnableTwoFactorDialog} onOpenChange={setShowEnableTwoFactorDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Ativar Verificação em Duas Etapas
+            </DialogTitle>
+            <DialogDescription>
+              Digite o código de 6 dígitos que enviamos para seu email para confirmar a ativação.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <TwoFactorInput
+              onComplete={handleVerify2FACode}
+              onResend={handleResend2FACode}
+              isVerifying={isVerifying2FA}
+              isResending={isResending2FA}
+              maskedEmail={maskedEmail}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
