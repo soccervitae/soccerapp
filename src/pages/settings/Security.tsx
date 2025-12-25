@@ -15,22 +15,13 @@ import { ptBR } from "date-fns/locale";
 import TwoFactorInput from "@/components/auth/TwoFactorInput";
 import { getCurrentDeviceFingerprint, trustCurrentDevice } from "@/services/deviceService";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+  ResponsiveModalDescription,
+  ResponsiveAlertModal,
+} from "@/components/ui/responsive-modal";
 
 interface UserDevice {
   id: string;
@@ -673,40 +664,30 @@ const Security = () => {
         </section>
       </div>
 
-      {/* Remove Device Dialog */}
-      <AlertDialog open={!!deviceToRemove} onOpenChange={() => setDeviceToRemove(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover dispositivo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Este dispositivo será removido da sua lista. Se for um dispositivo em uso, ele será
-              desconectado da sua conta.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deviceToRemove && removeDevice.mutate(deviceToRemove)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Remove Device Modal - Responsive */}
+      <ResponsiveAlertModal
+        open={!!deviceToRemove}
+        onOpenChange={() => setDeviceToRemove(null)}
+        title="Remover dispositivo?"
+        description="Este dispositivo será removido da sua lista. Se for um dispositivo em uso, ele será desconectado da sua conta."
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={() => deviceToRemove && removeDevice.mutate(deviceToRemove)}
+        confirmVariant="destructive"
+      />
 
-      {/* Enable 2FA Dialog */}
-      <Dialog open={showEnableTwoFactorDialog} onOpenChange={setShowEnableTwoFactorDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      {/* Enable 2FA Modal - Responsive */}
+      <ResponsiveModal open={showEnableTwoFactorDialog} onOpenChange={setShowEnableTwoFactorDialog}>
+        <ResponsiveModalContent className="sm:max-w-md">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
               Ativar Verificação em Duas Etapas
-            </DialogTitle>
-            <DialogDescription>
+            </ResponsiveModalTitle>
+            <ResponsiveModalDescription>
               Digite o código de 6 dígitos que enviamos para seu email para confirmar a ativação.
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveModalDescription>
+          </ResponsiveModalHeader>
           <div className="py-4">
             <TwoFactorInput
               onComplete={handleVerify2FACode}
@@ -716,8 +697,8 @@ const Security = () => {
               maskedEmail={maskedEmail}
             />
           </div>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
     </div>
   );
 };

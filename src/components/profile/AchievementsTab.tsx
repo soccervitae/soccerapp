@@ -1,16 +1,7 @@
 import { useState } from "react";
 import { useDeleteAchievement } from "@/hooks/useProfile";
 import { AddAchievementSheet } from "./AddAchievementSheet";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
 interface Achievement {
   id: string;
@@ -171,26 +162,17 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
       {/* Add Sheet */}
       <AddAchievementSheet open={showAddSheet} onOpenChange={setShowAddSheet} />
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover Conquista?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A conquista será removida permanentemente do seu perfil.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Confirmation - Responsive */}
+      <ResponsiveAlertModal
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Remover Conquista?"
+        description="Esta ação não pode ser desfeita. A conquista será removida permanentemente do seu perfil."
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={handleDelete}
+        confirmVariant="destructive"
+      />
     </>
   );
 };

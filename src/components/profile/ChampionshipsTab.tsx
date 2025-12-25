@@ -1,16 +1,7 @@
 import { useState } from "react";
 import { useDeleteChampionship } from "@/hooks/useProfile";
 import { AddChampionshipSheet } from "./AddChampionshipSheet";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
 interface Championship {
   id: string;
@@ -158,26 +149,17 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
       {/* Add Sheet */}
       <AddChampionshipSheet open={showAddSheet} onOpenChange={setShowAddSheet} />
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover Campeonato?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O campeonato será removido permanentemente do seu perfil.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Confirmation - Responsive */}
+      <ResponsiveAlertModal
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Remover Campeonato?"
+        description="Esta ação não pode ser desfeita. O campeonato será removido permanentemente do seu perfil."
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={handleDelete}
+        confirmVariant="destructive"
+      />
     </>
   );
 };
