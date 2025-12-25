@@ -10,11 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 
 interface ProfileHeaderProps {
@@ -136,12 +136,12 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
         <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
       )}
 
-      {/* QR Code Dialog */}
-      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-        <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="text-center">QR Code do Perfil</DialogTitle>
-          </DialogHeader>
+      {/* QR Code Modal - Responsive */}
+      <ResponsiveModal open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <ResponsiveModalContent className="sm:max-w-xs">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="text-center">QR Code do Perfil</ResponsiveModalTitle>
+          </ResponsiveModalHeader>
           <div className="flex flex-col items-center gap-4 py-4">
             <div 
               ref={qrRef}
@@ -175,8 +175,8 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
     </>
   );
 };
