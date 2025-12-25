@@ -7,6 +7,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import FollowList from "./pages/FollowList";
@@ -57,6 +58,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <PwaInstallPrompt />
         <BrowserRouter>
           <AnimatedRoutes />
         </BrowserRouter>
