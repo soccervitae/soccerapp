@@ -1,121 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
-import { Search, CheckCircle } from "lucide-react";
+import { Search, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSearchProfiles, useFollowingIds } from "@/hooks/useSearchProfiles";
+import { useFollowUser } from "@/hooks/useProfile";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface Athlete {
-  name: string;
-  username: string;
-  avatar: string;
-  position: string;
-  team: string;
-  verified: boolean;
-}
-
-const athletes: Athlete[] = [
-  {
-    name: "Gabriel Santos",
-    username: "gabriel.santos_9",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    position: "Meio-Campo",
-    team: "Flamengo",
-    verified: true,
-  },
-  {
-    name: "Ana Carolina",
-    username: "ana.carolina_11",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    position: "Atacante",
-    team: "Corinthians Feminino",
-    verified: true,
-  },
-  {
-    name: "Lucas Oliveira",
-    username: "lucas.oliveira_10",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    position: "Atacante",
-    team: "Palmeiras",
-    verified: false,
-  },
-  {
-    name: "Marina Costa",
-    username: "marina.costa_7",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    position: "Zagueira",
-    team: "São Paulo Feminino",
-    verified: true,
-  },
-  {
-    name: "Pedro Henrique",
-    username: "pedro.henrique_3",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    position: "Zagueiro",
-    team: "Santos",
-    verified: false,
-  },
-  {
-    name: "Julia Fernandes",
-    username: "julia.fernandes_1",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-    position: "Goleira",
-    team: "Grêmio Feminino",
-    verified: true,
-  },
-  {
-    name: "Rafael Almeida",
-    username: "rafael.almeida_6",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
-    position: "Lateral",
-    team: "Internacional",
-    verified: false,
-  },
-  {
-    name: "Camila Souza",
-    username: "camila.souza_8",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-    position: "Meio-Campo",
-    team: "Fluminense Feminino",
-    verified: true,
-  },
-];
-
-const positions = ["Todos", "Atacante", "Meio-Campo", "Zagueiro", "Zagueira", "Lateral", "Goleiro", "Goleira"];
+const positions = ["Todos", "Goleiro", "Lateral", "Zagueiro", "Volante", "Meia", "Atacante"];
 
 const Explore = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("Todos");
-  const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
 
-  const filteredAthletes = athletes.filter((athlete) => {
-    const matchesSearch =
-      athlete.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      athlete.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      athlete.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      athlete.position.toLowerCase().includes(searchQuery.toLowerCase());
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-    const matchesPosition =
-      selectedPosition === "Todos" || athlete.position === selectedPosition;
+  const { data: profiles, isLoading } = useSearchProfiles(
+    { query: debouncedQuery, position: selectedPosition },
+    user?.id
+  );
 
-    return matchesSearch && matchesPosition;
-  });
+  const { data: followingIds } = useFollowingIds(user?.id);
+  const { mutate: toggleFollow, isPending: isFollowPending } = useFollowUser();
 
-  const handleAthleteClick = (athlete: Athlete) => {
-    navigate("/profile", { state: { athlete } });
+  const handleProfileClick = (username: string) => {
+    navigate(`/@${username}`);
   };
 
-  const handleFollowClick = (e: React.MouseEvent, username: string) => {
+  const handleFollowClick = (e: React.MouseEvent, userId: string, isFollowing: boolean) => {
     e.stopPropagation();
-    setFollowingUsers((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(username)) {
-        newSet.delete(username);
-      } else {
-        newSet.add(username);
-      }
-      return newSet;
-    });
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    toggleFollow({ userId, isFollowing });
   };
 
   return (
@@ -123,13 +45,13 @@ const Explore = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-4">
         <h1 className="text-xl font-bold text-foreground mb-4">Explorar</h1>
-        
+
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar atletas..."
+            placeholder="Buscar por nome, username ou time..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-muted/50 border border-border rounded-xl pl-10 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
@@ -156,50 +78,86 @@ const Explore = () => {
         </div>
       </div>
 
-      {/* Athletes List */}
+      {/* Profiles List */}
       <div className="px-4 py-2">
         <div className="flex flex-col gap-2">
-          {filteredAthletes.map((athlete) => (
-            <button
-              key={athlete.username}
-              onClick={() => handleAthleteClick(athlete)}
-              className="bg-card border border-border rounded-xl p-3 text-left hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
-            >
-              <div className="relative shrink-0">
-                <img
-                  src={athlete.avatar}
-                  alt={athlete.name}
-                  className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
-                />
-                {athlete.verified && (
-                  <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm truncate">
-                  {athlete.name}
-                </h3>
-                <span className="text-xs text-primary font-medium">
-                  {athlete.position}
-                </span>
-              </div>
-              <Button
-                size="sm"
-                variant={followingUsers.has(athlete.username) ? "outline" : "default"}
-                onClick={(e) => handleFollowClick(e, athlete.username)}
-                className="shrink-0 h-7 px-3 text-xs"
+          {isLoading ? (
+            // Loading skeletons
+            Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-card border border-border rounded-xl p-3 flex items-center gap-3"
               >
-                {followingUsers.has(athlete.username) ? "Seguindo" : "Seguir"}
-              </Button>
-            </button>
-          ))}
-        </div>
+                <Skeleton className="w-11 h-11 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-4 w-32 mb-1" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="h-7 w-16 rounded-md" />
+              </div>
+            ))
+          ) : profiles && profiles.length > 0 ? (
+            profiles.map((profile) => {
+              const isFollowing = followingIds?.has(profile.id) || false;
 
-        {filteredAthletes.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Nenhum atleta encontrado</p>
-          </div>
-        )}
+              return (
+                <button
+                  key={profile.id}
+                  onClick={() => handleProfileClick(profile.username)}
+                  className="bg-card border border-border rounded-xl p-3 text-left hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
+                >
+                  <div className="relative shrink-0">
+                    <img
+                      src={profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`}
+                      alt={profile.full_name || profile.username}
+                      className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
+                    />
+                    {profile.conta_verificada && (
+                      <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm truncate">
+                      {profile.full_name || profile.username}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      @{profile.username}
+                    </p>
+                    {profile.position && (
+                      <span className="text-xs text-primary font-medium">
+                        {profile.position}
+                        {profile.team && ` • ${profile.team}`}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={isFollowing ? "outline" : "default"}
+                    onClick={(e) => handleFollowClick(e, profile.id, isFollowing)}
+                    disabled={isFollowPending}
+                    className="shrink-0 h-7 px-3 text-xs"
+                  >
+                    {isFollowPending ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : isFollowing ? (
+                      "Seguindo"
+                    ) : (
+                      "Seguir"
+                    )}
+                  </Button>
+                </button>
+              );
+            })
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                {searchQuery || selectedPosition !== "Todos"
+                  ? "Nenhum atleta encontrado"
+                  : "Comece a buscar atletas"}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       <BottomNavigation activeTab="search" />
