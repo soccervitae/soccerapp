@@ -192,12 +192,21 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
   const handleResendConfirmation = async () => {
-    if (!email) return;
+    if (!email || resendCooldown > 0) return;
     
     setResendingEmail(true);
     try {
@@ -220,6 +229,7 @@ const LoginForm = () => {
           title: "Email reenviado!",
           description: "Verifique sua caixa de entrada e spam.",
         });
+        setResendCooldown(60);
       }
     } catch (error: any) {
       toast({
@@ -353,12 +363,17 @@ const LoginForm = () => {
             onClick={handleResendConfirmation}
             variant="outline"
             className="w-full h-12"
-            disabled={resendingEmail}
+            disabled={resendingEmail || resendCooldown > 0}
           >
             {resendingEmail ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Reenviando...
+              </>
+            ) : resendCooldown > 0 ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Aguarde {resendCooldown}s
               </>
             ) : (
               <>
@@ -475,11 +490,20 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { signUp } = useAuth();
   const { toast } = useToast();
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
   const handleResendConfirmation = async () => {
-    if (!email) return;
+    if (!email || resendCooldown > 0) return;
     
     setResendingEmail(true);
     try {
@@ -502,6 +526,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
           title: "Email reenviado!",
           description: "Verifique sua caixa de entrada e spam.",
         });
+        setResendCooldown(60);
       }
     } catch (error: any) {
       toast({
@@ -691,12 +716,17 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             onClick={handleResendConfirmation}
             variant="outline"
             className="w-full h-12"
-            disabled={resendingEmail}
+            disabled={resendingEmail || resendCooldown > 0}
           >
             {resendingEmail ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Reenviando...
+              </>
+            ) : resendCooldown > 0 ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Aguarde {resendCooldown}s
               </>
             ) : (
               <>
