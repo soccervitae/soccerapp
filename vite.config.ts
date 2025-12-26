@@ -15,13 +15,13 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "prompt",
-      includeAssets: ["favicon.ico", "placeholder.svg"],
+      includeAssets: ["favicon.png", "placeholder.svg"],
       manifest: {
-        name: "Soccer Vitae - Rede de Atletas",
+        name: "SOCCER VITAE - Onde talentos encontram oportunidades.",
         short_name: "Soccer Vitae",
-        description: "A maior rede social para atletas profissionais",
-        theme_color: "#10b981",
-        background_color: "#ffffff",
+        description: "Onde talentos encontram oportunidades.",
+        theme_color: "#4d7c4f",
+        background_color: "#4d7c4f",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
