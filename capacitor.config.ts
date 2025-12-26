@@ -11,6 +11,12 @@ const config: CapacitorConfig = {
   plugins: {
     Camera: {
       presentationStyle: 'fullScreen'
+    },
+    SplashScreen: {
+      launchShowDuration: 0,
+      launchAutoHide: true,
+      backgroundColor: '#10b981',
+      showSpinner: false
     }
   }
 };

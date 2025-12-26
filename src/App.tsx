@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
+import SplashScreen from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import FollowList from "./pages/FollowList";
@@ -57,6 +58,8 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
     // Lock screen orientation to portrait on supported browsers
     const lockOrientation = async () => {
@@ -70,12 +73,22 @@ const App = () => {
       }
     };
     lockOrientation();
+
+    // Hide splash screen after 2.5 seconds
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
+          <AnimatePresence mode="wait">
+            {showSplash && <SplashScreen key="splash" />}
+          </AnimatePresence>
           <Toaster />
           <Sonner />
           <PwaInstallPrompt />
