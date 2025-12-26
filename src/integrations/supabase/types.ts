@@ -430,6 +430,45 @@ export type Database = {
           },
         ]
       }
+      music_tracks: {
+        Row: {
+          artist: string
+          audio_url: string
+          category: string
+          cover_url: string | null
+          created_at: string | null
+          duration_seconds: number
+          id: string
+          is_active: boolean | null
+          play_count: number | null
+          title: string
+        }
+        Insert: {
+          artist: string
+          audio_url: string
+          category: string
+          cover_url?: string | null
+          created_at?: string | null
+          duration_seconds: number
+          id?: string
+          is_active?: boolean | null
+          play_count?: number | null
+          title: string
+        }
+        Update: {
+          artist?: string
+          audio_url?: string
+          category?: string
+          cover_url?: string | null
+          created_at?: string | null
+          duration_seconds?: number
+          id?: string
+          is_active?: boolean | null
+          play_count?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string
@@ -612,6 +651,7 @@ export type Database = {
           location_name: string | null
           media_type: string | null
           media_url: string | null
+          music_track_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -626,6 +666,7 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          music_track_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -640,10 +681,18 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          music_track_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_music_track_id_fkey"
+            columns: ["music_track_id"]
+            isOneToOne: false
+            referencedRelation: "music_tracks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
@@ -882,6 +931,7 @@ export type Database = {
           id: string
           media_type: string
           media_url: string
+          music_track_id: string | null
           user_id: string
         }
         Insert: {
@@ -891,6 +941,7 @@ export type Database = {
           id?: string
           media_type: string
           media_url: string
+          music_track_id?: string | null
           user_id: string
         }
         Update: {
@@ -900,9 +951,17 @@ export type Database = {
           id?: string
           media_type?: string
           media_url?: string
+          music_track_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stories_music_track_id_fkey"
+            columns: ["music_track_id"]
+            isOneToOne: false
+            referencedRelation: "music_tracks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stories_user_id_fkey"
             columns: ["user_id"]

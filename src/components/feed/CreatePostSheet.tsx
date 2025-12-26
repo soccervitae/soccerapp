@@ -39,6 +39,8 @@ import { CropData, getCroppedImg, hasCropData } from "@/hooks/useImageCrop";
 import { PhotoTagEditor } from "@/components/feed/PhotoTagEditor";
 import { PhotoTag, useCreatePostTags } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
+import { MusicPicker } from "@/components/feed/MusicPicker";
+import { MusicTrack } from "@/hooks/useMusic";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -46,7 +48,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker" | "music-picker";
 
 interface MediaItem {
   url: string;
@@ -98,6 +100,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const createPostTags = useCreatePostTags();
   const [allTags, setAllTags] = useState<PhotoTag[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
 
   useEffect(() => {
     if (error) {
@@ -285,6 +288,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         locationName: selectedLocation?.name,
         locationLat: selectedLocation?.lat,
         locationLng: selectedLocation?.lng,
+        musicTrackId: selectedMusic?.id,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -301,6 +305,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setCurrentIndex(0);
       setAllTags([]);
       setSelectedLocation(null);
+      setSelectedMusic(null);
       onOpenChange(false);
     } catch (err) {
       console.error("Error publishing post:", err);
@@ -320,6 +325,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setEditingPhotoIndex(null);
     setAllTags([]);
     setSelectedLocation(null);
+    setSelectedMusic(null);
     clearGallery();
     onOpenChange(false);
   };
@@ -463,6 +469,22 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           initialLocation={selectedLocation}
           onConfirm={handleLocationConfirm}
           onCancel={() => setViewMode("default")}
+        />
+      );
+    }
+
+    if (viewMode === "music-picker") {
+      return (
+        <MusicPicker
+          selectedMusic={selectedMusic}
+          onSelect={setSelectedMusic}
+          onClose={() => setViewMode("default")}
+          onConfirm={() => {
+            setViewMode("default");
+            if (selectedMusic) {
+              toast.success(`Música "${selectedMusic.title}" adicionada!`);
+            }
+          }}
         />
       );
     }
@@ -850,9 +872,37 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             </div>
             <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
           </button>
-          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
-            <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">music_note</span><span className="text-sm text-foreground">Adicionar música</span></div>
-            <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+          <button 
+            onClick={() => setViewMode("music-picker")}
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+            disabled={isPublishing}
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[22px] text-foreground">music_note</span>
+              <div className="flex flex-col items-start">
+                <span className="text-sm text-foreground">
+                  {selectedMusic ? selectedMusic.title : "Adicionar música"}
+                </span>
+                {selectedMusic && (
+                  <span className="text-xs text-muted-foreground">{selectedMusic.artist}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedMusic && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedMusic(null);
+                    toast.success("Música removida");
+                  }}
+                  className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                </button>
+              )}
+              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+            </div>
           </button>
         </div>
       </div>

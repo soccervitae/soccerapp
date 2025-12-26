@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useDeviceGallery, GalleryMedia } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "./VideoRecorder";
+import { MusicPicker } from "./MusicPicker";
+import { MusicTrack } from "@/hooks/useMusic";
 
 interface CreateReplaySheetProps {
   open: boolean;
@@ -21,7 +23,7 @@ interface CreateReplaySheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder";
+type ViewMode = "default" | "video-recorder" | "music-picker";
 
 // Fallback gallery images (used when device gallery is not available)
 const fallbackGalleryImages = [
@@ -48,6 +50,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType; blob?: Blob }[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("default");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { takePhoto, pickFromGallery, pickMultipleFromGallery, isLoading, error, isNative } = useDeviceCamera();
@@ -107,6 +110,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
       setSelectedImages([]);
       setMultiSelect(false);
       setCapturedMedia([]);
+      setSelectedMusic(null);
       clearGallery();
     }
   }, [open, clearGallery]);
@@ -196,6 +200,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     setMultiSelect(false);
     setViewMode("default");
     setCapturedMedia([]);
+    setSelectedMusic(null);
     onOpenChange(false);
   };
 
@@ -248,6 +253,41 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
         onVideoRecorded={handleVideoRecorded}
         onClose={() => setViewMode("default")}
       />
+    );
+  }
+
+  // Show music picker fullscreen
+  if (viewMode === "music-picker") {
+    const musicContent = (
+      <MusicPicker
+        selectedMusic={selectedMusic}
+        onSelect={setSelectedMusic}
+        onClose={() => setViewMode("default")}
+        onConfirm={() => {
+          setViewMode("default");
+          if (selectedMusic) {
+            toast.success(`Música "${selectedMusic.title}" adicionada!`);
+          }
+        }}
+      />
+    );
+
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={handleClose}>
+          <DrawerContent className="h-full rounded-t-none p-0">
+            {musicContent}
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-xl h-[90vh] p-0 overflow-hidden">
+          {musicContent}
+        </DialogContent>
+      </Dialog>
     );
   }
 
@@ -323,10 +363,32 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
               <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
                 <span className="material-symbols-outlined text-[22px] text-white">auto_fix_high</span>
               </button>
-              <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+              <button 
+                onClick={() => setViewMode("music-picker")}
+                className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
+                  selectedMusic ? 'bg-primary' : 'bg-black/50'
+                }`}
+              >
                 <span className="material-symbols-outlined text-[22px] text-white">music_note</span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Selected music indicator */}
+        {selectedMusic && (
+          <div className="absolute bottom-16 left-4 right-4 flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-lg">
+            <span className="material-symbols-outlined text-[18px] text-white animate-pulse">music_note</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-xs font-medium truncate">{selectedMusic.title}</p>
+              <p className="text-white/60 text-[10px] truncate">{selectedMusic.artist}</p>
+            </div>
+            <button
+              onClick={() => setSelectedMusic(null)}
+              className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
+            >
+              <span className="material-symbols-outlined text-[14px] text-white">close</span>
+            </button>
           </div>
         )}
 
