@@ -30,7 +30,7 @@ const Install = () => {
             <Download className="w-10 h-10 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Soccer Vitae</h2>
+            <h2 className="text-2xl font-bold">SOCCER VITAE</h2>
             <p className="text-muted-foreground mt-1">
               Instale o app para uma experiência completa
             </p>
@@ -60,7 +60,7 @@ const Install = () => {
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
             <p className="font-medium text-primary">✓ App já instalado!</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Você pode acessar o Soccer Vitae pela sua tela inicial
+              Você pode acessar o SOCCER VITAE pela sua tela inicial
             </p>
           </div>
         )}

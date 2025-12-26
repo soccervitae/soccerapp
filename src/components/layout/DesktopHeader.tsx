@@ -45,7 +45,7 @@ export const DesktopHeader = () => {
         <button onClick={() => navigate("/")} className="flex-shrink-0">
           <img
             src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png"
-            alt="Soccer Vitae"
+            alt="SOCCER VITAE"
             className="h-7 object-contain"
           />
         </button>

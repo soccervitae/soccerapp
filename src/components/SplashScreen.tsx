@@ -31,7 +31,7 @@ const SplashScreen = () => {
           {/* Logo */}
           <img
             src={soccerVitaeLogo}
-            alt="Soccer Vitae"
+            alt="SOCCER VITAE"
             className="relative w-48 h-auto drop-shadow-2xl"
           />
         </div>
