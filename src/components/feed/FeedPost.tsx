@@ -393,6 +393,19 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         </div>
       )}
 
+      {/* Location */}
+      {post.location_name && (
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-4 pt-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">location_on</span>
+          <span className="truncate">{post.location_name}</span>
+        </a>
+      )}
+
       {/* Caption */}
       <div className="px-4 pt-3">
         <p className="text-sm text-foreground">
