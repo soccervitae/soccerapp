@@ -607,6 +607,9 @@ export type Database = {
           created_at: string
           id: string
           likes_count: number | null
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
           media_type: string | null
           media_url: string | null
           updated_at: string | null
@@ -618,6 +621,9 @@ export type Database = {
           created_at?: string
           id?: string
           likes_count?: number | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
           media_type?: string | null
           media_url?: string | null
           updated_at?: string | null
@@ -629,6 +635,9 @@ export type Database = {
           created_at?: string
           id?: string
           likes_count?: number | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
           media_type?: string | null
           media_url?: string | null
           updated_at?: string | null

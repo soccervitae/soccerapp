@@ -118,7 +118,21 @@ export const useCreatePost = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ content, mediaUrl, mediaType }: { content: string; mediaUrl?: string; mediaType?: string }) => {
+    mutationFn: async ({ 
+      content, 
+      mediaUrl, 
+      mediaType,
+      locationName,
+      locationLat,
+      locationLng,
+    }: { 
+      content: string; 
+      mediaUrl?: string; 
+      mediaType?: string;
+      locationName?: string;
+      locationLat?: number;
+      locationLng?: number;
+    }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
       const { data, error } = await supabase
@@ -128,6 +142,9 @@ export const useCreatePost = () => {
           content,
           media_url: mediaUrl || null,
           media_type: mediaType || null,
+          location_name: locationName || null,
+          location_lat: locationLat || null,
+          location_lng: locationLng || null,
         })
         .select()
         .single();
