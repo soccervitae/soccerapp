@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { cachePosts, getCachedPosts, isOnline } from "@/lib/offlineStorage";
 
 export interface Post {
   id: string;
@@ -30,9 +32,18 @@ export interface Post {
 export const usePosts = () => {
   const { user } = useAuth();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["posts"],
     queryFn: async (): Promise<Post[]> => {
+      // If offline, return cached data
+      if (!isOnline()) {
+        const cached = await getCachedPosts();
+        if (cached.length > 0) {
+          return cached as Post[];
+        }
+        throw new Error("Sem conexão e sem dados em cache");
+      }
+
       const { data: posts, error } = await supabase
         .from("posts")
         .select(`
@@ -85,7 +96,21 @@ export const usePosts = () => {
         saved_by_user: false,
       })) || [];
     },
+    retry: (failureCount, error) => {
+      // Don't retry if offline
+      if (!isOnline()) return false;
+      return failureCount < 3;
+    },
   });
+
+  // Cache posts when they're fetched successfully
+  useEffect(() => {
+    if (query.data && query.data.length > 0 && isOnline()) {
+      cachePosts(query.data).catch(console.error);
+    }
+  }, [query.data]);
+
+  return query;
 };
 
 export const useCreatePost = () => {

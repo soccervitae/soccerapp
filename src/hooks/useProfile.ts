@@ -1,7 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { 
+  cacheProfile, 
+  getCachedProfile, 
+  getCachedProfileByUsername,
+  cacheUserPosts,
+  getCachedUserPosts,
+  isOnline 
+} from "@/lib/offlineStorage";
 
 export interface Profile {
   id: string;
@@ -24,10 +33,19 @@ export const useProfile = (userId?: string) => {
   const { user } = useAuth();
   const targetUserId = userId || user?.id;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["profile", targetUserId],
     queryFn: async (): Promise<Profile | null> => {
       if (!targetUserId) return null;
+
+      // If offline, return cached data
+      if (!isOnline()) {
+        const cached = await getCachedProfile(targetUserId);
+        if (cached) {
+          return cached as Profile;
+        }
+        throw new Error("Sem conexão e sem dados em cache");
+      }
 
       const { data, error } = await supabase
         .from("profiles")
@@ -39,13 +57,35 @@ export const useProfile = (userId?: string) => {
       return data;
     },
     enabled: !!targetUserId,
+    retry: (failureCount) => {
+      if (!isOnline()) return false;
+      return failureCount < 3;
+    },
   });
+
+  // Cache profile when fetched successfully
+  useEffect(() => {
+    if (query.data && isOnline()) {
+      cacheProfile(query.data).catch(console.error);
+    }
+  }, [query.data]);
+
+  return query;
 };
 
 export const useProfileByUsername = (username: string) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["profile", "username", username],
     queryFn: async (): Promise<Profile | null> => {
+      // If offline, return cached data
+      if (!isOnline()) {
+        const cached = await getCachedProfileByUsername(username);
+        if (cached) {
+          return cached as Profile;
+        }
+        throw new Error("Sem conexão e sem dados em cache");
+      }
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -56,7 +96,20 @@ export const useProfileByUsername = (username: string) => {
       return data;
     },
     enabled: !!username,
+    retry: (failureCount) => {
+      if (!isOnline()) return false;
+      return failureCount < 3;
+    },
   });
+
+  // Cache profile when fetched successfully
+  useEffect(() => {
+    if (query.data && isOnline()) {
+      cacheProfile(query.data).catch(console.error);
+    }
+  }, [query.data]);
+
+  return query;
 };
 
 export const useUpdateProfile = () => {
@@ -77,8 +130,12 @@ export const useUpdateProfile = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      // Update cache with new data
+      if (data) {
+        cacheProfile(data).catch(console.error);
+      }
       toast.success("Perfil atualizado!");
     },
     onError: () => {
@@ -87,14 +144,35 @@ export const useUpdateProfile = () => {
   });
 };
 
+export interface UserPost {
+  id: string;
+  user_id: string;
+  content: string;
+  media_url: string | null;
+  media_type: string | null;
+  likes_count: number | null;
+  comments_count: number | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export const useUserPosts = (userId?: string) => {
   const { user } = useAuth();
   const targetUserId = userId || user?.id;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["user-posts", targetUserId],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserPost[]> => {
       if (!targetUserId) return [];
+
+      // If offline, return cached data
+      if (!isOnline()) {
+        const cached = await getCachedUserPosts(targetUserId);
+        if (cached.length > 0) {
+          return cached as UserPost[];
+        }
+        throw new Error("Sem conexão e sem dados em cache");
+      }
 
       const { data, error } = await supabase
         .from("posts")
@@ -103,10 +181,23 @@ export const useUserPosts = (userId?: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!targetUserId,
+    retry: (failureCount) => {
+      if (!isOnline()) return false;
+      return failureCount < 3;
+    },
   });
+
+  // Cache user posts when fetched successfully
+  useEffect(() => {
+    if (targetUserId && query.data && query.data.length > 0 && isOnline()) {
+      cacheUserPosts(targetUserId, query.data).catch(console.error);
+    }
+  }, [targetUserId, query.data]);
+
+  return query;
 };
 
 export const useFollowStats = (userId?: string) => {

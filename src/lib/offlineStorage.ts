@@ -1,10 +1,13 @@
-// IndexedDB wrapper for offline message storage
+// IndexedDB wrapper for offline storage
 
 const DB_NAME = 'soccervitae-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const MESSAGES_STORE = 'messages';
 const CONVERSATIONS_STORE = 'conversations';
 const PENDING_STORE = 'pending_messages';
+const POSTS_STORE = 'posts';
+const PROFILES_STORE = 'profiles';
+const USER_POSTS_STORE = 'user_posts';
 
 let db: IDBDatabase | null = null;
 
@@ -42,6 +45,25 @@ const openDB = (): Promise<IDBDatabase> => {
       if (!database.objectStoreNames.contains(PENDING_STORE)) {
         const pendingStore = database.createObjectStore(PENDING_STORE, { keyPath: 'tempId', autoIncrement: true });
         pendingStore.createIndex('conversation_id', 'conversation_id', { unique: false });
+      }
+
+      // Posts store (feed posts)
+      if (!database.objectStoreNames.contains(POSTS_STORE)) {
+        const postsStore = database.createObjectStore(POSTS_STORE, { keyPath: 'id' });
+        postsStore.createIndex('created_at', 'created_at', { unique: false });
+        postsStore.createIndex('user_id', 'user_id', { unique: false });
+      }
+
+      // Profiles store
+      if (!database.objectStoreNames.contains(PROFILES_STORE)) {
+        const profilesStore = database.createObjectStore(PROFILES_STORE, { keyPath: 'id' });
+        profilesStore.createIndex('username', 'username', { unique: false });
+      }
+
+      // User posts store (posts by specific user)
+      if (!database.objectStoreNames.contains(USER_POSTS_STORE)) {
+        const userPostsStore = database.createObjectStore(USER_POSTS_STORE, { keyPath: 'id' });
+        userPostsStore.createIndex('user_id', 'user_id', { unique: false });
       }
     };
   });
@@ -162,14 +184,135 @@ export const removePendingMessage = async (tempId: number): Promise<void> => {
   });
 };
 
+// Posts operations
+export const cachePosts = async (posts: unknown[]): Promise<void> => {
+  const database = await openDB();
+  const tx = database.transaction(POSTS_STORE, 'readwrite');
+  const store = tx.objectStore(POSTS_STORE);
+
+  for (const post of posts) {
+    store.put(post);
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+export const getCachedPosts = async (): Promise<unknown[]> => {
+  const database = await openDB();
+  const tx = database.transaction(POSTS_STORE, 'readonly');
+  const store = tx.objectStore(POSTS_STORE);
+
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const posts = request.result || [];
+      // Sort by created_at descending
+      posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      resolve(posts);
+    };
+    request.onerror = () => reject(request.error);
+  });
+};
+
+// Profile operations
+export const cacheProfile = async (profile: unknown): Promise<void> => {
+  const database = await openDB();
+  const tx = database.transaction(PROFILES_STORE, 'readwrite');
+  const store = tx.objectStore(PROFILES_STORE);
+
+  store.put(profile);
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+export const getCachedProfile = async (userId: string): Promise<unknown | null> => {
+  const database = await openDB();
+  const tx = database.transaction(PROFILES_STORE, 'readonly');
+  const store = tx.objectStore(PROFILES_STORE);
+
+  return new Promise((resolve, reject) => {
+    const request = store.get(userId);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+export const getCachedProfileByUsername = async (username: string): Promise<unknown | null> => {
+  const database = await openDB();
+  const tx = database.transaction(PROFILES_STORE, 'readonly');
+  const store = tx.objectStore(PROFILES_STORE);
+  const index = store.index('username');
+
+  return new Promise((resolve, reject) => {
+    const request = index.get(username);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+// User posts operations
+export const cacheUserPosts = async (userId: string, posts: unknown[]): Promise<void> => {
+  const database = await openDB();
+  const tx = database.transaction(USER_POSTS_STORE, 'readwrite');
+  const store = tx.objectStore(USER_POSTS_STORE);
+
+  // Clear existing posts for this user first
+  const index = store.index('user_id');
+  const existingRequest = index.getAllKeys(userId);
+  
+  await new Promise<void>((resolve, reject) => {
+    existingRequest.onsuccess = async () => {
+      for (const key of existingRequest.result) {
+        store.delete(key);
+      }
+      resolve();
+    };
+    existingRequest.onerror = () => reject(existingRequest.error);
+  });
+
+  // Add new posts
+  for (const post of posts) {
+    store.put(post);
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+export const getCachedUserPosts = async (userId: string): Promise<unknown[]> => {
+  const database = await openDB();
+  const tx = database.transaction(USER_POSTS_STORE, 'readonly');
+  const store = tx.objectStore(USER_POSTS_STORE);
+  const index = store.index('user_id');
+
+  return new Promise((resolve, reject) => {
+    const request = index.getAll(userId);
+    request.onsuccess = () => {
+      const posts = request.result || [];
+      posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      resolve(posts);
+    };
+    request.onerror = () => reject(request.error);
+  });
+};
+
 // Clear all cached data
 export const clearCache = async (): Promise<void> => {
   const database = await openDB();
-  const tx = database.transaction([MESSAGES_STORE, CONVERSATIONS_STORE, PENDING_STORE], 'readwrite');
+  const stores = [MESSAGES_STORE, CONVERSATIONS_STORE, PENDING_STORE, POSTS_STORE, PROFILES_STORE, USER_POSTS_STORE];
+  const tx = database.transaction(stores, 'readwrite');
   
-  tx.objectStore(MESSAGES_STORE).clear();
-  tx.objectStore(CONVERSATIONS_STORE).clear();
-  tx.objectStore(PENDING_STORE).clear();
+  for (const storeName of stores) {
+    tx.objectStore(storeName).clear();
+  }
 
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
