@@ -381,8 +381,20 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     return emailRegex.test(email);
   };
 
-  const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
-    if (pwd.length === 0) return { score: 0, label: "", color: "" };
+  const getPasswordStrength = (pwd: string): { 
+    score: number; 
+    label: string; 
+    color: string;
+    requirements: { hasMinLength: boolean; hasUppercase: boolean; hasNumber: boolean; hasSpecial: boolean };
+  } => {
+    const requirements = {
+      hasMinLength: pwd.length >= 8,
+      hasUppercase: /[A-Z]/.test(pwd),
+      hasNumber: /[0-9]/.test(pwd),
+      hasSpecial: /[^a-zA-Z0-9]/.test(pwd),
+    };
+
+    if (pwd.length === 0) return { score: 0, label: "", color: "", requirements };
     
     let score = 0;
     
@@ -393,17 +405,23 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     
     // Character variety checks
     if (/[a-z]/.test(pwd)) score += 1;
-    if (/[A-Z]/.test(pwd)) score += 1;
-    if (/[0-9]/.test(pwd)) score += 1;
-    if (/[^a-zA-Z0-9]/.test(pwd)) score += 1;
+    if (requirements.hasUppercase) score += 1;
+    if (requirements.hasNumber) score += 1;
+    if (requirements.hasSpecial) score += 1;
     
-    if (score <= 2) return { score: 1, label: "Fraca", color: "bg-destructive" };
-    if (score <= 4) return { score: 2, label: "Média", color: "bg-yellow-500" };
-    if (score <= 5) return { score: 3, label: "Boa", color: "bg-emerald-400" };
-    return { score: 4, label: "Forte", color: "bg-emerald-600" };
+    if (score <= 2) return { score: 1, label: "Fraca", color: "bg-destructive", requirements };
+    if (score <= 4) return { score: 2, label: "Média", color: "bg-yellow-500", requirements };
+    if (score <= 5) return { score: 3, label: "Boa", color: "bg-emerald-400", requirements };
+    return { score: 4, label: "Forte", color: "bg-emerald-600", requirements };
   };
 
   const passwordStrength = getPasswordStrength(password);
+  
+  const isPasswordValid = 
+    password.length >= 8 &&
+    passwordStrength.requirements.hasUppercase &&
+    passwordStrength.requirements.hasNumber &&
+    passwordStrength.requirements.hasSpecial;
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -480,11 +498,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    if (password.length < 6) {
+    if (!isPasswordValid) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres",
+        title: "Senha fraca",
+        description: "A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, número e caractere especial",
       });
       return;
     }
@@ -521,7 +539,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     lastName.trim().length >= 2 &&
     gender !== "" &&
     emailStatus === "valid" &&
-    password.length >= 6 &&
+    isPasswordValid &&
     password === confirmPassword;
 
   return (
@@ -638,7 +656,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
         {/* Password Strength Indicator */}
         {password.length > 0 && (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex gap-1">
               {[1, 2, 3, 4].map((level) => (
                 <div
@@ -651,17 +669,31 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
                 />
               ))}
             </div>
-            <div className="flex justify-between items-center">
-              <p className={`text-xs ${
-                passwordStrength.score <= 1 ? "text-destructive" : 
-                passwordStrength.score === 2 ? "text-yellow-600" : 
-                "text-emerald-600"
-              }`}>
-                Força: {passwordStrength.label}
-              </p>
-              {password.length < 6 && (
-                <p className="text-xs text-destructive">Mínimo 6 caracteres</p>
-              )}
+            <p className={`text-xs ${
+              passwordStrength.score <= 1 ? "text-destructive" : 
+              passwordStrength.score === 2 ? "text-yellow-600" : 
+              "text-emerald-600"
+            }`}>
+              Força: {passwordStrength.label}
+            </p>
+            {/* Requirements checklist */}
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+              <div className={`flex items-center gap-1 ${passwordStrength.requirements.hasMinLength ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {passwordStrength.requirements.hasMinLength ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                <span>8+ caracteres</span>
+              </div>
+              <div className={`flex items-center gap-1 ${passwordStrength.requirements.hasUppercase ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {passwordStrength.requirements.hasUppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                <span>Letra maiúscula</span>
+              </div>
+              <div className={`flex items-center gap-1 ${passwordStrength.requirements.hasNumber ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {passwordStrength.requirements.hasNumber ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                <span>Número</span>
+              </div>
+              <div className={`flex items-center gap-1 ${passwordStrength.requirements.hasSpecial ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {passwordStrength.requirements.hasSpecial ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                <span>Caractere especial</span>
+              </div>
             </div>
           </div>
         )}
