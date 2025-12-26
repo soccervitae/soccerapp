@@ -12,6 +12,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 import SplashScreen from "@/components/SplashScreen";
+import OrientationLock from "@/components/OrientationLock";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import FollowList from "./pages/FollowList";
@@ -103,6 +104,7 @@ const App = () => {
           </AnimatePresence>
           <Toaster />
           <Sonner />
+          <OrientationLock />
           <PwaInstallPrompt />
           <PwaUpdatePrompt />
           <BrowserRouter>
