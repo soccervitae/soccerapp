@@ -6,13 +6,21 @@ import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { RightSidebar } from "@/components/layout/RightSidebar";
 import { CreatePostInline } from "@/components/feed/CreatePostInline";
+import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen";
 import { usePosts } from "@/hooks/usePosts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { data: posts, isLoading } = usePosts();
   const isMobile = useIsMobile();
+  const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
+
+  // Show onboarding for first-time users
+  if (!onboardingLoading && showOnboarding) {
+    return <OnboardingScreen onComplete={completeOnboarding} />;
+  }
 
   const renderFeed = () => (
     <>
