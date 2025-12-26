@@ -15,6 +15,9 @@ export interface Post {
   comments_count: number;
   created_at: string;
   updated_at: string | null;
+  location_name: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
   profile: {
     id: string;
     username: string;
