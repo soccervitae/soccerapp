@@ -169,7 +169,7 @@ export const ProfileInfo = ({
           {profile.position && profile.team ? `${profile.position} | ${profile.team}` : profile.position || profile.team || `@${profile.username}`}
         </p>
         {profile.bio && (
-          <p className="text-muted-foreground/80 text-xs px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
+          <p className="text-muted-foreground/80 text-sm px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
             {profile.bio}
           </p>
         )}
