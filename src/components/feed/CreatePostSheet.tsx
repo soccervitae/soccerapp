@@ -18,6 +18,7 @@ import { useDeviceGallery } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { PhotoFilterEditor } from "@/components/feed/PhotoFilterEditor";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
+import { LocationPicker } from "@/components/feed/LocationPicker";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useCreatePost } from "@/hooks/usePosts";
 import { useImageCompression } from "@/hooks/useImageCompression";
@@ -45,7 +46,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker";
 
 interface MediaItem {
   url: string;
@@ -56,6 +57,12 @@ interface MediaItem {
   cropData?: CropData;
   croppedUrl?: string;
   tags?: PhotoTag[];
+}
+
+interface SelectedLocation {
+  name: string;
+  lat: number;
+  lng: number;
 }
 
 const MAX_PHOTOS = 10;
@@ -90,6 +97,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const createPost = useCreatePost();
   const createPostTags = useCreatePostTags();
   const [allTags, setAllTags] = useState<PhotoTag[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
 
   useEffect(() => {
     if (error) {
@@ -274,6 +282,9 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         content: caption || "",
         mediaUrl,
         mediaType,
+        locationName: selectedLocation?.name,
+        locationLat: selectedLocation?.lat,
+        locationLng: selectedLocation?.lng,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -289,6 +300,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setSelectedMediaType("photo");
       setCurrentIndex(0);
       setAllTags([]);
+      setSelectedLocation(null);
       onOpenChange(false);
     } catch (err) {
       console.error("Error publishing post:", err);
@@ -307,8 +319,15 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setCurrentIndex(0);
     setEditingPhotoIndex(null);
     setAllTags([]);
+    setSelectedLocation(null);
     clearGallery();
     onOpenChange(false);
+  };
+
+  const handleLocationConfirm = (location: SelectedLocation) => {
+    setSelectedLocation(location);
+    setViewMode("default");
+    toast.success("Localização adicionada!");
   };
 
   const handleTagPhoto = (index: number) => {
@@ -434,6 +453,16 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             setEditingPhotoIndex(null);
             setViewMode("default");
           }}
+        />
+      );
+    }
+
+    if (viewMode === "location-picker") {
+      return (
+        <LocationPicker
+          initialLocation={selectedLocation}
+          onConfirm={handleLocationConfirm}
+          onCancel={() => setViewMode("default")}
         />
       );
     }
@@ -776,9 +805,37 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         </div>
 
         <div className="border-t border-border pt-4 space-y-1">
-          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
-            <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">location_on</span><span className="text-sm text-foreground">Adicionar localização</span></div>
-            <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+          <button 
+            onClick={() => setViewMode("location-picker")}
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+            disabled={isPublishing}
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[22px] text-foreground">location_on</span>
+              <div className="flex flex-col items-start">
+                <span className="text-sm text-foreground">
+                  {selectedLocation ? selectedLocation.name : "Adicionar localização"}
+                </span>
+                {selectedLocation && (
+                  <span className="text-xs text-muted-foreground">Toque para alterar</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedLocation && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedLocation(null);
+                    toast.success("Localização removida");
+                  }}
+                  className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                </button>
+              )}
+              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+            </div>
           </button>
           <button 
             onClick={() => selectedMediaType === "photo" && selectedMediaList.length > 0 && handleTagPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)}
