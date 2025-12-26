@@ -202,39 +202,13 @@ export const ProfileInfo = ({
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
         {isOwnProfile ? (
-          <>
-            <button 
-              onClick={() => navigate("/settings/profile")} 
-              className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[16px]">edit</span>
-              Editar Perfil
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
-                  <span className="material-symbols-outlined text-[16px]">share</span>
-                  Compartilhar
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48">
-                <DropdownMenuItem onClick={handleShareProfile} className="cursor-pointer">
-                  <span className="material-symbols-outlined text-[18px] mr-2">link</span>
-                  Copiar link
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
-                  <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
-                  QR Code
-                </DropdownMenuItem>
-                {typeof navigator.share === "function" && (
-                  <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
-                    <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
-                    Compartilhar
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
+          <button 
+            onClick={() => navigate("/settings/profile")} 
+            className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[16px]">edit</span>
+            Editar Perfil
+          </button>
         ) : (
           <>
             <button 
@@ -256,6 +230,32 @@ export const ProfileInfo = ({
             </button>
           </>
         )}
+        
+        {/* Botão Compartilhar - sempre visível */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
+              <span className="material-symbols-outlined text-[16px]">share</span>
+              Compartilhar
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-48">
+            <DropdownMenuItem onClick={handleShareProfile} className="cursor-pointer">
+              <span className="material-symbols-outlined text-[18px] mr-2">link</span>
+              Copiar link
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
+              <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
+              QR Code
+            </DropdownMenuItem>
+            {typeof navigator.share === "function" && (
+              <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
+                Compartilhar
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* QR Code Modal */}
