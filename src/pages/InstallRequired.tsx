@@ -15,6 +15,7 @@ import {
   LogOut
 } from "lucide-react";
 import logo from "@/assets/soccer-vitae-logo.png";
+import logoText from "@/assets/soccervitae-logo-text.png";
 
 const InstallRequired = () => {
   const navigate = useNavigate();
@@ -67,13 +68,16 @@ const InstallRequired = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         {/* App Icon */}
-        <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-8 shadow-2xl shadow-primary/30">
+        <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-4 shadow-2xl shadow-primary/30">
           <img src={logo} alt="Soccer Vitae" className="w-20 h-20 object-contain" />
         </div>
 
+        {/* Logo Text */}
+        <img src={logoText} alt="Soccer Vitae" className="h-8 mb-6 object-contain" />
+
         {/* Title */}
-        <h1 className="text-2xl font-bold text-foreground mb-2 text-center">
-          Instale o Soccer Vitae
+        <h1 className="text-xl font-bold text-foreground mb-2 text-center">
+          Instale o App
         </h1>
         <p className="text-muted-foreground text-center mb-8 max-w-xs">
           Para uma melhor experiência, instale nosso app na tela inicial do seu dispositivo
