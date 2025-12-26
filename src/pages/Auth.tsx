@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
 import {
@@ -190,17 +190,63 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    
+    setResendingEmail(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao reenviar",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Email reenviado!",
+          description: "Verifique sua caixa de entrada e spam.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível reenviar o email.",
+      });
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setEmailNotConfirmed(false);
 
     const { error } = await signIn(email, password);
 
     if (error) {
+      // Check if it's an email not confirmed error
+      if (error.message.includes("Email not confirmed")) {
+        setEmailNotConfirmed(true);
+        setLoading(false);
+        return;
+      }
+
       toast({
         variant: "destructive",
         title: "Erro ao entrar",
@@ -283,6 +329,60 @@ const LoginForm = () => {
 
     setLoading(false);
   };
+
+  // Email not confirmed state - show friendly UI
+  if (emailNotConfirmed) {
+    return (
+      <div className="text-center py-6 space-y-6">
+        <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+          <Mail className="h-10 w-10 text-primary" />
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-foreground">
+            Confirme seu email
+          </h3>
+          <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>. 
+            Por favor, verifique sua caixa de entrada e spam.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Button
+            onClick={handleResendConfirmation}
+            variant="outline"
+            className="w-full h-12"
+            disabled={resendingEmail}
+          >
+            {resendingEmail ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Reenviando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Reenviar email de confirmação
+              </>
+            )}
+          </Button>
+          
+          <Button
+            onClick={() => setEmailNotConfirmed(false)}
+            variant="ghost"
+            className="w-full"
+          >
+            Tentar novamente com outro email
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Não recebeu o email? Verifique a pasta de spam ou lixo eletrônico.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -373,8 +473,46 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const { signUp } = useAuth();
   const { toast } = useToast();
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    
+    setResendingEmail(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao reenviar",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Email reenviado!",
+          description: "Verifique sua caixa de entrada e spam.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível reenviar o email.",
+      });
+    } finally {
+      setResendingEmail(false);
+    }
+  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -523,16 +661,66 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         title: "Erro ao criar conta",
         description: translateError(error.message),
       });
+      setLoading(false);
     } else {
-      toast({
-        title: "Conta criada!",
-        description: "Verifique seu email para confirmar o cadastro.",
-      });
-      onSuccess();
+      setSignupSuccess(true);
+      setLoading(false);
     }
-
-    setLoading(false);
   };
+
+  // Signup success state - show email confirmation screen
+  if (signupSuccess) {
+    return (
+      <div className="text-center py-6 space-y-6">
+        <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center animate-in zoom-in-50 duration-300">
+          <Mail className="h-10 w-10 text-emerald-600" />
+        </div>
+        
+        <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+          <h3 className="text-xl font-semibold text-foreground">
+            Verifique seu email!
+          </h3>
+          <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>. 
+            Clique no link para ativar sua conta.
+          </p>
+        </div>
+
+        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
+          <Button
+            onClick={handleResendConfirmation}
+            variant="outline"
+            className="w-full h-12"
+            disabled={resendingEmail}
+          >
+            {resendingEmail ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Reenviando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Reenviar email de confirmação
+              </>
+            )}
+          </Button>
+          
+          <Button
+            onClick={onSuccess}
+            className="w-full h-12"
+          >
+            Ir para o login
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Não recebeu o email? Verifique a pasta de spam ou lixo eletrônico.
+        </p>
+      </div>
+    );
+  }
 
   const isFormValid = 
     firstName.trim().length >= 2 && 
