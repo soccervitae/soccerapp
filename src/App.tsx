@@ -20,6 +20,7 @@ import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const AnimatedRoutes = () => {
         <Route path="/:username" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/:username/followers" element={<PageTransition><FollowList /></PageTransition>} />
         <Route path="/explore" element={<PageTransition><Explore /></PageTransition>} />
+        <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
         <Route path="/settings/profile" element={<ProtectedRoute><PageTransition><EditProfile /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/privacy" element={<ProtectedRoute><PageTransition><Privacy /></PageTransition></ProtectedRoute>} />
         <Route path="/settings/security" element={<ProtectedRoute><PageTransition><Security /></PageTransition></ProtectedRoute>} />
