@@ -8,7 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { RequirePwaInstall } from "@/components/RequirePwaInstall";
+
 import { ScrollToTop } from "@/components/ScrollToTop";
 import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 import SplashScreen from "@/components/SplashScreen";
@@ -25,7 +25,7 @@ import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
-import InstallRequired from "./pages/InstallRequired";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,89 +43,60 @@ const AnimatedRoutes = () => {
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
         
-        {/* Install required page - needs login but NOT PWA check (to avoid infinite loop) */}
-        <Route path="/install-required" element={
-          <ProtectedRoute>
-            <PageTransition><InstallRequired /></PageTransition>
-          </ProtectedRoute>
-        } />
-        
-        {/* Protected routes - require login AND PWA */}
+        {/* Protected routes - require login */}
         <Route path="/" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Index /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Index /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/profile" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Profile /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Profile /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/followers" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><FollowList /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><FollowList /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/:username" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Profile /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Profile /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/:username/followers" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><FollowList /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><FollowList /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/explore" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Explore /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Explore /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/settings/profile" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><EditProfile /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><EditProfile /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/settings/privacy" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Privacy /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Privacy /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/settings/security" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Security /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Security /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Messages /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Messages /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/messages/:conversationId" element={
           <ProtectedRoute>
-            <RequirePwaInstall>
-              <PageTransition><Chat /></PageTransition>
-            </RequirePwaInstall>
+            <PageTransition><Chat /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
