@@ -128,6 +128,7 @@ export const useCreatePost = () => {
       locationName,
       locationLat,
       locationLng,
+      musicTrackId,
     }: { 
       content: string; 
       mediaUrl?: string; 
@@ -135,6 +136,7 @@ export const useCreatePost = () => {
       locationName?: string;
       locationLat?: number;
       locationLng?: number;
+      musicTrackId?: string;
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -148,6 +150,7 @@ export const useCreatePost = () => {
           location_name: locationName || null,
           location_lat: locationLat || null,
           location_lng: locationLng || null,
+          music_track_id: musicTrackId || null,
         })
         .select()
         .single();
