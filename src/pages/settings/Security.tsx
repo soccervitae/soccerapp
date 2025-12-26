@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck, RefreshCw } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck, RefreshCw, LogOut, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,6 +64,12 @@ const Security = () => {
 
   // Current device fingerprint
   const [currentFingerprint, setCurrentFingerprint] = useState<string | null>(null);
+
+  // Session management state
+  const [showSignOutOthersConfirm, setShowSignOutOthersConfirm] = useState(false);
+  const [showSignOutAllConfirm, setShowSignOutAllConfirm] = useState(false);
+  const [isSigningOutOthers, setIsSigningOutOthers] = useState(false);
+  const [isSigningOutAll, setIsSigningOutAll] = useState(false);
 
   // Load current device fingerprint
   useEffect(() => {
@@ -239,6 +245,55 @@ const Security = () => {
   const handleNotifySecurityEventsChange = (checked: boolean) => {
     setNotifySecurityEvents(checked);
     updateSecuritySettings.mutate({ notify_security_events: checked });
+  };
+
+  // Sign out from other sessions (keep current)
+  const handleSignOutOthers = async () => {
+    setIsSigningOutOthers(true);
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "others" });
+      if (error) throw error;
+
+      // Also remove other devices from the list
+      if (user?.id && currentFingerprint) {
+        await supabase
+          .from("user_devices")
+          .delete()
+          .eq("user_id", user.id)
+          .neq("device_fingerprint", currentFingerprint);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["user-devices"] });
+      toast({ title: "Todas as outras sessões foram encerradas" });
+      setShowSignOutOthersConfirm(false);
+    } catch (error) {
+      console.error("Error signing out others:", error);
+      toast({ variant: "destructive", title: "Erro ao encerrar sessões" });
+    }
+    setIsSigningOutOthers(false);
+  };
+
+  // Sign out from ALL sessions (including current)
+  const handleSignOutAll = async () => {
+    setIsSigningOutAll(true);
+    try {
+      // Remove all devices for this user
+      if (user?.id) {
+        await supabase
+          .from("user_devices")
+          .delete()
+          .eq("user_id", user.id);
+      }
+
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) throw error;
+
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out all:", error);
+      toast({ variant: "destructive", title: "Erro ao encerrar sessões" });
+      setIsSigningOutAll(false);
+    }
   };
 
   const handleEnableTwoFactor = async () => {
@@ -781,6 +836,57 @@ const Security = () => {
             </div>
           </div>
         </section>
+
+        <Separator />
+
+        {/* Session Management Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <LogOut className="h-5 w-5 text-primary" />
+            <h2 className="text-base font-semibold">Gerenciamento de Sessões</h2>
+          </div>
+
+          <div className="space-y-3">
+            {/* Sign out other sessions */}
+            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+              <div className="space-y-1">
+                <p className="font-medium text-sm">Encerrar outras sessões</p>
+                <p className="text-xs text-muted-foreground">
+                  Encerra sessões em todos os outros dispositivos, mantendo apenas a sessão atual ativa.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowSignOutOthersConfirm(true)}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Encerrar outras sessões
+              </Button>
+            </div>
+
+            {/* Sign out all sessions */}
+            <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium text-sm text-destructive">Encerrar todas as sessões</p>
+                  <p className="text-xs text-muted-foreground">
+                    Você será deslogado de TODOS os dispositivos, incluindo este. Precisará fazer login novamente.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => setShowSignOutAllConfirm(true)}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Encerrar todas as sessões
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Remove Device Modal - Responsive */}
@@ -818,6 +924,30 @@ const Security = () => {
           </div>
         </ResponsiveModalContent>
       </ResponsiveModal>
+
+      {/* Sign Out Others Confirmation Modal */}
+      <ResponsiveAlertModal
+        open={showSignOutOthersConfirm}
+        onOpenChange={setShowSignOutOthersConfirm}
+        title="Encerrar outras sessões?"
+        description="Todos os outros dispositivos serão desconectados da sua conta. Apenas este dispositivo permanecerá logado."
+        cancelText="Cancelar"
+        confirmText={isSigningOutOthers ? "Encerrando..." : "Encerrar"}
+        onConfirm={handleSignOutOthers}
+        confirmVariant="default"
+      />
+
+      {/* Sign Out All Confirmation Modal */}
+      <ResponsiveAlertModal
+        open={showSignOutAllConfirm}
+        onOpenChange={setShowSignOutAllConfirm}
+        title="Encerrar TODAS as sessões?"
+        description="Você será deslogado de TODOS os dispositivos, incluindo este. Precisará fazer login novamente para acessar sua conta."
+        cancelText="Cancelar"
+        confirmText={isSigningOutAll ? "Encerrando..." : "Encerrar tudo"}
+        onConfirm={handleSignOutAll}
+        confirmVariant="destructive"
+      />
     </div>
   );
 };
