@@ -21,7 +21,7 @@ interface CreateReplaySheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "gallery" | "camera" | "video-recorder";
+type ViewMode = "default" | "gallery" | "video-recorder";
 
 // Fallback gallery images (used when device gallery is not available)
 const fallbackGalleryImages = [
@@ -46,7 +46,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [multiSelect, setMultiSelect] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType; blob?: Blob }[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("gallery");
+  const [viewMode, setViewMode] = useState<ViewMode>("default");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -67,31 +67,13 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     supportsGalleryPlugin
   } = useDeviceGallery();
 
-  // Auto-open native gallery picker on Android when sheet opens
-  const hasAutoOpenedGallery = useRef(false);
-  
+  // Load gallery when entering gallery view
   useEffect(() => {
-    if (open && isAndroid && !hasAutoOpenedGallery.current) {
-      hasAutoOpenedGallery.current = true;
-      // Small delay to ensure sheet is fully open
-      const timer = setTimeout(() => {
-        handlePickFromGallery();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-    
-    if (!open) {
-      hasAutoOpenedGallery.current = false;
-    }
-  }, [open, isAndroid]);
-
-  // Load gallery when sheet opens (only on iOS, Android uses native picker)
-  useEffect(() => {
-    if (open && supportsGalleryPlugin) {
+    if (open && viewMode === "gallery" && supportsGalleryPlugin) {
       const tabType = activeTab === "all" ? "all" : activeTab === "photos" ? "image" : "video";
       loadGallery({ type: tabType, limit: 50 });
     }
-  }, [open, supportsGalleryPlugin, activeTab, loadGallery]);
+  }, [open, viewMode, supportsGalleryPlugin, activeTab, loadGallery]);
 
   useEffect(() => {
     if (error || galleryError) {
@@ -101,7 +83,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
 
   useEffect(() => {
     if (!open) {
-      setViewMode("gallery");
+      setViewMode("default");
       clearGallery();
     }
   }, [open, clearGallery]);
@@ -112,6 +94,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
       setCapturedMedia(prev => [{ url: photo.webPath, type: "photo", blob: photo.blob }, ...prev]);
       setSelectedMedia(photo.webPath);
       setSelectedMediaType("photo");
+      setViewMode("gallery");
       toast.success("Foto capturada!");
     }
   };
@@ -131,6 +114,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
         const newItems = photos.map(p => ({ url: p.webPath, type: "photo" as MediaType, blob: p.blob }));
         setCapturedMedia(prev => [...newItems, ...prev]);
         setSelectedImages(photos.map(p => p.webPath));
+        setViewMode("gallery");
         toast.success(`${photos.length} imagem(ns) selecionada(s)!`);
       }
     } else {
@@ -139,7 +123,18 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
         setCapturedMedia(prev => [{ url: photo.webPath, type: "photo", blob: photo.blob }, ...prev]);
         setSelectedMedia(photo.webPath);
         setSelectedMediaType("photo");
+        setViewMode("gallery");
       }
+    }
+  };
+
+  const handleOpenGallery = () => {
+    if (isAndroid) {
+      // On Android, open native picker directly
+      handlePickFromGallery();
+    } else {
+      // On iOS/Web, show gallery grid
+      setViewMode("gallery");
     }
   };
 
@@ -189,7 +184,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     setSelectedMedia(null);
     setSelectedImages([]);
     setMultiSelect(false);
-    setViewMode("gallery");
+    setViewMode("default");
     onOpenChange(false);
   };
 
@@ -240,12 +235,13 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     return (
       <VideoRecorder
         onVideoRecorded={handleVideoRecorded}
-        onClose={() => setViewMode("gallery")}
+        onClose={() => setViewMode("default")}
       />
     );
   }
 
-  const content = (
+  // Default view - Media selection options
+  const defaultContent = (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -256,9 +252,90 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
           <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
         </button>
         
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold text-foreground">Novo Replay</span>
+        <span className="text-base font-semibold text-foreground">Novo Replay</span>
+        
+        <div className="w-10" />
+      </div>
+
+      {/* Main Content - Options */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+        {/* Main Gallery Button */}
+        <button
+          onClick={handleOpenGallery}
+          disabled={isLoading}
+          className="w-full max-w-sm bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl p-6 flex flex-col items-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+        >
+          <div className="w-16 h-16 bg-primary-foreground/20 rounded-full flex items-center justify-center">
+            <span className="material-symbols-outlined text-[32px]">photo_library</span>
+          </div>
+          <div className="text-center">
+            <p className="font-semibold text-lg">Escolher da Galeria</p>
+            <p className="text-sm opacity-80 mt-1">Selecione suas fotos e vídeos</p>
+          </div>
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 w-full max-w-sm">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-muted-foreground text-sm">ou</span>
+          <div className="flex-1 h-px bg-border" />
         </div>
+
+        {/* Secondary Options */}
+        <div className="flex gap-4 w-full max-w-sm">
+          {/* Take Photo */}
+          <button
+            onClick={handleTakePhoto}
+            disabled={isLoading}
+            className="flex-1 bg-muted hover:bg-muted/80 rounded-2xl p-5 flex flex-col items-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+          >
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+              <span className="material-symbols-outlined text-[24px] text-primary">photo_camera</span>
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-foreground">Tirar Foto</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Usar câmera</p>
+            </div>
+          </button>
+
+          {/* Record Video */}
+          <button
+            onClick={() => setViewMode("video-recorder")}
+            className="flex-1 bg-muted hover:bg-muted/80 rounded-2xl p-5 flex flex-col items-center gap-3 transition-all active:scale-[0.98]"
+          >
+            <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center">
+              <span className="material-symbols-outlined text-[24px] text-red-500">videocam</span>
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-foreground">Gravar Vídeo</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Até 45 segundos</p>
+            </div>
+          </button>
+        </div>
+
+        {isLoading && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm">Carregando...</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Gallery view - Media selection grid
+  const galleryContent = (
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <button 
+          onClick={() => setViewMode("default")}
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+        >
+          <span className="material-symbols-outlined text-[24px] text-foreground">arrow_back</span>
+        </button>
+        
+        <span className="text-base font-semibold text-foreground">Novo Replay</span>
         
         <Button 
           onClick={handlePublish}
@@ -399,22 +476,6 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
           </div>
         )}
 
-        {isAndroid && (
-          <div className="px-4 py-2 bg-primary/10 border-b border-border">
-            <button 
-              onClick={handlePickFromGallery}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-[20px]">photo_library</span>
-              Escolher da Galeria
-            </button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Toque acima para abrir a galeria do seu dispositivo
-            </p>
-          </div>
-        )}
-
         {/* Gallery Grid */}
         <div 
           ref={scrollContainerRef}
@@ -533,6 +594,8 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
       </div>
     </div>
   );
+
+  const content = viewMode === "default" ? defaultContent : galleryContent;
 
   if (isMobile) {
     return (
