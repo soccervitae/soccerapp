@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.png", "placeholder.svg"],
       manifest: {
         name: "SOCCER VITAE - Onde talentos encontram oportunidades.",
-        short_name: "Soccer Vitae",
+        short_name: "SOCCER VITAE",
         description: "Onde talentos encontram oportunidades.",
         theme_color: "#426F42",
         background_color: "#426F42",
