@@ -25,7 +25,7 @@ const PwaInstallPrompt = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="text-primary-foreground font-semibold text-sm sm:text-base truncate">
-                  Instale o Soccer Vitae
+                  Instale o SOCCER VITAE
                 </h3>
                 <p className="text-primary-foreground/80 text-xs sm:text-sm truncate">
                   Acesse mais rápido direto da sua tela inicial

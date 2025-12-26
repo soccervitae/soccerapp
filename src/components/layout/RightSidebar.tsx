@@ -132,7 +132,7 @@ export const RightSidebar = () => {
         <p className="text-xs text-muted-foreground">
           Sobre • Ajuda • Privacidade • Termos
         </p>
-        <p className="text-xs text-muted-foreground mt-1">© 2025 Soccer Vitae</p>
+        <p className="text-xs text-muted-foreground mt-1">© 2025 SOCCER VITAE</p>
       </div>
     </aside>
   );
