@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { usePostComments, useCreateComment, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 interface CommentsSheetProps {
   post: Post;
@@ -52,13 +50,13 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl">
-        <SheetHeader className="border-b border-border pb-4">
-          <SheetTitle className="text-center">Comentários</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="sm:max-w-lg h-[70vh] sm:h-[500px] flex flex-col">
+        <ResponsiveModalHeader className="border-b border-border pb-4">
+          <ResponsiveModalTitle className="text-center">Comentários</ResponsiveModalTitle>
+        </ResponsiveModalHeader>
         
-        <ScrollArea className="h-[calc(100%-120px)] py-4">
+        <ScrollArea className="flex-1 py-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -108,7 +106,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
         </ScrollArea>
 
         {/* Comment input */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-background p-4">
+        <div className="border-t border-border bg-background p-4 mt-auto">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
               {user ? (
@@ -140,7 +138,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
             )}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

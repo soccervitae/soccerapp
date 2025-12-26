@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -16,8 +17,10 @@ import {
   DrawerTitle,
   DrawerFooter,
   DrawerClose,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface ResponsiveModalProps {
@@ -133,6 +136,32 @@ export function ResponsiveModalFooter({ children, className }: ResponsiveModalFo
   }
 
   return <DialogFooter className={className}>{children}</DialogFooter>;
+}
+
+// Trigger component for sheets with triggers
+interface ResponsiveModalTriggerProps {
+  children: React.ReactNode;
+  asChild?: boolean;
+}
+
+export function ResponsiveModalTrigger({ children, asChild }: ResponsiveModalTriggerProps) {
+  const { isMobile } = React.useContext(ResponsiveModalContext);
+
+  if (isMobile) {
+    return <DrawerTrigger asChild={asChild}>{children}</DrawerTrigger>;
+  }
+
+  return <DialogTrigger asChild={asChild}>{children}</DialogTrigger>;
+}
+
+// ScrollArea wrapper for consistent scrolling
+interface ResponsiveModalScrollAreaProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function ResponsiveModalScrollArea({ children, className }: ResponsiveModalScrollAreaProps) {
+  return <ScrollArea className={cn("flex-1", className)}>{children}</ScrollArea>;
 }
 
 // Alert Modal for confirmations

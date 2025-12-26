@@ -13,12 +13,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+  ResponsiveModalTrigger,
+} from "@/components/ui/responsive-modal";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -93,17 +94,17 @@ const Messages = () => {
           <h1 className="text-lg font-semibold">Mensagens</h1>
         </div>
 
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
+        <ResponsiveModal open={sheetOpen} onOpenChange={setSheetOpen}>
+          <ResponsiveModalTrigger asChild>
             <Button variant="ghost" size="icon">
               <MessageSquarePlus className="h-5 w-5" />
             </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh]">
-            <SheetHeader>
-              <SheetTitle>Nova Conversa</SheetTitle>
-            </SheetHeader>
-            <div className="mt-4 space-y-4">
+          </ResponsiveModalTrigger>
+          <ResponsiveModalContent className="sm:max-w-md h-[80vh] sm:h-[500px] flex flex-col">
+            <ResponsiveModalHeader>
+              <ResponsiveModalTitle>Nova Conversa</ResponsiveModalTitle>
+            </ResponsiveModalHeader>
+            <div className="mt-4 space-y-4 flex-1 flex flex-col">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -114,42 +115,44 @@ const Messages = () => {
                 />
               </div>
 
-              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                {isSearching && (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                )}
-
-                {!isSearching && searchResults.length === 0 && searchQuery.length >= 2 && (
-                  <p className="text-center text-muted-foreground py-4">
-                    Nenhum usuário encontrado
-                  </p>
-                )}
-
-                {searchResults.map((profile) => (
-                  <button
-                    key={profile.id}
-                    onClick={() => handleStartConversation(profile.id)}
-                    disabled={isCreating}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors rounded-lg disabled:opacity-50"
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={profile.avatar_url || ""} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getInitials(profile.full_name || profile.username)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="text-left">
-                      <p className="font-medium">{profile.full_name || profile.username}</p>
-                      <p className="text-sm text-muted-foreground">@{profile.username}</p>
+              <ScrollArea className="flex-1">
+                <div className="space-y-2">
+                  {isSearching && (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                  </button>
-                ))}
-              </div>
+                  )}
+
+                  {!isSearching && searchResults.length === 0 && searchQuery.length >= 2 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      Nenhum usuário encontrado
+                    </p>
+                  )}
+
+                  {searchResults.map((profile) => (
+                    <button
+                      key={profile.id}
+                      onClick={() => handleStartConversation(profile.id)}
+                      disabled={isCreating}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors rounded-lg disabled:opacity-50"
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={profile.avatar_url || ""} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {getInitials(profile.full_name || profile.username)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left">
+                        <p className="font-medium">{profile.full_name || profile.username}</p>
+                        <p className="text-sm text-muted-foreground">@{profile.username}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
-          </SheetContent>
-        </Sheet>
+          </ResponsiveModalContent>
+        </ResponsiveModal>
       </div>
 
       {/* Content */}

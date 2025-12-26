@@ -2,13 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Separator } from "@/components/ui/separator";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProfileSettingsSheetProps {
   open: boolean;
@@ -73,92 +74,94 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl px-0 pb-8">
-        <SheetHeader className="px-4 pb-2">
-          <SheetTitle className="text-center">Configurações</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="sm:max-w-md">
+        <ResponsiveModalHeader className="px-4 pb-2">
+          <ResponsiveModalTitle className="text-center">Configurações</ResponsiveModalTitle>
+        </ResponsiveModalHeader>
 
-        <div className="mt-4 space-y-2">
-          {/* Conta */}
-          <div>
-            <SectionHeader title="Conta" />
-            <SettingsItem
-              icon="person"
-              label="Editar perfil"
-              onClick={() => handleNavigation("/settings/profile")}
-            />
-            <SettingsItem
-              icon="lock"
-              label="Privacidade"
-              onClick={() => handleNavigation("/settings/privacy")}
-            />
-            <SettingsItem
-              icon="shield"
-              label="Segurança"
-              onClick={() => handleNavigation("/settings/security")}
-            />
-            <SettingsItem
-              icon="notifications"
-              label="Notificações"
-              onClick={() => handleComingSoon("Notificações")}
-            />
+        <ScrollArea className="max-h-[60vh]">
+          <div className="mt-4 space-y-2 pb-4">
+            {/* Conta */}
+            <div>
+              <SectionHeader title="Conta" />
+              <SettingsItem
+                icon="person"
+                label="Editar perfil"
+                onClick={() => handleNavigation("/settings/profile")}
+              />
+              <SettingsItem
+                icon="lock"
+                label="Privacidade"
+                onClick={() => handleNavigation("/settings/privacy")}
+              />
+              <SettingsItem
+                icon="shield"
+                label="Segurança"
+                onClick={() => handleNavigation("/settings/security")}
+              />
+              <SettingsItem
+                icon="notifications"
+                label="Notificações"
+                onClick={() => handleComingSoon("Notificações")}
+              />
+            </div>
+
+            <Separator className="my-2" />
+
+            {/* Preferências */}
+            <div>
+              <SectionHeader title="Preferências" />
+              <SettingsItem
+                icon="language"
+                label="Idioma"
+                onClick={() => handleComingSoon("Idioma")}
+              />
+              <SettingsItem
+                icon="dark_mode"
+                label="Tema"
+                onClick={() => handleComingSoon("Tema")}
+              />
+              <SettingsItem
+                icon="info"
+                label="Sobre"
+                onClick={() => handleComingSoon("Sobre")}
+              />
+              {!isInstalled && (
+                <>
+                  {isInstallable ? (
+                    <SettingsItem
+                      icon="download"
+                      label="Instalar App"
+                      onClick={handleInstallApp}
+                      variant="primary"
+                    />
+                  ) : (
+                    <SettingsItem
+                      icon="phone_android"
+                      label="Como instalar o app"
+                      onClick={() => handleNavigation("/install")}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+
+            <Separator className="my-2" />
+
+            {/* Sessão */}
+            <div>
+              <SectionHeader title="Sessão" />
+              <SettingsItem
+                icon="logout"
+                label="Sair da conta"
+                onClick={handleLogout}
+                variant="danger"
+              />
+            </div>
           </div>
-
-          <Separator className="my-2" />
-
-          {/* Preferências */}
-          <div>
-            <SectionHeader title="Preferências" />
-            <SettingsItem
-              icon="language"
-              label="Idioma"
-              onClick={() => handleComingSoon("Idioma")}
-            />
-            <SettingsItem
-              icon="dark_mode"
-              label="Tema"
-              onClick={() => handleComingSoon("Tema")}
-            />
-            <SettingsItem
-              icon="info"
-              label="Sobre"
-              onClick={() => handleComingSoon("Sobre")}
-            />
-            {!isInstalled && (
-              <>
-                {isInstallable ? (
-                  <SettingsItem
-                    icon="download"
-                    label="Instalar App"
-                    onClick={handleInstallApp}
-                    variant="primary"
-                  />
-                ) : (
-                  <SettingsItem
-                    icon="phone_android"
-                    label="Como instalar o app"
-                    onClick={() => handleNavigation("/install")}
-                  />
-                )}
-              </>
-            )}
-          </div>
-
-          <Separator className="my-2" />
-
-          {/* Sessão */}
-          <div>
-            <SectionHeader title="Sessão" />
-            <SettingsItem
-              icon="logout"
-              label="Sair da conta"
-              onClick={handleLogout}
-              variant="danger"
-            />
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </ScrollArea>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };
