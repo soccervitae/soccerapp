@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
+import PwaUpdatePrompt from "@/components/pwa/PwaUpdatePrompt";
 import SplashScreen from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -92,6 +93,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <PwaInstallPrompt />
+          <PwaUpdatePrompt />
           <BrowserRouter>
             <ScrollToTop />
             <AnimatedRoutes />
