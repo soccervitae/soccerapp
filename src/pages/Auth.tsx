@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
+import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -193,6 +194,7 @@ const LoginForm = () => {
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [rememberDevice, setRememberDevice] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -274,6 +276,11 @@ const LoginForm = () => {
     if (user) {
       // Register device automatically (pass email for new device notification)
       await registerDevice(user.id, email);
+
+      // If "remember device" is checked, trust the device for 30 days
+      if (rememberDevice) {
+        await trustCurrentDevice(user.id);
+      }
 
       // Check if user has 2FA enabled
       const { data: profile } = await supabase
@@ -442,7 +449,20 @@ const LoginForm = () => {
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         </div>
-        <div className="text-right">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="remember-device" 
+              checked={rememberDevice}
+              onCheckedChange={(checked) => setRememberDevice(checked === true)}
+            />
+            <label 
+              htmlFor="remember-device" 
+              className="text-sm text-muted-foreground cursor-pointer select-none"
+            >
+              Lembrar deste dispositivo
+            </label>
+          </div>
           <Link
             to="/forgot-password"
             className="text-sm text-primary hover:underline"
