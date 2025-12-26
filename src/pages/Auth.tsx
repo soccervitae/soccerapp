@@ -381,6 +381,30 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     return emailRegex.test(email);
   };
 
+  const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
+    if (pwd.length === 0) return { score: 0, label: "", color: "" };
+    
+    let score = 0;
+    
+    // Length checks
+    if (pwd.length >= 6) score += 1;
+    if (pwd.length >= 8) score += 1;
+    if (pwd.length >= 12) score += 1;
+    
+    // Character variety checks
+    if (/[a-z]/.test(pwd)) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^a-zA-Z0-9]/.test(pwd)) score += 1;
+    
+    if (score <= 2) return { score: 1, label: "Fraca", color: "bg-destructive" };
+    if (score <= 4) return { score: 2, label: "Média", color: "bg-yellow-500" };
+    if (score <= 5) return { score: 3, label: "Boa", color: "bg-emerald-400" };
+    return { score: 4, label: "Forte", color: "bg-emerald-600" };
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (value.length === 0) {
@@ -612,8 +636,34 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         </div>
-        {password.length > 0 && password.length < 6 && (
-          <p className="text-xs text-destructive">A senha deve ter pelo menos 6 caracteres</p>
+        {/* Password Strength Indicator */}
+        {password.length > 0 && (
+          <div className="space-y-1.5">
+            <div className="flex gap-1">
+              {[1, 2, 3, 4].map((level) => (
+                <div
+                  key={level}
+                  className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                    passwordStrength.score >= level
+                      ? passwordStrength.color
+                      : "bg-muted"
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="flex justify-between items-center">
+              <p className={`text-xs ${
+                passwordStrength.score <= 1 ? "text-destructive" : 
+                passwordStrength.score === 2 ? "text-yellow-600" : 
+                "text-emerald-600"
+              }`}>
+                Força: {passwordStrength.label}
+              </p>
+              {password.length < 6 && (
+                <p className="text-xs text-destructive">Mínimo 6 caracteres</p>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
