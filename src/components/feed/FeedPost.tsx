@@ -4,6 +4,7 @@ import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, 
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
+import { PostMusicPlayer } from "./PostMusicPlayer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -404,6 +405,15 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           <span className="material-symbols-outlined text-[16px]">location_on</span>
           <span className="truncate">{post.location_name}</span>
         </a>
+      )}
+
+      {/* Music Player */}
+      {post.music_track && (
+        <PostMusicPlayer
+          track={post.music_track}
+          startSeconds={post.music_start_seconds ?? 0}
+          endSeconds={post.music_end_seconds ?? post.music_track.duration_seconds}
+        />
       )}
 
       {/* Caption */}

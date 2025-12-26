@@ -14,7 +14,7 @@ import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useDeviceGallery, GalleryMedia } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "./VideoRecorder";
 import { MusicPicker } from "./MusicPicker";
-import { MusicTrack } from "@/hooks/useMusic";
+import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 
 interface CreateReplaySheetProps {
   open: boolean;
@@ -50,7 +50,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; type: MediaType; blob?: Blob }[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("default");
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
-  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
+  const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { takePhoto, pickFromGallery, pickMultipleFromGallery, isLoading, error, isNative } = useDeviceCamera();
@@ -266,9 +266,10 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
         onConfirm={() => {
           setViewMode("default");
           if (selectedMusic) {
-            toast.success(`Música "${selectedMusic.title}" adicionada!`);
+            toast.success(`Música "${selectedMusic.track.title}" adicionada!`);
           }
         }}
+        maxTrimDuration={15}
       />
     );
 
@@ -380,8 +381,10 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
           <div className="absolute bottom-16 left-4 right-4 flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-lg">
             <span className="material-symbols-outlined text-[18px] text-white animate-pulse">music_note</span>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium truncate">{selectedMusic.title}</p>
-              <p className="text-white/60 text-[10px] truncate">{selectedMusic.artist}</p>
+              <p className="text-white text-xs font-medium truncate">{selectedMusic.track.title}</p>
+              <p className="text-white/60 text-[10px] truncate">
+                {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
+              </p>
             </div>
             <button
               onClick={() => setSelectedMusic(null)}

@@ -18,6 +18,17 @@ export interface Post {
   location_name: string | null;
   location_lat: number | null;
   location_lng: number | null;
+  music_track_id: string | null;
+  music_start_seconds: number | null;
+  music_end_seconds: number | null;
+  music_track: {
+    id: string;
+    title: string;
+    artist: string;
+    audio_url: string;
+    duration_seconds: number;
+    cover_url: string | null;
+  } | null;
   profile: {
     id: string;
     username: string;
@@ -60,6 +71,14 @@ export const usePosts = () => {
             position,
             team,
             conta_verificada
+          ),
+          music_track:music_tracks (
+            id,
+            title,
+            artist,
+            audio_url,
+            duration_seconds,
+            cover_url
           )
         `)
         .order("created_at", { ascending: false });
@@ -129,6 +148,8 @@ export const useCreatePost = () => {
       locationLat,
       locationLng,
       musicTrackId,
+      musicStartSeconds,
+      musicEndSeconds,
     }: { 
       content: string; 
       mediaUrl?: string; 
@@ -137,6 +158,8 @@ export const useCreatePost = () => {
       locationLat?: number;
       locationLng?: number;
       musicTrackId?: string;
+      musicStartSeconds?: number;
+      musicEndSeconds?: number;
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -151,6 +174,8 @@ export const useCreatePost = () => {
           location_lat: locationLat || null,
           location_lng: locationLng || null,
           music_track_id: musicTrackId || null,
+          music_start_seconds: musicStartSeconds ?? null,
+          music_end_seconds: musicEndSeconds ?? null,
         })
         .select()
         .single();

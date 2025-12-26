@@ -13,6 +13,12 @@ export interface MusicTrack {
   play_count: number;
 }
 
+export interface SelectedMusicWithTrim {
+  track: MusicTrack;
+  startSeconds: number;
+  endSeconds: number;
+}
+
 export const MUSIC_CATEGORIES = [
   { id: "all", label: "Todas", icon: "music_note" },
   { id: "energia", label: "Energia", icon: "bolt" },
