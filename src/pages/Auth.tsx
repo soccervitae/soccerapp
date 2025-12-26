@@ -107,7 +107,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header with stadium background effect */}
-      <div className="relative h-64 bg-gradient-to-b from-zinc-900 via-zinc-800 to-zinc-900 flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative h-56 bg-gradient-to-b from-zinc-900 via-zinc-800 to-zinc-900 flex flex-col items-center justify-center overflow-hidden">
         {/* Stadium lights effect */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
@@ -116,17 +116,11 @@ const Auth = () => {
         </div>
         
         {/* Logo */}
-        <div className="relative z-10 w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
-          <span className="text-4xl">⚽</span>
-        </div>
-        
-        {/* Title */}
-        <h1 className="relative z-10 text-2xl font-bold text-white mb-2">
-          Conecte-se ao Jogo
-        </h1>
-        <p className="relative z-10 text-sm text-zinc-400 text-center px-8 max-w-sm">
-          A rede social definitiva para atletas que querem chegar ao próximo nível.
-        </p>
+        <img 
+          src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
+          alt="Soccer Vitae"
+          className="relative z-10 h-32 w-auto object-contain"
+        />
       </div>
 
       {/* Auth Card */}
