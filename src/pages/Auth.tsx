@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Social Login Buttons Component
 const SocialLoginButtons = () => {
@@ -357,61 +364,21 @@ interface SignupFormProps {
 }
 
 const SignupForm = ({ onSuccess }: SignupFormProps) => {
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { signUp } = useAuth();
   const { toast } = useToast();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  };
-
-  const checkUsernameAvailability = async (usernameToCheck: string) => {
-    if (usernameToCheck.length < 3) {
-      setUsernameStatus("idle");
-      return;
-    }
-
-    setUsernameStatus("checking");
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("username", usernameToCheck)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error checking username:", error);
-      setUsernameStatus("idle");
-      return;
-    }
-
-    setUsernameStatus(data ? "taken" : "available");
-  };
-
-  const handleUsernameChange = (value: string) => {
-    // Normalize: lowercase, only letters, numbers and underscore
-    const normalized = value.toLowerCase().replace(/[^a-z0-9_]/g, "");
-    setUsername(normalized);
-    setUsernameStatus("idle");
-
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    if (normalized.length >= 3) {
-      debounceTimeoutRef.current = setTimeout(() => {
-        checkUsernameAvailability(normalized);
-      }, 500);
-    }
   };
 
   const handleEmailChange = (value: string) => {
@@ -424,14 +391,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       setEmailStatus("invalid");
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const translateError = (errorMessage: string): string => {
     if (errorMessage.includes("User already registered")) {
@@ -452,20 +411,29 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (username.length < 3) {
+    if (firstName.trim().length < 2) {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "O nome de usuário deve ter pelo menos 3 caracteres",
+        description: "O nome deve ter pelo menos 2 caracteres",
       });
       return;
     }
 
-    if (usernameStatus === "taken") {
+    if (lastName.trim().length < 2) {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Este nome de usuário já está em uso",
+        description: "O sobrenome deve ter pelo menos 2 caracteres",
+      });
+      return;
+    }
+
+    if (!gender) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, selecione seu sexo",
       });
       return;
     }
@@ -499,7 +467,13 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, username);
+    const { error } = await signUp({
+      email,
+      password,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      gender,
+    });
 
     if (error) {
       toast({
@@ -519,48 +493,72 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   };
 
   const isFormValid = 
-    username.length >= 3 && 
-    usernameStatus !== "taken" && 
-    usernameStatus !== "checking" &&
+    firstName.trim().length >= 2 && 
+    lastName.trim().length >= 2 &&
+    gender !== "" &&
     emailStatus === "valid" &&
     password.length >= 6 &&
     password === confirmPassword;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="signup-username" className="text-xs font-semibold uppercase text-muted-foreground">
-          Nome de usuário
-        </Label>
-        <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            id="signup-username"
-            type="text"
-            placeholder="seu_username"
-            value={username}
-            onChange={(e) => handleUsernameChange(e.target.value)}
-            className="pl-10 pr-10 h-12 bg-muted/50 border-0"
-            maxLength={20}
-            required
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {usernameStatus === "checking" && (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            )}
-            {usernameStatus === "available" && (
-              <Check className="h-4 w-4 text-green-500" />
-            )}
-            {usernameStatus === "taken" && (
-              <X className="h-4 w-4 text-destructive" />
-            )}
+      {/* Nome e Sobrenome em linha */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
+            Nome
+          </Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              id="signup-firstname"
+              type="text"
+              placeholder="João"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="pl-10 h-12 bg-muted/50 border-0"
+              maxLength={30}
+              required
+            />
           </div>
         </div>
-        {usernameStatus === "taken" && (
-          <p className="text-xs text-destructive">Este nome de usuário já está em uso</p>
-        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
+            Sobrenome
+          </Label>
+          <Input
+            id="signup-lastname"
+            type="text"
+            placeholder="Silva"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="h-12 bg-muted/50 border-0"
+            maxLength={50}
+            required
+          />
+        </div>
       </div>
 
+      {/* Sexo */}
+      <div className="space-y-2">
+        <Label htmlFor="signup-gender" className="text-xs font-semibold uppercase text-muted-foreground">
+          Sexo
+        </Label>
+        <Select value={gender} onValueChange={setGender}>
+          <SelectTrigger className="h-12 bg-muted/50 border-0">
+            <SelectValue placeholder="Selecione seu sexo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="masculino">Masculino</SelectItem>
+            <SelectItem value="feminino">Feminino</SelectItem>
+            <SelectItem value="outro">Outro</SelectItem>
+            <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
           Email
@@ -590,6 +588,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         )}
       </div>
 
+      {/* Senha */}
       <div className="space-y-2">
         <Label htmlFor="signup-password" className="text-xs font-semibold uppercase text-muted-foreground">
           Senha
@@ -618,6 +617,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         )}
       </div>
 
+      {/* Confirmar Senha */}
       <div className="space-y-2">
         <Label htmlFor="signup-confirm" className="text-xs font-semibold uppercase text-muted-foreground">
           Confirmar Senha
