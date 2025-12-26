@@ -108,6 +108,13 @@
   }
 }
 
+/* Orientation lock - show overlay in landscape on mobile */
+@media (orientation: landscape) and (max-height: 500px) {
+  .orientation-lock-overlay {
+    display: flex !important;
+  }
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
