@@ -59,7 +59,7 @@ export const CreateMenuSheet = ({
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
-      <ResponsiveModalContent className="sm:max-w-md">
+      <ResponsiveModalContent className="sm:max-w-md" useFullHeight>
         <ResponsiveModalHeader className="pb-4">
           <ResponsiveModalTitle className="text-center">O que você quer criar?</ResponsiveModalTitle>
         </ResponsiveModalHeader>

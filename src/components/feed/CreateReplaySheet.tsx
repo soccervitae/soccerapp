@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,7 @@ const fallbackGalleryImages = [
 
 export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: CreateReplaySheetProps) => {
   const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);
@@ -620,7 +622,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="h-[95vh] p-0">
+        <DrawerContent className={`${isPWA ? "h-full" : "h-[90vh]"} p-0`}>
           {mainContent}
         </DrawerContent>
       </Drawer>
