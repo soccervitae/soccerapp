@@ -144,8 +144,8 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Social Login */}
-          <SocialLoginButtons />
+          {/* Social Login - only show on login tab */}
+          {activeTab === "login" && <SocialLoginButtons />}
 
           {/* Toggle text */}
           <div className="mt-8 text-center">
