@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ interface ResponsiveModalProps {
 interface ResponsiveModalContentProps {
   children: React.ReactNode;
   className?: string;
+  useFullHeight?: boolean;
 }
 
 interface ResponsiveModalHeaderProps {
@@ -54,16 +56,18 @@ interface ResponsiveModalFooterProps {
   className?: string;
 }
 
-const ResponsiveModalContext = React.createContext<{ isMobile: boolean }>({
+const ResponsiveModalContext = React.createContext<{ isMobile: boolean; isPWA: boolean }>({
   isMobile: false,
+  isPWA: false,
 });
 
 export function ResponsiveModal({ open, onOpenChange, children }: ResponsiveModalProps) {
   const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
 
   if (isMobile) {
     return (
-      <ResponsiveModalContext.Provider value={{ isMobile: true }}>
+      <ResponsiveModalContext.Provider value={{ isMobile: true, isPWA }}>
         <Drawer open={open} onOpenChange={onOpenChange}>
           {children}
         </Drawer>
@@ -72,7 +76,7 @@ export function ResponsiveModal({ open, onOpenChange, children }: ResponsiveModa
   }
 
   return (
-    <ResponsiveModalContext.Provider value={{ isMobile: false }}>
+    <ResponsiveModalContext.Provider value={{ isMobile: false, isPWA }}>
       <Dialog open={open} onOpenChange={onOpenChange}>
         {children}
       </Dialog>
@@ -80,19 +84,29 @@ export function ResponsiveModal({ open, onOpenChange, children }: ResponsiveModa
   );
 }
 
-export function ResponsiveModalContent({ children, className }: ResponsiveModalContentProps) {
-  const { isMobile } = React.useContext(ResponsiveModalContext);
+export function ResponsiveModalContent({ children, className, useFullHeight = false }: ResponsiveModalContentProps) {
+  const { isMobile, isPWA } = React.useContext(ResponsiveModalContext);
+
+  // Para sheets com useFullHeight: PWA = 100%, Web = 90vh
+  const shouldUseFullHeight = useFullHeight && isPWA;
 
   if (isMobile) {
     return (
-      <DrawerContent className={cn("px-4 pb-6", className)}>
+      <DrawerContent 
+        fullHeight={shouldUseFullHeight}
+        className={cn(
+          "px-4 pb-6",
+          useFullHeight && !isPWA && "h-[90vh]",
+          className
+        )}
+      >
         {children}
       </DrawerContent>
     );
   }
 
   return (
-    <DialogContent className={className}>
+    <DialogContent className={cn(useFullHeight && "h-[90vh]", className)}>
       {children}
     </DialogContent>
   );

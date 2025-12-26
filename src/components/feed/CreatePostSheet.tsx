@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,7 @@ const MAX_PHOTOS = 10;
 
 export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) => {
   const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
   const { data: profile } = useProfile();
   const [caption, setCaption] = useState("");
   const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
@@ -917,7 +919,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="h-full rounded-t-none p-0">
+        <DrawerContent className={`${isPWA ? "h-full rounded-t-none" : "h-[90vh]"} p-0`}>
           {defaultContent}
         </DrawerContent>
       </Drawer>
