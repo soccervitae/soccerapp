@@ -1,9 +1,9 @@
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 
 type CreateOption = "post" | "replay" | "championship" | "achievement";
 
@@ -58,11 +58,11 @@ export const CreateMenuSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl pb-10">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="text-center">O que você quer criar?</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="sm:max-w-md">
+        <ResponsiveModalHeader className="pb-4">
+          <ResponsiveModalTitle className="text-center">O que você quer criar?</ResponsiveModalTitle>
+        </ResponsiveModalHeader>
 
         <div className="flex flex-col gap-2 px-2">
           {menuOptions.map((option) => (
@@ -83,7 +83,7 @@ export const CreateMenuSheet = ({
             </button>
           ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

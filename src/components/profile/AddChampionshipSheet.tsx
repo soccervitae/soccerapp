@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddChampionship } from "@/hooks/useProfile";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AddChampionshipSheetProps {
   open: boolean;
@@ -71,116 +72,118 @@ export const AddChampionshipSheet = ({ open, onOpenChange }: AddChampionshipShee
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="flex items-center gap-2">
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="sm:max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] flex flex-col">
+        <ResponsiveModalHeader className="pb-4">
+          <ResponsiveModalTitle className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">emoji_events</span>
             Adicionar Campeonato
-          </SheetTitle>
-        </SheetHeader>
+          </ResponsiveModalTitle>
+        </ResponsiveModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pb-8">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome do Campeonato *</Label>
-            <Input
-              id="name"
-              placeholder="Ex: Campeonato Brasileiro"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        <ScrollArea className="flex-1">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-8 px-1">
             <div className="space-y-2">
-              <Label htmlFor="year">Ano *</Label>
-              <Select value={year} onValueChange={setYear} required>
-                <SelectTrigger id="year">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="position">Posição</Label>
-              <Select value={position} onValueChange={setPosition}>
-                <SelectTrigger id="position">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positions.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="team">Time</Label>
-            <Input
-              id="team"
-              placeholder="Ex: Flamengo"
-              value={team}
-              onChange={(e) => setTeam(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="games">Jogos Disputados</Label>
+              <Label htmlFor="name">Nome do Campeonato *</Label>
               <Input
-                id="games"
-                type="number"
-                placeholder="0"
-                min="0"
-                value={games}
-                onChange={(e) => setGames(e.target.value)}
+                id="name"
+                placeholder="Ex: Campeonato Brasileiro"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="year">Ano *</Label>
+                <Select value={year} onValueChange={setYear} required>
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((y) => (
+                      <SelectItem key={y} value={y.toString()}>
+                        {y}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="position">Posição</Label>
+                <Select value={position} onValueChange={setPosition}>
+                  <SelectTrigger id="position">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {positions.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="goals">Gols Marcados</Label>
+              <Label htmlFor="team">Time</Label>
               <Input
-                id="goals"
-                type="number"
-                placeholder="0"
-                min="0"
-                value={goals}
-                onChange={(e) => setGoals(e.target.value)}
+                id="team"
+                placeholder="Ex: Flamengo"
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
               />
             </div>
-          </div>
 
-          <Button 
-            type="submit" 
-            className="w-full mt-6" 
-            disabled={!name.trim() || !year || addChampionship.isPending}
-          >
-            {addChampionship.isPending ? (
-              <>
-                <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
-                Salvando...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined mr-2">save</span>
-                Salvar Campeonato
-              </>
-            )}
-          </Button>
-        </form>
-      </SheetContent>
-    </Sheet>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="games">Jogos Disputados</Label>
+                <Input
+                  id="games"
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  value={games}
+                  onChange={(e) => setGames(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="goals">Gols Marcados</Label>
+                <Input
+                  id="goals"
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  value={goals}
+                  onChange={(e) => setGoals(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full mt-6" 
+              disabled={!name.trim() || !year || addChampionship.isPending}
+            >
+              {addChampionship.isPending ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined mr-2">save</span>
+                  Salvar Campeonato
+                </>
+              )}
+            </Button>
+          </form>
+        </ScrollArea>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

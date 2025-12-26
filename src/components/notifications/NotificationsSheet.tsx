@@ -2,12 +2,12 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+  ResponsiveModalTrigger,
+} from "@/components/ui/responsive-modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   type Notification,
 } from "@/hooks/useNotifications";
 import { Bell, Heart, MessageCircle, UserPlus, Check } from "lucide-react";
+import { useState } from "react";
 
 interface NotificationsSheetProps {
   children: React.ReactNode;
@@ -55,9 +56,11 @@ const getNotificationText = (notification: Notification) => {
 const NotificationItem = ({
   notification,
   onRead,
+  onClose,
 }: {
   notification: Notification;
   onRead: (id: string) => void;
+  onClose: () => void;
 }) => {
   const navigate = useNavigate();
 
@@ -65,6 +68,8 @@ const NotificationItem = ({
     if (!notification.read) {
       onRead(notification.id);
     }
+
+    onClose();
 
     // Navigate based on notification type
     if (notification.type === "follow") {
@@ -115,6 +120,7 @@ const NotificationItem = ({
 };
 
 export const NotificationsSheet = ({ children }: NotificationsSheetProps) => {
+  const [open, setOpen] = useState(false);
   const { data: notifications, isLoading } = useNotifications();
   const { data: unreadCount = 0 } = useUnreadNotificationsCount();
   const markRead = useMarkNotificationRead();
@@ -129,12 +135,12 @@ export const NotificationsSheet = ({ children }: NotificationsSheetProps) => {
   };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0">
-        <SheetHeader className="p-4 border-b border-border">
+    <ResponsiveModal open={open} onOpenChange={setOpen}>
+      <ResponsiveModalTrigger asChild>{children}</ResponsiveModalTrigger>
+      <ResponsiveModalContent className="sm:max-w-md h-[80vh] sm:h-[600px] flex flex-col p-0">
+        <ResponsiveModalHeader className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-lg">Notificações</SheetTitle>
+            <ResponsiveModalTitle className="text-lg">Notificações</ResponsiveModalTitle>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -148,9 +154,9 @@ export const NotificationsSheet = ({ children }: NotificationsSheetProps) => {
               </Button>
             )}
           </div>
-        </SheetHeader>
+        </ResponsiveModalHeader>
 
-        <ScrollArea className="h-[calc(100vh-80px)]">
+        <ScrollArea className="flex-1">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -178,12 +184,13 @@ export const NotificationsSheet = ({ children }: NotificationsSheetProps) => {
                   key={notification.id}
                   notification={notification}
                   onRead={handleMarkRead}
+                  onClose={() => setOpen(false)}
                 />
               ))}
             </div>
           )}
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddAchievement, useAchievementTypes } from "@/hooks/useProfile";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AddAchievementSheetProps {
   open: boolean;
@@ -64,116 +65,118 @@ export const AddAchievementSheet = ({ open, onOpenChange }: AddAchievementSheetP
   const isValid = year && (achievementTypeId || customName.trim());
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="flex items-center gap-2">
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="sm:max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] flex flex-col">
+        <ResponsiveModalHeader className="pb-4">
+          <ResponsiveModalTitle className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">military_tech</span>
             Adicionar Conquista
-          </SheetTitle>
-        </SheetHeader>
+          </ResponsiveModalTitle>
+        </ResponsiveModalHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pb-8">
-          <div className="space-y-2">
-            <Label htmlFor="type">Tipo de Conquista *</Label>
-            <Select value={achievementTypeId} onValueChange={(v) => {
-              setAchievementTypeId(v);
-              if (v) setCustomName("");
-            }}>
-              <SelectTrigger id="type">
-                <SelectValue placeholder="Selecione um tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {achievementTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    <span className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[16px]">{type.icon}</span>
-                      {type.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {!achievementTypeId && (
+        <ScrollArea className="flex-1">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-8 px-1">
             <div className="space-y-2">
-              <Label htmlFor="customName">Ou digite um nome personalizado *</Label>
+              <Label htmlFor="type">Tipo de Conquista *</Label>
+              <Select value={achievementTypeId} onValueChange={(v) => {
+                setAchievementTypeId(v);
+                if (v) setCustomName("");
+              }}>
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Selecione um tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {achievementTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px]">{type.icon}</span>
+                        {type.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {!achievementTypeId && (
+              <div className="space-y-2">
+                <Label htmlFor="customName">Ou digite um nome personalizado *</Label>
+                <Input
+                  id="customName"
+                  placeholder="Ex: Melhor em Campo"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="year">Ano *</Label>
+              <Select value={year} onValueChange={setYear} required>
+                <SelectTrigger id="year">
+                  <SelectValue placeholder="Selecione o ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="championship">Campeonato</Label>
               <Input
-                id="customName"
-                placeholder="Ex: Melhor em Campo"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
+                id="championship"
+                placeholder="Ex: Copa do Brasil"
+                value={championship}
+                onChange={(e) => setChampionship(e.target.value)}
               />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="year">Ano *</Label>
-            <Select value={year} onValueChange={setYear} required>
-              <SelectTrigger id="year">
-                <SelectValue placeholder="Selecione o ano" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((y) => (
-                  <SelectItem key={y} value={y.toString()}>
-                    {y}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="team">Time</Label>
+              <Input
+                id="team"
+                placeholder="Ex: Palmeiras"
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="championship">Campeonato</Label>
-            <Input
-              id="championship"
-              placeholder="Ex: Copa do Brasil"
-              value={championship}
-              onChange={(e) => setChampionship(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Descrição (opcional)</Label>
+              <Textarea
+                id="description"
+                placeholder="Detalhes sobre a conquista..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="team">Time</Label>
-            <Input
-              id="team"
-              placeholder="Ex: Palmeiras"
-              value={team}
-              onChange={(e) => setTeam(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição (opcional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Detalhes sobre a conquista..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <Button 
-            type="submit" 
-            className="w-full mt-6" 
-            disabled={!isValid || addAchievement.isPending}
-          >
-            {addAchievement.isPending ? (
-              <>
-                <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
-                Salvando...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined mr-2">save</span>
-                Salvar Conquista
-              </>
-            )}
-          </Button>
-        </form>
-      </SheetContent>
-    </Sheet>
+            <Button 
+              type="submit" 
+              className="w-full mt-6" 
+              disabled={!isValid || addAchievement.isPending}
+            >
+              {addAchievement.isPending ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined mr-2">save</span>
+                  Salvar Conquista
+                </>
+              )}
+            </Button>
+          </form>
+        </ScrollArea>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

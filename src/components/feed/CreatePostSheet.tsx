@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+} from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
@@ -58,6 +61,7 @@ interface MediaItem {
 const MAX_PHOTOS = 10;
 
 export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) => {
+  const isMobile = useIsMobile();
   const { data: profile } = useProfile();
   const [caption, setCaption] = useState("");
   const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
@@ -101,21 +105,19 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   }, [carouselApi]);
 
   const handlePickFromGallery = async () => {
-    // If native, show gallery picker view
     if (isGalleryNative) {
       await loadGallery({ type: 'image', limit: 50 });
       setViewMode("gallery-picker");
       return;
     }
     
-    // Fallback to native picker
     const images = await pickMultipleFromGallery(MAX_PHOTOS);
     if (images.length > 0) {
       const mediaItems: MediaItem[] = images
         .filter((img) => img.webPath)
         .map((img) => ({
           url: img.webPath!,
-          blob: img.blob, // Store blob if available
+          blob: img.blob,
           isLocal: true,
         }));
       setSelectedMediaList(mediaItems);
@@ -131,14 +133,12 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       return;
     }
 
-    // Get full path
     let mediaUrl = galleryItem.webPath;
     const fullPath = await getMediaPath(galleryItem.id);
     if (fullPath) {
       mediaUrl = fullPath;
     }
 
-    // Try to get blob for upload
     const blob = await getMediaBlob(galleryItem.id);
 
     setSelectedMediaList((prev) => [...prev, { url: mediaUrl, blob: blob || undefined, isLocal: true }]);
@@ -164,7 +164,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         .filter((img) => img.webPath)
         .map((img) => ({
           url: img.webPath!,
-          blob: img.blob, // Store blob if available
+          blob: img.blob,
           isLocal: true,
         }));
       setSelectedMediaList((prev) => [...prev, ...mediaItems]);
@@ -198,33 +198,26 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       let uploadedUrl: string | null = null;
       
       if (media.blob && selectedMediaType === "video") {
-        // Video blob - upload directly without compression
         uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
       } else if (media.isLocal && (media.blob || media.url)) {
-        // Local image - apply crop, filters, compress, then upload
         try {
           let blob: Blob;
           
-          // Apply crop if any
           if (hasCropData(media.cropData)) {
             blob = await getCroppedImg(media.url, media.cropData!.croppedAreaPixels);
           } else if (media.blob) {
-            // Use blob directly if available (from camera/gallery on native)
             blob = media.blob;
           } else {
-            // Try to fetch - this works for web/remote URLs
             try {
               const response = await fetch(media.url);
               if (!response.ok) throw new Error('Fetch failed');
               blob = await response.blob();
             } catch (fetchErr) {
               console.error("Failed to fetch image:", fetchErr);
-              // Skip this image if we can't get the blob
               continue;
             }
           }
           
-          // Apply filters if any
           if (media.filters && !areFiltersDefault(media.filters)) {
             blob = await applyFiltersToBlob(blob, media.filters);
           }
@@ -235,7 +228,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           console.error("Error processing/uploading image:", err);
         }
       } else if (media.url && !media.isLocal) {
-        // Already uploaded URL
         uploadedUrl = media.url;
       }
       
@@ -268,7 +260,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
       toast.dismiss("upload-progress");
       
-      // For now, store the first URL (for single media) or all URLs as JSON (for carousel)
       const mediaUrl = uploadedUrls.length === 1 
         ? uploadedUrls[0] 
         : JSON.stringify(uploadedUrls);
@@ -285,7 +276,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         mediaType,
       });
 
-      // Save tags if any
       if (allTags.length > 0 && result?.id) {
         try {
           await createPostTags.mutateAsync({ postId: result.id, tags: allTags });
@@ -294,7 +284,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         }
       }
 
-      // Reset state
       setCaption("");
       setSelectedMediaList([]);
       setSelectedMediaType("photo");
@@ -361,7 +350,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     if (editingPhotoIndex !== null) {
       const media = selectedMediaList[editingPhotoIndex];
       try {
-        // Generate cropped preview URL
         const croppedBlob = await getCroppedImg(media.url, cropData.croppedAreaPixels);
         const croppedUrl = URL.createObjectURL(croppedBlob);
         
@@ -396,402 +384,439 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
   const isButtonDisabled = selectedMediaList.length === 0 || isLoading || isUploading || isCompressing || isPublishing || createPost.isPending;
 
-  if (viewMode === "video-recorder") {
+  // Fullscreen views for editors
+  const renderFullscreenContent = () => {
+    if (viewMode === "video-recorder") {
+      return (
+        <VideoRecorder onVideoRecorded={(videoUrl, blob) => handleVideoRecorded(videoUrl, blob)} onClose={() => setViewMode("default")} />
+      );
+    }
+
+    if (viewMode === "photo-editor" && editingPhotoIndex !== null) {
+      const mediaToEdit = selectedMediaList[editingPhotoIndex];
+      return (
+        <PhotoFilterEditor
+          imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
+          initialFilters={mediaToEdit.filters}
+          onApply={handleApplyFilters}
+          onCancel={() => {
+            setEditingPhotoIndex(null);
+            setViewMode("default");
+          }}
+        />
+      );
+    }
+
+    if (viewMode === "photo-crop" && editingPhotoIndex !== null) {
+      const mediaToEdit = selectedMediaList[editingPhotoIndex];
+      return (
+        <PhotoCropEditor
+          imageUrl={mediaToEdit.url}
+          initialCropData={mediaToEdit.cropData}
+          onApply={handleApplyCrop}
+          onCancel={() => {
+            setEditingPhotoIndex(null);
+            setViewMode("default");
+          }}
+        />
+      );
+    }
+
+    if (viewMode === "photo-tag" && editingPhotoIndex !== null) {
+      const mediaToEdit = selectedMediaList[editingPhotoIndex];
+      return (
+        <PhotoTagEditor
+          imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
+          photoIndex={editingPhotoIndex}
+          initialTags={allTags}
+          onApply={handleApplyTags}
+          onCancel={() => {
+            setEditingPhotoIndex(null);
+            setViewMode("default");
+          }}
+        />
+      );
+    }
+
+    return null;
+  };
+
+  const fullscreenContent = renderFullscreenContent();
+  if (fullscreenContent) {
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={handleClose}>
+          <DrawerContent className="h-full rounded-t-none p-0">
+            {fullscreenContent}
+          </DrawerContent>
+        </Drawer>
+      );
+    }
     return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
-          <VideoRecorder onVideoRecorded={(videoUrl, blob) => handleVideoRecorded(videoUrl, blob)} onClose={() => setViewMode("default")} />
-        </SheetContent>
-      </Sheet>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden">
+          {fullscreenContent}
+        </DialogContent>
+      </Dialog>
     );
   }
 
-  if (viewMode === "photo-editor" && editingPhotoIndex !== null) {
-    const mediaToEdit = selectedMediaList[editingPhotoIndex];
-    return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
-          <PhotoFilterEditor
-            imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
-            initialFilters={mediaToEdit.filters}
-            onApply={handleApplyFilters}
-            onCancel={() => {
-              setEditingPhotoIndex(null);
-              setViewMode("default");
-            }}
-          />
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
+  // Gallery picker view
   if (viewMode === "gallery-picker") {
-    return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-3xl p-0 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <button 
-              onClick={() => {
-                setViewMode("default");
-                clearGallery();
-              }}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-            >
-              <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
-            </button>
-            
-            <span className="text-base font-semibold text-foreground">
-              Selecionar Fotos {selectedMediaList.length > 0 && `(${selectedMediaList.length}/${MAX_PHOTOS})`}
-            </span>
-            
-            <Button 
-              onClick={handleGalleryDone}
-              size="sm"
-              variant="ghost"
-              className="text-primary font-semibold text-sm hover:bg-transparent"
-              disabled={selectedMediaList.length === 0}
-            >
-              Concluir
-            </Button>
-          </div>
-
-          {/* Gallery Grid */}
-          <div 
-            className="flex-1 overflow-y-auto p-1"
-            onScroll={(e) => {
-              const target = e.currentTarget;
-              const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
-              if (isNearBottom && hasMore && !isLoadingMore && isGalleryNative) {
-                loadMore();
-              }
+    const galleryContent = (
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <button 
+            onClick={() => {
+              setViewMode("default");
+              clearGallery();
             }}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
-            {isGalleryLoading ? (
-              <div className="w-full h-64 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm text-muted-foreground">Carregando galeria...</span>
-                </div>
+            <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
+          </button>
+          
+          <span className="text-base font-semibold text-foreground">
+            Selecionar Fotos {selectedMediaList.length > 0 && `(${selectedMediaList.length}/${MAX_PHOTOS})`}
+          </span>
+          
+          <Button 
+            onClick={handleGalleryDone}
+            size="sm"
+            variant="ghost"
+            className="text-primary font-semibold text-sm hover:bg-transparent"
+            disabled={selectedMediaList.length === 0}
+          >
+            Concluir
+          </Button>
+        </div>
+
+        {/* Gallery Grid */}
+        <div 
+          className="flex-1 overflow-y-auto p-1"
+          onScroll={(e) => {
+            const target = e.currentTarget;
+            const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+            if (isNearBottom && hasMore && !isLoadingMore && isGalleryNative) {
+              loadMore();
+            }
+          }}
+        >
+          {isGalleryLoading ? (
+            <div className="w-full h-64 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-muted-foreground">Carregando galeria...</span>
               </div>
-            ) : deviceGallery.length === 0 ? (
-              <div className="w-full h-64 flex flex-col items-center justify-center gap-3">
-                <span className="material-symbols-outlined text-[48px] text-muted-foreground">photo_library</span>
-                <p className="text-sm text-muted-foreground">Nenhuma foto encontrada</p>
+            </div>
+          ) : deviceGallery.length === 0 ? (
+            <div className="w-full h-64 flex flex-col items-center justify-center gap-3">
+              <span className="material-symbols-outlined text-[48px] text-muted-foreground">photo_library</span>
+              <p className="text-sm text-muted-foreground">Nenhuma foto encontrada</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-4 gap-0.5">
+                {deviceGallery.map((item, index) => {
+                  const isSelected = selectedMediaList.some(m => m.url === item.webPath);
+                  const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
+                  
+                  return (
+                    <button
+                      key={`${item.id}-${index}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedMediaList(prev => prev.filter(m => m.url !== item.webPath));
+                        } else {
+                          handleGallerySelect(item);
+                        }
+                      }}
+                      className="relative aspect-square overflow-hidden"
+                    >
+                      <img
+                        src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
+                        alt={`Gallery ${index + 1}`}
+                        className={`w-full h-full object-cover transition-all duration-200 ${
+                          isSelected ? 'scale-90 rounded-lg' : ''
+                        }`}
+                      />
+                      
+                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        isSelected 
+                          ? 'bg-primary border-primary' 
+                          : 'bg-black/30 border-white/70'
+                      }`}>
+                        {isSelected && (
+                          <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
+                        )}
+                      </div>
+
+                      {item.type === 'video' && (
+                        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
+                          <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {isLoadingMore && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {!hasMore && deviceGallery.length > 0 && (
+                <div className="flex items-center justify-center py-4">
+                  <span className="text-xs text-muted-foreground">Fim da galeria</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    );
+
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={handleClose}>
+          <DrawerContent className="h-[95vh] p-0">
+            {galleryContent}
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-2xl h-[85vh] p-0 overflow-hidden">
+          {galleryContent}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Default view
+  const defaultContent = (
+    <div className="h-full flex flex-col">
+      <div className="pb-4 border-b border-border px-4 pt-4">
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={handleClose} 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            disabled={isPublishing}
+          >
+            Cancelar
+          </button>
+          <span className="text-base font-bold">Nova Publicação</span>
+          <Button 
+            onClick={handlePost} 
+            size="sm" 
+            className="rounded font-semibold text-xs h-8 px-4" 
+            disabled={isButtonDisabled}
+          >
+            {isPublishing ? "Publicando..." : "Publicar"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 px-4 mt-4 flex-1 overflow-y-auto pb-4">
+        {/* Upload Progress */}
+        {isPublishing && (
+          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+            <div 
+              className="h-full bg-primary transition-all duration-300" 
+              style={{ width: `${progress}%` }} 
+            />
+          </div>
+        )}
+
+        {selectedMediaList.length === 0 ? (
+          <div className="w-full aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-6 p-6">
+            {isLoading ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-muted-foreground">Carregando...</p>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-4 gap-0.5">
-                  {deviceGallery.map((item, index) => {
-                    const isSelected = selectedMediaList.some(m => m.url === item.webPath);
-                    const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
-                    
-                    return (
-                      <button
-                        key={`${item.id}-${index}`}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedMediaList(prev => prev.filter(m => m.url !== item.webPath));
-                          } else {
-                            handleGallerySelect(item);
-                          }
-                        }}
-                        className="relative aspect-square overflow-hidden"
-                      >
-                        <img
-                          src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
-                          alt={`Gallery ${index + 1}`}
-                          className={`w-full h-full object-cover transition-all duration-200 ${
-                            isSelected ? 'scale-90 rounded-lg' : ''
-                          }`}
-                        />
-                        
-                        {/* Selection indicator */}
-                        <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                          isSelected 
-                            ? 'bg-primary border-primary' 
-                            : 'bg-black/30 border-white/70'
-                        }`}>
-                          {isSelected && (
-                            <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
-                          )}
-                        </div>
-
-                        {/* Video indicator */}
-                        {item.type === 'video' && (
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
-                            <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                <button onClick={handlePickFromGallery} className="w-full max-w-[200px] flex flex-col items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[28px] text-primary">photo_library</span>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-foreground">Escolher da Galeria</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Selecione até {MAX_PHOTOS} fotos</p>
+                  </div>
+                </button>
+                <div className="flex items-center gap-3 w-full max-w-[200px]">
+                  <div className="flex-1 h-px bg-border" /><span className="text-xs text-muted-foreground">ou</span><div className="flex-1 h-px bg-border" />
                 </div>
-
-                {/* Loading more indicator */}
-                {isLoadingMore && (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-
-                {/* End of gallery indicator */}
-                {!hasMore && deviceGallery.length > 0 && (
-                  <div className="flex items-center justify-center py-4">
-                    <span className="text-xs text-muted-foreground">Fim da galeria</span>
-                  </div>
-                )}
+                <div className="flex gap-4">
+                  <button onClick={handleTakePhoto} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">photo_camera</span></div>
+                    <span className="text-xs font-medium text-foreground">Tirar Foto</span>
+                  </button>
+                  <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">videocam</span></div>
+                    <span className="text-xs font-medium text-foreground">Gravar Vídeo</span>
+                  </button>
+                </div>
               </>
             )}
           </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
+        ) : (
+          <div className="relative">
+            {selectedMediaType === "video" ? (
+              <>
+                <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-lg" />
+                <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-foreground">videocam</span>
+                  <span className="text-xs font-medium text-foreground">VÍDEO</span>
+                </div>
+              </>
+            ) : selectedMediaList.length === 1 ? (
+              <img 
+                src={selectedMediaList[0]?.croppedUrl || selectedMediaList[0]?.url} 
+                alt="Preview" 
+                className="w-full aspect-square object-cover rounded-lg" 
+                style={selectedMediaList[0]?.filters ? getCSSFilterWithFade(selectedMediaList[0].filters) : undefined}
+              />
+            ) : (
+              <Carousel setApi={setCarouselApi} className="w-full">
+                <CarouselContent>
+                  {selectedMediaList.map((media, index) => (
+                    <CarouselItem key={index}>
+                      <img 
+                        src={media.croppedUrl || media.url} 
+                        alt={`Foto ${index + 1}`} 
+                        className="w-full aspect-square object-cover rounded-lg" 
+                        style={media.filters ? getCSSFilterWithFade(media.filters) : undefined}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            )}
+            {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
+              <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px] text-foreground">photo_library</span>
+                <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
+              </div>
+            )}
+            {selectedMediaType === "photo" && !isPublishing && (
+              <>
+                <button 
+                  onClick={() => handleCropPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
+                  className="absolute top-2 right-[5.5rem] w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                  title="Recortar"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-foreground">crop</span>
+                </button>
+                <button 
+                  onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
+                  className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                  title="Filtros"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
+                </button>
+              </>
+            )}
+            <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
+              <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
+            </button>
+            {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                {selectedMediaList.map((_, index) => (
+                  <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />
+                ))}
+              </div>
+            )}
+            {selectedMediaType === "photo" && !isPublishing && (
+              <SortablePhotoThumbnails
+                items={selectedMediaList}
+                onReorder={(newList) => {
+                  setSelectedMediaList(newList);
+                  toast.success("Ordem das fotos atualizada!");
+                }}
+                currentIndex={currentIndex}
+                onSelect={(index) => {
+                  setCurrentIndex(index);
+                  carouselApi?.scrollTo(index);
+                }}
+                disabled={isPublishing}
+              />
+            )}
+            {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && !isPublishing && (
+              <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors disabled:opacity-50">
+                <span className="material-symbols-outlined text-[20px] text-foreground">add_photo_alternate</span>
+                <span className="text-sm font-medium text-foreground">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
+              </button>
+            )}
+          </div>
+        )}
 
-  if (viewMode === "photo-crop" && editingPhotoIndex !== null) {
-    const mediaToEdit = selectedMediaList[editingPhotoIndex];
-    return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
-          <PhotoCropEditor
-            imageUrl={mediaToEdit.url}
-            initialCropData={mediaToEdit.cropData}
-            onApply={handleApplyCrop}
-            onCancel={() => {
-              setEditingPhotoIndex(null);
-              setViewMode("default");
-            }}
+        <div className="flex gap-3">
+          <Avatar className="w-10 h-10 flex-shrink-0">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "Usuário"} />
+            <AvatarFallback className="bg-muted">
+              <span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span>
+            </AvatarFallback>
+          </Avatar>
+          <Textarea 
+            placeholder="Escreva uma legenda..." 
+            value={caption} 
+            onChange={(e) => setCaption(e.target.value)} 
+            className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" 
+            disabled={isPublishing}
+            autoFocus={false}
           />
-        </SheetContent>
-      </Sheet>
-    );
-  }
+        </div>
 
-  if (viewMode === "photo-tag" && editingPhotoIndex !== null) {
-    const mediaToEdit = selectedMediaList[editingPhotoIndex];
+        <div className="border-t border-border pt-4 space-y-1">
+          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
+            <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">location_on</span><span className="text-sm text-foreground">Adicionar localização</span></div>
+            <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+          </button>
+          <button 
+            onClick={() => selectedMediaType === "photo" && selectedMediaList.length > 0 && handleTagPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)}
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+            disabled={isPublishing || selectedMediaType !== "photo" || selectedMediaList.length === 0}
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[22px] text-foreground">person_add</span>
+              <span className="text-sm text-foreground">
+                Marcar pessoas {allTags.length > 0 && `(${allTags.length})`}
+              </span>
+            </div>
+            <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+          </button>
+          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
+            <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">music_note</span><span className="text-sm text-foreground">Adicionar música</span></div>
+            <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-full rounded-t-none p-0">
-          <PhotoTagEditor
-            imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
-            photoIndex={editingPhotoIndex}
-            initialTags={allTags}
-            onApply={handleApplyTags}
-            onCancel={() => {
-              setEditingPhotoIndex(null);
-              setViewMode("default");
-            }}
-          />
-        </SheetContent>
-      </Sheet>
+      <Drawer open={open} onOpenChange={handleClose}>
+        <DrawerContent className="h-full rounded-t-none p-0">
+          {defaultContent}
+        </DrawerContent>
+      </Drawer>
     );
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="h-full rounded-t-none">
-        <SheetHeader className="pb-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={handleClose} 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              disabled={isPublishing}
-            >
-              Cancelar
-            </button>
-            <SheetTitle className="text-base font-bold">Nova Publicação</SheetTitle>
-            <Button 
-              onClick={handlePost} 
-              size="sm" 
-              className="rounded font-semibold text-xs h-8 px-4" 
-              disabled={isButtonDisabled}
-            >
-              {isPublishing ? "Publicando..." : "Publicar"}
-            </Button>
-          </div>
-        </SheetHeader>
-
-        <div className="flex flex-col gap-4 mt-4 h-[calc(100%-80px)] overflow-y-auto">
-          {/* Upload Progress */}
-          {isPublishing && (
-            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-300" 
-                style={{ width: `${progress}%` }} 
-              />
-            </div>
-          )}
-
-          {selectedMediaList.length === 0 ? (
-            <div className="w-full aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-6 p-6">
-              {isLoading ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-muted-foreground">Carregando...</p>
-                </div>
-              ) : (
-                <>
-                  <button onClick={handlePickFromGallery} className="w-full max-w-[200px] flex flex-col items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
-                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[28px] text-primary">photo_library</span>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-foreground">Escolher da Galeria</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Selecione até {MAX_PHOTOS} fotos</p>
-                    </div>
-                  </button>
-                  <div className="flex items-center gap-3 w-full max-w-[200px]">
-                    <div className="flex-1 h-px bg-border" /><span className="text-xs text-muted-foreground">ou</span><div className="flex-1 h-px bg-border" />
-                  </div>
-                  <div className="flex gap-4">
-                    <button onClick={handleTakePhoto} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">photo_camera</span></div>
-                      <span className="text-xs font-medium text-foreground">Tirar Foto</span>
-                    </button>
-                    <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">videocam</span></div>
-                      <span className="text-xs font-medium text-foreground">Gravar Vídeo</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="relative">
-              {selectedMediaType === "video" ? (
-                <>
-                  <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-lg" />
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-foreground">videocam</span>
-                    <span className="text-xs font-medium text-foreground">VÍDEO</span>
-                  </div>
-                </>
-              ) : selectedMediaList.length === 1 ? (
-                <img 
-                  src={selectedMediaList[0]?.croppedUrl || selectedMediaList[0]?.url} 
-                  alt="Preview" 
-                  className="w-full aspect-square object-cover rounded-lg" 
-                  style={selectedMediaList[0]?.filters ? getCSSFilterWithFade(selectedMediaList[0].filters) : undefined}
-                />
-              ) : (
-                <Carousel setApi={setCarouselApi} className="w-full">
-                  <CarouselContent>
-                    {selectedMediaList.map((media, index) => (
-                      <CarouselItem key={index}>
-                        <img 
-                          src={media.croppedUrl || media.url} 
-                          alt={`Foto ${index + 1}`} 
-                          className="w-full aspect-square object-cover rounded-lg" 
-                          style={media.filters ? getCSSFilterWithFade(media.filters) : undefined}
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              )}
-              {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
-                <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-foreground">photo_library</span>
-                  <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
-                </div>
-              )}
-              {/* Crop and Edit buttons for current photo */}
-              {selectedMediaType === "photo" && !isPublishing && (
-                <>
-                  <button 
-                    onClick={() => handleCropPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
-                    className="absolute top-2 right-[5.5rem] w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
-                    title="Recortar"
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-foreground">crop</span>
-                  </button>
-                  <button 
-                    onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
-                    className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
-                    title="Filtros"
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
-                  </button>
-                </>
-              )}
-              <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
-                <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
-              </button>
-              {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
-                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                  {selectedMediaList.map((_, index) => (
-                    <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />
-                  ))}
-                </div>
-              )}
-              {/* Sortable Thumbnails for Reordering */}
-              {selectedMediaType === "photo" && !isPublishing && (
-                <SortablePhotoThumbnails
-                  items={selectedMediaList}
-                  onReorder={(newList) => {
-                    setSelectedMediaList(newList);
-                    toast.success("Ordem das fotos atualizada!");
-                  }}
-                  currentIndex={currentIndex}
-                  onSelect={(index) => {
-                    setCurrentIndex(index);
-                    carouselApi?.scrollTo(index);
-                  }}
-                  disabled={isPublishing}
-                />
-              )}
-              {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && !isPublishing && (
-                <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors disabled:opacity-50">
-                  <span className="material-symbols-outlined text-[20px] text-foreground">add_photo_alternate</span>
-                  <span className="text-sm font-medium text-foreground">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
-                </button>
-              )}
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <Avatar className="w-10 h-10 flex-shrink-0">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "Usuário"} />
-              <AvatarFallback className="bg-muted">
-                <span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span>
-              </AvatarFallback>
-            </Avatar>
-            <Textarea 
-              placeholder="Escreva uma legenda..." 
-              value={caption} 
-              onChange={(e) => setCaption(e.target.value)} 
-              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" 
-              disabled={isPublishing}
-              autoFocus={false}
-            />
-          </div>
-
-          <div className="border-t border-border pt-4 space-y-1">
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
-              <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">location_on</span><span className="text-sm text-foreground">Adicionar localização</span></div>
-              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
-            </button>
-            <button 
-              onClick={() => selectedMediaType === "photo" && selectedMediaList.length > 0 && handleTagPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
-              disabled={isPublishing || selectedMediaType !== "photo" || selectedMediaList.length === 0}
-            >
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px] text-foreground">person_add</span>
-                <span className="text-sm text-foreground">
-                  Marcar pessoas {allTags.length > 0 && `(${allTags.length})`}
-                </span>
-              </div>
-              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" disabled={isPublishing}>
-              <div className="flex items-center gap-3"><span className="material-symbols-outlined text-[22px] text-foreground">music_note</span><span className="text-sm text-foreground">Adicionar música</span></div>
-              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
-            </button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-xl h-[90vh] p-0 overflow-hidden">
+        {defaultContent}
+      </DialogContent>
+    </Dialog>
   );
 };
