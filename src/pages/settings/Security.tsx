@@ -517,6 +517,125 @@ const Security = () => {
 
         <Separator />
 
+        {/* Trusted Devices Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <h2 className="text-base font-semibold">Dispositivos Confiáveis</h2>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Dispositivos confiáveis podem fazer login sem verificação em duas etapas por 30 dias.
+          </p>
+
+          {loadingDevices ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : (() => {
+            const trustedDevices = devices?.filter((d) => {
+              if (!d.is_trusted) return false;
+              if (!d.trusted_until) return false;
+              return new Date(d.trusted_until) > new Date();
+            }) || [];
+
+            if (trustedDevices.length === 0) {
+              return (
+                <div className="p-4 bg-muted/30 rounded-lg text-center">
+                  <ShieldCheck className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Nenhum dispositivo confiável no momento
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Marque "Lembrar deste dispositivo" ao fazer login
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-3">
+                {trustedDevices.map((device) => {
+                  const isCurrentDevice = device.device_fingerprint === currentFingerprint;
+                  const daysRemaining = Math.ceil(
+                    (new Date(device.trusted_until!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                  );
+
+                  return (
+                    <div
+                      key={device.id}
+                      className={`p-4 rounded-lg border ${
+                        isCurrentDevice 
+                          ? "bg-primary/5 border-primary/30" 
+                          : "bg-muted/30 border-border"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-full bg-primary/10 text-primary">
+                          {getDeviceIcon(device.device_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-medium text-sm truncate">
+                              {getDeviceDisplayName(device)}
+                            </p>
+                            {isCurrentDevice && (
+                              <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                                Este dispositivo
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className={`text-xs px-2 py-1 rounded-full ${
+                              daysRemaining <= 5 
+                                ? "bg-destructive/10 text-destructive" 
+                                : "bg-primary/10 text-primary"
+                            }`}>
+                              {daysRemaining} {daysRemaining === 1 ? "dia restante" : "dias restantes"}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              Expira em {format(new Date(device.trusted_until!), "dd/MM/yyyy", { locale: ptBR })}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {isCurrentDevice && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => renewDeviceTrust.mutate(device.id)}
+                              disabled={renewDeviceTrust.isPending}
+                              className="text-xs"
+                            >
+                              <RefreshCw className={`h-3 w-3 mr-1 ${renewDeviceTrust.isPending ? "animate-spin" : ""}`} />
+                              Renovar
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              toggleDeviceTrust.mutate({
+                                deviceId: device.id,
+                                isTrusted: false,
+                              })
+                            }
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+                          >
+                            Revogar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </section>
+
+        <Separator />
+
         {/* Connected Devices Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
