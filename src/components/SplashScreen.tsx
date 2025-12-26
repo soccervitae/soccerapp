@@ -18,7 +18,6 @@ const SplashScreen = () => {
           duration: 0.6,
           ease: [0.34, 1.56, 0.64, 1],
         }}
-        className="mb-6"
       >
         <div className="relative">
           {/* Glow effect */}
@@ -46,25 +45,6 @@ const SplashScreen = () => {
         </div>
       </motion.div>
 
-      {/* Texto principal */}
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="text-3xl font-display font-bold text-white tracking-wider mb-2"
-      >
-        SOCCER VITAE
-      </motion.h1>
-
-      {/* Tagline */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7, duration: 0.5 }}
-        className="text-white/80 text-sm font-display text-center px-4"
-      >
-        Onde talentos encontram oportunidades
-      </motion.p>
 
       {/* Loading indicator */}
       <motion.div
