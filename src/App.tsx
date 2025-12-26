@@ -58,8 +58,17 @@ const AnimatedRoutes = () => {
   );
 };
 
+// Check if running as installed PWA
+const isPWA = () => {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true ||
+    document.referrer.includes('android-app://')
+  );
+};
+
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(isPWA());
 
   useEffect(() => {
     // Lock screen orientation to portrait on supported browsers
@@ -75,13 +84,15 @@ const App = () => {
     };
     lockOrientation();
 
-    // Hide splash screen after 2.5 seconds
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
+    // Hide splash screen after 2.5 seconds (only if showing)
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 2500);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
 
   return (
     <QueryClientProvider client={queryClient}>

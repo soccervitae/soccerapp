@@ -29,18 +29,10 @@ const SplashScreen = () => {
             style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
           />
           {/* Logo */}
-          <motion.img
+          <img
             src={soccerVitaeLogo}
             alt="Soccer Vitae"
             className="relative w-48 h-auto drop-shadow-2xl"
-            animate={{ 
-              y: [0, -8, 0],
-            }}
-            transition={{ 
-              duration: 2, 
-              ease: "easeInOut", 
-              repeat: Infinity,
-            }}
           />
         </div>
       </motion.div>
