@@ -4,12 +4,20 @@ import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -36,9 +44,15 @@ export const ProfileInfo = ({
     user
   } = useAuth();
   const followUser = useFollowUser();
+  const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
   const [isCheering, setIsCheering] = useState(followStats?.isFollowing || false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
+
+  // Use Sheet on mobile or PWA, DropdownMenu on desktop
+  const useSheet = isMobile || isPWA;
 
   const profileUrl = `${window.location.origin}/${profile.username}`;
 
@@ -232,30 +246,75 @@ export const ProfileInfo = ({
         )}
         
         {/* Botão Compartilhar - sempre visível */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
+        {useSheet ? (
+          <>
+            <button 
+              onClick={() => setShareSheetOpen(true)}
+              className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm"
+            >
               <span className="material-symbols-outlined text-[16px]">share</span>
               Compartilhar
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-48">
-            <DropdownMenuItem onClick={handleShareProfile} className="cursor-pointer">
-              <span className="material-symbols-outlined text-[18px] mr-2">link</span>
-              Copiar link
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
-              <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
-              QR Code
-            </DropdownMenuItem>
-            {typeof navigator.share === "function" && (
-              <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
-                <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
+            
+            <Sheet open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+              <SheetContent side="bottom" className="rounded-t-2xl">
+                <SheetHeader className="pb-2">
+                  <SheetTitle className="text-center">Compartilhar Perfil</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-2 py-4">
+                  <button 
+                    onClick={() => { handleShareProfile(); setShareSheetOpen(false); }}
+                    className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">link</span>
+                    <span className="font-medium">Copiar link</span>
+                  </button>
+                  <button 
+                    onClick={() => { setShareSheetOpen(false); setQrDialogOpen(true); }}
+                    className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
+                    <span className="font-medium">QR Code</span>
+                  </button>
+                  {typeof navigator.share === "function" && (
+                    <button 
+                      onClick={() => { handleNativeShare(); setShareSheetOpen(false); }}
+                      className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                    >
+                      <span className="material-symbols-outlined text-[22px]">ios_share</span>
+                      <span className="font-medium">Compartilhar</span>
+                    </button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
+                <span className="material-symbols-outlined text-[16px]">share</span>
                 Compartilhar
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-48">
+              <DropdownMenuItem onClick={handleShareProfile} className="cursor-pointer">
+                <span className="material-symbols-outlined text-[18px] mr-2">link</span>
+                Copiar link
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
+                <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
+                QR Code
+              </DropdownMenuItem>
+              {typeof navigator.share === "function" && (
+                <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                  <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
+                  Compartilhar
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* QR Code Modal */}
