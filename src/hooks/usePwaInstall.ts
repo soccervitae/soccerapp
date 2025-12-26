@@ -5,13 +5,27 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+  const isAndroid = /Android/.test(userAgent);
+  const isMobile = isIOS || isAndroid || /webOS|BlackBerry|Opera Mini|IEMobile/.test(userAgent);
+  
+  return { isIOS, isAndroid, isMobile };
+};
+
 export const usePwaInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState({ isIOS: false, isAndroid: false, isMobile: false });
 
   useEffect(() => {
+    // Detect device
+    const info = getDeviceInfo();
+    setDeviceInfo(info);
+
     // Check if already installed
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
@@ -32,6 +46,11 @@ export const usePwaInstall = () => {
       if (daysSinceDismissed < 7) {
         setIsDismissed(true);
       }
+    }
+
+    // For iOS, set installable true since beforeinstallprompt won't fire
+    if (info.isIOS) {
+      setIsInstallable(true);
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -81,7 +100,7 @@ export const usePwaInstall = () => {
     localStorage.setItem("pwa-install-dismissed", new Date().toISOString());
   }, []);
 
-  const canShowPrompt = isInstallable && !isInstalled && !isDismissed;
+  const canShowPrompt = isInstallable && !isInstalled && !isDismissed && deviceInfo.isMobile;
 
   return {
     isInstallable,
@@ -90,5 +109,8 @@ export const usePwaInstall = () => {
     canShowPrompt,
     promptInstall,
     dismiss,
+    isIOS: deviceInfo.isIOS,
+    isAndroid: deviceInfo.isAndroid,
+    hasNativePrompt: !!deferredPrompt,
   };
 };
