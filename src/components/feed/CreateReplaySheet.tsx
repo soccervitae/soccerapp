@@ -67,6 +67,24 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     supportsGalleryPlugin
   } = useDeviceGallery();
 
+  // Auto-open native gallery picker on Android when sheet opens
+  const hasAutoOpenedGallery = useRef(false);
+  
+  useEffect(() => {
+    if (open && isAndroid && !hasAutoOpenedGallery.current) {
+      hasAutoOpenedGallery.current = true;
+      // Small delay to ensure sheet is fully open
+      const timer = setTimeout(() => {
+        handlePickFromGallery();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    
+    if (!open) {
+      hasAutoOpenedGallery.current = false;
+    }
+  }, [open, isAndroid]);
+
   // Load gallery when sheet opens (only on iOS, Android uses native picker)
   useEffect(() => {
     if (open && supportsGalleryPlugin) {
@@ -194,7 +212,8 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     type: (item.type === "video" ? "video" : "photo") as MediaType
   }));
 
-  const fallbackMedia = !isGalleryNative || deviceGallery.length === 0 
+  // Only show fallback images on web (not on native mobile devices)
+  const fallbackMedia = (!isNative && !isGalleryNative) || (!isNative && deviceGallery.length === 0)
     ? fallbackGalleryImages.map((url, index) => ({ 
         url, 
         originalPath: url,
