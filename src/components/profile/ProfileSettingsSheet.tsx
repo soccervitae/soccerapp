@@ -125,13 +125,23 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
               label="Sobre"
               onClick={() => handleComingSoon("Sobre")}
             />
-            {isInstallable && !isInstalled && (
-              <SettingsItem
-                icon="download"
-                label="Instalar App"
-                onClick={handleInstallApp}
-                variant="primary"
-              />
+            {!isInstalled && (
+              <>
+                {isInstallable ? (
+                  <SettingsItem
+                    icon="download"
+                    label="Instalar App"
+                    onClick={handleInstallApp}
+                    variant="primary"
+                  />
+                ) : (
+                  <SettingsItem
+                    icon="phone_android"
+                    label="Como instalar o app"
+                    onClick={() => handleNavigation("/install")}
+                  />
+                )}
+              </>
             )}
           </div>
 
