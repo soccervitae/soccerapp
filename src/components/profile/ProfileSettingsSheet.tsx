@@ -8,6 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 
 interface ProfileSettingsSheetProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface SettingsItemProps {
   icon: string;
   label: string;
   onClick: () => void;
-  variant?: "default" | "danger";
+  variant?: "default" | "danger" | "primary";
 }
 
 const SettingsItem = ({ icon, label, onClick, variant = "default" }: SettingsItemProps) => (
@@ -27,6 +28,8 @@ const SettingsItem = ({ icon, label, onClick, variant = "default" }: SettingsIte
     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-colors ${
       variant === "danger"
         ? "text-destructive hover:bg-destructive/10"
+        : variant === "primary"
+        ? "text-primary hover:bg-primary/10"
         : "text-foreground hover:bg-muted"
     }`}
   >
@@ -44,6 +47,7 @@ const SectionHeader = ({ title }: { title: string }) => (
 export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsSheetProps) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
 
   const handleNavigation = (path: string) => {
     onOpenChange(false);
@@ -52,6 +56,14 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
 
   const handleComingSoon = (feature: string) => {
     toast.info(`${feature} estará disponível em breve`);
+  };
+
+  const handleInstallApp = async () => {
+    const installed = await promptInstall();
+    if (installed) {
+      toast.success("App instalado com sucesso!");
+      onOpenChange(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -113,6 +125,14 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
               label="Sobre"
               onClick={() => handleComingSoon("Sobre")}
             />
+            {isInstallable && !isInstalled && (
+              <SettingsItem
+                icon="download"
+                label="Instalar App"
+                onClick={handleInstallApp}
+                variant="primary"
+              />
+            )}
           </div>
 
           <Separator className="my-2" />
