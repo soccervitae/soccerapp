@@ -105,26 +105,19 @@ const Auth = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with stadium background effect */}
-      <div className="relative h-56 bg-gradient-to-b from-zinc-900 via-zinc-800 to-zinc-900 flex flex-col items-center justify-center overflow-hidden">
-        {/* Stadium lights effect */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute top-0 right-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
-        </div>
-        
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-center py-8">
         {/* Logo */}
         <img 
           src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
           alt="Soccer Vitae"
-          className="relative z-10 h-32 w-auto object-contain"
+          className="h-20 w-auto object-contain"
         />
       </div>
 
       {/* Auth Card */}
-      <div className="flex-1 -mt-6 bg-background rounded-t-3xl px-6 pt-6 pb-8">
+      <div className="flex-1 bg-white px-6 pt-2 pb-8">
         <div className="max-w-sm mx-auto">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
             <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl h-12">
