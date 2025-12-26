@@ -651,6 +651,8 @@ export type Database = {
           location_name: string | null
           media_type: string | null
           media_url: string | null
+          music_end_seconds: number | null
+          music_start_seconds: number | null
           music_track_id: string | null
           updated_at: string | null
           user_id: string
@@ -666,6 +668,8 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          music_end_seconds?: number | null
+          music_start_seconds?: number | null
           music_track_id?: string | null
           updated_at?: string | null
           user_id: string
@@ -681,6 +685,8 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          music_end_seconds?: number | null
+          music_start_seconds?: number | null
           music_track_id?: string | null
           updated_at?: string | null
           user_id?: string
@@ -931,6 +937,8 @@ export type Database = {
           id: string
           media_type: string
           media_url: string
+          music_end_seconds: number | null
+          music_start_seconds: number | null
           music_track_id: string | null
           user_id: string
         }
@@ -941,6 +949,8 @@ export type Database = {
           id?: string
           media_type: string
           media_url: string
+          music_end_seconds?: number | null
+          music_start_seconds?: number | null
           music_track_id?: string | null
           user_id: string
         }
@@ -951,6 +961,8 @@ export type Database = {
           id?: string
           media_type?: string
           media_url?: string
+          music_end_seconds?: number | null
+          music_start_seconds?: number | null
           music_track_id?: string | null
           user_id?: string
         }

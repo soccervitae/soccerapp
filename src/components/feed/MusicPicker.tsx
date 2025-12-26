@@ -10,15 +10,18 @@ import {
   MusicTrack,
   MUSIC_CATEGORIES,
   formatDuration,
+  SelectedMusicWithTrim,
 } from "@/hooks/useMusic";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/lib/utils";
+import { MusicTrimmer } from "./MusicTrimmer";
 
 interface MusicPickerProps {
-  selectedMusic: MusicTrack | null;
-  onSelect: (track: MusicTrack | null) => void;
+  selectedMusic: SelectedMusicWithTrim | null;
+  onSelect: (music: SelectedMusicWithTrim | null) => void;
   onClose: () => void;
   onConfirm: () => void;
+  maxTrimDuration?: number;
 }
 
 export function MusicPicker({
@@ -26,9 +29,12 @@ export function MusicPicker({
   onSelect,
   onClose,
   onConfirm,
+  maxTrimDuration = 15,
 }: MusicPickerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [showTrimmer, setShowTrimmer] = useState(false);
+  const [pendingTrack, setPendingTrack] = useState<MusicTrack | null>(null);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
   const { data: tracks, isLoading } = useMusicTracks(activeCategory);
@@ -46,11 +52,40 @@ export function MusicPicker({
   const displayTracks = debouncedSearch.trim() ? searchResults : tracks;
 
   const handleTrackSelect = (track: MusicTrack) => {
-    if (selectedMusic?.id === track.id) {
+    if (selectedMusic?.track.id === track.id) {
       onSelect(null);
     } else {
-      onSelect(track);
+      // Se a música for maior que maxTrimDuration, mostrar trimmer
+      if (track.duration_seconds > maxTrimDuration) {
+        setPendingTrack(track);
+        setShowTrimmer(true);
+        stop();
+      } else {
+        // Música curta, selecionar diretamente
+        onSelect({
+          track,
+          startSeconds: 0,
+          endSeconds: track.duration_seconds,
+        });
+      }
     }
+  };
+
+  const handleTrimConfirm = (startSeconds: number, endSeconds: number) => {
+    if (pendingTrack) {
+      onSelect({
+        track: pendingTrack,
+        startSeconds,
+        endSeconds,
+      });
+      setPendingTrack(null);
+      setShowTrimmer(false);
+    }
+  };
+
+  const handleTrimClose = () => {
+    setPendingTrack(null);
+    setShowTrimmer(false);
   };
 
   const handleConfirm = () => {
@@ -62,6 +97,18 @@ export function MusicPicker({
     stop();
     onClose();
   };
+
+  // Mostrar trimmer
+  if (showTrimmer && pendingTrack) {
+    return (
+      <MusicTrimmer
+        track={pendingTrack}
+        maxDuration={maxTrimDuration}
+        onConfirm={handleTrimConfirm}
+        onClose={handleTrimClose}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
@@ -154,7 +201,7 @@ export function MusicPicker({
           )}
 
           {displayTracks?.map((track) => {
-            const isSelected = selectedMusic?.id === track.id;
+            const isSelected = selectedMusic?.track.id === track.id;
             const isCurrentlyPlaying =
               currentTrack?.id === track.id && isPlaying;
 
@@ -256,10 +303,10 @@ export function MusicPicker({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">
-                {selectedMusic.title}
+                {selectedMusic.track.title}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {selectedMusic.artist}
+                {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
               </p>
             </div>
             <button

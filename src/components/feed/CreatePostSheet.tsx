@@ -40,7 +40,7 @@ import { PhotoTagEditor } from "@/components/feed/PhotoTagEditor";
 import { PhotoTag, useCreatePostTags } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { MusicPicker } from "@/components/feed/MusicPicker";
-import { MusicTrack } from "@/hooks/useMusic";
+import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -100,7 +100,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const createPostTags = useCreatePostTags();
   const [allTags, setAllTags] = useState<PhotoTag[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
-  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
+  const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
 
   useEffect(() => {
     if (error) {
@@ -288,7 +288,9 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         locationName: selectedLocation?.name,
         locationLat: selectedLocation?.lat,
         locationLng: selectedLocation?.lng,
-        musicTrackId: selectedMusic?.id,
+        musicTrackId: selectedMusic?.track.id,
+        musicStartSeconds: selectedMusic?.startSeconds,
+        musicEndSeconds: selectedMusic?.endSeconds,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -482,9 +484,10 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           onConfirm={() => {
             setViewMode("default");
             if (selectedMusic) {
-              toast.success(`Música "${selectedMusic.title}" adicionada!`);
+              toast.success(`Música "${selectedMusic.track.title}" adicionada!`);
             }
           }}
+          maxTrimDuration={30}
         />
       );
     }
@@ -881,10 +884,12 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
               <span className="material-symbols-outlined text-[22px] text-foreground">music_note</span>
               <div className="flex flex-col items-start">
                 <span className="text-sm text-foreground">
-                  {selectedMusic ? selectedMusic.title : "Adicionar música"}
+                  {selectedMusic ? selectedMusic.track.title : "Adicionar música"}
                 </span>
                 {selectedMusic && (
-                  <span className="text-xs text-muted-foreground">{selectedMusic.artist}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
+                  </span>
                 )}
               </div>
             </div>
