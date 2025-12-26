@@ -72,8 +72,8 @@ export default {
         "2xl": "calc(var(--radius) + 8px)",
       },
       boxShadow: {
-        "primary-glow": "0 4px 15px rgba(13, 242, 89, 0.25)",
-        "emerald-glow": "0 8px 25px rgba(13, 242, 89, 0.15)",
+        "primary-glow": "0 4px 15px rgba(66, 111, 66, 0.35)",
+        "emerald-glow": "0 8px 25px rgba(66, 111, 66, 0.25)",
       },
       keyframes: {
         "accordion-down": {
