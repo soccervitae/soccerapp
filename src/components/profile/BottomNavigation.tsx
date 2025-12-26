@@ -59,7 +59,9 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
             onClick={() => setIsMenuOpen(true)}
             className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-nav-active transition-colors"
           >
-            <span className="material-symbols-outlined text-[26px]">add</span>
+            <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center">
+              <span className="material-symbols-outlined text-[20px]">add</span>
+            </div>
           </button>
           <button className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "analytics" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}>
             <span className="material-symbols-outlined text-[26px]">analytics</span>
