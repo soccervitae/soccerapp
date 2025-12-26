@@ -17,6 +17,9 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       backgroundColor: '#10b981',
       showSpinner: false
+    },
+    ScreenOrientation: {
+      lockOrientation: 'portrait'
     }
   }
 };

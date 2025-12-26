@@ -79,10 +79,22 @@
 @layer base {
   * {
     @apply border-border;
+    touch-action: manipulation;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground font-display antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
   }
 }
 
