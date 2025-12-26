@@ -7,6 +7,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -62,6 +63,7 @@ const App = () => (
         <Sonner />
         <PwaInstallPrompt />
         <BrowserRouter>
+          <ScrollToTop />
           <AnimatedRoutes />
         </BrowserRouter>
       </AuthProvider>
