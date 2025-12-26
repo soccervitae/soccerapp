@@ -112,7 +112,7 @@ const Auth = () => {
         <img 
           src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
           alt="Soccer Vitae"
-          className="h-20 w-auto object-contain"
+          className="h-12 w-auto object-contain"
         />
       </div>
 
