@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
+import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
 import {
@@ -55,6 +56,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isCommentsSheetOpen, setIsCommentsSheetOpen] = useState(false);
+  const [isLikesSheetOpen, setIsLikesSheetOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -424,8 +426,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       </div>
 
       {/* Actions */}
-      <div className="p-4">
-        <div className="grid grid-cols-4 bg-card rounded-2xl border border-border shadow-sm mb-3">
+      <div className="px-4 pt-3">
+        <div className="grid grid-cols-4 bg-card rounded-2xl border border-border shadow-sm">
           <button 
             onClick={handleLike}
             disabled={likePost.isPending}
@@ -464,8 +466,57 @@ export const FeedPost = ({ post }: FeedPostProps) => {
             </span>
           </button>
         </div>
-
       </div>
+
+      {/* Liked by section */}
+      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && (
+        <div className="px-4 pt-2 pb-1">
+          <button 
+            onClick={() => setIsLikesSheetOpen(true)}
+            className="flex items-center gap-2 group"
+          >
+            {/* Stacked avatars */}
+            <div className="flex -space-x-2">
+              {post.recent_likes.slice(0, 3).map((like, index) => (
+                <img
+                  key={like.user_id}
+                  src={like.avatar_url || "/placeholder.svg"}
+                  alt={like.username}
+                  className="w-6 h-6 rounded-full border-2 border-background object-cover"
+                  style={{ zIndex: 3 - index }}
+                />
+              ))}
+            </div>
+            
+            {/* Text */}
+            <p className="text-sm text-foreground">
+              Curtido por{" "}
+              <span 
+                className="font-semibold group-hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/${post.recent_likes[0].username}`);
+                }}
+              >
+                {post.recent_likes[0].nickname || post.recent_likes[0].username}
+              </span>
+              {post.likes_count > 1 && (
+                <>
+                  {" "}e{" "}
+                  <span className="font-semibold group-hover:underline">
+                    {post.likes_count === 2 
+                      ? post.recent_likes[1]?.nickname || post.recent_likes[1]?.username || "outra pessoa"
+                      : `outras ${post.likes_count - 1} pessoas`
+                    }
+                  </span>
+                </>
+              )}
+            </p>
+          </button>
+        </div>
+      )}
+
+      <div className="pb-3" />
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -568,6 +619,13 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         post={post} 
         open={isCommentsSheetOpen} 
         onOpenChange={setIsCommentsSheetOpen} 
+      />
+
+      {/* Likes Sheet */}
+      <LikesSheet
+        postId={post.id}
+        open={isLikesSheetOpen}
+        onOpenChange={setIsLikesSheetOpen}
       />
     </article>
   );

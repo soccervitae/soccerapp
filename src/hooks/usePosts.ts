@@ -5,6 +5,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cachePosts, getCachedPosts, isOnline } from "@/lib/offlineStorage";
 
+export interface RecentLike {
+  user_id: string;
+  username: string;
+  full_name: string | null;
+  nickname: string | null;
+  avatar_url: string | null;
+  conta_verificada: boolean;
+}
+
 export interface Post {
   id: string;
   user_id: string;
@@ -41,6 +50,7 @@ export interface Post {
   };
   liked_by_user: boolean;
   saved_by_user: boolean;
+  recent_likes: RecentLike[];
 }
 
 export const usePosts = () => {
@@ -85,10 +95,48 @@ export const usePosts = () => {
 
       if (error) throw error;
 
+      // Get post IDs for batch queries
+      const postIds = posts?.map(p => p.id) || [];
+
+      // Fetch recent likes for all posts (get the 3 most recent per post)
+      const recentLikesRes = await supabase
+        .from("likes")
+        .select(`
+          post_id,
+          user_id,
+          created_at,
+          profile:profiles!likes_user_id_fkey (
+            id,
+            username,
+            full_name,
+            nickname,
+            avatar_url,
+            conta_verificada
+          )
+        `)
+        .in("post_id", postIds)
+        .order("created_at", { ascending: false });
+
+      // Group recent likes by post_id (max 3 per post)
+      const recentLikesByPost: Record<string, RecentLike[]> = {};
+      for (const like of recentLikesRes.data || []) {
+        if (!recentLikesByPost[like.post_id]) {
+          recentLikesByPost[like.post_id] = [];
+        }
+        if (recentLikesByPost[like.post_id].length < 3) {
+          recentLikesByPost[like.post_id].push({
+            user_id: like.user_id,
+            username: (like.profile as any)?.username || "",
+            full_name: (like.profile as any)?.full_name || null,
+            nickname: (like.profile as any)?.nickname || null,
+            avatar_url: (like.profile as any)?.avatar_url || null,
+            conta_verificada: (like.profile as any)?.conta_verificada || false,
+          });
+        }
+      }
+
       // Check if posts are liked/saved by current user
       if (user && posts) {
-        const postIds = posts.map(p => p.id);
-        
         const [likesRes, savedRes] = await Promise.all([
           supabase
             .from("likes")
@@ -109,6 +157,7 @@ export const usePosts = () => {
           ...post,
           liked_by_user: likedPostIds.has(post.id),
           saved_by_user: savedPostIds.has(post.id),
+          recent_likes: recentLikesByPost[post.id] || [],
         }));
       }
 
@@ -116,6 +165,7 @@ export const usePosts = () => {
         ...post,
         liked_by_user: false,
         saved_by_user: false,
+        recent_likes: recentLikesByPost[post.id] || [],
       })) || [];
     },
     retry: (failureCount, error) => {
