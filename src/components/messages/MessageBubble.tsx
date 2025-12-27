@@ -157,15 +157,15 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
               message.isPending 
                 ? "text-primary-foreground/50" 
                 : isRead 
-                  ? "text-primary-foreground" 
-                  : "text-primary-foreground/50"
+                  ? "text-blue-400" 
+                  : "text-primary-foreground/70"
             }`}>
               {message.isPending ? (
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3.5 w-3.5" />
               ) : isRead ? (
-                <CheckCheck className="h-3 w-3" />
+                <CheckCheck className="h-3.5 w-3.5" />
               ) : (
-                <Check className="h-3 w-3" />
+                <Check className="h-3.5 w-3.5" />
               )}
             </span>
           )}
