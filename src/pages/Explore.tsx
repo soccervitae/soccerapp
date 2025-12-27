@@ -135,9 +135,6 @@ const Explore = () => {
                     <h3 className="font-semibold text-foreground text-sm truncate">
                       {profile.full_name || profile.username}
                     </h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      @{profile.username}
-                    </p>
                     {profile.position && (
                       <span className="text-xs text-primary font-medium">
                         {profile.position}
