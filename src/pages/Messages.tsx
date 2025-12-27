@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
+import { useFollowing } from "@/hooks/useFollowList";
 import { ConversationItem } from "@/components/messages/ConversationItem";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Search, MessageSquarePlus, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Search, MessageSquarePlus, Loader2, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,35 +29,33 @@ const Messages = () => {
   const { user } = useAuth();
   const { conversations, isLoading } = useConversations();
   const { createConversation } = useCreateConversation();
+  const { data: followingUsers, isLoading: isLoadingFollowing } = useFollowing(user?.id || "");
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Profile[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.length < 2) {
-      setSearchResults([]);
+  // Filter following users based on search query
+  useEffect(() => {
+    if (!followingUsers) {
+      setFilteredUsers([]);
       return;
     }
 
-    setIsSearching(true);
-    try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .neq("id", user?.id)
-        .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
-        .limit(10);
-
-      setSearchResults(data || []);
-    } catch (error) {
-      console.error("Error searching users:", error);
-    } finally {
-      setIsSearching(false);
+    if (searchQuery.length < 2) {
+      // Cast to Profile[] since FollowUser has compatible fields
+      setFilteredUsers(followingUsers as unknown as Profile[]);
+      return;
     }
-  };
+
+    const query = searchQuery.toLowerCase();
+    const filtered = followingUsers.filter(
+      (profile) =>
+        profile.username?.toLowerCase().includes(query) ||
+        profile.full_name?.toLowerCase().includes(query)
+    );
+    setFilteredUsers(filtered as unknown as Profile[]);
+  }, [searchQuery, followingUsers]);
 
   const handleStartConversation = async (userId: string) => {
     setIsCreating(true);
@@ -108,28 +106,38 @@ const Messages = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar usuários..."
+                  placeholder="Buscar entre quem você segue..."
                   value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
                 />
               </div>
 
               <ScrollArea className="flex-1">
                 <div className="space-y-2">
-                  {isSearching && (
+                  {isLoadingFollowing && (
                     <div className="flex justify-center py-4">
                       <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                   )}
 
-                  {!isSearching && searchResults.length === 0 && searchQuery.length >= 2 && (
-                    <p className="text-center text-muted-foreground py-4">
-                      Nenhum usuário encontrado
-                    </p>
+                  {!isLoadingFollowing && filteredUsers.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                      <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground">
+                        {searchQuery.length >= 2 
+                          ? "Nenhum usuário encontrado" 
+                          : "Você ainda não segue ninguém"}
+                      </p>
+                      {searchQuery.length < 2 && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Siga pessoas para iniciar conversas
+                        </p>
+                      )}
+                    </div>
                   )}
 
-                  {searchResults.map((profile) => (
+                  {filteredUsers.map((profile) => (
                     <button
                       key={profile.id}
                       onClick={() => handleStartConversation(profile.id)}
