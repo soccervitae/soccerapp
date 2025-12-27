@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { ImagePlus, Send, X, Loader2, Mic, Square, Trash2, Play, Pause } from "lucide-react";
+import { ImagePlus, Send, X, Loader2, Mic, Square, Trash2, Play, Pause, Flame } from "lucide-react";
 import type { MessageWithSender } from "@/hooks/useMessages";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
-  onSend: (content: string, mediaUrl?: string, mediaType?: string, replyToMessageId?: string) => void;
+  onSend: (content: string, mediaUrl?: string, mediaType?: string, replyToMessageId?: string, isTemporary?: boolean) => void;
   isSending: boolean;
   replyTo?: MessageWithSender | null;
   onCancelReply?: () => void;
@@ -18,6 +19,7 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
   const [message, setMessage] = useState("");
   const [mediaPreview, setMediaPreview] = useState<{ url: string; type: string; file: File } | null>(null);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [isTemporaryMode, setIsTemporaryMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
   const { uploadMedia, isUploading } = useUploadMedia();
@@ -63,7 +65,7 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
       setMediaPreview(null);
     }
 
-    onSend(message.trim() || (mediaType === "audio" ? "🎤" : "📷"), mediaUrl, mediaType, replyTo?.id);
+    onSend(message.trim() || (mediaType === "audio" ? "🎤" : "📷"), mediaUrl, mediaType, replyTo?.id, isTemporaryMode);
     setMessage("");
     if (onCancelReply) onCancelReply();
   };
@@ -132,6 +134,22 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
   if (recordedAudio) {
     return (
       <div className="border-t border-border bg-background p-3">
+        {/* Temporary mode indicator */}
+        {isTemporaryMode && (
+          <div className="flex items-center gap-2 mb-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+            <Flame className="h-4 w-4 text-orange-500" />
+            <span className="text-sm text-orange-500">Mensagem temporária ativada</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsTemporaryMode(false)}
+              className="h-5 w-5 ml-auto"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+
         {replyTo && (
           <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
             <div className="flex-1 text-sm text-muted-foreground truncate">
@@ -203,6 +221,22 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
 
   return (
     <div className="border-t border-border bg-background p-3">
+      {/* Temporary mode indicator */}
+      {isTemporaryMode && (
+        <div className="flex items-center gap-2 mb-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+          <Flame className="h-4 w-4 text-orange-500" />
+          <span className="text-sm text-orange-500">Mensagem temporária - desaparece após leitura</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsTemporaryMode(false)}
+            className="h-5 w-5 ml-auto"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
+
       {/* Reply preview */}
       {replyTo && (
         <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
@@ -256,6 +290,20 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
           <ImagePlus className="h-5 w-5" />
         </Button>
 
+        {/* Temporary message toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsTemporaryMode(!isTemporaryMode)}
+          className={cn(
+            "flex-shrink-0 transition-colors",
+            isTemporaryMode && "text-orange-500 bg-orange-500/10 hover:bg-orange-500/20 hover:text-orange-500"
+          )}
+          title="Mensagem temporária"
+        >
+          <Flame className="h-5 w-5" />
+        </Button>
+
         <Textarea
           value={message}
           onChange={(e) => {
@@ -263,8 +311,11 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
             onTyping?.();
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Digite uma mensagem..."
-          className="min-h-[44px] max-h-32 resize-none"
+          placeholder={isTemporaryMode ? "Mensagem temporária..." : "Digite uma mensagem..."}
+          className={cn(
+            "min-h-[44px] max-h-32 resize-none",
+            isTemporaryMode && "border-orange-500/30 focus-visible:ring-orange-500/50"
+          )}
           rows={1}
         />
 

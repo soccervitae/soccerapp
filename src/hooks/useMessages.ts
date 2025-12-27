@@ -164,7 +164,8 @@ export const useMessages = (conversationId: string | null) => {
     content: string,
     mediaUrl?: string,
     mediaType?: string,
-    replyToMessageId?: string
+    replyToMessageId?: string,
+    isTemporary?: boolean
   ) => {
     if (!conversationId || !user) return null;
 
@@ -181,6 +182,8 @@ export const useMessages = (conversationId: string | null) => {
           media_type: mediaType,
           reply_to_message_id: replyToMessageId,
           created_at: new Date().toISOString(),
+          is_temporary: isTemporary || false,
+          delete_after_read: isTemporary || false,
         };
 
         const tempId = await addPendingMessage(pendingMessage);
@@ -196,9 +199,9 @@ export const useMessages = (conversationId: string | null) => {
           reply_to_message_id: replyToMessageId || null,
           created_at: new Date().toISOString(),
           deleted_at: null,
-          delete_after_read: null,
+          delete_after_read: isTemporary || null,
           expires_at: null,
-          is_temporary: null,
+          is_temporary: isTemporary || null,
           read_by: null,
           sender: null,
           isPending: true,
@@ -224,6 +227,8 @@ export const useMessages = (conversationId: string | null) => {
           media_url: mediaUrl || null,
           media_type: mediaType || null,
           reply_to_message_id: replyToMessageId || null,
+          is_temporary: isTemporary || false,
+          delete_after_read: isTemporary || false,
         })
         .select()
         .single();
