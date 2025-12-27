@@ -830,10 +830,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <SelectValue placeholder="Selecione seu sexo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="masculino">Masculino</SelectItem>
-            <SelectItem value="feminino">Feminino</SelectItem>
-            <SelectItem value="outro">Outro</SelectItem>
-            <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+            <SelectItem value="homem">Homem</SelectItem>
+            <SelectItem value="mulher">Mulher</SelectItem>
           </SelectContent>
         </Select>
       </div>
