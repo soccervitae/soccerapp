@@ -1,25 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
+import { FollowingUserItem } from "@/components/messages/FollowingUserItem";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Search, MessageSquarePlus, Loader2, UserPlus } from "lucide-react";
+import { ArrowLeft, Search, Loader2, UserPlus, Users, Circle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  ResponsiveModal,
-  ResponsiveModalContent,
-  ResponsiveModalHeader,
-  ResponsiveModalTitle,
-  ResponsiveModalTrigger,
-} from "@/components/ui/responsive-modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -33,54 +26,61 @@ const Messages = () => {
   const { data: followingUsers, isLoading: isLoadingFollowing } = useFollowing(user?.id || "");
   const { isUserOnline } = usePresenceContext();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
 
-  // Filter following users based on search query
-  useEffect(() => {
-    if (!followingUsers) {
-      setFilteredUsers([]);
-      return;
-    }
+  // Set de IDs de usuários com conversas existentes
+  const existingConversationUserIds = useMemo(() => {
+    return new Set(
+      conversations
+        .filter((c) => c.participant)
+        .map((c) => c.participant!.id)
+    );
+  }, [conversations]);
 
-    if (searchQuery.length < 2) {
-      // Cast to Profile[] since FollowUser has compatible fields
-      setFilteredUsers(followingUsers as unknown as Profile[]);
-      return;
-    }
+  // Filtrar usuários baseado na busca
+  const filteredUsers = useMemo(() => {
+    if (!followingUsers) return [];
+    
+    const users = followingUsers as unknown as Profile[];
+    
+    if (searchQuery.length < 2) return users;
 
     const query = searchQuery.toLowerCase();
-    const filtered = followingUsers.filter(
+    return users.filter(
       (profile) =>
         profile.username?.toLowerCase().includes(query) ||
         profile.full_name?.toLowerCase().includes(query)
     );
-    setFilteredUsers(filtered as unknown as Profile[]);
-  }, [searchQuery, followingUsers]);
+  }, [followingUsers, searchQuery]);
+
+  // Separar usuários online e offline
+  const { onlineUsers, offlineUsers } = useMemo(() => {
+    const online: Profile[] = [];
+    const offline: Profile[] = [];
+
+    filteredUsers.forEach((user) => {
+      if (isUserOnline(user.id)) {
+        online.push(user);
+      } else {
+        offline.push(user);
+      }
+    });
+
+    return { onlineUsers: online, offlineUsers: offline };
+  }, [filteredUsers, isUserOnline]);
 
   const handleStartConversation = async (userId: string) => {
-    setIsCreating(true);
+    setCreatingUserId(userId);
     try {
       const conversationId = await createConversation(userId);
       if (conversationId) {
-        setSheetOpen(false);
         navigate(`/messages/${conversationId}`);
       }
     } catch (error) {
       console.error("Error creating conversation:", error);
     } finally {
-      setIsCreating(false);
+      setCreatingUserId(null);
     }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -93,76 +93,6 @@ const Messages = () => {
           </Button>
           <h1 className="text-lg font-semibold">Mensagens</h1>
         </div>
-
-        <ResponsiveModal open={sheetOpen} onOpenChange={setSheetOpen}>
-          <ResponsiveModalTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MessageSquarePlus className="h-5 w-5" />
-            </Button>
-          </ResponsiveModalTrigger>
-          <ResponsiveModalContent className="sm:max-w-md h-[80vh] sm:h-[500px] flex flex-col">
-            <ResponsiveModalHeader>
-              <ResponsiveModalTitle>Nova Conversa</ResponsiveModalTitle>
-            </ResponsiveModalHeader>
-            <div className="mt-4 space-y-4 flex-1 flex flex-col">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar entre quem você segue..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
-              <ScrollArea className="flex-1">
-                <div className="space-y-2">
-                  {isLoadingFollowing && (
-                    <div className="flex justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
-
-                  {!isLoadingFollowing && filteredUsers.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                      <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
-                      <p className="text-muted-foreground">
-                        {searchQuery.length >= 2 
-                          ? "Nenhum usuário encontrado" 
-                          : "Você ainda não segue ninguém"}
-                      </p>
-                      {searchQuery.length < 2 && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Siga pessoas para iniciar conversas
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {filteredUsers.map((profile) => (
-                    <button
-                      key={profile.id}
-                      onClick={() => handleStartConversation(profile.id)}
-                      disabled={isCreating}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors rounded-lg disabled:opacity-50"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={profile.avatar_url || ""} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {getInitials(profile.full_name || profile.username)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="text-left">
-                        <p className="font-medium">{profile.full_name || profile.username}</p>
-                        <p className="text-sm text-muted-foreground">@{profile.username}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </ResponsiveModalContent>
-        </ResponsiveModal>
       </div>
 
       {/* Content */}
@@ -177,65 +107,128 @@ const Messages = () => {
           <NotificationPermissionButton />
         </div>
 
-        {/* Seção de usuários seguidos */}
-        {followingUsers && followingUsers.length > 0 && (
-          <div className="px-3 py-3 border-b border-border">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">
-              Quem você segue
-            </h3>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              {followingUsers.map((userProfile) => (
-                <button
-                  key={userProfile.id}
-                  onClick={() => handleStartConversation(userProfile.id)}
-                  disabled={isCreating}
-                  className="flex flex-col items-center gap-1.5 min-w-[64px] disabled:opacity-50 transition-opacity"
-                >
-                  <div className="relative">
-                    <Avatar className="h-14 w-14 border-2 border-primary/20">
-                      <AvatarImage src={userProfile.avatar_url || ""} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {getInitials(userProfile.full_name || userProfile.username)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {isUserOnline(userProfile.id) && (
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-background rounded-full" />
-                    )}
-                  </div>
-                  <span className="text-xs text-foreground truncate max-w-[64px]">
-                    {userProfile.username}
-                  </span>
-                </button>
-              ))}
-            </div>
+        {/* Campo de busca */}
+        <div className="px-3 pb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar entre quem você segue..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        {/* Loading state */}
+        {isLoadingFollowing && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : conversations.length === 0 ? (
+        {/* Empty state - não segue ninguém */}
+        {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && (
           <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-            <span className="material-symbols-outlined text-5xl text-muted-foreground mb-3">
-              chat_bubble_outline
-            </span>
-            <h2 className="text-lg font-medium mb-2">Nenhuma conversa ainda</h2>
+            <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
+            <h2 className="text-lg font-medium mb-1">Você ainda não segue ninguém</h2>
             <p className="text-muted-foreground text-sm">
-              {followingUsers && followingUsers.length > 0 
-                ? "Selecione alguém acima para começar a conversar"
-                : "Comece seguindo pessoas para poder conversar"}
+              Siga pessoas para iniciar conversas
             </p>
           </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {conversations.map((conversation) => (
-              <ConversationItem
-                key={conversation.id}
-                conversation={conversation}
-                onClick={() => navigate(`/messages/${conversation.id}`)}
-              />
-            ))}
+        )}
+
+        {/* Empty state - busca sem resultados */}
+        {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length >= 2 && (
+          <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+            <Search className="h-12 w-12 text-muted-foreground mb-3" />
+            <p className="text-muted-foreground">
+              Nenhum usuário encontrado para "{searchQuery}"
+            </p>
+          </div>
+        )}
+
+        {/* Lista de usuários seguidos */}
+        {!isLoadingFollowing && filteredUsers.length > 0 && (
+          <ScrollArea className="h-[calc(100vh-280px)]">
+            {/* Seção Online */}
+            {onlineUsers.length > 0 && (
+              <div className="px-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Online agora ({onlineUsers.length})
+                  </h3>
+                </div>
+                <div className="bg-muted/30 rounded-lg overflow-hidden">
+                  {onlineUsers.map((userProfile) => (
+                    <FollowingUserItem
+                      key={userProfile.id}
+                      user={userProfile}
+                      isOnline={true}
+                      hasConversation={existingConversationUserIds.has(userProfile.id)}
+                      onClick={() => handleStartConversation(userProfile.id)}
+                      disabled={creatingUserId !== null}
+                      isLoading={creatingUserId === userProfile.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Seção Todos/Offline */}
+            {offlineUsers.length > 0 && (
+              <div className="px-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    {onlineUsers.length > 0 ? "Outros" : "Quem você segue"} ({offlineUsers.length})
+                  </h3>
+                </div>
+                <div className="bg-muted/30 rounded-lg overflow-hidden">
+                  {offlineUsers.map((userProfile) => (
+                    <FollowingUserItem
+                      key={userProfile.id}
+                      user={userProfile}
+                      isOnline={false}
+                      hasConversation={existingConversationUserIds.has(userProfile.id)}
+                      onClick={() => handleStartConversation(userProfile.id)}
+                      disabled={creatingUserId !== null}
+                      isLoading={creatingUserId === userProfile.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Seção de conversas recentes */}
+            {conversations.length > 0 && (
+              <div className="px-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Conversas recentes ({conversations.length})
+                  </h3>
+                </div>
+                <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                  {conversations.map((conversation) => (
+                    <ConversationItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      onClick={() => navigate(`/messages/${conversation.id}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        )}
+
+        {/* Empty conversations state quando há usuários mas nenhuma conversa */}
+        {!isLoadingFollowing && !isLoading && filteredUsers.length > 0 && conversations.length === 0 && (
+          <div className="px-3 py-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Clique em alguém acima para iniciar uma conversa
+            </p>
           </div>
         )}
       </div>
