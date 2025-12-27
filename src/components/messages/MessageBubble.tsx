@@ -1,21 +1,33 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageWithSender } from "@/hooks/useMessages";
+import type { ReactionWithUser } from "@/hooks/useMessageReactions";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, CheckCheck, Play, Pause, Clock } from "lucide-react";
+import { Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmojiReactionPicker } from "./EmojiReactionPicker";
 
 interface MessageBubbleProps {
   message: MessageWithSender;
   onReply?: (message: MessageWithSender) => void;
+  reactions?: ReactionWithUser[];
+  onAddReaction?: (messageId: string, emoji: string) => void;
+  onRemoveReaction?: (reactionId: string) => void;
 }
 
-export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
+export const MessageBubble = ({ 
+  message, 
+  onReply, 
+  reactions = [],
+  onAddReaction,
+  onRemoveReaction 
+}: MessageBubbleProps) => {
   const { user } = useAuth();
   const isOwn = message.sender_id === user?.id;
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const formatTime = (date: string) => {
@@ -23,6 +35,7 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
   };
 
   const isRead = message.read_by && message.read_by.length > 1;
+  const isTemporary = message.is_temporary || message.delete_after_read;
 
   const toggleAudio = () => {
     if (!audioRef.current) return;
@@ -53,123 +66,203 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleLongPress = () => {
+    setShowReactionPicker(true);
+  };
+
+  const handleReactionClick = (emoji: string, existingReaction?: ReactionWithUser) => {
+    if (existingReaction && existingReaction.user_id === user?.id && onRemoveReaction) {
+      onRemoveReaction(existingReaction.id);
+    } else if (onAddReaction) {
+      onAddReaction(message.id, emoji);
+    }
+  };
+
+  // Group reactions by emoji
+  const groupedReactions = reactions.reduce((acc, reaction) => {
+    if (!acc[reaction.emoji]) {
+      acc[reaction.emoji] = [];
+    }
+    acc[reaction.emoji].push(reaction);
+    return acc;
+  }, {} as Record<string, ReactionWithUser[]>);
+
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
-      <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-          isOwn
-            ? "bg-primary text-primary-foreground rounded-br-md"
-            : "bg-muted text-foreground rounded-bl-md"
-        }`}
-      >
-        {/* Reply preview */}
-        {message.replyToMessage && (
-          <div
-            className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
-              isOwn
-                ? "bg-primary-foreground/10 border-primary-foreground/50"
-                : "bg-background/50 border-primary/50"
-            }`}
-          >
-            <p className="opacity-70 truncate">{message.replyToMessage.content}</p>
-          </div>
-        )}
+      <div className="relative">
+        <div
+          className={`max-w-[75%] rounded-2xl px-4 py-2 ${
+            isOwn
+              ? "bg-primary text-primary-foreground rounded-br-md"
+              : "bg-muted text-foreground rounded-bl-md"
+          } ${isTemporary ? "border-2 border-orange-500/50" : ""}`}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            handleLongPress();
+          }}
+          onDoubleClick={() => onReply?.(message)}
+        >
+          {/* Temporary message indicator */}
+          {isTemporary && (
+            <div className={`flex items-center gap-1 text-xs mb-1 ${
+              isOwn ? "text-primary-foreground/70" : "text-orange-500"
+            }`}>
+              <Flame className="h-3 w-3" />
+              <span>Mensagem temporária</span>
+            </div>
+          )}
 
-        {/* Media content */}
-        {message.media_url && (
-          <div className="mb-2 rounded-lg overflow-hidden">
-            {message.media_type === "audio" ? (
-              <div className="flex items-center gap-2 min-w-[180px]">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleAudio}
-                  className={`h-10 w-10 rounded-full ${
-                    isOwn
-                      ? "bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground"
-                      : "bg-background/50 hover:bg-background/70"
-                  }`}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-5 w-5" />
-                  ) : (
-                    <Play className="h-5 w-5 ml-0.5" />
-                  )}
-                </Button>
+          {/* Reply preview */}
+          {message.replyToMessage && (
+            <div
+              className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
+                isOwn
+                  ? "bg-primary-foreground/10 border-primary-foreground/50"
+                  : "bg-background/50 border-primary/50"
+              }`}
+            >
+              <p className="opacity-70 truncate">{message.replyToMessage.content}</p>
+            </div>
+          )}
 
-                <div className="flex-1">
-                  <div className={`h-1 rounded-full overflow-hidden ${
-                    isOwn ? "bg-primary-foreground/30" : "bg-border"
-                  }`}>
-                    <div
-                      className={`h-full transition-all ${
-                        isOwn ? "bg-primary-foreground" : "bg-primary"
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
+          {/* Media content */}
+          {message.media_url && (
+            <div className="mb-2 rounded-lg overflow-hidden">
+              {message.media_type === "audio" ? (
+                <div className="flex items-center gap-2 min-w-[180px]">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleAudio}
+                    className={`h-10 w-10 rounded-full ${
+                      isOwn
+                        ? "bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground"
+                        : "bg-background/50 hover:bg-background/70"
+                    }`}
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5 ml-0.5" />
+                    )}
+                  </Button>
+
+                  <div className="flex-1">
+                    <div className={`h-1 rounded-full overflow-hidden ${
+                      isOwn ? "bg-primary-foreground/30" : "bg-border"
+                    }`}>
+                      <div
+                        className={`h-full transition-all ${
+                          isOwn ? "bg-primary-foreground" : "bg-primary"
+                        }`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <span className={`text-[10px] ${
+                      isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                    }`}>
+                      {audioRef.current?.duration
+                        ? formatDuration(isPlaying ? audioRef.current.currentTime : audioRef.current.duration)
+                        : "0:00"}
+                    </span>
                   </div>
-                  <span className={`text-[10px] ${
-                    isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                  }`}>
-                    {audioRef.current?.duration
-                      ? formatDuration(isPlaying ? audioRef.current.currentTime : audioRef.current.duration)
-                      : "0:00"}
-                  </span>
-                </div>
 
-                <audio
-                  ref={audioRef}
+                  <audio
+                    ref={audioRef}
+                    src={message.media_url}
+                    onTimeUpdate={handleTimeUpdate}
+                    onEnded={handleAudioEnded}
+                    onLoadedMetadata={() => setProgress(0)}
+                    className="hidden"
+                  />
+                </div>
+              ) : message.media_type === "video" ? (
+                <video
                   src={message.media_url}
-                  onTimeUpdate={handleTimeUpdate}
-                  onEnded={handleAudioEnded}
-                  onLoadedMetadata={() => setProgress(0)}
-                  className="hidden"
+                  controls
+                  className="max-w-full rounded-lg"
                 />
-              </div>
-            ) : message.media_type === "video" ? (
-              <video
-                src={message.media_url}
-                controls
-                className="max-w-full rounded-lg"
-              />
-            ) : (
-              <img
-                src={message.media_url}
-                alt="Media"
-                className="max-w-full rounded-lg"
-              />
+              ) : (
+                <img
+                  src={message.media_url}
+                  alt="Media"
+                  className="max-w-full rounded-lg"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Text content - hide emoji placeholders for audio */}
+          {message.content && message.content !== "🎤" && (
+            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+          )}
+
+          {/* Time and read status */}
+          <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+            <span className={`text-[10px] ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+              {formatTime(message.created_at)}
+            </span>
+            {isOwn && (
+              <span className={`${
+                message.isPending 
+                  ? "text-primary-foreground/50" 
+                  : isRead 
+                    ? "text-blue-400" 
+                    : "text-primary-foreground/70"
+              }`}>
+                {message.isPending ? (
+                  <Clock className="h-3.5 w-3.5" />
+                ) : isRead ? (
+                  <CheckCheck className="h-3.5 w-3.5" />
+                ) : (
+                  <Check className="h-3.5 w-3.5" />
+                )}
+              </span>
             )}
           </div>
-        )}
 
-        {/* Text content - hide emoji placeholders for audio */}
-        {message.content && message.content !== "🎤" && (
-          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-        )}
+          {/* Reaction button */}
+          <button
+            onClick={() => setShowReactionPicker(true)}
+            className={`absolute -bottom-2 ${isOwn ? "left-0" : "right-0"} opacity-0 group-hover:opacity-100 hover:opacity-100 bg-card border border-border rounded-full p-1 shadow-sm transition-opacity`}
+            style={{ opacity: showReactionPicker ? 0 : undefined }}
+          >
+            <SmilePlus className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
 
-        {/* Time and read status */}
-        <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
-          <span className={`text-[10px] ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-            {formatTime(message.created_at)}
-          </span>
-          {isOwn && (
-            <span className={`${
-              message.isPending 
-                ? "text-primary-foreground/50" 
-                : isRead 
-                  ? "text-blue-400" 
-                  : "text-primary-foreground/70"
-            }`}>
-              {message.isPending ? (
-                <Clock className="h-3.5 w-3.5" />
-              ) : isRead ? (
-                <CheckCheck className="h-3.5 w-3.5" />
-              ) : (
-                <Check className="h-3.5 w-3.5" />
-              )}
-            </span>
-          )}
+          {/* Emoji picker */}
+          <EmojiReactionPicker
+            isOpen={showReactionPicker}
+            onSelect={(emoji) => onAddReaction?.(message.id, emoji)}
+            onClose={() => setShowReactionPicker(false)}
+            position={isOwn ? "top" : "top"}
+          />
         </div>
+
+        {/* Reactions display */}
+        {Object.keys(groupedReactions).length > 0 && (
+          <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+            {Object.entries(groupedReactions).map(([emoji, reacts]) => {
+              const userReacted = reacts.find((r) => r.user_id === user?.id);
+              return (
+                <button
+                  key={emoji}
+                  onClick={() => handleReactionClick(emoji, userReacted)}
+                  className={`flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full border transition-colors ${
+                    userReacted
+                      ? "bg-primary/20 border-primary/50"
+                      : "bg-muted border-border hover:bg-muted/80"
+                  }`}
+                >
+                  <span>{emoji}</span>
+                  {reacts.length > 1 && (
+                    <span className="text-muted-foreground">{reacts.length}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

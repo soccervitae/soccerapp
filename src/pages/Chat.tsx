@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useMessages } from "@/hooks/useMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
+import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { ChatInput } from "@/components/messages/ChatInput";
@@ -19,6 +20,7 @@ const Chat = () => {
   const { user } = useAuth();
   const { messages, isLoading, isSending, isOffline, sendMessage } = useMessages(conversationId || null);
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
+  const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -49,6 +51,14 @@ const Chat = () => {
     fetchParticipant();
   }, [conversationId, user]);
 
+  // Fetch reactions when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      const messageIds = messages.map((m) => m.id);
+      fetchReactionsForMessages(messageIds);
+    }
+  }, [messages, fetchReactionsForMessages]);
+
   // Scroll to bottom on new messages or typing
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,13 +82,14 @@ const Chat = () => {
     content: string,
     mediaUrl?: string,
     mediaType?: string,
-    replyToMessageId?: string
+    replyToMessageId?: string,
+    isTemporary?: boolean
   ) => {
     stopTyping();
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    await sendMessage(content, mediaUrl, mediaType, replyToMessageId);
+    await sendMessage(content, mediaUrl, mediaType, replyToMessageId, isTemporary);
   };
 
   const handleReply = (message: MessageWithSender) => {
@@ -129,10 +140,15 @@ const Chat = () => {
             {messages.map((message) => (
               <div
                 key={message.id}
-                onDoubleClick={() => handleReply(message)}
-                className="cursor-pointer"
+                className="group"
               >
-                <MessageBubble message={message} onReply={handleReply} />
+                <MessageBubble 
+                  message={message} 
+                  onReply={handleReply}
+                  reactions={getReactionsForMessage(message.id)}
+                  onAddReaction={addReaction}
+                  onRemoveReaction={removeReaction}
+                />
               </div>
             ))}
             <div ref={messagesEndRef} />
