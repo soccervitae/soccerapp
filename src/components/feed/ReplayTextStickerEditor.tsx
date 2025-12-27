@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
 interface OverlayElement {
@@ -57,6 +58,21 @@ const FONT_SIZES = {
 };
 
 type ToolMode = "none" | "text" | "stickers" | "colors";
+type GestureMode = "none" | "drag" | "pinch-rotate";
+
+// Helpers para gestos multi-touch
+const getDistance = (touch1: React.Touch, touch2: React.Touch): number => {
+  const dx = touch1.clientX - touch2.clientX;
+  const dy = touch1.clientY - touch2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+const getAngle = (touch1: React.Touch, touch2: React.Touch): number => {
+  return Math.atan2(
+    touch2.clientY - touch1.clientY,
+    touch2.clientX - touch1.clientX
+  ) * (180 / Math.PI);
+};
 
 export const ReplayTextStickerEditor = ({
   mediaUrl,
@@ -73,9 +89,16 @@ export const ReplayTextStickerEditor = ({
   const [selectedFontStyle, setSelectedFontStyle] = useState<"normal" | "bold" | "cursive">("bold");
   const [isDragging, setIsDragging] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [gestureMode, setGestureMode] = useState<GestureMode>("none");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; elementX: number; elementY: number } | null>(null);
+  const initialGestureRef = useRef<{
+    distance: number;
+    angle: number;
+    scale: number;
+    rotation: number;
+  } | null>(null);
 
   const generateId = () => `el-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -125,7 +148,97 @@ export const ReplayTextStickerEditor = ({
     }
   };
 
+  // Touch handlers para gestos de pinça
+  const handleTouchStart = (e: React.TouchEvent, elementId: string) => {
+    e.stopPropagation();
+    setActiveElementId(elementId);
+
+    const element = elements.find(el => el.id === elementId);
+    if (!element) return;
+
+    if (e.touches.length === 2) {
+      // Gesto de pinça/rotação
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+
+      initialGestureRef.current = {
+        distance: getDistance(touch1, touch2),
+        angle: getAngle(touch1, touch2),
+        scale: element.scale,
+        rotation: element.rotation,
+      };
+      setGestureMode("pinch-rotate");
+    } else if (e.touches.length === 1) {
+      // Arraste simples
+      setGestureMode("drag");
+      setIsDragging(true);
+      
+      if (containerRef.current) {
+        dragStartRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          elementX: element.x,
+          elementY: element.y,
+        };
+      }
+    }
+  };
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!activeElementId || !containerRef.current) return;
+
+    if (e.touches.length === 2 && initialGestureRef.current && gestureMode === "pinch-rotate") {
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+
+      // Calcular nova escala
+      const currentDistance = getDistance(touch1, touch2);
+      const scaleFactor = currentDistance / initialGestureRef.current.distance;
+      const newScale = Math.max(0.5, Math.min(3, initialGestureRef.current.scale * scaleFactor));
+
+      // Calcular nova rotação
+      const currentAngle = getAngle(touch1, touch2);
+      const angleDiff = currentAngle - initialGestureRef.current.angle;
+      const newRotation = initialGestureRef.current.rotation + angleDiff;
+
+      setElements(prev =>
+        prev.map(el =>
+          el.id === activeElementId
+            ? { ...el, scale: newScale, rotation: newRotation }
+            : el
+        )
+      );
+    } else if (e.touches.length === 1 && gestureMode === "drag" && dragStartRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+      const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+
+      const newX = dragStartRef.current.elementX + (deltaX / rect.width) * 100;
+      const newY = dragStartRef.current.elementY + (deltaY / rect.height) * 100;
+
+      setElements(prev =>
+        prev.map(el =>
+          el.id === activeElementId
+            ? { ...el, x: Math.max(5, Math.min(95, newX)), y: Math.max(5, Math.min(95, newY)) }
+            : el
+        )
+      );
+    }
+  }, [activeElementId, gestureMode]);
+
+  const handleTouchEnd = () => {
+    initialGestureRef.current = null;
+    setGestureMode("none");
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
   const handlePointerDown = (e: React.PointerEvent, elementId: string) => {
+    // Ignorar se for touch (será tratado pelo handleTouchStart)
+    if (e.pointerType === "touch") return;
+    
     e.stopPropagation();
     setActiveElementId(elementId);
     setIsDragging(true);
@@ -133,7 +246,6 @@ export const ReplayTextStickerEditor = ({
     const element = elements.find(el => el.id === elementId);
     if (!element || !containerRef.current) return;
 
-    const rect = containerRef.current.getBoundingClientRect();
     dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
@@ -145,6 +257,7 @@ export const ReplayTextStickerEditor = ({
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === "touch") return;
     if (!isDragging || !dragStartRef.current || !activeElementId || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
@@ -163,9 +276,18 @@ export const ReplayTextStickerEditor = ({
     );
   }, [isDragging, activeElementId]);
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (e.pointerType === "touch") return;
     setIsDragging(false);
     dragStartRef.current = null;
+  };
+
+  const updateElementProperty = (elementId: string, property: keyof OverlayElement, value: number) => {
+    setElements(prev =>
+      prev.map(el =>
+        el.id === elementId ? { ...el, [property]: value } : el
+      )
+    );
   };
 
   const handleContainerClick = () => {
@@ -360,20 +482,30 @@ export const ReplayTextStickerEditor = ({
             key={element.id}
             style={getElementStyle(element)}
             onPointerDown={(e) => handlePointerDown(e, element.id)}
+            onTouchStart={(e) => handleTouchStart(e, element.id)}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`${activeElementId === element.id ? "ring-2 ring-primary ring-offset-2 ring-offset-transparent" : ""}`}
           >
             {element.content}
             
             {activeElementId === element.id && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteElement(element.id);
-                }}
-                className="absolute -top-3 -right-3 w-6 h-6 bg-destructive rounded-full flex items-center justify-center shadow-lg"
-              >
-                <span className="material-symbols-outlined text-[14px] text-white">close</span>
-              </button>
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteElement(element.id);
+                  }}
+                  className="absolute -top-3 -right-3 w-6 h-6 bg-destructive rounded-full flex items-center justify-center shadow-lg"
+                >
+                  <span className="material-symbols-outlined text-[14px] text-white">close</span>
+                </button>
+                
+                {/* Indicador de escala/rotação */}
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-white bg-black/60 px-2 py-0.5 rounded-full whitespace-nowrap backdrop-blur-sm">
+                  {Math.round(element.rotation)}° • {element.scale.toFixed(1)}x
+                </div>
+              </>
             )}
           </div>
         ))}
@@ -387,6 +519,45 @@ export const ReplayTextStickerEditor = ({
           </div>
         )}
       </div>
+
+      {/* Controles de Escala e Rotação para elemento ativo */}
+      {activeElementId && toolMode === "none" && (
+        <div className="bg-card border-t border-border p-3 animate-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-4">
+            {/* Slider de Escala */}
+            <div className="flex-1 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-muted-foreground">zoom_in</span>
+              <Slider
+                value={[elements.find(el => el.id === activeElementId)?.scale || 1]}
+                min={0.5}
+                max={3}
+                step={0.1}
+                onValueChange={([value]) => updateElementProperty(activeElementId, "scale", value)}
+                className="flex-1"
+              />
+              <span className="text-xs text-muted-foreground w-8">
+                {(elements.find(el => el.id === activeElementId)?.scale || 1).toFixed(1)}x
+              </span>
+            </div>
+            
+            {/* Slider de Rotação */}
+            <div className="flex-1 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-muted-foreground">rotate_right</span>
+              <Slider
+                value={[elements.find(el => el.id === activeElementId)?.rotation || 0]}
+                min={-180}
+                max={180}
+                step={5}
+                onValueChange={([value]) => updateElementProperty(activeElementId, "rotation", value)}
+                className="flex-1"
+              />
+              <span className="text-xs text-muted-foreground w-8">
+                {Math.round(elements.find(el => el.id === activeElementId)?.rotation || 0)}°
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tool Panels */}
       {toolMode === "text" && (
