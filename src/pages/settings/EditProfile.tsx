@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Camera, ArrowLeft, Loader2, Check, X } from "lucide-react";
 
@@ -30,6 +31,7 @@ const EditProfile = () => {
     weight: "",
     birth_date: "",
     preferred_foot: "",
+    gender: "",
   });
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -106,6 +108,7 @@ const EditProfile = () => {
         weight: profile.weight?.toString() || "",
         birth_date: profile.birth_date || "",
         preferred_foot: profile.preferred_foot || "",
+        gender: profile.gender || "",
       });
     }
   });
@@ -122,6 +125,7 @@ const EditProfile = () => {
       weight: profile.weight?.toString() || "",
       birth_date: profile.birth_date || "",
       preferred_foot: profile.preferred_foot || "",
+      gender: profile.gender || "",
     });
   }
 
@@ -172,6 +176,7 @@ const EditProfile = () => {
         weight: formData.weight ? Number(formData.weight) : null,
         birth_date: formData.birth_date || null,
         preferred_foot: formData.preferred_foot || null,
+        gender: formData.gender || null,
         avatar_url: avatarUrl,
         cover_url: coverUrl,
       });
@@ -395,19 +400,32 @@ const EditProfile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="preferred_foot">Pé Preferido</Label>
-              <select
-                id="preferred_foot"
-                value={formData.preferred_foot}
-                onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="">Selecione</option>
-                <option value="right">Direito</option>
-                <option value="left">Esquerdo</option>
-                <option value="both">Ambos</option>
-              </select>
+              <Label htmlFor="gender">Sexo</Label>
+              <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="homem">Homem</SelectItem>
+                  <SelectItem value="mulher">Mulher</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="preferred_foot">Pé Preferido</Label>
+            <select
+              id="preferred_foot"
+              value={formData.preferred_foot}
+              onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="">Selecione</option>
+              <option value="right">Direito</option>
+              <option value="left">Esquerdo</option>
+              <option value="both">Ambos</option>
+            </select>
           </div>
 
           <Button

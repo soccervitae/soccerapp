@@ -25,6 +25,7 @@ export interface Profile {
   weight: number | null;
   birth_date: string | null;
   preferred_foot: string | null;
+  gender: string | null;
   conta_verificada: boolean;
   created_at: string;
 }
