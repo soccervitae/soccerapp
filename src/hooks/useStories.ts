@@ -176,3 +176,29 @@ export const useLikeStory = () => {
     },
   });
 };
+
+export const useDeleteStory = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (storyId: string) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("stories")
+        .delete()
+        .eq("id", storyId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      toast.success("Replay excluído!");
+    },
+    onError: () => {
+      toast.error("Erro ao excluir replay");
+    },
+  });
+};

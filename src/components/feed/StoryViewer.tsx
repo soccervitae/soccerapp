@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useViewStory, useLikeStory, type GroupedStories } from "@/hooks/useStories";
+import { useViewStory, useLikeStory, useDeleteStory, type GroupedStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStoryLikeStatus, useSendStoryReply, useStoryViewerCount, useStoryReplyCount } from "@/hooks/useStoryInteractions";
 import { useQueryClient } from "@tanstack/react-query";
 import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface StoryViewerProps {
   groupedStories: GroupedStories[];
@@ -21,6 +31,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const queryClient = useQueryClient();
   const viewStory = useViewStory();
   const likeStory = useLikeStory();
+  const deleteStory = useDeleteStory();
   const sendReply = useSendStoryReply();
 
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
@@ -33,6 +44,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const [showViewersSheet, setShowViewersSheet] = useState(false);
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
@@ -54,7 +66,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     
     setProgress(0);
     const interval = setInterval(() => {
-      if (isTransitioning || isPaused || showViewersSheet || showRepliesSheet) return;
+      if (isTransitioning || isPaused || showViewersSheet || showRepliesSheet || showDeleteDialog) return;
       
       setProgress(prev => {
         if (prev >= 100) {
@@ -66,7 +78,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isOpen, currentGroupIndex, currentStoryIndex, isTransitioning, isPaused, showViewersSheet, showRepliesSheet]);
+  }, [isOpen, currentGroupIndex, currentStoryIndex, isTransitioning, isPaused, showViewersSheet, showRepliesSheet, showDeleteDialog]);
 
   useEffect(() => {
     setCurrentGroupIndex(initialGroupIndex);
@@ -151,6 +163,36 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     }
   };
 
+  const handleDeleteStory = async () => {
+    if (!currentStory) return;
+    
+    try {
+      await deleteStory.mutateAsync(currentStory.id);
+      setShowDeleteDialog(false);
+      
+      // Navigate to next story or close if last one
+      if (currentGroup.stories.length === 1) {
+        // Last story in this group
+        if (currentGroupIndex < groupedStories.length - 1) {
+          handleTransition("next", currentGroupIndex + 1);
+        } else if (currentGroupIndex > 0) {
+          handleTransition("prev", currentGroupIndex - 1);
+        } else {
+          onClose();
+        }
+      } else if (currentStoryIndex < currentGroup.stories.length - 1) {
+        // Go to next story in same group
+        setProgress(0);
+      } else {
+        // Was last story, go to previous
+        setCurrentStoryIndex(prev => prev - 1);
+        setProgress(0);
+      }
+    } catch (error) {
+      console.error("Error deleting story:", error);
+    }
+  };
+
   if (!currentStory || !currentGroup) return null;
 
   const getTransitionClasses = () => {
@@ -200,12 +242,22 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                   <p className="text-white/60 text-xs">Agora</p>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
-              >
-                <span className="material-symbols-outlined text-[24px]">close</span>
-              </button>
+              <div className="flex items-center gap-1">
+                {isOwner && (
+                  <button 
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[24px]">delete</span>
+                  </button>
+                )}
+                <button 
+                  onClick={onClose}
+                  className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">close</span>
+                </button>
+              </div>
             </div>
 
             {/* Story Media */}
@@ -340,6 +392,27 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
           />
         </>
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir replay?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O replay será excluído permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteStory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
