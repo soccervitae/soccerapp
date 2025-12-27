@@ -29,6 +29,7 @@ export interface Profile {
   conta_verificada: boolean;
   created_at: string;
   profile_completed?: boolean;
+  onboarding_completed?: boolean;
   nationality?: number | null;
 }
 

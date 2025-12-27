@@ -156,8 +156,8 @@ const CompleteProfile = () => {
 
       if (error) throw error;
 
-      toast.success("Perfil completado com sucesso!");
-      navigate("/");
+      toast.success("Perfil completo!");
+      navigate("/welcome");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Erro ao salvar perfil. Tente novamente.");
