@@ -15,6 +15,7 @@ import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useDeviceGallery, GalleryMedia } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "./VideoRecorder";
 import { MusicPicker } from "./MusicPicker";
+import { ReplayTextStickerEditor } from "./ReplayTextStickerEditor";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 
 interface CreateReplaySheetProps {
@@ -24,7 +25,7 @@ interface CreateReplaySheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "music-picker";
+type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor";
 
 // Fallback gallery images (used when device gallery is not available)
 const fallbackGalleryImages = [
@@ -176,17 +177,21 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     }
   };
 
-  const handlePublish = () => {
-    const mediaToPublish = multiSelect ? selectedImages[0] : selectedMedia;
+  const handleAdvance = () => {
+    const mediaToAdvance = multiSelect ? selectedImages[0] : selectedMedia;
     
-    if (!mediaToPublish) {
+    if (!mediaToAdvance) {
       toast.error("Selecione uma imagem ou vídeo para o replay");
       return;
     }
     
+    setViewMode("text-sticker-editor");
+  };
+
+  const handleFinalPublish = (finalMediaUrl: string) => {
     if (onReplayCreated) {
       onReplayCreated({ 
-        image: mediaToPublish, 
+        image: finalMediaUrl, 
         caption: "",
         isVideo: selectedMediaType === "video"
       });
@@ -294,6 +299,20 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     );
   }
 
+  // Show text/sticker editor fullscreen
+  if (viewMode === "text-sticker-editor") {
+    const mediaToEdit = multiSelect ? selectedImages[0] : selectedMedia;
+    
+    return (
+      <ReplayTextStickerEditor
+        mediaUrl={mediaToEdit!}
+        mediaType={selectedMediaType}
+        onPublish={handleFinalPublish}
+        onCancel={() => setViewMode("default")}
+      />
+    );
+  }
+
   // Main content with integrated gallery
   const mainContent = (
     <div className="h-full flex flex-col">
@@ -309,7 +328,7 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
         <span className="text-base font-semibold text-foreground">Novo Replay</span>
         
         <Button 
-          onClick={handlePublish}
+          onClick={handleAdvance}
           size="sm"
           variant="ghost"
           className="text-primary font-semibold text-sm hover:bg-transparent"
