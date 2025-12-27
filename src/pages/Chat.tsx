@@ -5,7 +5,6 @@ import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { ChatInput } from "@/components/messages/ChatInput";
-import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -105,7 +104,7 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <ChatHeader participant={participant} />
+      <ChatHeader participant={participant} isTyping={isAnyoneTyping} />
 
       {/* Offline indicator */}
       {isOffline && (
@@ -136,12 +135,6 @@ const Chat = () => {
                 <MessageBubble message={message} onReply={handleReply} />
               </div>
             ))}
-
-            {/* Typing indicator */}
-            {isAnyoneTyping && (
-              <TypingIndicator username={typingUsers[0]?.username} />
-            )}
-
             <div ref={messagesEndRef} />
           </div>
         )}

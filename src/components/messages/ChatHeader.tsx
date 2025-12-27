@@ -9,9 +9,10 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface ChatHeaderProps {
   participant: Profile | null;
+  isTyping?: boolean;
 }
 
-export const ChatHeader = ({ participant }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -48,11 +49,15 @@ export const ChatHeader = ({ participant }: ChatHeaderProps) => {
           <h1 className="font-semibold text-foreground truncate">
             {participant?.full_name || participant?.username || "Usuário"}
           </h1>
-          <p className="text-xs text-muted-foreground truncate">
-            {isOnline ? (
+          <p className="text-xs truncate">
+            {isTyping ? (
+              <span className="text-primary animate-pulse">digitando...</span>
+            ) : isOnline ? (
               <span className="text-green-500">online</span>
             ) : (
-              participant?.username && `@${participant.username}`
+              <span className="text-muted-foreground">
+                {participant?.username && `@${participant.username}`}
+              </span>
             )}
           </p>
         </div>
