@@ -32,10 +32,14 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
     return text.slice(0, maxLength) + "...";
   };
 
+  const hasUnread = unreadCount > 0;
+
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors rounded-lg"
+      className={`w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-all rounded-lg ${
+        hasUnread ? "bg-primary/5" : ""
+      }`}
     >
       <div className="relative">
         <Avatar className="h-12 w-12">
@@ -48,45 +52,53 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
         {isOnline && (
           <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-background rounded-full" />
         )}
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center bg-primary text-primary-foreground text-xs font-medium rounded-full px-1">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
       </div>
 
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`font-medium text-foreground ${unreadCount > 0 ? "font-semibold" : ""}`}>
+            <span className={`text-foreground ${hasUnread ? "font-bold" : "font-medium"}`}>
               {participant?.full_name || participant?.username || "Usuário"}
             </span>
             {isOnline && (
               <span className="text-xs text-green-500 font-medium">online</span>
             )}
           </div>
-          {lastMessage && (
-            <span className="text-xs text-muted-foreground">
-              {formatTime(lastMessage.created_at)}
+          <div className="flex items-center gap-2">
+            {lastMessage && (
+              <span className="text-xs text-muted-foreground">
+                {formatTime(lastMessage.created_at)}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+            {lastMessage ? (
+              lastMessage.media_url ? (
+                <span className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">
+                    {lastMessage.media_type === "video" ? "videocam" : "image"}
+                  </span>
+                  {lastMessage.media_type === "video" ? "Vídeo" : "Foto"}
+                </span>
+              ) : (
+                truncateMessage(lastMessage.content)
+              )
+            ) : (
+              "Iniciar conversa..."
+            )}
+          </p>
+          {/* Unread badge */}
+          {hasUnread && (
+            <span className="flex items-center gap-1.5 shrink-0">
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold rounded-full px-1.5 shadow-sm">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
             </span>
           )}
         </div>
-        <p className={`text-sm truncate ${unreadCount > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-          {lastMessage ? (
-            lastMessage.media_url ? (
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-[14px]">
-                  {lastMessage.media_type === "video" ? "videocam" : "image"}
-                </span>
-                {lastMessage.media_type === "video" ? "Vídeo" : "Foto"}
-              </span>
-            ) : (
-              truncateMessage(lastMessage.content)
-            )
-          ) : (
-            "Iniciar conversa..."
-          )}
-        </p>
       </div>
     </button>
   );
