@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -44,11 +45,13 @@ export const ProfileInfo = ({
     user
   } = useAuth();
   const followUser = useFollowUser();
+  const { createConversation } = useCreateConversation();
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
   const [isCheering, setIsCheering] = useState(followStats?.isFollowing || false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 
   // Use Sheet on mobile or PWA, DropdownMenu on desktop
@@ -124,6 +127,26 @@ export const ProfileInfo = ({
     }, {
       onSuccess: () => setIsCheering(!isCheering)
     });
+  };
+
+  const handleMessageClick = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    setIsStartingChat(true);
+    try {
+      const conversationId = await createConversation(profile.id);
+      if (conversationId) {
+        navigate(`/messages/${conversationId}`);
+      }
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      toast.error("Erro ao iniciar conversa");
+    } finally {
+      setIsStartingChat(false);
+    }
   };
   const age = calculateAge(profile.birth_date);
   const formatHeight = (cm: number | null) => {
@@ -311,8 +334,16 @@ export const ProfileInfo = ({
               </span>
               {isCheering ? "Torcendo" : "Torcer"}
             </button>
-            <button className="flex-1 bg-background hover:bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
-              <span className="material-symbols-outlined text-[16px]">chat</span>
+            <button 
+              onClick={handleMessageClick}
+              disabled={isStartingChat}
+              className="flex-1 bg-background hover:bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              {isStartingChat ? (
+                <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+              ) : (
+                <span className="material-symbols-outlined text-[16px]">chat</span>
+              )}
               Mensagem
             </button>
           </>
