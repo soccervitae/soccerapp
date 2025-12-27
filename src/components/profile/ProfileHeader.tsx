@@ -5,10 +5,13 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -24,17 +27,33 @@ import {
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProfileHeaderProps {
   username: string;
   isOwnProfile?: boolean;
+  profileId?: string;
 }
 
-export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderProps) => {
+const REPORT_REASONS = [
+  { value: "spam", label: "Spam" },
+  { value: "harassment", label: "Assédio ou bullying" },
+  { value: "hate_speech", label: "Discurso de ódio" },
+  { value: "fake_account", label: "Conta falsa" },
+  { value: "inappropriate_content", label: "Conteúdo inadequado" },
+  { value: "other", label: "Outro" },
+];
+
+export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: ProfileHeaderProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [reportSheetOpen, setReportSheetOpen] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<string | null>(null);
+  const [reportDescription, setReportDescription] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
@@ -99,6 +118,41 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
+  const handleOpenReport = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setShareSheetOpen(false);
+    setReportSheetOpen(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReason || !profileId || !user) return;
+
+    setIsSubmittingReport(true);
+    try {
+      const { error } = await supabase.from("profile_reports").insert({
+        profile_id: profileId,
+        reporter_id: user.id,
+        reason: selectedReason,
+        description: reportDescription || null,
+      });
+
+      if (error) throw error;
+
+      toast.success("Denúncia enviada com sucesso");
+      setReportSheetOpen(false);
+      setSelectedReason(null);
+      setReportDescription("");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast.error("Erro ao enviar denúncia");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
@@ -118,7 +172,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
               <span className="material-symbols-outlined text-[24px]">more_horiz</span>
             </button>
           ) : (
-            // Menu para perfis de outros usuários - opções de compartilhar
+            // Menu para perfis de outros usuários - opções de compartilhar e denunciar
             useSheet ? (
               <button 
                 onClick={() => setShareSheetOpen(true)}
@@ -150,6 +204,11 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
                       Compartilhar
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleOpenReport} className="cursor-pointer text-destructive focus:text-destructive">
+                    <span className="material-symbols-outlined text-[18px] mr-2">flag</span>
+                    Denunciar
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )
@@ -162,7 +221,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
         <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
       )}
 
-      {/* Share Sheet for other profiles (mobile/PWA) */}
+      {/* Options Sheet for other profiles (mobile/PWA) */}
       {!isOwnProfile && (
         <Sheet open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
           <SheetContent side="bottom" className="rounded-t-2xl">
@@ -193,10 +252,79 @@ export const ProfileHeader = ({ username, isOwnProfile = false }: ProfileHeaderP
                   <span className="font-medium">Compartilhar</span>
                 </button>
               )}
+              <div className="h-px bg-border my-2" />
+              <button 
+                onClick={handleOpenReport}
+                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left text-destructive"
+              >
+                <span className="material-symbols-outlined text-[22px]">flag</span>
+                <span className="font-medium">Denunciar</span>
+              </button>
             </div>
           </SheetContent>
         </Sheet>
       )}
+
+      {/* Report Sheet */}
+      <Sheet open={reportSheetOpen} onOpenChange={setReportSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-center">Denunciar @{username}</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <p className="text-sm text-muted-foreground text-center">
+              Por que você está denunciando este perfil?
+            </p>
+            
+            <div className="flex flex-col gap-2">
+              {REPORT_REASONS.map((reason) => (
+                <button
+                  key={reason.value}
+                  onClick={() => setSelectedReason(reason.value)}
+                  className={`flex items-center gap-3 w-full p-3 rounded-lg border transition-colors text-left ${
+                    selectedReason === reason.value
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    selectedReason === reason.value
+                      ? "border-primary"
+                      : "border-muted-foreground"
+                  }`}>
+                    {selectedReason === reason.value && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  <span className="font-medium">{reason.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {selectedReason && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">
+                  Detalhes adicionais (opcional)
+                </label>
+                <Textarea
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  placeholder="Descreva o problema..."
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+            )}
+
+            <Button
+              onClick={handleSubmitReport}
+              disabled={!selectedReason || isSubmittingReport}
+              className="w-full mt-2"
+            >
+              {isSubmittingReport ? "Enviando..." : "Enviar denúncia"}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* QR Code Modal */}
       <ResponsiveModal open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
