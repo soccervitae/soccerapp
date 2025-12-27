@@ -1403,6 +1403,11 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_conversation_participant: {
+        Args: { check_user_id: string; conv_id: string }
+        Returns: boolean
+      }
+      is_new_conversation: { Args: { conv_id: string }; Returns: boolean }
       is_participant:
         | {
             Args: { conversation_id_to_check: number; user_id_to_check: string }
