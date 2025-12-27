@@ -80,7 +80,7 @@ const Profile = () => {
 
   return (
     <main className="bg-background min-h-screen relative pb-24">
-      <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} />
+      <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
       
       <div className="pt-16 flex flex-col gap-6">
         <ProfileInfo 
