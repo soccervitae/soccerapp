@@ -1383,6 +1383,10 @@ export type Database = {
         Args: { team_id: string; user_id: string }
         Returns: undefined
       }
+      can_access_conversation: {
+        Args: { _conv_id: string; _user_id: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           p_actor_id: string
