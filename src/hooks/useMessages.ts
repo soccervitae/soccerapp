@@ -7,6 +7,7 @@ import {
   addPendingMessage,
   isOnline,
 } from "@/lib/offlineStorage";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type Message = Database["public"]["Tables"]["messages"]["Row"];
@@ -300,13 +301,24 @@ export const useCreateConversation = () => {
   };
 
   const createConversation = async (otherUserId: string): Promise<string | null> => {
-    if (!user) return null;
+    if (!user) {
+      toast.error("Você precisa estar logado para iniciar uma conversa");
+      return null;
+    }
+
+    // Verificar sessão ativa antes de prosseguir
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Sessão expirada. Por favor, faça login novamente.");
+      return null;
+    }
 
     // Check if conversation already exists
     const existingId = await findExistingConversation(otherUserId);
     if (existingId) return existingId;
 
-    try {
+    // Função auxiliar para criar conversa
+    const attemptCreateConversation = async () => {
       // Create new conversation
       const { data: conversation, error: convError } = await supabase
         .from("conversations")
@@ -327,8 +339,30 @@ export const useCreateConversation = () => {
       if (partError) throw partError;
 
       return conversation.id;
-    } catch (error) {
+    };
+
+    try {
+      return await attemptCreateConversation();
+    } catch (error: any) {
       console.error("Error creating conversation:", error);
+      
+      // Se for erro de RLS, tentar refresh do token e retry
+      if (error?.code === '42501' || error?.message?.includes('row-level security')) {
+        console.log("RLS error detected, attempting session refresh...");
+        
+        try {
+          await supabase.auth.refreshSession();
+          
+          // Retry após refresh
+          return await attemptCreateConversation();
+        } catch (retryError) {
+          console.error("Retry failed after session refresh:", retryError);
+          toast.error("Erro ao criar conversa. Tente recarregar a página.");
+          return null;
+        }
+      }
+      
+      toast.error("Não foi possível criar a conversa. Tente novamente.");
       return null;
     }
   };
