@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
@@ -10,10 +10,10 @@ import { NotificationPermissionButton } from "@/components/notifications/Notific
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search, Loader2, UserPlus, Users, Circle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -75,9 +75,13 @@ const Messages = () => {
       const conversationId = await createConversation(userId);
       if (conversationId) {
         navigate(`/messages/${conversationId}`);
+      } else {
+        // Toast já é mostrado no hook, mas garantir feedback
+        console.log("No conversation ID returned");
       }
     } catch (error) {
       console.error("Error creating conversation:", error);
+      toast.error("Erro ao iniciar conversa. Tente novamente.");
     } finally {
       setCreatingUserId(null);
     }
