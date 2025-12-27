@@ -767,6 +767,7 @@ export type Database = {
           password_reset_expires_at: string | null
           position: string | null
           preferred_foot: string | null
+          profile_completed: boolean | null
           role: string | null
           show_activity_status: boolean | null
           show_profile_to: string | null
@@ -798,6 +799,7 @@ export type Database = {
           password_reset_expires_at?: string | null
           position?: string | null
           preferred_foot?: string | null
+          profile_completed?: boolean | null
           role?: string | null
           show_activity_status?: boolean | null
           show_profile_to?: string | null
@@ -829,6 +831,7 @@ export type Database = {
           password_reset_expires_at?: string | null
           position?: string | null
           preferred_foot?: string | null
+          profile_completed?: boolean | null
           role?: string | null
           show_activity_status?: boolean | null
           show_profile_to?: string | null

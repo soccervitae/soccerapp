@@ -25,6 +25,7 @@ import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
+import CompleteProfile from "./pages/CompleteProfile";
 
 import NotFound from "./pages/NotFound";
 
@@ -43,7 +44,14 @@ const AnimatedRoutes = () => {
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
         
-        {/* Protected routes - require login */}
+        {/* Complete profile route - requires login but not complete profile */}
+        <Route path="/complete-profile" element={
+          <ProtectedRoute requireCompleteProfile={false}>
+            <PageTransition><CompleteProfile /></PageTransition>
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected routes - require login and complete profile */}
         <Route path="/" element={
           <ProtectedRoute>
             <PageTransition><Index /></PageTransition>
