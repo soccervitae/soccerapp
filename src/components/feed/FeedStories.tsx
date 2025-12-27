@@ -62,30 +62,24 @@ export const FeedStories = () => {
   // Filter out user's own stories from the main list (will show in "Seu replay" card)
   const otherStories = groupedStories?.filter(g => g.userId !== user?.id) || [];
 
-  // Handle clicking on own story
-  const handleOwnStoryClick = () => {
-    if (hasOwnStories && userStoryGroup) {
-      const ownIndex = groupedStories?.findIndex(g => g.userId === user?.id) ?? 0;
-      setSelectedGroupIndex(ownIndex);
-      setViewerOpen(true);
-    } else {
-      handleAddStoryClick();
-    }
-  };
 
   return (
     <>
       <div className="bg-background border-b border-border">
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {/* Add Story Button - Instagram Style */}
-          <div
-            className="flex-none w-28 cursor-pointer group"
-            onClick={handleOwnStoryClick}
-          >
+          <div className="flex-none w-28 group">
             <div className={`relative h-44 rounded-xl overflow-hidden shadow-md ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
               <div className="w-full h-full bg-muted flex flex-col">
-                {/* User photo area */}
-                <div className="flex-1 relative overflow-hidden">
+                {/* User photo area - clickable to view stories */}
+                <div 
+                  className={`flex-1 relative overflow-hidden ${hasOwnStories ? 'cursor-pointer' : ''}`}
+                  onClick={hasOwnStories ? () => {
+                    const ownIndex = groupedStories?.findIndex(g => g.userId === user?.id) ?? 0;
+                    setSelectedGroupIndex(ownIndex);
+                    setViewerOpen(true);
+                  } : undefined}
+                >
                   <img
                     src={hasOwnStories ? (userStoryGroup.stories[0]?.media_url || profile?.avatar_url || "/placeholder.svg") : (profile?.avatar_url || "/placeholder.svg")}
                     alt="Seu replay"
@@ -108,9 +102,15 @@ export const FeedStories = () => {
                 </div>
                 {/* Bottom section with + icon overlapping */}
                 <div className="relative bg-background px-2 py-3 pt-4 text-center">
-                  {/* + icon positioned at the border */}
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-[3px] border-background shadow-lg ${hasOwnStories ? 'bg-muted-foreground/60' : 'bg-nav-active'}`}>
+                  {/* + icon positioned at the border - always clickable to add new replay */}
+                  <div 
+                    className="absolute -top-4 left-1/2 -translate-x-1/2 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddStoryClick();
+                    }}
+                  >
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center border-[3px] border-background shadow-lg bg-nav-active hover:bg-nav-active/90 transition-colors">
                       <span className="material-symbols-outlined text-[18px] text-white">add</span>
                     </div>
                   </div>
