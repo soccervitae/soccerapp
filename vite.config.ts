@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       includeAssets: ["favicon.png", "placeholder.svg"],
       manifest: {
         name: "SOCCER VITAE - Onde talentos encontram oportunidades.",
