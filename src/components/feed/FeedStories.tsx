@@ -3,12 +3,14 @@ import { StoryViewer } from "./StoryViewer";
 import { CreateReplaySheet } from "./CreateReplaySheet";
 import { useStories, useCreateStory, type GroupedStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 
 export const FeedStories = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: profile } = useProfile(user?.id);
   const { data: groupedStories, isLoading } = useStories();
   const createStory = useCreateStory();
   
@@ -56,20 +58,31 @@ export const FeedStories = () => {
     <>
       <div className="bg-background border-b border-border">
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
-          {/* Add Story Button */}
+          {/* Add Story Button - Instagram Style */}
           <div
             className="flex-none w-28 cursor-pointer group"
             onClick={handleAddStoryClick}
           >
             <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
               <div className="w-full h-full bg-muted flex flex-col">
-                <div className="flex-1 bg-gradient-to-b from-nav-active/20 to-nav-active/5 flex items-center justify-center">
-                  <div className="w-10 h-10 bg-nav-active rounded-full flex items-center justify-center shadow-lg">
-                    <span className="material-symbols-outlined text-[24px] text-white">add</span>
-                  </div>
+                {/* User photo area */}
+                <div className="flex-1 relative overflow-hidden">
+                  <img
+                    src={profile?.avatar_url || "/placeholder.svg"}
+                    alt="Seu replay"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
                 </div>
-                <div className="bg-background px-2 py-3 text-center">
-                  <p className="text-xs font-semibold text-foreground truncate">Criar replay</p>
+                {/* Bottom section with + icon overlapping */}
+                <div className="relative bg-background px-2 py-3 pt-4 text-center">
+                  {/* + icon positioned at the border */}
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <div className="w-8 h-8 bg-nav-active rounded-full flex items-center justify-center border-[3px] border-background shadow-lg">
+                      <span className="material-symbols-outlined text-[18px] text-white">add</span>
+                    </div>
+                  </div>
+                  <p className="text-xs font-semibold text-foreground truncate mt-1">Seu replay</p>
                 </div>
               </div>
             </div>
