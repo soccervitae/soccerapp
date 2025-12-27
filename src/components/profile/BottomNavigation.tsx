@@ -5,14 +5,16 @@ import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
 import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
+import { useConversations } from "@/hooks/useConversations";
 
 interface BottomNavigationProps {
-  activeTab?: "home" | "search" | "add" | "analytics" | "profile";
+  activeTab?: "home" | "search" | "add" | "messages" | "profile";
 }
 
 export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { totalUnread } = useConversations();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
@@ -20,7 +22,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : "home");
+  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
 
   const handleSelectOption = (option: "post" | "replay" | "championship" | "achievement") => {
     switch (option) {
@@ -63,8 +65,16 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
               <span className="material-symbols-outlined text-[24px]">add</span>
             </div>
           </button>
-          <button className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "analytics" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}>
-            <span className="material-symbols-outlined text-[26px]">analytics</span>
+          <button 
+            onClick={() => navigate("/messages")}
+            className={`flex flex-col items-center gap-1 p-2 transition-colors relative ${currentTab === "messages" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
+          >
+            <span className={`material-symbols-outlined text-[26px] ${currentTab === "messages" ? "fill-1" : ""}`}>chat</span>
+            {totalUnread > 0 && (
+              <span className="absolute top-0 right-0 min-w-4 h-4 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-medium rounded-full px-1">
+                {totalUnread > 99 ? "99+" : totalUnread}
+              </span>
+            )}
           </button>
           <button 
             onClick={() => navigate("/profile")}
