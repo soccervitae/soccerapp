@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -161,17 +162,19 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <AnimatePresence mode="wait">
-            {showSplash && <SplashScreen key="splash" />}
-          </AnimatePresence>
-          <Toaster />
-          <Sonner />
-          <OrientationLock />
-          <PwaUpdatePrompt />
-          <BrowserRouter>
-            <ScrollToTop />
-            <AnimatedRoutes />
-          </BrowserRouter>
+          <PresenceProvider>
+            <AnimatePresence mode="wait">
+              {showSplash && <SplashScreen key="splash" />}
+            </AnimatePresence>
+            <Toaster />
+            <Sonner />
+            <OrientationLock />
+            <PwaUpdatePrompt />
+            <BrowserRouter>
+              <ScrollToTop />
+              <AnimatedRoutes />
+            </BrowserRouter>
+          </PresenceProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
