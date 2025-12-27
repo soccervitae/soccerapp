@@ -295,10 +295,6 @@ const LoginForm = () => {
         
         if (trusted) {
           // Device is trusted, skip 2FA
-          toast({
-            title: "Bem-vindo de volta!",
-            description: "Login realizado com sucesso.",
-          });
           navigate("/");
           setLoading(false);
           return;
@@ -338,10 +334,6 @@ const LoginForm = () => {
       }
     }
 
-    toast({
-      title: "Bem-vindo de volta!",
-      description: "Login realizado com sucesso.",
-    });
     navigate("/");
 
     setLoading(false);
