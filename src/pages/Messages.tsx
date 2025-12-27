@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
+import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
@@ -30,6 +31,7 @@ const Messages = () => {
   const { conversations, isLoading } = useConversations();
   const { createConversation } = useCreateConversation();
   const { data: followingUsers, isLoading: isLoadingFollowing } = useFollowing(user?.id || "");
+  const { isUserOnline } = usePresenceContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -164,29 +166,65 @@ const Messages = () => {
       </div>
 
       {/* Content */}
-      <div className="pt-14 px-2">
+      <div className="pt-14">
         {/* Offline indicator */}
-        <div className="p-3">
+        <div className="px-3 py-2">
           <OfflineIndicator />
         </div>
 
         {/* Notification permission prompt */}
-        <div className="px-3 pb-3 flex justify-center">
+        <div className="px-3 pb-2 flex justify-center">
           <NotificationPermissionButton />
         </div>
+
+        {/* Seção de usuários seguidos */}
+        {followingUsers && followingUsers.length > 0 && (
+          <div className="px-3 py-3 border-b border-border">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">
+              Quem você segue
+            </h3>
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+              {followingUsers.map((userProfile) => (
+                <button
+                  key={userProfile.id}
+                  onClick={() => handleStartConversation(userProfile.id)}
+                  disabled={isCreating}
+                  className="flex flex-col items-center gap-1.5 min-w-[64px] disabled:opacity-50 transition-opacity"
+                >
+                  <div className="relative">
+                    <Avatar className="h-14 w-14 border-2 border-primary/20">
+                      <AvatarImage src={userProfile.avatar_url || ""} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                        {getInitials(userProfile.full_name || userProfile.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isUserOnline(userProfile.id) && (
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-background rounded-full" />
+                    )}
+                  </div>
+                  <span className="text-xs text-foreground truncate max-w-[64px]">
+                    {userProfile.username}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-            <span className="material-symbols-outlined text-6xl text-muted-foreground mb-4">
+          <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+            <span className="material-symbols-outlined text-5xl text-muted-foreground mb-3">
               chat_bubble_outline
             </span>
             <h2 className="text-lg font-medium mb-2">Nenhuma conversa ainda</h2>
-            <p className="text-muted-foreground text-sm mb-4">
-              Comece uma nova conversa tocando no botão acima
+            <p className="text-muted-foreground text-sm">
+              {followingUsers && followingUsers.length > 0 
+                ? "Selecione alguém acima para começar a conversar"
+                : "Comece seguindo pessoas para poder conversar"}
             </p>
           </div>
         ) : (
