@@ -6,9 +6,14 @@ import { Loader2 } from "lucide-react";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireCompleteProfile?: boolean;
+  requireOnboarding?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requireCompleteProfile = true }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ 
+  children, 
+  requireCompleteProfile = true,
+  requireOnboarding = true 
+}: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const location = useLocation();
@@ -25,15 +30,28 @@ export const ProtectedRoute = ({ children, requireCompleteProfile = true }: Prot
     return <Navigate to="/auth" replace />;
   }
 
+  const profileData = profile as any;
+
   // Redirect to complete profile if profile is not completed
-  // Skip this check if we're already on the complete-profile page
   if (
     requireCompleteProfile &&
     profile &&
-    !(profile as any).profile_completed &&
+    !profileData.profile_completed &&
     location.pathname !== "/complete-profile"
   ) {
     return <Navigate to="/complete-profile" replace />;
+  }
+
+  // Redirect to welcome/onboarding if profile is complete but onboarding is not
+  if (
+    requireOnboarding &&
+    profile &&
+    profileData.profile_completed &&
+    !profileData.onboarding_completed &&
+    location.pathname !== "/welcome" &&
+    location.pathname !== "/complete-profile"
+  ) {
+    return <Navigate to="/welcome" replace />;
   }
 
   return <>{children}</>;

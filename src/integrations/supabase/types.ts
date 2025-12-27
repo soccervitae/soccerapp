@@ -763,6 +763,7 @@ export type Database = {
           nickname: string | null
           notify_new_device: boolean | null
           notify_security_events: boolean | null
+          onboarding_completed: boolean | null
           password_reset_code: string | null
           password_reset_expires_at: string | null
           position: string | null
@@ -795,6 +796,7 @@ export type Database = {
           nickname?: string | null
           notify_new_device?: boolean | null
           notify_security_events?: boolean | null
+          onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
           position?: string | null
@@ -827,6 +829,7 @@ export type Database = {
           nickname?: string | null
           notify_new_device?: boolean | null
           notify_security_events?: boolean | null
+          onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
           position?: string | null
