@@ -511,8 +511,26 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  
+  // Estados "touched" para feedback visual após interação
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+    gender: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+  
   const { signUp } = useAuth();
   const { toast } = useToast();
+  
+  // Validações individuais
+  const isFirstNameValid = firstName.trim().length >= 2;
+  const isLastNameValid = lastName.trim().length >= 2;
+  const isGenderValid = gender !== "";
+  const isEmailValid = emailStatus === "valid";
+  const doPasswordsMatch = password === confirmPassword;
 
   // Countdown timer effect
   useEffect(() => {
@@ -786,7 +804,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Nome
+            Nome <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -796,37 +814,94 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
               placeholder="João"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="pl-10 h-12 bg-muted/50 border-0"
+              onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
+              className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+                touched.firstName 
+                  ? isFirstNameValid 
+                    ? "border-emerald-500 border" 
+                    : "border-destructive border"
+                  : "border-0"
+              }`}
               maxLength={30}
               required
             />
+            {touched.firstName && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {isFirstNameValid ? (
+                  <Check className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <X className="h-4 w-4 text-destructive" />
+                )}
+              </div>
+            )}
           </div>
+          {touched.firstName && !isFirstNameValid && (
+            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Sobrenome
+            Sobrenome <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="signup-lastname"
-            type="text"
-            placeholder="Silva"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="h-12 bg-muted/50 border-0"
-            maxLength={50}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="signup-lastname"
+              type="text"
+              placeholder="Silva"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
+              className={`pr-10 h-12 bg-muted/50 transition-colors ${
+                touched.lastName 
+                  ? isLastNameValid 
+                    ? "border-emerald-500 border" 
+                    : "border-destructive border"
+                  : "border-0"
+              }`}
+              maxLength={50}
+              required
+            />
+            {touched.lastName && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {isLastNameValid ? (
+                  <Check className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <X className="h-4 w-4 text-destructive" />
+                )}
+              </div>
+            )}
+          </div>
+          {touched.lastName && !isLastNameValid && (
+            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+          )}
         </div>
       </div>
 
       {/* Sexo */}
       <div className="space-y-2">
         <Label htmlFor="signup-gender" className="text-xs font-semibold uppercase text-muted-foreground">
-          Sexo
+          Sexo <span className="text-destructive">*</span>
         </Label>
-        <Select value={gender} onValueChange={setGender}>
-          <SelectTrigger className="h-12 bg-muted/50 border-0">
+        <Select 
+          value={gender} 
+          onValueChange={(value) => {
+            setGender(value);
+            setTouched(prev => ({ ...prev, gender: true }));
+          }}
+          onOpenChange={(open) => {
+            if (!open && !gender) {
+              setTouched(prev => ({ ...prev, gender: true }));
+            }
+          }}
+        >
+          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+            touched.gender 
+              ? isGenderValid 
+                ? "border-emerald-500 border" 
+                : "border-destructive border"
+              : "border-0"
+          }`}>
             <SelectValue placeholder="Selecione seu sexo" />
           </SelectTrigger>
           <SelectContent>
@@ -834,12 +909,15 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <SelectItem value="mulher">Mulher</SelectItem>
           </SelectContent>
         </Select>
+        {touched.gender && !isGenderValid && (
+          <p className="text-xs text-destructive">Selecione seu sexo</p>
+        )}
       </div>
 
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
-          Email
+          Email <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -849,7 +927,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => handleEmailChange(e.target.value)}
-            className="pl-10 pr-10 h-12 bg-muted/50 border-0"
+            onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+            className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+              touched.email && email.length > 0
+                ? isEmailValid 
+                  ? "border-emerald-500 border" 
+                  : "border-destructive border"
+                : "border-0"
+            }`}
             required
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -869,7 +954,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       {/* Senha */}
       <div className="space-y-2">
         <Label htmlFor="signup-password" className="text-xs font-semibold uppercase text-muted-foreground">
-          Senha
+          Senha <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -879,7 +964,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="pl-10 pr-10 h-12 bg-muted/50 border-0"
+            onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
+            className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+              touched.password && password.length > 0
+                ? isPasswordValid 
+                  ? "border-emerald-500 border" 
+                  : "border-destructive border"
+                : "border-0"
+            }`}
             required
           />
           <button
@@ -938,7 +1030,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       {/* Confirmar Senha */}
       <div className="space-y-2">
         <Label htmlFor="signup-confirm" className="text-xs font-semibold uppercase text-muted-foreground">
-          Confirmar Senha
+          Confirmar Senha <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -948,19 +1040,26 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="pl-10 pr-10 h-12 bg-muted/50 border-0"
+            onBlur={() => setTouched(prev => ({ ...prev, confirmPassword: true }))}
+            className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+              touched.confirmPassword && confirmPassword.length > 0
+                ? doPasswordsMatch && isPasswordValid
+                  ? "border-emerald-500 border" 
+                  : "border-destructive border"
+                : "border-0"
+            }`}
             required
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {confirmPassword.length > 0 && password === confirmPassword && (
-              <Check className="h-4 w-4 text-green-500" />
+            {confirmPassword.length > 0 && doPasswordsMatch && (
+              <Check className="h-4 w-4 text-emerald-500" />
             )}
-            {confirmPassword.length > 0 && password !== confirmPassword && (
+            {confirmPassword.length > 0 && !doPasswordsMatch && (
               <X className="h-4 w-4 text-destructive" />
             )}
           </div>
         </div>
-        {confirmPassword.length > 0 && password !== confirmPassword && (
+        {touched.confirmPassword && confirmPassword.length > 0 && !doPasswordsMatch && (
           <p className="text-xs text-destructive">As senhas não coincidem</p>
         )}
       </div>
