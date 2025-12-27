@@ -28,6 +28,8 @@ export interface Profile {
   gender: string | null;
   conta_verificada: boolean;
   created_at: string;
+  profile_completed?: boolean;
+  nationality?: number | null;
 }
 
 export const useProfile = (userId?: string) => {
