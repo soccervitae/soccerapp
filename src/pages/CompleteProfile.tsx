@@ -382,9 +382,9 @@ const CompleteProfile = () => {
               <SelectValue placeholder="Selecione o pé preferido" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Direito">Direito</SelectItem>
-              <SelectItem value="Esquerdo">Esquerdo</SelectItem>
-              <SelectItem value="Ambos">Ambos</SelectItem>
+              <SelectItem value="right">Direito</SelectItem>
+              <SelectItem value="left">Esquerdo</SelectItem>
+              <SelectItem value="both">Ambos</SelectItem>
             </SelectContent>
           </Select>
           {touched.preferredFoot && !isPreferredFootValid && (
