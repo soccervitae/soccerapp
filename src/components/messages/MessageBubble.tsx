@@ -67,7 +67,7 @@ export const MessageBubble = ({
     return format(new Date(date), "HH:mm", { locale: ptBR });
   };
 
-  const isRead = message.read_by && message.read_by.length > 1;
+  const isRead = message.read_by && message.read_by.length > 0;
   const isTemporary = message.is_temporary || message.delete_after_read;
 
   const toggleAudio = () => {
@@ -257,21 +257,21 @@ export const MessageBubble = ({
               {formatTime(message.created_at)}
             </span>
             {isOwn && (
-              <span className={`${
-                message.isPending 
-                  ? "text-slate-400 dark:text-slate-500" 
-                  : isRead 
-                    ? "text-blue-500" 
-                    : "text-slate-500 dark:text-slate-400"
-              }`}>
+              <motion.span 
+                className="flex items-center"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.2 }}
+                key={message.isPending ? 'pending' : isRead ? 'read' : 'delivered'}
+              >
                 {message.isPending ? (
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                 ) : isRead ? (
-                  <CheckCheck className="h-3.5 w-3.5" />
+                  <CheckCheck className="h-3.5 w-3.5 text-blue-500" />
                 ) : (
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
                 )}
-              </span>
+              </motion.span>
             )}
           </div>
 
