@@ -3,9 +3,13 @@ import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageWithSender } from "@/hooks/useMessages";
 import type { ReactionWithUser } from "@/hooks/useMessageReactions";
+import type { VideoCallMetadata } from "@/hooks/useVideoCall";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus, Reply, Trash2 } from "lucide-react";
+import { 
+  Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus, Reply, Trash2,
+  Video, PhoneOff, PhoneMissed, PhoneIncoming, Phone
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmojiReactionPicker } from "./EmojiReactionPicker";
 import { AudioWaveform } from "./AudioWaveform";
@@ -113,6 +117,16 @@ export const MessageBubble = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const formatCallDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   const handleLongPress = () => {
     setShowActionMenu(true);
   };
@@ -135,6 +149,95 @@ export const MessageBubble = ({
     acc[reaction.emoji].push(reaction);
     return acc;
   }, {} as Record<string, ReactionWithUser[]>);
+
+  // Check if this is a video call message
+  const isVideoCallMessage = message.media_type === "video_call";
+
+  // Render video call card
+  if (isVideoCallMessage) {
+    let callData: VideoCallMetadata;
+    try {
+      callData = JSON.parse(message.content);
+    } catch {
+      callData = { status: 'completed' };
+    }
+
+    const isInitiator = callData.initiator === user?.id;
+    
+    const getCallConfig = () => {
+      switch (callData.status) {
+        case 'completed':
+          return {
+            icon: Video,
+            iconBg: 'bg-green-100 dark:bg-green-900/30',
+            iconColor: 'text-green-600 dark:text-green-400',
+            title: 'Chamada de vídeo',
+            subtitle: callData.duration ? formatCallDuration(callData.duration) : 'Concluída',
+          };
+        case 'missed':
+          return {
+            icon: PhoneMissed,
+            iconBg: 'bg-red-100 dark:bg-red-900/30',
+            iconColor: 'text-red-600 dark:text-red-400',
+            title: 'Chamada de vídeo',
+            subtitle: 'Perdida',
+          };
+        case 'rejected':
+          return {
+            icon: PhoneOff,
+            iconBg: 'bg-orange-100 dark:bg-orange-900/30',
+            iconColor: 'text-orange-600 dark:text-orange-400',
+            title: 'Chamada de vídeo',
+            subtitle: isInitiator ? 'Recusada' : 'Recusada',
+          };
+        case 'no_answer':
+          return {
+            icon: PhoneIncoming,
+            iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
+            iconColor: 'text-yellow-600 dark:text-yellow-400',
+            title: 'Chamada de vídeo',
+            subtitle: 'Não atendida',
+          };
+        default:
+          return {
+            icon: Phone,
+            iconBg: 'bg-muted',
+            iconColor: 'text-muted-foreground',
+            title: 'Chamada de vídeo',
+            subtitle: '',
+          };
+      }
+    };
+
+    const config = getCallConfig();
+    const IconComponent = config.icon;
+
+    return (
+      <div className="flex justify-center my-4">
+        <div className="bg-muted/50 backdrop-blur-sm rounded-2xl px-4 py-3 flex items-center gap-3 max-w-[280px] border border-border/50">
+          {/* Icon */}
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${config.iconBg}`}>
+            <IconComponent className={`h-5 w-5 ${config.iconColor}`} />
+          </div>
+          
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">
+              {config.title}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {config.subtitle}
+            </p>
+          </div>
+          
+          {/* Time */}
+          <span className="text-[10px] text-muted-foreground self-end">
+            {formatTime(message.created_at)}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>

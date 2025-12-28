@@ -7,6 +7,15 @@ import type { Database } from "@/integrations/supabase/types";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+export type VideoCallStatus = 'completed' | 'missed' | 'rejected' | 'no_answer';
+
+export interface VideoCallMetadata {
+  status: VideoCallStatus;
+  duration?: number; // in seconds
+  startedAt?: string;
+  endedAt?: string;
+  initiator?: string; // user id who started the call
+}
 
 interface CallState {
   isCallActive: boolean;
@@ -75,10 +84,48 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
   const callTimeoutRef = useRef<number | null>(null);
+  const callStartTimeRef = useRef<Date | null>(null);
+  const isInitiatorRef = useRef<boolean>(false);
+  const callConnectedRef = useRef<boolean>(false);
+
+  // Save call to message history
+  const saveCallToHistory = useCallback(async (status: VideoCallStatus) => {
+    if (!conversationId || !user) return;
+
+    const duration = callStartTimeRef.current
+      ? Math.floor((Date.now() - callStartTimeRef.current.getTime()) / 1000)
+      : 0;
+
+    const metadata: VideoCallMetadata = {
+      status,
+      duration: status === 'completed' && duration > 0 ? duration : undefined,
+      startedAt: callStartTimeRef.current?.toISOString(),
+      endedAt: new Date().toISOString(),
+      initiator: isInitiatorRef.current ? user.id : undefined,
+    };
+
+    console.log("[WebRTC] Saving call to history:", metadata);
+
+    try {
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: JSON.stringify(metadata),
+        media_type: "video_call",
+      });
+    } catch (error) {
+      console.error("[WebRTC] Error saving call to history:", error);
+    }
+  }, [conversationId, user]);
 
   // Define cleanupCall first since it's used by other functions
-  const cleanupCall = useCallback(() => {
-    console.log("[WebRTC] Cleaning up call...");
+  const cleanupCall = useCallback((saveStatus?: VideoCallStatus) => {
+    console.log("[WebRTC] Cleaning up call...", saveStatus);
+    
+    // Save to history if status provided
+    if (saveStatus) {
+      saveCallToHistory(saveStatus);
+    }
     
     // Clear timeout
     if (callTimeoutRef.current) {
@@ -102,8 +149,11 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       peerConnectionRef.current = null;
     }
 
-    // Clear pending candidates
+    // Clear pending candidates and refs
     pendingCandidatesRef.current = [];
+    callStartTimeRef.current = null;
+    isInitiatorRef.current = false;
+    callConnectedRef.current = false;
 
     setCallState({
       isCallActive: false,
@@ -116,7 +166,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       callerInfo: null,
       connectionStatus: 'idle',
     });
-  }, []);
+  }, [saveCallToHistory]);
 
   const clearCallTimeout = useCallback(() => {
     if (callTimeoutRef.current) {
@@ -187,6 +237,11 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       
       if (pc.iceConnectionState === "connected") {
         clearCallTimeout();
+        // Mark call as connected and record start time
+        if (!callConnectedRef.current) {
+          callConnectedRef.current = true;
+          callStartTimeRef.current = new Date();
+        }
         setCallState((prev) => ({ ...prev, isCalling: false, isCallActive: true, connectionStatus }));
       } else if (pc.iceConnectionState === "disconnected") {
         console.log("[WebRTC] Connection disconnected, attempting to recover...");
@@ -195,7 +250,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       } else if (pc.iceConnectionState === "failed") {
         console.log("[WebRTC] Connection failed");
         toast.error("Falha na conexão. Tente novamente.");
-        cleanupCall();
+        cleanupCall(callConnectedRef.current ? 'completed' : undefined);
       } else {
         setCallState((prev) => ({ ...prev, connectionStatus }));
       }
@@ -311,7 +366,8 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         break;
 
       case "call_rejected":
-        cleanupCall();
+        toast.error("Chamada recusada");
+        cleanupCall('rejected');
         break;
 
       case "offer":
@@ -347,6 +403,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         break;
 
       case "call_ended":
+        // Other party ended the call - they will save to history
         cleanupCall();
         break;
     }
@@ -384,6 +441,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     if (!participant || !user) return;
 
     console.log("[WebRTC] Starting call to:", participant.username);
+    isInitiatorRef.current = true;
 
     // Fetch current user's profile for caller info
     const { data: profile } = await supabase
@@ -405,7 +463,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     callTimeoutRef.current = window.setTimeout(() => {
       console.log("[WebRTC] Call timeout - no answer");
       toast.error("Chamada não atendida");
-      cleanupCall();
+      cleanupCall('no_answer');
     }, CALL_TIMEOUT_MS);
   }, [participant, user, sendSignalingMessage, clearCallTimeout, cleanupCall]);
 
@@ -442,7 +500,8 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         to: participant.id,
       });
     }
-    cleanupCall();
+    // Save to history - if call was connected, save as completed
+    cleanupCall(callConnectedRef.current ? 'completed' : undefined);
   }, [participant, sendSignalingMessage, cleanupCall]);
 
   const toggleVideo = useCallback(() => {
