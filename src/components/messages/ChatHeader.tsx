@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { formatDistanceToNow } from "date-fns";
@@ -12,9 +12,11 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 interface ChatHeaderProps {
   participant: Profile | null;
   isTyping?: boolean;
+  onVideoCall?: () => void;
+  isCallActive?: boolean;
 }
 
-export const ChatHeader = ({ participant, isTyping }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, isCallActive }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -71,6 +73,17 @@ export const ChatHeader = ({ participant, isTyping }: ChatHeaderProps) => {
           </p>
         </div>
       </div>
+
+      {/* Video call button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onVideoCall}
+        disabled={!participant || isCallActive}
+        className="text-primary hover:text-primary/80"
+      >
+        <Video className="h-5 w-5" />
+      </Button>
     </div>
   );
 };

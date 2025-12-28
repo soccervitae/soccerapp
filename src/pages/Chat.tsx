@@ -3,11 +3,14 @@ import { useParams } from "react-router-dom";
 import { useMessages } from "@/hooks/useMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
+import { useVideoCall } from "@/hooks/useVideoCall";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { ChatInput } from "@/components/messages/ChatInput";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
+import { VideoCallModal } from "@/components/messages/VideoCallModal";
+import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -26,6 +29,24 @@ const Chat = () => {
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Video call hook
+  const {
+    isCallActive,
+    isIncomingCall,
+    isCalling,
+    isVideoEnabled,
+    isAudioEnabled,
+    localStream,
+    remoteStream,
+    callerInfo,
+    startCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleVideo,
+    toggleAudio,
+  } = useVideoCall(conversationId || null, participant);
 
   // Fetch other participant
   useEffect(() => {
@@ -116,7 +137,34 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <ChatHeader participant={participant} isTyping={isAnyoneTyping} />
+      <ChatHeader 
+        participant={participant} 
+        isTyping={isAnyoneTyping}
+        onVideoCall={startCall}
+        isCallActive={isCallActive}
+      />
+
+      {/* Incoming call modal */}
+      <IncomingCallModal
+        isOpen={isIncomingCall}
+        caller={callerInfo}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+      />
+
+      {/* Video call modal */}
+      <VideoCallModal
+        isOpen={isCallActive}
+        participant={participant}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        isCalling={isCalling}
+        isVideoEnabled={isVideoEnabled}
+        isAudioEnabled={isAudioEnabled}
+        onToggleVideo={toggleVideo}
+        onToggleAudio={toggleAudio}
+        onEndCall={endCall}
+      />
 
       {/* Offline indicator */}
       {isOffline && (
