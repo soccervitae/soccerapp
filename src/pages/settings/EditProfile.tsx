@@ -683,6 +683,7 @@ const EditProfile = () => {
           <PhotoCropEditor
             imageUrl={imageToCrop}
             defaultAspectRatioId={cropType === 'cover' ? 'landscape' : 'square'}
+            cropShape={cropType === 'avatar' ? 'round' : 'rect'}
             onApply={handleCropApply}
             onCancel={handleCropCancel}
           />
