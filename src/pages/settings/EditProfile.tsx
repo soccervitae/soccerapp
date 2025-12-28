@@ -282,12 +282,12 @@ const EditProfile = () => {
             type="submit"
             form="edit-profile-form"
             disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
-            className="p-2 -mr-2 text-primary hover:bg-muted rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Check className="w-5 h-5" />
+              "Salvar"
             )}
           </button>
         </div>
