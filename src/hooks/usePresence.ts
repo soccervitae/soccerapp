@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
+const updateLastSeen = async (userId: string) => {
+  await supabase
+    .from("profiles")
+    .update({ last_seen_at: new Date().toISOString() })
+    .eq("id", userId);
+};
+
 interface PresenceState {
   [key: string]: {
     user_id: string;
@@ -71,6 +78,9 @@ export const usePresence = () => {
       });
 
     return () => {
+      if (user?.id) {
+        updateLastSeen(user.id);
+      }
       channel.unsubscribe();
       channelRef.current = null;
     };

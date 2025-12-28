@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePresenceContext } from "@/contexts/PresenceContext";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -54,6 +56,13 @@ export const ChatHeader = ({ participant, isTyping }: ChatHeaderProps) => {
               <span className="text-primary animate-pulse">digitando...</span>
             ) : isOnline ? (
               <span className="text-green-500">online</span>
+            ) : participant?.last_seen_at ? (
+              <span className="text-muted-foreground">
+                visto {formatDistanceToNow(new Date(participant.last_seen_at), { 
+                  addSuffix: true, 
+                  locale: ptBR 
+                })}
+              </span>
             ) : (
               <span className="text-muted-foreground">
                 {participant?.username && `@${participant.username}`}
