@@ -418,7 +418,7 @@ export const HighlightsSection = ({
     
     return {
       opacity: 0,
-      scale: 0.1,
+      scale: Math.min(clickOrigin.width / window.innerWidth, 0.15),
       x: originCenterX - centerX,
       y: originCenterY - centerY,
       borderRadius: "50%",

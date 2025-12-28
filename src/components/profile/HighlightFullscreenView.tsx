@@ -125,9 +125,10 @@ export const HighlightFullscreenView = ({
             exit={getInitialPosition()}
             transition={{ 
               type: "spring", 
-              stiffness: 300, 
-              damping: 30,
-              opacity: { duration: 0.2 }
+              stiffness: 200, 
+              damping: 25,
+              mass: 0.8,
+              opacity: { duration: 0.25 }
             }}
           >
             <div className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto">
