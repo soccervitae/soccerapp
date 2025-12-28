@@ -662,3 +662,32 @@ export const useDeleteHighlight = () => {
     },
   });
 };
+
+export const useReorderHighlights = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (highlights: { id: string; display_order: number }[]) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const updates = highlights.map((h) =>
+        supabase
+          .from("user_highlights")
+          .update({ display_order: h.display_order })
+          .eq("id", h.id)
+          .eq("user_id", user.id)
+      );
+
+      const results = await Promise.all(updates);
+      const errors = results.filter((r) => r.error);
+      if (errors.length > 0) throw errors[0].error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+    },
+    onError: () => {
+      toast.error("Erro ao reordenar destaques");
+    },
+  });
+};
