@@ -130,8 +130,8 @@ export const ProfileFeedSheet = ({
                   <motion.div 
                     key={post.id} 
                     ref={(el) => { postRefs.current[index] = el; }}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ 
                       duration: 0.4, 
                       delay: Math.min(index * 0.08, 0.4),
