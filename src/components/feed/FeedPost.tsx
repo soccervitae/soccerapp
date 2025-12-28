@@ -425,49 +425,6 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         </p>
       </div>
 
-      {/* Actions */}
-      <div className="px-4 pt-3">
-        <div className="grid grid-cols-4">
-          <button 
-            onClick={handleLike}
-            disabled={likePost.isPending}
-            className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${
-              post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
-            }`}
-          >
-            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
-              {post.liked_by_user ? 'favorite' : 'favorite_border'}
-            </span>
-            {(post.likes_count || 0) >= 1 && (
-              <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>
-            )}
-          </button>
-          <button 
-            onClick={() => setIsCommentsSheetOpen(true)}
-            className="flex items-center justify-center p-3 gap-1.5 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
-          >
-            <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
-            {(post.comments_count || 0) >= 1 && (
-              <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>
-            )}
-          </button>
-          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[24px]">send</span>
-          </button>
-          <button 
-            onClick={handleSave}
-            disabled={savePost.isPending}
-            className={`flex items-center justify-center p-3 border-l border-border transition-colors ${
-              post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
-            }`}
-          >
-            <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
-              {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
-            </span>
-          </button>
-        </div>
-      </div>
-
       {/* Liked by section */}
       {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && (
         <div className="px-4 pt-2 pb-1">
@@ -515,6 +472,49 @@ export const FeedPost = ({ post }: FeedPostProps) => {
           </button>
         </div>
       )}
+
+      {/* Actions */}
+      <div className="px-4 pt-3">
+        <div className="grid grid-cols-4">
+          <button 
+            onClick={handleLike}
+            disabled={likePost.isPending}
+            className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${
+              post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'
+            }`}
+          >
+            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
+              {post.liked_by_user ? 'favorite' : 'favorite_border'}
+            </span>
+            {(post.likes_count || 0) >= 1 && (
+              <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>
+            )}
+          </button>
+          <button 
+            onClick={() => setIsCommentsSheetOpen(true)}
+            className="flex items-center justify-center p-3 gap-1.5 border-l border-border text-foreground hover:text-muted-foreground transition-colors"
+          >
+            <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
+            {(post.comments_count || 0) >= 1 && (
+              <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>
+            )}
+          </button>
+          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
+            <span className="material-symbols-outlined text-[24px]">send</span>
+          </button>
+          <button 
+            onClick={handleSave}
+            disabled={savePost.isPending}
+            className={`flex items-center justify-center p-3 border-l border-border transition-colors ${
+              post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'
+            }`}
+          >
+            <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
+              {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
+            </span>
+          </button>
+        </div>
+      </div>
 
       <div className="pb-3" />
 
