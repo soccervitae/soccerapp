@@ -467,221 +467,203 @@ export const HighlightsSection = ({
 
       <AddHighlightSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
 
-      {/* Fullscreen View Dialog */}
+      {/* Fullscreen View Dialog - Story-like */}
       <Dialog open={viewDialogOpen} onOpenChange={(open) => {
         setViewDialogOpen(open);
         if (!open) setIsEditingTitle(false);
       }}>
-        <DialogContent className="max-w-lg p-0 bg-background/95 backdrop-blur-sm border-none">
-          <div className="relative flex flex-col items-center">
-            {/* Header with counter and close button */}
-            <div className="w-full flex items-center justify-between p-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {currentHighlightIndex + 1} / {displayHighlights.length}
-                </span>
-                {currentImages.length > 1 && (
-                  <span className="text-xs text-primary flex items-center gap-1">
-                    <Images className="w-3 h-3" />
-                    {currentImageIndex + 1}/{currentImages.length}
-                  </span>
-                )}
+        <DialogContent className="max-w-md w-full h-[100dvh] max-h-[100dvh] p-0 border-0 bg-black rounded-none sm:rounded-2xl sm:h-[90vh] sm:max-h-[800px]">
+          <div className="relative w-full h-full flex flex-col overflow-hidden">
+            {/* Progress bars for images */}
+            {currentImages.length > 1 && (
+              <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
+                {currentImages.map((_, index) => (
+                  <div key={index} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-white transition-all duration-200"
+                      style={{ 
+                        width: index < currentImageIndex ? '100%' : index === currentImageIndex ? '100%' : '0%' 
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
-              <button
-                onClick={() => setViewDialogOpen(false)}
-                className="p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors"
-              >
-                <X className="w-5 h-5 text-foreground" />
-              </button>
-            </div>
-
-            {/* Navigation arrows for highlights */}
-            {displayHighlights.length > 1 && (
-              <>
-                <button
-                  onClick={handlePrevHighlight}
-                  disabled={currentHighlightIndex === 0}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronLeft className="w-5 h-5 text-foreground" />
-                </button>
-                <button
-                  onClick={handleNextHighlight}
-                  disabled={currentHighlightIndex === displayHighlights.length - 1}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronRight className="w-5 h-5 text-foreground" />
-                </button>
-              </>
             )}
-            
-            {/* Highlight Carousel (outer) */}
-            <div className="w-full overflow-hidden" ref={highlightEmblaRef}>
-              <div className="flex">
-                {displayHighlights.map((highlight) => {
-                  const images = highlight.images && highlight.images.length > 0 
-                    ? highlight.images 
-                    : [{ id: highlight.id, image_url: highlight.image_url, highlight_id: highlight.id, display_order: 0, created_at: highlight.created_at }];
-                  
-                  return (
-                    <div key={highlight.id} className="flex-[0_0_100%] min-w-0 flex flex-col items-center px-6">
-                      {/* Image Carousel (inner) */}
-                      <div className="relative w-full max-w-[280px]">
-                        <div className="overflow-hidden rounded-2xl" ref={highlight.id === selectedHighlight?.id ? imageEmblaRef : undefined}>
-                          <div className="flex">
-                            {images.map((image) => (
-                              <div key={image.id} className="flex-[0_0_100%] min-w-0">
-                                <div className="aspect-square relative">
-                                  <img
-                                    src={image.image_url}
-                                    alt={highlight.title}
-                                    className="w-full h-full object-cover"
-                                  />
-                                  {/* Delete image button */}
-                                  {isOwnProfile && images.length > 0 && highlight.id === selectedHighlight?.id && (
-                                    <button
-                                      onClick={() => {
-                                        setSelectedImageToDelete(image);
-                                        setDeleteImageDialogOpen(true);
-                                      }}
-                                      className="absolute top-2 right-2 p-2 rounded-full bg-destructive/80 hover:bg-destructive transition-colors"
-                                    >
-                                      <X className="w-4 h-4 text-destructive-foreground" />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
 
-                        {/* Image navigation arrows */}
-                        {images.length > 1 && highlight.id === selectedHighlight?.id && (
-                          <>
-                            <button
-                              onClick={handlePrevImage}
-                              disabled={currentImageIndex === 0}
-                              className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-4 h-4 text-foreground" />
-                            </button>
-                            <button
-                              onClick={handleNextImage}
-                              disabled={currentImageIndex === images.length - 1}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-4 h-4 text-foreground" />
-                            </button>
-                          </>
-                        )}
-
-                        {/* Image dots */}
-                        {images.length > 1 && highlight.id === selectedHighlight?.id && (
-                          <div className="flex gap-1 justify-center mt-2">
-                            {images.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => imageEmblaApi?.scrollTo(index)}
-                                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                                  index === currentImageIndex ? 'bg-primary' : 'bg-muted-foreground/30'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
+            {/* Header */}
+            <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-400">
+                  <div 
+                    className="w-full h-full rounded-full border-2 border-black bg-cover bg-center"
+                    style={{ backgroundImage: `url('${selectedHighlight?.image_url}')` }}
+                  />
+                </div>
+                <div>
+                  {isEditingTitle && isOwnProfile ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editedTitle}
+                        onChange={(e) => setEditedTitle(e.target.value)}
+                        onKeyDown={handleTitleKeyDown}
+                        className="text-sm font-semibold max-w-[150px] h-7 bg-white/10 border-white/20 text-white"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleTitleSave}
+                        disabled={updateHighlight.isPending}
+                        className="w-6 h-6 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
                     </div>
-                  );
-                })}
+                  ) : (
+                    <button
+                      onClick={handleTitleClick}
+                      className={`flex items-center gap-1 group ${isOwnProfile ? 'cursor-pointer' : 'cursor-default'}`}
+                      disabled={!isOwnProfile}
+                    >
+                      <p className="text-white text-sm font-semibold">{selectedHighlight?.title}</p>
+                      {isOwnProfile && (
+                        <Pencil className="w-3 h-3 text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </button>
+                  )}
+                  <p className="text-white/60 text-xs">
+                    {currentImages.length > 1 && `${currentImageIndex + 1}/${currentImages.length} • `}
+                    {currentHighlightIndex + 1}/{displayHighlights.length} destaques
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                {isOwnProfile && (
+                  <button 
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
+                <button 
+                  onClick={() => setViewDialogOpen(false)}
+                  className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             </div>
-            
-            {/* Title - editable for own profile */}
-            <div className="mt-4 px-6 w-full flex justify-center">
-              {isEditingTitle && isOwnProfile ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    onKeyDown={handleTitleKeyDown}
-                    className="text-center text-lg font-semibold max-w-[200px]"
-                    autoFocus
-                  />
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleTitleSave}
-                    disabled={updateHighlight.isPending}
-                  >
-                    <Check className="w-4 h-4 text-primary" />
-                  </Button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleTitleClick}
-                  className={`flex items-center gap-2 group ${isOwnProfile ? 'cursor-pointer hover:text-primary' : 'cursor-default'}`}
-                  disabled={!isOwnProfile}
-                >
-                  <h3 className="text-xl font-semibold text-foreground transition-colors">
-                    {selectedHighlight?.title}
-                  </h3>
-                  {isOwnProfile && (
-                    <Pencil className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  )}
-                </button>
+
+            {/* Image Display */}
+            <div className="flex-1 flex items-center justify-center bg-black relative">
+              {currentImages[currentImageIndex] && (
+                <img
+                  src={currentImages[currentImageIndex].image_url}
+                  alt={selectedHighlight?.title || 'Destaque'}
+                  className="w-full h-full object-contain transition-all duration-300 ease-out"
+                />
               )}
             </div>
-            
-            {/* Action buttons */}
-            {isOwnProfile && (
-              <div className="flex gap-2 mt-4 mb-6">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAddImage}
-                    className="hidden"
-                    disabled={isAddingImage}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isAddingImage}
-                    asChild
-                  >
-                    <span>
-                      {isAddingImage ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <ImagePlus className="w-4 h-4 mr-2" />
-                      )}
-                      Adicionar foto
-                    </span>
-                  </Button>
-                </label>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Remover destaque
-                </Button>
-              </div>
-            )}
 
-            {/* Highlight dots indicator */}
-            {displayHighlights.length > 1 && (
-              <div className="flex gap-1.5 pb-4">
-                {displayHighlights.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => highlightEmblaApi?.scrollTo(index)}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentHighlightIndex ? 'bg-primary' : 'bg-muted-foreground/30'
-                    }`}
-                  />
-                ))}
+            {/* Navigation areas (invisible touch zones) */}
+            <div className="absolute inset-0 flex z-10">
+              <button 
+                onClick={() => {
+                  if (currentImageIndex > 0) {
+                    imageEmblaApi?.scrollPrev();
+                    setCurrentImageIndex(prev => prev - 1);
+                  } else if (currentHighlightIndex > 0) {
+                    handlePrevHighlight();
+                  }
+                }}
+                className="w-1/3 h-full focus:outline-none"
+                aria-label="Anterior"
+              />
+              <div className="w-1/3" />
+              <button 
+                onClick={() => {
+                  if (currentImageIndex < currentImages.length - 1) {
+                    imageEmblaApi?.scrollNext();
+                    setCurrentImageIndex(prev => prev + 1);
+                  } else if (currentHighlightIndex < displayHighlights.length - 1) {
+                    handleNextHighlight();
+                  } else {
+                    setViewDialogOpen(false);
+                  }
+                }}
+                className="w-1/3 h-full focus:outline-none"
+                aria-label="Próximo"
+              />
+            </div>
+
+            {/* Footer with gradient */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
+              {isOwnProfile ? (
+                // Owner footer: action buttons
+                <div className="flex items-center justify-center gap-4">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAddImage}
+                      className="hidden"
+                      disabled={isAddingImage}
+                    />
+                    <span className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors cursor-pointer">
+                      {isAddingImage ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <ImagePlus className="w-5 h-5" />
+                      )}
+                      <span className="text-sm font-medium">Adicionar foto</span>
+                    </span>
+                  </label>
+                  {currentImages.length > 1 && (
+                    <button 
+                      onClick={() => {
+                        setSelectedImageToDelete(currentImages[currentImageIndex]);
+                        setDeleteImageDialogOpen(true);
+                      }}
+                      className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                      <span className="text-sm font-medium">Remover foto</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                // Visitor footer: highlight dots
+                <div className="flex justify-center">
+                  {displayHighlights.length > 1 && (
+                    <div className="flex gap-2">
+                      {displayHighlights.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => highlightEmblaApi?.scrollTo(index)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            index === currentHighlightIndex ? 'bg-white' : 'bg-white/30'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Highlight dots for owner too */}
+            {isOwnProfile && displayHighlights.length > 1 && (
+              <div className="absolute bottom-20 left-0 right-0 z-20 flex justify-center">
+                <div className="flex gap-2">
+                  {displayHighlights.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => highlightEmblaApi?.scrollTo(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentHighlightIndex ? 'bg-white' : 'bg-white/30'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
