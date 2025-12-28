@@ -6,6 +6,7 @@ import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
 import { FollowingUserItem } from "@/components/messages/FollowingUserItem";
+import { OnlineUserAvatar } from "@/components/messages/OnlineUserAvatar";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
@@ -150,22 +151,20 @@ const Messages = () => {
         {/* Lista de usuários seguidos */}
         {!isLoadingFollowing && filteredUsers.length > 0 && (
           <ScrollArea className="h-[calc(100vh-280px)]">
-            {/* Seção Online */}
+            {/* Seção Online - Horizontal scroll */}
             {onlineUsers.length > 0 && (
-              <div className="px-3 mb-4">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2 px-3">
                   <Circle className="h-3 w-3 fill-green-500 text-green-500" />
                   <h3 className="text-sm font-medium text-muted-foreground">
                     Online agora ({onlineUsers.length})
                   </h3>
                 </div>
-                <div className="bg-muted/30 rounded-lg overflow-hidden">
+                <div className="flex overflow-x-auto scrollbar-hide px-2 gap-1">
                   {onlineUsers.map((userProfile) => (
-                    <FollowingUserItem
+                    <OnlineUserAvatar
                       key={userProfile.id}
                       user={userProfile}
-                      isOnline={true}
-                      hasConversation={existingConversationUserIds.has(userProfile.id)}
                       onClick={() => handleStartConversation(userProfile.id)}
                       disabled={creatingUserId !== null}
                       isLoading={creatingUserId === userProfile.id}
