@@ -93,7 +93,7 @@ export const MessageBubble = ({
         <div
           className={`max-w-[75%] rounded-2xl px-4 py-2 ${
             isOwn
-              ? "bg-primary text-primary-foreground rounded-br-md"
+              ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
           } ${isTemporary ? "border-2 border-orange-500/50" : ""}`}
           onContextMenu={(e) => {
@@ -105,7 +105,7 @@ export const MessageBubble = ({
           {/* Temporary message indicator */}
           {isTemporary && (
             <div className={`flex items-center gap-1 text-xs mb-1 ${
-              isOwn ? "text-primary-foreground/70" : "text-orange-500"
+              isOwn ? "text-slate-500 dark:text-slate-400" : "text-orange-500"
             }`}>
               <Flame className="h-3 w-3" />
               <span>Mensagem temporária</span>
@@ -117,7 +117,7 @@ export const MessageBubble = ({
             <div
               className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
                 isOwn
-                  ? "bg-primary-foreground/10 border-primary-foreground/50"
+                  ? "bg-slate-200/50 dark:bg-slate-600/50 border-slate-400 dark:border-slate-500"
                   : "bg-background/50 border-primary/50"
               }`}
             >
@@ -136,7 +136,7 @@ export const MessageBubble = ({
                     onClick={toggleAudio}
                     className={`h-10 w-10 rounded-full ${
                       isOwn
-                        ? "bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground"
+                        ? "bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200"
                         : "bg-background/50 hover:bg-background/70"
                     }`}
                   >
@@ -149,17 +149,17 @@ export const MessageBubble = ({
 
                   <div className="flex-1">
                     <div className={`h-1 rounded-full overflow-hidden ${
-                      isOwn ? "bg-primary-foreground/30" : "bg-border"
+                      isOwn ? "bg-slate-300 dark:bg-slate-500" : "bg-border"
                     }`}>
                       <div
                         className={`h-full transition-all ${
-                          isOwn ? "bg-primary-foreground" : "bg-primary"
+                          isOwn ? "bg-slate-600 dark:bg-slate-300" : "bg-primary"
                         }`}
                         style={{ width: `${progress}%` }}
                       />
                     </div>
                     <span className={`text-[10px] ${
-                      isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                      isOwn ? "text-slate-500 dark:text-slate-400" : "text-muted-foreground"
                     }`}>
                       {audioRef.current?.duration
                         ? formatDuration(isPlaying ? audioRef.current.currentTime : audioRef.current.duration)
@@ -199,16 +199,16 @@ export const MessageBubble = ({
 
           {/* Time and read status */}
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
-            <span className={`text-[10px] ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+            <span className={`text-[10px] ${isOwn ? "text-slate-500 dark:text-slate-400" : "text-muted-foreground"}`}>
               {formatTime(message.created_at)}
             </span>
             {isOwn && (
               <span className={`${
                 message.isPending 
-                  ? "text-primary-foreground/50" 
+                  ? "text-slate-400 dark:text-slate-500" 
                   : isRead 
-                    ? "text-blue-400" 
-                    : "text-primary-foreground/70"
+                    ? "text-blue-500" 
+                    : "text-slate-500 dark:text-slate-400"
               }`}>
                 {message.isPending ? (
                   <Clock className="h-3.5 w-3.5" />
