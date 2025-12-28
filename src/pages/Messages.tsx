@@ -5,13 +5,13 @@ import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
-import { FollowingUserItem } from "@/components/messages/FollowingUserItem";
+
 import { OnlineUserAvatar } from "@/components/messages/OnlineUserAvatar";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, UserPlus, Users, Circle } from "lucide-react";
+import { Search, Loader2, UserPlus, Circle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -53,24 +53,9 @@ const Messages = () => {
     return users.filter(profile => profile.username?.toLowerCase().includes(query) || profile.full_name?.toLowerCase().includes(query));
   }, [followingUsers, searchQuery]);
 
-  // Separar usuários online e offline
-  const {
-    onlineUsers,
-    offlineUsers
-  } = useMemo(() => {
-    const online: Profile[] = [];
-    const offline: Profile[] = [];
-    filteredUsers.forEach(user => {
-      if (isUserOnline(user.id)) {
-        online.push(user);
-      } else {
-        offline.push(user);
-      }
-    });
-    return {
-      onlineUsers: online,
-      offlineUsers: offline
-    };
+  // Filtrar apenas usuários online
+  const onlineUsers = useMemo(() => {
+    return filteredUsers.filter(user => isUserOnline(user.id));
   }, [filteredUsers, isUserOnline]);
   const handleStartConversation = async (userId: string) => {
     setCreatingUserId(userId);
@@ -149,19 +134,6 @@ const Messages = () => {
                 </div>
                 <div className="flex overflow-x-auto no-scrollbar gap-2 px-3 pb-2">
                   {onlineUsers.map(userProfile => <OnlineUserAvatar key={userProfile.id} user={userProfile} onClick={() => handleStartConversation(userProfile.id)} disabled={creatingUserId !== null} isLoading={creatingUserId === userProfile.id} />)}
-                </div>
-              </div>}
-
-            {/* Seção Todos/Offline */}
-            {offlineUsers.length > 0 && <div className="px-3 mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    {onlineUsers.length > 0 ? "Outros" : "Quem você segue"} ({offlineUsers.length})
-                  </h3>
-                </div>
-                <div className="bg-muted/30 rounded-lg overflow-hidden">
-                  {offlineUsers.map(userProfile => <FollowingUserItem key={userProfile.id} user={userProfile} isOnline={false} hasConversation={existingConversationUserIds.has(userProfile.id)} onClick={() => handleStartConversation(userProfile.id)} disabled={creatingUserId !== null} isLoading={creatingUserId === userProfile.id} />)}
                 </div>
               </div>}
 
