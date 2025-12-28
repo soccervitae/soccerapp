@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
+import { ProfileFeedSheet } from "./ProfileFeedSheet";
 
 interface Post {
   id: string;
@@ -39,6 +40,14 @@ interface Achievement {
   } | null;
 }
 
+interface Profile {
+  id: string;
+  username: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  conta_verificada?: boolean;
+}
+
 interface PostsGridProps {
   posts: Post[];
   taggedPosts?: Post[];
@@ -49,6 +58,7 @@ interface PostsGridProps {
   isAchievementsLoading?: boolean;
   isTaggedLoading?: boolean;
   isOwnProfile?: boolean;
+  profile?: Profile;
 }
 
 type Tab = "posts" | "videos" | "fotos" | "campeonatos" | "conquistas" | "tagged";
@@ -72,9 +82,13 @@ export const PostsGrid = ({
   isAchievementsLoading = false,
   isTaggedLoading = false,
   isOwnProfile = false,
+  profile,
 }: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
+  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
+  const [feedPosts, setFeedPosts] = useState<Post[]>([]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -108,6 +122,12 @@ export const PostsGrid = ({
     return [];
   };
 
+  const handlePostClick = (filteredPosts: Post[], index: number) => {
+    setFeedPosts(filteredPosts);
+    setSelectedPostIndex(index);
+    setFeedSheetOpen(true);
+  };
+
   const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
     if (filteredPosts.length === 0) {
       return (
@@ -120,8 +140,12 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post) => (
-          <div key={post.id} className="aspect-square bg-muted relative group overflow-hidden cursor-pointer">
+        {filteredPosts.map((post, index) => (
+          <div 
+            key={post.id} 
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
+            onClick={() => handlePostClick(filteredPosts, index)}
+          >
             {post.media_url ? (
               post.media_type === "video" ? (
                 <>
@@ -166,7 +190,7 @@ export const PostsGrid = ({
         </div>
         <div className="grid grid-cols-3 gap-1 mb-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="aspect-square bg-muted animate-pulse" />
+            <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
           ))}
         </div>
       </section>
@@ -234,7 +258,7 @@ export const PostsGrid = ({
             {isTaggedLoading ? (
               <div className="grid grid-cols-3 gap-1 mb-8">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="aspect-square bg-muted animate-pulse" />
+                  <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
                 ))}
               </div>
             ) : (
@@ -243,6 +267,17 @@ export const PostsGrid = ({
           </div>
         </div>
       </div>
+
+      {/* Profile Feed Sheet */}
+      {profile && (
+        <ProfileFeedSheet
+          posts={feedPosts}
+          initialPostIndex={selectedPostIndex}
+          isOpen={feedSheetOpen}
+          onClose={() => setFeedSheetOpen(false)}
+          profile={profile}
+        />
+      )}
     </section>
   );
 };
