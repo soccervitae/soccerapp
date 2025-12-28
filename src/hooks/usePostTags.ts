@@ -78,19 +78,30 @@ export const useCreatePostTags = () => {
   });
 };
 
-export const useSearchUsers = () => {
-  return useMutation({
-    mutationFn: async (query: string) => {
-      if (!query.trim()) return [];
+export const useSearchFollowing = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ["following-profiles", userId],
+    queryFn: async () => {
+      if (!userId) return [];
 
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, username, full_name, avatar_url")
-        .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
-        .limit(10);
+        .from("follows")
+        .select(`
+          following:profiles!follows_following_id_fkey(
+            id,
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq("follower_id", userId);
 
       if (error) throw error;
-      return data || [];
+
+      return (data || [])
+        .map((item) => item.following)
+        .filter((f): f is { id: string; username: string; full_name: string | null; avatar_url: string | null } => f !== null);
     },
+    enabled: !!userId,
   });
 };
