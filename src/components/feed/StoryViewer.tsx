@@ -220,7 +220,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     
     return {
       opacity: 0,
-      scale: 0.1,
+      scale: Math.min(originRect.width / window.innerWidth, 0.15),
       x: originCenterX - centerX,
       y: originCenterY - centerY,
       borderRadius: "50%",
@@ -286,9 +286,10 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
               exit={getInitialPosition()}
               transition={{ 
                 type: "spring", 
-                stiffness: 300, 
-                damping: 30,
-                opacity: { duration: 0.2 }
+                stiffness: 200, 
+                damping: 25,
+                mass: 0.8,
+                opacity: { duration: 0.25 }
               }}
             >
               <div className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto">
