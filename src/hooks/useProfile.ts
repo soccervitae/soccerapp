@@ -538,3 +538,127 @@ export const useDeleteAchievement = () => {
     },
   });
 };
+
+// Highlight interface
+export interface UserHighlight {
+  id: string;
+  user_id: string;
+  title: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
+}
+
+// Fetch user highlights
+export const useUserHighlights = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+
+  return useQuery({
+    queryKey: ["user-highlights", targetUserId],
+    queryFn: async (): Promise<UserHighlight[]> => {
+      if (!targetUserId) return [];
+
+      const { data, error } = await supabase
+        .from("user_highlights")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!targetUserId,
+  });
+};
+
+// Add highlight
+export const useAddHighlight = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (highlight: {
+      title: string;
+      image_url: string;
+      display_order?: number;
+    }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_highlights")
+        .insert({
+          user_id: user.id,
+          ...highlight,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+      toast.success("Destaque adicionado!");
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar destaque");
+    },
+  });
+};
+
+// Update highlight
+export const useUpdateHighlight = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<UserHighlight> & { id: string }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_highlights")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar destaque");
+    },
+  });
+};
+
+// Delete highlight
+export const useDeleteHighlight = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (highlightId: string) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("user_highlights")
+        .delete()
+        .eq("id", highlightId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+      toast.success("Destaque removido!");
+    },
+    onError: () => {
+      toast.error("Erro ao remover destaque");
+    },
+  });
+};
