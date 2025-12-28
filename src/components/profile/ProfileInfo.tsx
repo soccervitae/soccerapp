@@ -7,24 +7,9 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  ResponsiveModal,
-  ResponsiveModalContent,
-  ResponsiveModalHeader,
-  ResponsiveModalTitle,
-} from "@/components/ui/responsive-modal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, ResponsiveModalTitle } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 interface ProfileInfoProps {
   profile: Profile;
@@ -45,7 +30,9 @@ export const ProfileInfo = ({
     user
   } = useAuth();
   const followUser = useFollowUser();
-  const { createConversation } = useCreateConversation();
+  const {
+    createConversation
+  } = useCreateConversation();
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
   const [isCheering, setIsCheering] = useState(followStats?.isFollowing || false);
@@ -56,9 +43,7 @@ export const ProfileInfo = ({
 
   // Use Sheet on mobile or PWA, DropdownMenu on desktop
   const useSheet = isMobile || isPWA;
-
   const profileUrl = `${window.location.origin}/${profile.username}`;
-
   const handleShareProfile = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
@@ -73,13 +58,12 @@ export const ProfileInfo = ({
       toast.success("Link do perfil copiado!");
     }
   };
-
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: `Perfil de @${profile.username}`,
-          url: profileUrl,
+          url: profileUrl
         });
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -90,32 +74,26 @@ export const ProfileInfo = ({
       handleShareProfile();
     }
   };
-
   const handleDownloadQR = () => {
     const svg = qrRef.current?.querySelector("svg");
     if (!svg) return;
-
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx?.drawImage(img, 0, 0);
       const pngUrl = canvas.toDataURL("image/png");
-      
       const link = document.createElement("a");
       link.download = `qrcode-${profile.username}.png`;
       link.href = pngUrl;
       link.click();
       toast.success("QR Code salvo!");
     };
-
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
-
   const handleFollowClick = () => {
     if (!user) {
       navigate("/login");
@@ -128,13 +106,11 @@ export const ProfileInfo = ({
       onSuccess: () => setIsCheering(!isCheering)
     });
   };
-
   const handleMessageClick = async () => {
     if (!user) {
       navigate("/login");
       return;
     }
-    
     setIsStartingChat(true);
     try {
       const conversationId = await createConversation(profile.id);
@@ -191,15 +167,13 @@ export const ProfileInfo = ({
         <p className="text-muted-foreground font-medium text-sm">
           {profile.position && profile.team ? `${profile.position} | ${profile.team}` : profile.position || profile.team || `@${profile.username}`}
         </p>
-        {profile.bio && (
-          <p className="text-muted-foreground/80 text-sm px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
+        {profile.bio && <p className="text-muted-foreground/80 text-sm px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
             {profile.bio}
-          </p>
-        )}
+          </p>}
       </div>
 
       {/* Physical Stats */}
-      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-2">
+      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-2 py-[4px]">
         <div className="flex flex-col gap-1 p-2 text-center">
           <p className="text-foreground text-sm font-bold">{age || "-"}</p>
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
@@ -220,17 +194,11 @@ export const ProfileInfo = ({
 
       {/* Stats Row */}
       {followStats && <div className="flex items-center gap-8 py-2">
-          <button 
-            onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)}
-            className="text-center hover:opacity-70 transition-opacity"
-          >
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="text-center hover:opacity-70 transition-opacity">
             <p className="text-foreground font-bold">{followStats.followers}</p>
             <p className="text-muted-foreground text-xs">Torcedores</p>
           </button>
-          <button 
-            onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)}
-            className="text-center hover:opacity-70 transition-opacity"
-          >
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="text-center hover:opacity-70 transition-opacity">
             <p className="text-foreground font-bold">{followStats.following}</p>
             <p className="text-muted-foreground text-xs">Torcendo</p>
           </button>
@@ -238,23 +206,15 @@ export const ProfileInfo = ({
 
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
-        {isOwnProfile ? (
-          <>
-            <button 
-              onClick={() => navigate("/settings/profile")} 
-              className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm"
-            >
+        {isOwnProfile ? <>
+            <button onClick={() => navigate("/settings/profile")} className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
               <span className="material-symbols-outlined text-[16px]">edit</span>
               Editar Perfil
             </button>
             
             {/* Botão Compartilhar - apenas no próprio perfil */}
-            {useSheet ? (
-              <>
-                <button 
-                  onClick={() => setShareSheetOpen(true)}
-                  className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm"
-                >
+            {useSheet ? <>
+                <button onClick={() => setShareSheetOpen(true)} className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
                   <span className="material-symbols-outlined text-[16px]">share</span>
                   Compartilhar
                 </button>
@@ -265,35 +225,31 @@ export const ProfileInfo = ({
                       <SheetTitle className="text-center">Compartilhar Perfil</SheetTitle>
                     </SheetHeader>
                     <div className="flex flex-col gap-2 py-4">
-                      <button 
-                        onClick={() => { handleShareProfile(); setShareSheetOpen(false); }}
-                        className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                      >
+                      <button onClick={() => {
+                  handleShareProfile();
+                  setShareSheetOpen(false);
+                }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
                         <span className="material-symbols-outlined text-[22px]">link</span>
                         <span className="font-medium">Copiar link</span>
                       </button>
-                      <button 
-                        onClick={() => { setShareSheetOpen(false); setQrDialogOpen(true); }}
-                        className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                      >
+                      <button onClick={() => {
+                  setShareSheetOpen(false);
+                  setQrDialogOpen(true);
+                }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
                         <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
                         <span className="font-medium">QR Code</span>
                       </button>
-                      {typeof navigator.share === "function" && (
-                        <button 
-                          onClick={() => { handleNativeShare(); setShareSheetOpen(false); }}
-                          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
-                        >
+                      {typeof navigator.share === "function" && <button onClick={() => {
+                  handleNativeShare();
+                  setShareSheetOpen(false);
+                }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
                           <span className="material-symbols-outlined text-[22px]">ios_share</span>
                           <span className="font-medium">Compartilhar</span>
-                        </button>
-                      )}
+                        </button>}
                     </div>
                   </SheetContent>
                 </Sheet>
-              </>
-            ) : (
-              <DropdownMenu>
+              </> : <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
                     <span className="material-symbols-outlined text-[16px]">share</span>
@@ -309,45 +265,26 @@ export const ProfileInfo = ({
                     <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
                     QR Code
                   </DropdownMenuItem>
-                  {typeof navigator.share === "function" && (
-                    <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                  {typeof navigator.share === "function" && <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
                       <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
                       Compartilhar
-                    </DropdownMenuItem>
-                  )}
+                    </DropdownMenuItem>}
                 </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </>
-        ) : (
-          <>
-            <button 
-              onClick={handleFollowClick} 
-              disabled={followUser.isPending} 
-              className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-300 flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-primary/10 text-primary border border-primary hover:bg-primary/20" : "bg-primary hover:bg-primary-dark text-primary-foreground shadow-primary-glow"}`}
-            >
-              <span 
-                className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} 
-                style={{ fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0" }}
-              >
+              </DropdownMenu>}
+          </> : <>
+            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-300 flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-primary/10 text-primary border border-primary hover:bg-primary/20" : "bg-primary hover:bg-primary-dark text-primary-foreground shadow-primary-glow"}`}>
+              <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} style={{
+            fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
+          }}>
                 favorite
               </span>
               {isCheering ? "Torcendo" : "Torcer"}
             </button>
-            <button 
-              onClick={handleMessageClick}
-              disabled={isStartingChat}
-              className="flex-1 bg-background hover:bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
-            >
-              {isStartingChat ? (
-                <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-              ) : (
-                <span className="material-symbols-outlined text-[16px]">chat</span>
-              )}
+            <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background hover:bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50">
+              {isStartingChat ? <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> : <span className="material-symbols-outlined text-[16px]">chat</span>}
               Mensagem
             </button>
-          </>
-        )}
+          </>}
       </div>
 
       {/* QR Code Modal */}
@@ -357,33 +294,18 @@ export const ProfileInfo = ({
             <ResponsiveModalTitle className="text-center">QR Code do Perfil</ResponsiveModalTitle>
           </ResponsiveModalHeader>
           <div className="flex flex-col items-center gap-4 py-4">
-            <div 
-              ref={qrRef}
-              className="bg-white p-4 rounded-xl"
-            >
-              <QRCodeSVG 
-                value={profileUrl}
-                size={200}
-                level="H"
-                includeMargin={false}
-              />
+            <div ref={qrRef} className="bg-white p-4 rounded-xl">
+              <QRCodeSVG value={profileUrl} size={200} level="H" includeMargin={false} />
             </div>
             <p className="text-sm text-muted-foreground text-center">
               @{profile.username}
             </p>
             <div className="flex gap-2 w-full">
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={handleShareProfile}
-              >
+              <Button variant="outline" className="flex-1" onClick={handleShareProfile}>
                 <span className="material-symbols-outlined text-[18px] mr-2">link</span>
                 Copiar
               </Button>
-              <Button 
-                className="flex-1"
-                onClick={handleDownloadQR}
-              >
+              <Button className="flex-1" onClick={handleDownloadQR}>
                 <span className="material-symbols-outlined text-[18px] mr-2">download</span>
                 Salvar
               </Button>
