@@ -6,6 +6,8 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
+export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+
 interface CallState {
   isCallActive: boolean;
   isIncomingCall: boolean;
@@ -15,6 +17,7 @@ interface CallState {
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   callerInfo: Profile | null;
+  connectionStatus: ConnectionStatus;
 }
 
 interface SignalingMessage {
@@ -64,6 +67,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     localStream: null,
     remoteStream: null,
     callerInfo: null,
+    connectionStatus: 'idle',
   });
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -110,6 +114,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       localStream: null,
       remoteStream: null,
       callerInfo: null,
+      connectionStatus: 'idle',
     });
   }, []);
 
@@ -166,16 +171,33 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       console.log("[WebRTC] Connection state:", pc.connectionState);
       console.log("[WebRTC] Signaling state:", pc.signalingState);
       
+      // Map ICE connection state to our connection status
+      let connectionStatus: ConnectionStatus = 'idle';
+      const iceState = pc.iceConnectionState;
+      
+      if (iceState === 'new' || iceState === 'checking') {
+        connectionStatus = 'connecting';
+      } else if (iceState === 'connected' || iceState === 'completed') {
+        connectionStatus = 'connected';
+      } else if (iceState === 'disconnected') {
+        connectionStatus = 'reconnecting';
+      } else if (iceState === 'failed') {
+        connectionStatus = 'failed';
+      }
+      
       if (pc.iceConnectionState === "connected") {
         clearCallTimeout();
-        setCallState((prev) => ({ ...prev, isCalling: false, isCallActive: true }));
+        setCallState((prev) => ({ ...prev, isCalling: false, isCallActive: true, connectionStatus }));
       } else if (pc.iceConnectionState === "disconnected") {
         console.log("[WebRTC] Connection disconnected, attempting to recover...");
         toast.error("Conexão perdida. Tentando reconectar...");
+        setCallState((prev) => ({ ...prev, connectionStatus }));
       } else if (pc.iceConnectionState === "failed") {
         console.log("[WebRTC] Connection failed");
         toast.error("Falha na conexão. Tente novamente.");
         cleanupCall();
+      } else {
+        setCallState((prev) => ({ ...prev, connectionStatus }));
       }
     };
 
@@ -239,7 +261,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       });
     }
 
-    setCallState((prev) => ({ ...prev, isCalling: true, isCallActive: true }));
+    setCallState((prev) => ({ ...prev, isCalling: true, isCallActive: true, connectionStatus: 'connecting' }));
   }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage]);
 
   const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {

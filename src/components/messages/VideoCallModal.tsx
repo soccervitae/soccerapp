@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Video, VideoOff, Mic, MicOff, PhoneOff } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, PhoneOff, Wifi, WifiOff } from "lucide-react";
 import { useDialTone } from "@/hooks/useDialTone";
 import type { Database } from "@/integrations/supabase/types";
+import type { ConnectionStatus } from "@/hooks/useVideoCall";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -16,10 +17,26 @@ interface VideoCallModalProps {
   isCalling: boolean;
   isVideoEnabled: boolean;
   isAudioEnabled: boolean;
+  connectionStatus: ConnectionStatus;
   onToggleVideo: () => void;
   onToggleAudio: () => void;
   onEndCall: () => void;
 }
+
+const getStatusConfig = (status: ConnectionStatus) => {
+  switch (status) {
+    case 'connecting':
+      return { color: 'bg-yellow-500', text: 'Conectando...', pulse: true, icon: Wifi };
+    case 'connected':
+      return { color: 'bg-green-500', text: 'Conectado', pulse: true, icon: Wifi };
+    case 'reconnecting':
+      return { color: 'bg-orange-500', text: 'Reconectando...', pulse: true, icon: Wifi };
+    case 'failed':
+      return { color: 'bg-red-500', text: 'Falha na conexão', pulse: false, icon: WifiOff };
+    default:
+      return { color: 'bg-zinc-500', text: '', pulse: false, icon: Wifi };
+  }
+};
 
 export const VideoCallModal = ({
   isOpen,
@@ -29,6 +46,7 @@ export const VideoCallModal = ({
   isCalling,
   isVideoEnabled,
   isAudioEnabled,
+  connectionStatus,
   onToggleVideo,
   onToggleAudio,
   onEndCall,
@@ -113,13 +131,28 @@ export const VideoCallModal = ({
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="max-w-full w-full h-full max-h-full p-0 bg-black border-none rounded-none [&>button]:hidden">
         <div className="relative w-full h-full flex flex-col">
-          {/* Call duration indicator - shows when connected */}
-          {remoteStream && (
+          {/* Connection status indicator */}
+          {(connectionStatus !== 'idle' || remoteStream) && (
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-white text-sm font-medium">
-                {formatDuration(callDuration)}
-              </span>
+              {(() => {
+                const config = getStatusConfig(connectionStatus);
+                const StatusIcon = config.icon;
+                return (
+                  <>
+                    <div className={`w-2 h-2 ${config.color} rounded-full ${config.pulse ? 'animate-pulse' : ''}`} />
+                    <StatusIcon className="h-4 w-4 text-white/80" />
+                    {remoteStream && connectionStatus === 'connected' ? (
+                      <span className="text-white text-sm font-medium">
+                        {formatDuration(callDuration)}
+                      </span>
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {config.text}
+                      </span>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
 
