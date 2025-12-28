@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Video, VideoOff, Mic, MicOff, PhoneOff, Loader2 } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, PhoneOff } from "lucide-react";
 import { useDialTone } from "@/hooks/useDialTone";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -35,10 +35,45 @@ export const VideoCallModal = ({
 }: VideoCallModalProps) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const callStartTimeRef = useRef<number | null>(null);
+  const [callDuration, setCallDuration] = useState(0);
 
   // Play dial tone while waiting for answer (calling but no remote stream yet)
   const isWaitingForAnswer = isCalling && !remoteStream;
   useDialTone(isWaitingForAnswer);
+
+  // Call duration timer
+  useEffect(() => {
+    let interval: number | null = null;
+    
+    if (remoteStream) {
+      if (!callStartTimeRef.current) {
+        callStartTimeRef.current = Date.now();
+      }
+      
+      interval = window.setInterval(() => {
+        if (callStartTimeRef.current) {
+          const elapsed = Math.floor((Date.now() - callStartTimeRef.current) / 1000);
+          setCallDuration(elapsed);
+        }
+      }, 1000);
+    } else {
+      callStartTimeRef.current = null;
+      setCallDuration(0);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [remoteStream]);
+
+  // Reset when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      callStartTimeRef.current = null;
+      setCallDuration(0);
+    }
+  }, [isOpen]);
 
   // Attach local stream to video element
   useEffect(() => {
@@ -63,10 +98,31 @@ export const VideoCallModal = ({
       .slice(0, 2);
   };
 
+  const formatDuration = (seconds: number): string => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="max-w-full w-full h-full max-h-full p-0 bg-black border-none rounded-none [&>button]:hidden">
         <div className="relative w-full h-full flex flex-col">
+          {/* Call duration indicator - shows when connected */}
+          {remoteStream && (
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-white text-sm font-medium">
+                {formatDuration(callDuration)}
+              </span>
+            </div>
+          )}
+
           {/* Remote video (full screen) */}
           <div className="flex-1 relative bg-zinc-900">
             {remoteStream ? (
