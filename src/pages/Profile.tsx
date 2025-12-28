@@ -13,7 +13,8 @@ import {
   useProfileView,
   useUserChampionships,
   useUserAchievements,
-  useUserTaggedPosts
+  useUserTaggedPosts,
+  useUserHighlights
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ const Profile = () => {
   const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
   const { data: achievements, isLoading: achievementsLoading } = useUserAchievements(targetUserId);
   const { data: taggedPosts, isLoading: taggedLoading } = useUserTaggedPosts(targetUserId);
+  const { data: highlights, isLoading: highlightsLoading } = useUserHighlights(targetUserId);
   const profileView = useProfileView();
 
   // Record profile view
@@ -89,7 +91,11 @@ const Profile = () => {
           isOwnProfile={isOwnProfile}
         />
         <div className="px-4 flex flex-col gap-6">
-          <HighlightsSection />
+          <HighlightsSection 
+            highlights={highlights || []} 
+            isLoading={highlightsLoading}
+            isOwnProfile={isOwnProfile}
+          />
           <PostsGrid 
             posts={posts || []} 
             taggedPosts={taggedPosts || []}
