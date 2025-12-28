@@ -160,7 +160,7 @@ export const MessageBubble = ({
           style={{ x }}
           className={`w-fit max-w-full rounded-2xl px-4 py-2 cursor-grab active:cursor-grabbing ${
             isOwn
-              ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-br-md"
+              ? "bg-green-400 dark:bg-green-600 text-white rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
           } ${isTemporary ? "border-2 border-orange-500/50" : ""}`}
           onContextMenu={(e) => {
@@ -172,7 +172,7 @@ export const MessageBubble = ({
           {/* Temporary message indicator */}
           {isTemporary && (
             <div className={`flex items-center gap-1 text-xs mb-1 ${
-              isOwn ? "text-slate-500 dark:text-slate-400" : "text-orange-500"
+              isOwn ? "text-white/80" : "text-orange-500"
             }`}>
               <Flame className="h-3 w-3" />
               <span>Mensagem temporária</span>
@@ -184,7 +184,7 @@ export const MessageBubble = ({
             <div
               className={`text-xs mb-2 p-2 rounded-lg border-l-2 ${
                 isOwn
-                  ? "bg-slate-200/50 dark:bg-slate-600/50 border-slate-400 dark:border-slate-500"
+                  ? "bg-green-500/30 dark:bg-green-700/50 border-white/50"
                   : "bg-background/50 border-primary/50"
               }`}
             >
@@ -203,7 +203,7 @@ export const MessageBubble = ({
                     onClick={toggleAudio}
                     className={`h-10 w-10 rounded-full ${
                       isOwn
-                        ? "bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200"
+                        ? "bg-white/20 hover:bg-white/30 text-white"
                         : "bg-background/50 hover:bg-background/70"
                     }`}
                   >
@@ -229,7 +229,7 @@ export const MessageBubble = ({
                       }}
                     />
                     <span className={`text-[10px] ${
-                      isOwn ? "text-slate-500 dark:text-slate-400" : "text-muted-foreground"
+                      isOwn ? "text-white/70" : "text-muted-foreground"
                     }`}>
                       {audioRef.current?.duration
                         ? formatDuration(isPlaying ? audioRef.current.currentTime : audioRef.current.duration)
@@ -269,7 +269,7 @@ export const MessageBubble = ({
 
           {/* Time and read status */}
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
-            <span className={`text-[10px] ${isOwn ? "text-slate-500 dark:text-slate-400" : "text-muted-foreground"}`}>
+            <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted-foreground"}`}>
               {formatTime(message.created_at)}
             </span>
             {isOwn && (
@@ -281,11 +281,11 @@ export const MessageBubble = ({
                 key={message.isPending ? 'pending' : isRead ? 'read' : 'delivered'}
               >
                 {message.isPending ? (
-                  <Clock className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+                  <Clock className="h-3.5 w-3.5 text-white/60" />
                 ) : isRead ? (
                   <CheckCheck className="h-3.5 w-3.5 text-blue-500" />
                 ) : (
-                  <Check className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+                  <Check className="h-3.5 w-3.5 text-white/70" />
                 )}
               </motion.span>
             )}
