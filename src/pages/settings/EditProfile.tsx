@@ -2,22 +2,24 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
+import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { Camera, ArrowLeft, Loader2, Check, X } from "lucide-react";
+import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon } from "lucide-react";
 
 const EditProfile = () => {
   const navigate = useNavigate();
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const uploadMedia = useUploadMedia();
+  const { takePhoto, pickFromGallery, isNative } = useDeviceCamera();
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +44,9 @@ const EditProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [coverMenuOpen, setCoverMenuOpen] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Check username availability
@@ -187,6 +192,59 @@ const EditProfile = () => {
     }
   };
 
+  // Process camera/gallery image for cover
+  const processCameraImage = async (type: 'cover' | 'avatar', source: 'camera' | 'gallery') => {
+    setIsProcessingImage(true);
+    try {
+      const image = source === 'camera' ? await takePhoto() : await pickFromGallery();
+      
+      if (image) {
+        let file: File;
+        
+        if (image.blob) {
+          // Native: use the blob directly
+          file = new File([image.blob], `${type}-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        } else {
+          // Web: fetch the webPath to get blob
+          const response = await fetch(image.webPath);
+          const blob = await response.blob();
+          file = new File([blob], `${type}-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+        }
+
+        if (type === 'cover') {
+          setCoverFile(file);
+          setCoverPreview(image.webPath);
+          setCoverMenuOpen(false);
+        } else {
+          setAvatarFile(file);
+          setAvatarPreview(image.webPath);
+          setAvatarMenuOpen(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast.error('Erro ao processar imagem');
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+
+  const handleCoverIconClick = () => {
+    if (isNative) {
+      setCoverMenuOpen(true);
+    } else {
+      coverInputRef.current?.click();
+    }
+  };
+
+  const handleAvatarIconClick = () => {
+    if (isNative) {
+      setAvatarMenuOpen(true);
+    } else {
+      avatarInputRef.current?.click();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -306,7 +364,7 @@ const EditProfile = () => {
           </div>
           <button
             type="button"
-            onClick={() => coverInputRef.current?.click()}
+            onClick={handleCoverIconClick}
             className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm text-foreground p-2 rounded-full hover:bg-background transition-colors"
           >
             <Camera className="w-5 h-5" />
@@ -332,7 +390,7 @@ const EditProfile = () => {
             </div>
             <button
               type="button"
-              onClick={() => avatarInputRef.current?.click()}
+              onClick={handleAvatarIconClick}
               className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
             >
               <Camera className="w-4 h-4" />
@@ -504,6 +562,88 @@ const EditProfile = () => {
 
         </div>
       </form>
+
+      {/* Cover Photo Menu Sheet */}
+      <Sheet open={coverMenuOpen} onOpenChange={setCoverMenuOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Alterar foto de capa</SheetTitle>
+          </SheetHeader>
+          <div className="py-4 space-y-2">
+            <button
+              onClick={() => processCameraImage('cover', 'camera')}
+              disabled={isProcessingImage}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              {isProcessingImage ? (
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              ) : (
+                <Camera className="w-5 h-5 text-primary" />
+              )}
+              <span className="font-medium">Tirar foto</span>
+            </button>
+            <button
+              onClick={() => processCameraImage('cover', 'gallery')}
+              disabled={isProcessingImage}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              {isProcessingImage ? (
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              ) : (
+                <ImageIcon className="w-5 h-5 text-primary" />
+              )}
+              <span className="font-medium">Escolher da galeria</span>
+            </button>
+            <button
+              onClick={() => setCoverMenuOpen(false)}
+              className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            >
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Avatar Photo Menu Sheet */}
+      <Sheet open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Alterar foto de perfil</SheetTitle>
+          </SheetHeader>
+          <div className="py-4 space-y-2">
+            <button
+              onClick={() => processCameraImage('avatar', 'camera')}
+              disabled={isProcessingImage}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              {isProcessingImage ? (
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              ) : (
+                <Camera className="w-5 h-5 text-primary" />
+              )}
+              <span className="font-medium">Tirar foto</span>
+            </button>
+            <button
+              onClick={() => processCameraImage('avatar', 'gallery')}
+              disabled={isProcessingImage}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              {isProcessingImage ? (
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              ) : (
+                <ImageIcon className="w-5 h-5 text-primary" />
+              )}
+              <span className="font-medium">Escolher da galeria</span>
+            </button>
+            <button
+              onClick={() => setAvatarMenuOpen(false)}
+              className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            >
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </main>
     </>
   );
