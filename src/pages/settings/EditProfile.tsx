@@ -13,6 +13,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon } from "lucide-react";
+import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
+import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -47,6 +49,9 @@ const EditProfile = () => {
   const [coverMenuOpen, setCoverMenuOpen] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [showCropEditor, setShowCropEditor] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<'cover' | 'avatar'>('cover');
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Check username availability
@@ -179,17 +184,54 @@ const EditProfile = () => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+      const imageUrl = URL.createObjectURL(file);
+      setImageToCrop(imageUrl);
+      setCropType('avatar');
+      setShowCropEditor(true);
     }
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setCoverFile(file);
-      setCoverPreview(URL.createObjectURL(file));
+      const imageUrl = URL.createObjectURL(file);
+      setImageToCrop(imageUrl);
+      setCropType('cover');
+      setShowCropEditor(true);
     }
+  };
+
+  const handleCropApply = async (cropData: CropData) => {
+    if (!imageToCrop) return;
+
+    try {
+      const croppedBlob = await getCroppedImg(imageToCrop, cropData.croppedAreaPixels);
+      const croppedFile = new File(
+        [croppedBlob],
+        `${cropType}-cropped-${Date.now()}.jpg`,
+        { type: 'image/jpeg' }
+      );
+      const croppedPreview = URL.createObjectURL(croppedBlob);
+
+      if (cropType === 'cover') {
+        setCoverFile(croppedFile);
+        setCoverPreview(croppedPreview);
+      } else {
+        setAvatarFile(croppedFile);
+        setAvatarPreview(croppedPreview);
+      }
+
+      setShowCropEditor(false);
+      setImageToCrop(null);
+    } catch (error) {
+      console.error('Error cropping image:', error);
+      toast.error('Erro ao recortar imagem');
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropEditor(false);
+    setImageToCrop(null);
   };
 
   // Process camera/gallery image for cover
@@ -199,27 +241,17 @@ const EditProfile = () => {
       const image = source === 'camera' ? await takePhoto() : await pickFromGallery();
       
       if (image) {
-        let file: File;
+        // Open crop editor with the selected image
+        setImageToCrop(image.webPath);
+        setCropType(type);
         
-        if (image.blob) {
-          // Native: use the blob directly
-          file = new File([image.blob], `${type}-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        } else {
-          // Web: fetch the webPath to get blob
-          const response = await fetch(image.webPath);
-          const blob = await response.blob();
-          file = new File([blob], `${type}-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
-        }
-
         if (type === 'cover') {
-          setCoverFile(file);
-          setCoverPreview(image.webPath);
           setCoverMenuOpen(false);
         } else {
-          setAvatarFile(file);
-          setAvatarPreview(image.webPath);
           setAvatarMenuOpen(false);
         }
+        
+        setShowCropEditor(true);
       }
     } catch (error) {
       console.error('Error processing image:', error);
@@ -644,6 +676,17 @@ const EditProfile = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Image Crop Editor */}
+      {showCropEditor && imageToCrop && (
+        <div className="fixed inset-0 z-[100] bg-background">
+          <PhotoCropEditor
+            imageUrl={imageToCrop}
+            onApply={handleCropApply}
+            onCancel={handleCropCancel}
+          />
+        </div>
+      )}
     </main>
     </>
   );
