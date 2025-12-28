@@ -11,6 +11,7 @@ import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import OrientationLock from "@/components/OrientationLock";
@@ -172,8 +173,10 @@ const App = () => {
             {/* PWA auto-update hook */}
             <PwaAutoUpdate />
             <BrowserRouter>
-              <ScrollToTop />
-              <AnimatedRoutes />
+              <MessageNotificationProvider>
+                <ScrollToTop />
+                <AnimatedRoutes />
+              </MessageNotificationProvider>
             </BrowserRouter>
           </PresenceProvider>
         </AuthProvider>

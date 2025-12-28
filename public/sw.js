@@ -20,8 +20,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: data.body || 'Nova mensagem recebida',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/pwa-192x192.png',
+    badge: '/pwa-192x192.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/messages',
@@ -76,8 +76,8 @@ self.addEventListener('message', (event) => {
     
     self.registration.showNotification(title, {
       body,
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
       vibrate: [100, 50, 100],
       data: { url, conversationId },
       tag: `message-${conversationId}`,

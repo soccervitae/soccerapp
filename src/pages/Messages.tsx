@@ -103,7 +103,9 @@ const Messages = () => {
         </div>
 
         {/* Notification permission prompt */}
-        
+        <div className="px-3 pb-2">
+          <NotificationPermissionButton />
+        </div>
 
         {/* Campo de busca */}
         <div className="px-3 pb-3">
