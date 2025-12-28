@@ -21,7 +21,7 @@ export const OnlineUserAvatar = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex flex-col items-center gap-1.5 min-w-[72px] py-2 px-1 disabled:opacity-50 transition-opacity"
+      className="flex flex-col items-center gap-1.5 min-w-[72px] py-2 px-1 disabled:opacity-50 transition-opacity flex-shrink-0"
     >
       <div className="relative">
         <Avatar className="h-14 w-14 ring-2 ring-green-500 ring-offset-2 ring-offset-background">
