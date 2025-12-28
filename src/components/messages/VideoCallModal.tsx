@@ -78,18 +78,32 @@ export const VideoCallModal = ({
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={participant?.avatar_url || ""} />
-                  <AvatarFallback className="text-2xl bg-primary/20 text-primary">
-                    {getInitials(participant?.full_name || participant?.username || "?")}
-                  </AvatarFallback>
-                </Avatar>
+                {/* Pulsing indicator around avatar */}
+                <div className="relative">
+                  {isCalling && (
+                    <>
+                      <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: '1.5s' }} />
+                      <div className="absolute -inset-2 rounded-full border-2 border-primary/50 animate-pulse" />
+                      <div className="absolute -inset-4 rounded-full border border-primary/30 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    </>
+                  )}
+                  <Avatar className="h-24 w-24 relative z-10">
+                    <AvatarImage src={participant?.avatar_url || ""} />
+                    <AvatarFallback className="text-2xl bg-primary/20 text-primary">
+                      {getInitials(participant?.full_name || participant?.username || "?")}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <p className="text-white text-xl font-medium">
                   {participant?.full_name || participant?.username}
                 </p>
                 {isCalling && (
                   <div className="flex items-center gap-2 text-white/70">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
                     <span>Chamando...</span>
                   </div>
                 )}
