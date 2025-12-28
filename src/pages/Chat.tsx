@@ -40,6 +40,7 @@ const Chat = () => {
     localStream,
     remoteStream,
     callerInfo,
+    connectionStatus,
     startCall,
     acceptCall,
     rejectCall,
@@ -161,6 +162,7 @@ const Chat = () => {
         isCalling={isCalling}
         isVideoEnabled={isVideoEnabled}
         isAudioEnabled={isAudioEnabled}
+        connectionStatus={connectionStatus}
         onToggleVideo={toggleVideo}
         onToggleAudio={toggleAudio}
         onEndCall={endCall}
