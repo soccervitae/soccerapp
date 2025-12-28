@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -71,6 +72,7 @@ const CALL_TIMEOUT_MS = 30000; // 30 seconds timeout
 
 export const useVideoCall = (conversationId: string | null, participant: Profile | null) => {
   const { user } = useAuth();
+  const { showCallNotification } = usePushNotifications();
   const [callState, setCallState] = useState<CallState>({
     isCallActive: false,
     isIncomingCall: false,
@@ -370,6 +372,19 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
           callerInfo: message.callerInfo || null,
           callType: message.callType || 'video',
         }));
+        
+        // Show push notification if app is in background
+        if (document.visibilityState === 'hidden' && conversationId) {
+          const callerName = message.callerInfo?.full_name || 
+                            message.callerInfo?.username || 
+                            'Alguém';
+          showCallNotification(
+            callerName,
+            message.callType || 'video',
+            conversationId,
+            message.from
+          );
+        }
         break;
 
       case "call_accepted":
@@ -418,7 +433,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         cleanupCall();
         break;
     }
-  }, [createOffer, handleOffer, cleanupCall]);
+  }, [createOffer, handleOffer, cleanupCall, conversationId, showCallNotification]);
 
   // Initialize signaling channel
   useEffect(() => {
