@@ -433,6 +433,20 @@ export const HighlightsSection = ({
       <h3 className="text-sm font-semibold text-foreground mb-3">Destaques</h3>
       
       <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
+        {isOwnProfile && canAddMore && (
+          <div 
+            className="flex-none w-20 flex flex-col gap-2 items-center cursor-pointer"
+            onClick={() => setAddSheetOpen(true)}
+          >
+            <div className="w-16 h-16 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center hover:bg-muted/80 transition-colors">
+              <Plus className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <span className="text-xs text-muted-foreground truncate w-full text-center font-medium">
+              Adicionar
+            </span>
+          </div>
+        )}
+
         {isOwnProfile ? (
           <DndContext
             sensors={sensors}
@@ -448,20 +462,6 @@ export const HighlightsSection = ({
           </DndContext>
         ) : (
           highlightItems
-        )}
-
-        {isOwnProfile && canAddMore && (
-          <div 
-            className="flex-none w-20 flex flex-col gap-2 items-center cursor-pointer"
-            onClick={() => setAddSheetOpen(true)}
-          >
-            <div className="w-16 h-16 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center hover:bg-muted/80 transition-colors">
-              <Plus className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <span className="text-xs text-muted-foreground truncate w-full text-center font-medium">
-              Adicionar
-            </span>
-          </div>
         )}
       </div>
 
