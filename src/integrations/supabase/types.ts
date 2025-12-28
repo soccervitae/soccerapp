@@ -1387,6 +1387,10 @@ export type Database = {
         Args: { _conv_id: string; _user_id: string }
         Returns: boolean
       }
+      create_conversation_with_user: {
+        Args: { p_other_user_id: string }
+        Returns: string
+      }
       create_notification: {
         Args: {
           p_actor_id: string
