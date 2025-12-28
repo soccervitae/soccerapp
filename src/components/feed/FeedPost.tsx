@@ -368,18 +368,27 @@ export const FeedPost = ({
             </span>
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
           </button>
-          <button onClick={() => setIsCommentsSheetOpen(true)} className="flex items-center justify-center p-3 gap-1.5 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
-            {(post.comments_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>}
-          </button>
-          <button className="flex items-center justify-center p-3 border-l border-border text-foreground hover:text-muted-foreground transition-colors">
-            <span className="material-symbols-outlined text-[24px]">send</span>
-          </button>
-          <button onClick={handleSave} disabled={savePost.isPending} className={`flex items-center justify-center p-3 border-l border-border transition-colors ${post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'}`}>
-            <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
-              {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
-            </span>
-          </button>
+          <div className="flex items-center justify-center relative">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+            <button onClick={() => setIsCommentsSheetOpen(true)} className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors">
+              <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
+              {(post.comments_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>}
+            </button>
+          </div>
+          <div className="flex items-center justify-center relative">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+            <button className="flex items-center justify-center p-3 text-foreground hover:text-muted-foreground transition-colors">
+              <span className="material-symbols-outlined text-[24px]">send</span>
+            </button>
+          </div>
+          <div className="flex items-center justify-center relative">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+            <button onClick={handleSave} disabled={savePost.isPending} className={`flex items-center justify-center p-3 transition-colors ${post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'}`}>
+              <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
+                {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
