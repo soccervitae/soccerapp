@@ -71,9 +71,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "messages" ? "fill-1" : ""}`}>chat</span>
             {totalUnread > 0 && (
-              <span className="absolute top-0 right-0 min-w-4 h-4 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-medium rounded-full px-1">
-                {totalUnread > 99 ? "99+" : totalUnread}
-              </span>
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
             )}
           </button>
           <button 
