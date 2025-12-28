@@ -8,13 +8,6 @@ interface HighlightFullscreenViewProps {
   viewDialogOpen: boolean;
   onClose: () => void;
   clickOrigin: DOMRect | null;
-  getInitialPosition: () => {
-    opacity: number;
-    scale: number;
-    x?: number;
-    y?: number;
-    borderRadius: string;
-  };
   currentImages: HighlightImage[];
   currentImageIndex: number;
   currentHighlightIndex: number;
@@ -43,7 +36,6 @@ export const HighlightFullscreenView = ({
   viewDialogOpen,
   onClose,
   clickOrigin,
-  getInitialPosition,
   currentImages,
   currentImageIndex,
   currentHighlightIndex,
@@ -67,6 +59,25 @@ export const HighlightFullscreenView = ({
   setSelectedImageToDelete,
   setDeleteImageDialogOpen,
 }: HighlightFullscreenViewProps) => {
+  // Calculate initial position inside the component to ensure fresh clickOrigin
+  const getInitialPosition = () => {
+    if (!clickOrigin) {
+      return { opacity: 0, scale: 0.8, borderRadius: "24px" };
+    }
+    
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const originCenterX = clickOrigin.left + clickOrigin.width / 2;
+    const originCenterY = clickOrigin.top + clickOrigin.height / 2;
+    
+    return {
+      opacity: 0,
+      scale: Math.min(clickOrigin.width / window.innerWidth, 0.15),
+      x: originCenterX - centerX,
+      y: originCenterY - centerY,
+      borderRadius: "50%",
+    };
+  };
   // Drag values for swipe-to-close
   const dragY = useMotionValue(0);
   const dragOpacity = useTransform(dragY, [0, 200], [1, 0.5]);

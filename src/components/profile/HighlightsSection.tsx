@@ -405,26 +405,6 @@ export const HighlightsSection = ({
     }];
   };
 
-  // Animation helper for Instagram-like effect
-  const getInitialPosition = () => {
-    if (!clickOrigin) {
-      return { opacity: 0, scale: 0.8, borderRadius: "24px" };
-    }
-    
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const originCenterX = clickOrigin.left + clickOrigin.width / 2;
-    const originCenterY = clickOrigin.top + clickOrigin.height / 2;
-    
-    return {
-      opacity: 0,
-      scale: Math.min(clickOrigin.width / window.innerWidth, 0.15),
-      x: originCenterX - centerX,
-      y: originCenterY - centerY,
-      borderRadius: "50%",
-    };
-  };
-
   if (isLoading) {
     return (
       <section>
@@ -506,7 +486,6 @@ export const HighlightsSection = ({
           setIsEditingTitle(false);
         }}
         clickOrigin={clickOrigin}
-        getInitialPosition={getInitialPosition}
         currentImages={currentImages}
         currentImageIndex={currentImageIndex}
         currentHighlightIndex={currentHighlightIndex}
