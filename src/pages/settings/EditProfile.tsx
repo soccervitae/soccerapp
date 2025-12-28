@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { useNavigate, useBlocker } from "react-router-dom";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,7 @@ const EditProfile = () => {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Check username availability
@@ -135,11 +136,27 @@ const EditProfile = () => {
     return hasFormChanges || hasMediaChanges;
   }, [formData, profile, avatarFile, coverFile]);
 
-  // Block navigation if there are unsaved changes
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
-  );
+  // Handle back button click
+  const handleBackClick = () => {
+    if (hasUnsavedChanges) {
+      setShowExitDialog(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  // Handle browser beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Handle browser beforeunload event
   useEffect(() => {
@@ -231,7 +248,7 @@ const EditProfile = () => {
   return (
     <>
       {/* Unsaved Changes Dialog */}
-      <AlertDialog open={blocker.state === "blocked"}>
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
@@ -240,10 +257,10 @@ const EditProfile = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => blocker.reset?.()}>
+            <AlertDialogCancel>
               Continuar editando
             </AlertDialogCancel>
-            <AlertDialogAction onClick={() => blocker.proceed?.()}>
+            <AlertDialogAction onClick={() => navigate(-1)}>
               Sair sem salvar
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -255,7 +272,7 @@ const EditProfile = () => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleBackClick}
             className="p-2 -ml-2 text-foreground hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
