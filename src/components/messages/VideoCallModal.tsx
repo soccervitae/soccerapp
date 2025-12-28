@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Video, VideoOff, Mic, MicOff, PhoneOff, Loader2 } from "lucide-react";
+import { useDialTone } from "@/hooks/useDialTone";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -34,6 +35,10 @@ export const VideoCallModal = ({
 }: VideoCallModalProps) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Play dial tone while waiting for answer (calling but no remote stream yet)
+  const isWaitingForAnswer = isCalling && !remoteStream;
+  useDialTone(isWaitingForAnswer);
 
   // Attach local stream to video element
   useEffect(() => {
