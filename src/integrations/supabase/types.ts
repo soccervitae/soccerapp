@@ -804,6 +804,7 @@ export type Database = {
           height: number | null
           id: string
           is_private: boolean | null
+          last_seen_at: string | null
           nationality: number | null
           nickname: string | null
           notify_new_device: boolean | null
@@ -837,6 +838,7 @@ export type Database = {
           height?: number | null
           id: string
           is_private?: boolean | null
+          last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
           notify_new_device?: boolean | null
@@ -870,6 +872,7 @@ export type Database = {
           height?: number | null
           id?: string
           is_private?: boolean | null
+          last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
           notify_new_device?: boolean | null
