@@ -19,7 +19,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Chat = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user } = useAuth();
-  const { messages, isLoading, isSending, isOffline, sendMessage } = useMessages(conversationId || null);
+  const { messages, isLoading, isSending, isOffline, sendMessage, deleteMessage } = useMessages(conversationId || null);
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
@@ -149,6 +149,7 @@ const Chat = () => {
                   reactions={getReactionsForMessage(message.id)}
                   onAddReaction={addReaction}
                   onRemoveReaction={removeReaction}
+                  onDelete={deleteMessage}
                 />
               </div>
             ))}
