@@ -160,16 +160,18 @@ const Messages = () => {
                     Online agora ({onlineUsers.length})
                   </h3>
                 </div>
-                <div className="flex overflow-x-auto scrollbar-hide px-2 gap-1">
-                  {onlineUsers.map((userProfile) => (
-                    <OnlineUserAvatar
-                      key={userProfile.id}
-                      user={userProfile}
-                      onClick={() => handleStartConversation(userProfile.id)}
-                      disabled={creatingUserId !== null}
-                      isLoading={creatingUserId === userProfile.id}
-                    />
-                  ))}
+                <div className="px-3">
+                  <div className="grid grid-flow-col auto-cols-max gap-3 overflow-x-auto pb-2">
+                    {onlineUsers.map((userProfile) => (
+                      <OnlineUserAvatar
+                        key={userProfile.id}
+                        user={userProfile}
+                        onClick={() => handleStartConversation(userProfile.id)}
+                        disabled={creatingUserId !== null}
+                        isLoading={creatingUserId === userProfile.id}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
