@@ -142,7 +142,7 @@ export const MessageBubble = ({
           dragElastic={0.1}
           onDragEnd={handleDragEnd}
           style={{ x }}
-          className={`w-fit rounded-2xl px-4 py-2 cursor-grab active:cursor-grabbing ${
+          className={`w-fit max-w-full rounded-2xl px-4 py-2 cursor-grab active:cursor-grabbing ${
             isOwn
               ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
@@ -248,7 +248,7 @@ export const MessageBubble = ({
 
           {/* Text content - hide emoji placeholders for audio */}
           {message.content && message.content !== "🎤" && (
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>{message.content}</p>
           )}
 
           {/* Time and read status */}
