@@ -150,11 +150,13 @@ export const MessageBubble = ({
     return acc;
   }, {} as Record<string, ReactionWithUser[]>);
 
-  // Check if this is a video call message
+  // Check if this is a call message (video or voice)
   const isVideoCallMessage = message.media_type === "video_call";
+  const isVoiceCallMessage = message.media_type === "voice_call";
+  const isCallMessage = isVideoCallMessage || isVoiceCallMessage;
 
-  // Render video call card
-  if (isVideoCallMessage) {
+  // Render call card
+  if (isCallMessage) {
     let callData: VideoCallMetadata;
     try {
       callData = JSON.parse(message.content);
@@ -163,15 +165,20 @@ export const MessageBubble = ({
     }
 
     const isInitiator = callData.initiator === user?.id;
+    const callTypeFromData = callData.callType || (isVoiceCallMessage ? 'voice' : 'video');
+    const isVoice = callTypeFromData === 'voice';
     
     const getCallConfig = () => {
+      const callLabel = isVoice ? 'Chamada de voz' : 'Chamada de vídeo';
+      const CompletedIcon = isVoice ? Phone : Video;
+      
       switch (callData.status) {
         case 'completed':
           return {
-            icon: Video,
+            icon: CompletedIcon,
             iconBg: 'bg-green-100 dark:bg-green-900/30',
             iconColor: 'text-green-600 dark:text-green-400',
-            title: 'Chamada de vídeo',
+            title: callLabel,
             subtitle: callData.duration ? formatCallDuration(callData.duration) : 'Concluída',
           };
         case 'missed':
@@ -179,7 +186,7 @@ export const MessageBubble = ({
             icon: PhoneMissed,
             iconBg: 'bg-red-100 dark:bg-red-900/30',
             iconColor: 'text-red-600 dark:text-red-400',
-            title: 'Chamada de vídeo',
+            title: callLabel,
             subtitle: 'Perdida',
           };
         case 'rejected':
@@ -187,7 +194,7 @@ export const MessageBubble = ({
             icon: PhoneOff,
             iconBg: 'bg-orange-100 dark:bg-orange-900/30',
             iconColor: 'text-orange-600 dark:text-orange-400',
-            title: 'Chamada de vídeo',
+            title: callLabel,
             subtitle: isInitiator ? 'Recusada' : 'Recusada',
           };
         case 'no_answer':
@@ -195,15 +202,15 @@ export const MessageBubble = ({
             icon: PhoneIncoming,
             iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
             iconColor: 'text-yellow-600 dark:text-yellow-400',
-            title: 'Chamada de vídeo',
+            title: callLabel,
             subtitle: 'Não atendida',
           };
         default:
           return {
-            icon: Phone,
+            icon: isVoice ? Phone : Video,
             iconBg: 'bg-muted',
             iconColor: 'text-muted-foreground',
-            title: 'Chamada de vídeo',
+            title: callLabel,
             subtitle: '',
           };
       }

@@ -8,6 +8,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
 export type VideoCallStatus = 'completed' | 'missed' | 'rejected' | 'no_answer';
+export type CallType = 'video' | 'voice';
 
 export interface VideoCallMetadata {
   status: VideoCallStatus;
@@ -15,6 +16,7 @@ export interface VideoCallMetadata {
   startedAt?: string;
   endedAt?: string;
   initiator?: string; // user id who started the call
+  callType?: CallType; // type of call
 }
 
 interface CallState {
@@ -27,6 +29,7 @@ interface CallState {
   remoteStream: MediaStream | null;
   callerInfo: Profile | null;
   connectionStatus: ConnectionStatus;
+  callType: CallType | null;
 }
 
 interface SignalingMessage {
@@ -35,6 +38,7 @@ interface SignalingMessage {
   to: string;
   payload?: RTCSessionDescriptionInit | RTCIceCandidateInit | null;
   callerInfo?: Profile;
+  callType?: CallType;
 }
 
 // ICE servers with TURN for NAT traversal
@@ -77,6 +81,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     remoteStream: null,
     callerInfo: null,
     connectionStatus: 'idle',
+    callType: null,
   });
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -89,12 +94,14 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const callConnectedRef = useRef<boolean>(false);
 
   // Save call to message history
-  const saveCallToHistory = useCallback(async (status: VideoCallStatus) => {
+  const saveCallToHistory = useCallback(async (status: VideoCallStatus, currentCallType?: CallType) => {
     if (!conversationId || !user) return;
 
     const duration = callStartTimeRef.current
       ? Math.floor((Date.now() - callStartTimeRef.current.getTime()) / 1000)
       : 0;
+
+    const callTypeToSave = currentCallType || callState.callType || 'video';
 
     const metadata: VideoCallMetadata = {
       status,
@@ -102,6 +109,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       startedAt: callStartTimeRef.current?.toISOString(),
       endedAt: new Date().toISOString(),
       initiator: isInitiatorRef.current ? user.id : undefined,
+      callType: callTypeToSave,
     };
 
     console.log("[WebRTC] Saving call to history:", metadata);
@@ -111,12 +119,12 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         conversation_id: conversationId,
         sender_id: user.id,
         content: JSON.stringify(metadata),
-        media_type: "video_call",
+        media_type: callTypeToSave === 'voice' ? "voice_call" : "video_call",
       });
     } catch (error) {
       console.error("[WebRTC] Error saving call to history:", error);
     }
-  }, [conversationId, user]);
+  }, [conversationId, user, callState.callType]);
 
   // Define cleanupCall first since it's used by other functions
   const cleanupCall = useCallback((saveStatus?: VideoCallStatus) => {
@@ -165,6 +173,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       remoteStream: null,
       callerInfo: null,
       connectionStatus: 'idle',
+      callType: null,
     });
   }, [saveCallToHistory]);
 
@@ -268,13 +277,14 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     return pc;
   }, [participant, sendSignalingMessage, clearCallTimeout, cleanupCall]);
 
-  const getLocalStream = useCallback(async () => {
+  const getLocalStream = useCallback(async (type: CallType = 'video') => {
     try {
-      console.log("[WebRTC] Requesting media permissions...");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
+      console.log("[WebRTC] Requesting media permissions for", type, "call...");
+      const constraints = type === 'video' 
+        ? { video: true, audio: true }
+        : { video: false, audio: true };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("[WebRTC] Got local stream with tracks:", stream.getTracks().map(t => t.kind));
       localStreamRef.current = stream;
       setCallState((prev) => ({ ...prev, localStream: stream }));
@@ -299,7 +309,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
 
   const createOffer = useCallback(async () => {
     const pc = createPeerConnection();
-    const stream = await getLocalStream();
+    const stream = await getLocalStream(callState.callType || 'video');
 
     stream.getTracks().forEach((track) => {
       pc.addTrack(track, stream);
@@ -317,11 +327,11 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     }
 
     setCallState((prev) => ({ ...prev, isCalling: true, isCallActive: true, connectionStatus: 'connecting' }));
-  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage]);
+  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage, callState.callType]);
 
   const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
     const pc = createPeerConnection();
-    const stream = await getLocalStream();
+    const stream = await getLocalStream(callState.callType || 'video');
 
     stream.getTracks().forEach((track) => {
       pc.addTrack(track, stream);
@@ -347,7 +357,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     }
 
     setCallState((prev) => ({ ...prev, isCallActive: true, isIncomingCall: false }));
-  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage]);
+  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage, callState.callType]);
 
   const handleSignalingMessage = useCallback(async (message: SignalingMessage) => {
     console.log("Handling signaling:", message.type);
@@ -358,6 +368,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
           ...prev,
           isIncomingCall: true,
           callerInfo: message.callerInfo || null,
+          callType: message.callType || 'video',
         }));
         break;
 
@@ -437,11 +448,14 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     };
   }, [conversationId, user, handleSignalingMessage]);
 
-  const startCall = useCallback(async () => {
+  const startCall = useCallback(async (type: CallType = 'video') => {
     if (!participant || !user) return;
 
-    console.log("[WebRTC] Starting call to:", participant.username);
+    console.log("[WebRTC] Starting", type, "call to:", participant.username);
     isInitiatorRef.current = true;
+
+    // Set call type before starting
+    setCallState((prev) => ({ ...prev, callType: type, isCalling: true }));
 
     // Fetch current user's profile for caller info
     const { data: profile } = await supabase
@@ -454,9 +468,8 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       type: "call_request",
       to: participant.id,
       callerInfo: profile || undefined,
+      callType: type,
     });
-
-    setCallState((prev) => ({ ...prev, isCalling: true }));
 
     // Set timeout for unanswered call
     clearCallTimeout();

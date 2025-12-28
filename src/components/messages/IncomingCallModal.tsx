@@ -5,12 +5,14 @@ import { Phone, PhoneOff, Video } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRingtone } from "@/hooks/useRingtone";
 import type { Database } from "@/integrations/supabase/types";
+import type { CallType } from "@/hooks/useVideoCall";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface IncomingCallModalProps {
   isOpen: boolean;
   caller: Profile | null;
+  callType?: CallType;
   onAccept: () => void;
   onReject: () => void;
 }
@@ -18,6 +20,7 @@ interface IncomingCallModalProps {
 export const IncomingCallModal = ({
   isOpen,
   caller,
+  callType = 'video',
   onAccept,
   onReject,
 }: IncomingCallModalProps) => {
@@ -62,8 +65,17 @@ export const IncomingCallModal = ({
               {caller?.full_name || caller?.username}
             </h2>
             <div className="flex items-center justify-center gap-2 text-muted-foreground mt-1">
-              <Video className="h-4 w-4" />
-              <span>Videochamada recebida</span>
+              {callType === 'video' ? (
+                <>
+                  <Video className="h-4 w-4" />
+                  <span>Videochamada recebida</span>
+                </>
+              ) : (
+                <>
+                  <Phone className="h-4 w-4" />
+                  <span>Chamada de voz recebida</span>
+                </>
+              )}
             </div>
           </div>
 
