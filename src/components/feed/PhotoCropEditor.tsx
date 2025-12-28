@@ -10,6 +10,7 @@ import {
 interface PhotoCropEditorProps {
   imageUrl: string;
   initialCropData?: CropData;
+  defaultAspectRatioId?: string;
   onApply: (cropData: CropData) => void;
   onCancel: () => void;
 }
@@ -17,9 +18,12 @@ interface PhotoCropEditorProps {
 export const PhotoCropEditor = ({
   imageUrl,
   initialCropData,
+  defaultAspectRatioId,
   onApply,
   onCancel,
 }: PhotoCropEditorProps) => {
+  const defaultAspect = aspectRatioOptions.find(opt => opt.id === defaultAspectRatioId) || aspectRatioOptions[1];
+  
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -29,7 +33,7 @@ export const PhotoCropEditor = ({
   const [selectedAspect, setSelectedAspect] = useState<AspectRatioOption>(
     aspectRatioOptions.find(
       (opt) => opt.value === initialCropData?.aspectRatio
-    ) || aspectRatioOptions[1] // Default to square
+    ) || defaultAspect
   );
 
   const onCropComplete = useCallback(
@@ -60,7 +64,7 @@ export const PhotoCropEditor = ({
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
-    setSelectedAspect(aspectRatioOptions[1]);
+    setSelectedAspect(defaultAspect);
   };
 
   return (

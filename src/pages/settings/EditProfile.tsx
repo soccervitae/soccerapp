@@ -682,6 +682,7 @@ const EditProfile = () => {
         <div className="fixed inset-0 z-[100] bg-background">
           <PhotoCropEditor
             imageUrl={imageToCrop}
+            defaultAspectRatioId={cropType === 'cover' ? 'landscape' : 'square'}
             onApply={handleCropApply}
             onCancel={handleCropCancel}
           />
