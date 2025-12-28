@@ -72,33 +72,53 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
   const callTimeoutRef = useRef<number | null>(null);
 
-  // Initialize signaling channel
-  useEffect(() => {
-    if (!conversationId || !user) return;
+  // Define cleanupCall first since it's used by other functions
+  const cleanupCall = useCallback(() => {
+    console.log("[WebRTC] Cleaning up call...");
+    
+    // Clear timeout
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
 
-    const channel = supabase.channel(`video-call:${conversationId}`);
+    // Stop all tracks
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
+        console.log("[WebRTC] Stopping track:", track.kind);
+        track.stop();
+      });
+      localStreamRef.current = null;
+    }
 
-    channel
-      .on("broadcast", { event: "signaling" }, ({ payload }) => {
-        const message = payload as SignalingMessage;
-        
-        // Ignore messages from ourselves
-        if (message.from === user.id) return;
-        
-        // Only process messages meant for us
-        if (message.to !== user.id) return;
+    // Close peer connection
+    if (peerConnectionRef.current) {
+      console.log("[WebRTC] Closing peer connection");
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
 
-        console.log("Received signaling message:", message.type);
-        handleSignalingMessage(message);
-      })
-      .subscribe();
+    // Clear pending candidates
+    pendingCandidatesRef.current = [];
 
-    channelRef.current = channel;
+    setCallState({
+      isCallActive: false,
+      isIncomingCall: false,
+      isCalling: false,
+      isVideoEnabled: true,
+      isAudioEnabled: true,
+      localStream: null,
+      remoteStream: null,
+      callerInfo: null,
+    });
+  }, []);
 
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [conversationId, user]);
+  const clearCallTimeout = useCallback(() => {
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
+  }, []);
 
   const sendSignalingMessage = useCallback(
     async (message: Omit<SignalingMessage, "from">) => {
@@ -112,71 +132,6 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     },
     [user]
   );
-
-  const handleSignalingMessage = async (message: SignalingMessage) => {
-    console.log("Handling signaling:", message.type);
-
-    switch (message.type) {
-      case "call_request":
-        setCallState((prev) => ({
-          ...prev,
-          isIncomingCall: true,
-          callerInfo: message.callerInfo || null,
-        }));
-        break;
-
-      case "call_accepted":
-        await createOffer();
-        break;
-
-      case "call_rejected":
-        await cleanupCall();
-        break;
-
-      case "offer":
-        if (message.payload) {
-          await handleOffer(message.payload as RTCSessionDescriptionInit);
-        }
-        break;
-
-      case "answer":
-        if (message.payload && peerConnectionRef.current) {
-          await peerConnectionRef.current.setRemoteDescription(
-            new RTCSessionDescription(message.payload as RTCSessionDescriptionInit)
-          );
-          // Add any pending ICE candidates
-          for (const candidate of pendingCandidatesRef.current) {
-            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-          }
-          pendingCandidatesRef.current = [];
-        }
-        break;
-
-      case "ice_candidate":
-        if (message.payload) {
-          if (peerConnectionRef.current?.remoteDescription) {
-            await peerConnectionRef.current.addIceCandidate(
-              new RTCIceCandidate(message.payload as RTCIceCandidateInit)
-            );
-          } else {
-            // Queue the candidate for later
-            pendingCandidatesRef.current.push(message.payload as RTCIceCandidateInit);
-          }
-        }
-        break;
-
-      case "call_ended":
-        await cleanupCall();
-        break;
-    }
-  };
-
-  const clearCallTimeout = useCallback(() => {
-    if (callTimeoutRef.current) {
-      clearTimeout(callTimeoutRef.current);
-      callTimeoutRef.current = null;
-    }
-  }, []);
 
   const createPeerConnection = useCallback(() => {
     console.log("[WebRTC] Creating peer connection with ICE servers:", ICE_SERVERS);
@@ -234,9 +189,9 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
 
     peerConnectionRef.current = pc;
     return pc;
-  }, [participant, sendSignalingMessage, clearCallTimeout]);
+  }, [participant, sendSignalingMessage, clearCallTimeout, cleanupCall]);
 
-  const getLocalStream = async () => {
+  const getLocalStream = useCallback(async () => {
     try {
       console.log("[WebRTC] Requesting media permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -260,12 +215,12 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         toast.error("Erro ao acessar câmera/microfone.");
       }
       
-      await cleanupCall();
+      cleanupCall();
       throw error;
     }
-  };
+  }, [cleanupCall]);
 
-  const createOffer = async () => {
+  const createOffer = useCallback(async () => {
     const pc = createPeerConnection();
     const stream = await getLocalStream();
 
@@ -285,9 +240,9 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     }
 
     setCallState((prev) => ({ ...prev, isCalling: true, isCallActive: true }));
-  };
+  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage]);
 
-  const handleOffer = async (offer: RTCSessionDescriptionInit) => {
+  const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
     const pc = createPeerConnection();
     const stream = await getLocalStream();
 
@@ -315,7 +270,93 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     }
 
     setCallState((prev) => ({ ...prev, isCallActive: true, isIncomingCall: false }));
-  };
+  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage]);
+
+  const handleSignalingMessage = useCallback(async (message: SignalingMessage) => {
+    console.log("Handling signaling:", message.type);
+
+    switch (message.type) {
+      case "call_request":
+        setCallState((prev) => ({
+          ...prev,
+          isIncomingCall: true,
+          callerInfo: message.callerInfo || null,
+        }));
+        break;
+
+      case "call_accepted":
+        await createOffer();
+        break;
+
+      case "call_rejected":
+        cleanupCall();
+        break;
+
+      case "offer":
+        if (message.payload) {
+          await handleOffer(message.payload as RTCSessionDescriptionInit);
+        }
+        break;
+
+      case "answer":
+        if (message.payload && peerConnectionRef.current) {
+          await peerConnectionRef.current.setRemoteDescription(
+            new RTCSessionDescription(message.payload as RTCSessionDescriptionInit)
+          );
+          // Add any pending ICE candidates
+          for (const candidate of pendingCandidatesRef.current) {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+          pendingCandidatesRef.current = [];
+        }
+        break;
+
+      case "ice_candidate":
+        if (message.payload) {
+          if (peerConnectionRef.current?.remoteDescription) {
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(message.payload as RTCIceCandidateInit)
+            );
+          } else {
+            // Queue the candidate for later
+            pendingCandidatesRef.current.push(message.payload as RTCIceCandidateInit);
+          }
+        }
+        break;
+
+      case "call_ended":
+        cleanupCall();
+        break;
+    }
+  }, [createOffer, handleOffer, cleanupCall]);
+
+  // Initialize signaling channel
+  useEffect(() => {
+    if (!conversationId || !user) return;
+
+    const channel = supabase.channel(`video-call:${conversationId}`);
+
+    channel
+      .on("broadcast", { event: "signaling" }, ({ payload }) => {
+        const message = payload as SignalingMessage;
+        
+        // Ignore messages from ourselves
+        if (message.from === user.id) return;
+        
+        // Only process messages meant for us
+        if (message.to !== user.id) return;
+
+        console.log("Received signaling message:", message.type);
+        handleSignalingMessage(message);
+      })
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [conversationId, user, handleSignalingMessage]);
 
   const startCall = useCallback(async () => {
     if (!participant || !user) return;
@@ -341,12 +382,10 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     clearCallTimeout();
     callTimeoutRef.current = window.setTimeout(() => {
       console.log("[WebRTC] Call timeout - no answer");
-      if (!callState.remoteStream) {
-        toast.error("Chamada não atendida");
-        cleanupCall();
-      }
+      toast.error("Chamada não atendida");
+      cleanupCall();
     }, CALL_TIMEOUT_MS);
-  }, [participant, user, sendSignalingMessage, clearCallTimeout, callState.remoteStream]);
+  }, [participant, user, sendSignalingMessage, clearCallTimeout, cleanupCall]);
 
   const acceptCall = useCallback(async () => {
     if (!callState.callerInfo) return;
@@ -382,47 +421,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       });
     }
     cleanupCall();
-  }, [participant, sendSignalingMessage]);
-
-  const cleanupCall = useCallback(async () => {
-    console.log("[WebRTC] Cleaning up call...");
-    
-    // Clear timeout
-    if (callTimeoutRef.current) {
-      clearTimeout(callTimeoutRef.current);
-      callTimeoutRef.current = null;
-    }
-
-    // Stop all tracks
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        console.log("[WebRTC] Stopping track:", track.kind);
-        track.stop();
-      });
-      localStreamRef.current = null;
-    }
-
-    // Close peer connection
-    if (peerConnectionRef.current) {
-      console.log("[WebRTC] Closing peer connection");
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-
-    // Clear pending candidates
-    pendingCandidatesRef.current = [];
-
-    setCallState({
-      isCallActive: false,
-      isIncomingCall: false,
-      isCalling: false,
-      isVideoEnabled: true,
-      isAudioEnabled: true,
-      localStream: null,
-      remoteStream: null,
-      callerInfo: null,
-    });
-  }, []);
+  }, [participant, sendSignalingMessage, cleanupCall]);
 
   const toggleVideo = useCallback(() => {
     if (localStreamRef.current) {
@@ -449,7 +448,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     return () => {
       cleanupCall();
     };
-  }, []);
+  }, [cleanupCall]);
 
   return {
     ...callState,
