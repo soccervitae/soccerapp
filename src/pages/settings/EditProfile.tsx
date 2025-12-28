@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useNavigate, useBlocker } from "react-router-dom";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Camera, ArrowLeft, Loader2, Check, X } from "lucide-react";
 
@@ -96,8 +97,8 @@ const EditProfile = () => {
   }, []);
 
   // Initialize form when profile loads
-  useState(() => {
-    if (profile) {
+  useEffect(() => {
+    if (profile && formData.username === "") {
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
@@ -111,23 +112,47 @@ const EditProfile = () => {
         gender: profile.gender || "",
       });
     }
-  });
+  }, [profile]);
 
-  // Update form when profile changes
-  if (profile && !formData.username) {
-    setFormData({
-      full_name: profile.full_name || "",
-      username: profile.username || "",
-      bio: profile.bio || "",
-      position: profile.position || "",
-      team: profile.team || "",
-      height: profile.height?.toString() || "",
-      weight: profile.weight?.toString() || "",
-      birth_date: profile.birth_date || "",
-      preferred_foot: profile.preferred_foot || "",
-      gender: profile.gender || "",
-    });
-  }
+  // Check if form has unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!profile) return false;
+    
+    const hasFormChanges = 
+      formData.full_name !== (profile.full_name || "") ||
+      formData.username !== (profile.username || "") ||
+      formData.bio !== (profile.bio || "") ||
+      formData.position !== (profile.position || "") ||
+      formData.team !== (profile.team || "") ||
+      formData.height !== (profile.height?.toString() || "") ||
+      formData.weight !== (profile.weight?.toString() || "") ||
+      formData.birth_date !== (profile.birth_date || "") ||
+      formData.preferred_foot !== (profile.preferred_foot || "") ||
+      formData.gender !== (profile.gender || "");
+    
+    const hasMediaChanges = avatarFile !== null || coverFile !== null;
+    
+    return hasFormChanges || hasMediaChanges;
+  }, [formData, profile, avatarFile, coverFile]);
+
+  // Block navigation if there are unsaved changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  // Handle browser beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -204,7 +229,28 @@ const EditProfile = () => {
   }
 
   return (
-    <main className="bg-background min-h-screen">
+    <>
+      {/* Unsaved Changes Dialog */}
+      <AlertDialog open={blocker.state === "blocked"}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você tem alterações não salvas. Deseja sair sem salvar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>
+              Continuar editando
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>
+              Sair sem salvar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <main className="bg-background min-h-screen">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
@@ -442,6 +488,7 @@ const EditProfile = () => {
         </div>
       </form>
     </main>
+    </>
   );
 };
 
