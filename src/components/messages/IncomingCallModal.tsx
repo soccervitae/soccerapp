@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Phone, PhoneOff, Video } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRingtone } from "@/hooks/useRingtone";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -20,6 +21,8 @@ export const IncomingCallModal = ({
   onAccept,
   onReject,
 }: IncomingCallModalProps) => {
+  // Play ringtone while modal is open
+  useRingtone(isOpen);
   const getInitials = (name: string) => {
     return name
       .split(" ")
