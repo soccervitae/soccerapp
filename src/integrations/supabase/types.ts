@@ -285,6 +285,38 @@ export type Database = {
         }
         Relationships: []
       }
+      highlight_images: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          highlight_id: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          highlight_id: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          highlight_id?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlight_images_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "user_highlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string

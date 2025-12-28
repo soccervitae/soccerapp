@@ -539,6 +539,15 @@ export const useDeleteAchievement = () => {
   });
 };
 
+// Highlight image interface
+export interface HighlightImage {
+  id: string;
+  highlight_id: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
+}
+
 // Highlight interface
 export interface UserHighlight {
   id: string;
@@ -547,9 +556,10 @@ export interface UserHighlight {
   image_url: string;
   display_order: number;
   created_at: string;
+  images?: HighlightImage[];
 }
 
-// Fetch user highlights
+// Fetch user highlights with images
 export const useUserHighlights = (userId?: string) => {
   const { user } = useAuth();
   const targetUserId = userId || user?.id;
@@ -561,18 +571,26 @@ export const useUserHighlights = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("user_highlights")
-        .select("*")
+        .select(`
+          *,
+          images:highlight_images(*)
+        `)
         .eq("user_id", targetUserId)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      
+      // Sort images by display_order within each highlight
+      return (data || []).map(highlight => ({
+        ...highlight,
+        images: highlight.images?.sort((a: HighlightImage, b: HighlightImage) => a.display_order - b.display_order)
+      }));
     },
     enabled: !!targetUserId,
   });
 };
 
-// Add highlight
+// Add highlight with multiple images
 export const useAddHighlight = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -582,14 +600,78 @@ export const useAddHighlight = () => {
       title: string;
       image_url: string;
       display_order?: number;
+      image_urls?: string[];
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data, error } = await supabase
+      // First create the highlight
+      const { data: highlightData, error: highlightError } = await supabase
         .from("user_highlights")
         .insert({
           user_id: user.id,
-          ...highlight,
+          title: highlight.title,
+          image_url: highlight.image_url,
+          display_order: highlight.display_order,
+        })
+        .select()
+        .single();
+
+      if (highlightError) throw highlightError;
+
+      // Then create the images
+      const imageUrls = highlight.image_urls || [highlight.image_url];
+      const imageInserts = imageUrls.map((url, index) => ({
+        highlight_id: highlightData.id,
+        image_url: url,
+        display_order: index,
+      }));
+
+      const { error: imagesError } = await supabase
+        .from("highlight_images")
+        .insert(imageInserts);
+
+      if (imagesError) throw imagesError;
+
+      return highlightData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+      toast.success("Destaque adicionado!");
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar destaque");
+    },
+  });
+};
+
+// Add image to existing highlight
+export const useAddHighlightImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ highlightId, imageUrl, displayOrder }: {
+      highlightId: string;
+      imageUrl: string;
+      displayOrder?: number;
+    }) => {
+      // Get current max order if not provided
+      let order = displayOrder;
+      if (order === undefined) {
+        const { data: existing } = await supabase
+          .from("highlight_images")
+          .select("display_order")
+          .eq("highlight_id", highlightId)
+          .order("display_order", { ascending: false })
+          .limit(1);
+        order = existing && existing.length > 0 ? existing[0].display_order + 1 : 0;
+      }
+
+      const { data, error } = await supabase
+        .from("highlight_images")
+        .insert({
+          highlight_id: highlightId,
+          image_url: imageUrl,
+          display_order: order,
         })
         .select()
         .single();
@@ -599,10 +681,57 @@ export const useAddHighlight = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
-      toast.success("Destaque adicionado!");
     },
     onError: () => {
-      toast.error("Erro ao adicionar destaque");
+      toast.error("Erro ao adicionar imagem");
+    },
+  });
+};
+
+// Delete image from highlight
+export const useDeleteHighlightImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (imageId: string) => {
+      const { error } = await supabase
+        .from("highlight_images")
+        .delete()
+        .eq("id", imageId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+    },
+    onError: () => {
+      toast.error("Erro ao remover imagem");
+    },
+  });
+};
+
+// Reorder images within a highlight
+export const useReorderHighlightImages = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (images: { id: string; display_order: number }[]) => {
+      const updates = images.map((img) =>
+        supabase
+          .from("highlight_images")
+          .update({ display_order: img.display_order })
+          .eq("id", img.id)
+      );
+
+      const results = await Promise.all(updates);
+      const errors = results.filter((r) => r.error);
+      if (errors.length > 0) throw errors[0].error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
+    },
+    onError: () => {
+      toast.error("Erro ao reordenar imagens");
     },
   });
 };
