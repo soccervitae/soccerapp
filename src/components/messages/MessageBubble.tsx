@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmojiReactionPicker } from "./EmojiReactionPicker";
+import { AudioWaveform } from "./AudioWaveform";
 
 interface MessageBubbleProps {
   message: MessageWithSender;
@@ -198,16 +199,19 @@ export const MessageBubble = ({
                   </Button>
 
                   <div className="flex-1">
-                    <div className={`h-1 rounded-full overflow-hidden ${
-                      isOwn ? "bg-slate-300 dark:bg-slate-500" : "bg-border"
-                    }`}>
-                      <div
-                        className={`h-full transition-all ${
-                          isOwn ? "bg-slate-600 dark:bg-slate-300" : "bg-primary"
-                        }`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
+                    <AudioWaveform
+                      isPlaying={isPlaying}
+                      progress={progress}
+                      seed={message.id}
+                      barCount={28}
+                      isOwn={isOwn}
+                      onSeek={(newProgress) => {
+                        if (audioRef.current?.duration) {
+                          audioRef.current.currentTime = (newProgress / 100) * audioRef.current.duration;
+                          setProgress(newProgress);
+                        }
+                      }}
+                    />
                     <span className={`text-[10px] ${
                       isOwn ? "text-slate-500 dark:text-slate-400" : "text-muted-foreground"
                     }`}>
