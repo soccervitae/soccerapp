@@ -70,11 +70,35 @@ export const usePushNotifications = () => {
     [isSupported, permission, registration]
   );
 
+  const showCallNotification = useCallback(
+    async (
+      callerName: string,
+      callType: 'video' | 'voice',
+      conversationId: string,
+      callerId: string
+    ) => {
+      if (!isSupported || permission !== "granted" || !registration) return;
+
+      // Send message to service worker to show call notification
+      if (registration.active) {
+        registration.active.postMessage({
+          type: "SHOW_CALL_NOTIFICATION",
+          callerName,
+          callType,
+          conversationId,
+          callerId,
+        });
+      }
+    },
+    [isSupported, permission, registration]
+  );
+
   return {
     isSupported,
     permission,
     requestPermission,
     showNotification,
+    showCallNotification,
     isGranted: permission === "granted",
     isDenied: permission === "denied",
   };

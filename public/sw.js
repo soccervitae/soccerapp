@@ -44,9 +44,53 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
+  const data = event.notification.data;
+
   if (event.action === 'close') return;
 
-  const url = event.notification.data?.url || '/messages';
+  // Handle call notifications
+  if (data?.isCall) {
+    if (event.action === 'reject') {
+      // Send message to reject the call
+      event.waitUntil(
+        self.clients.matchAll({ type: 'window' }).then((clientList) => {
+          for (const client of clientList) {
+            client.postMessage({
+              type: 'CALL_REJECTED_FROM_NOTIFICATION',
+              callerId: data.callerId,
+              conversationId: data.conversationId,
+            });
+          }
+        })
+      );
+      return;
+    }
+
+    // Answer action or simple click - open/focus the chat
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.focus();
+            client.postMessage({
+              type: 'ANSWER_CALL_FROM_NOTIFICATION',
+              callerId: data.callerId,
+              conversationId: data.conversationId,
+            });
+            return;
+          }
+        }
+        // Open new window at the chat with answerCall param
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(`/messages/${data.conversationId}?answerCall=true`);
+        }
+      })
+    );
+    return;
+  }
+
+  // Handle regular message notifications
+  const url = data?.url || '/messages';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
@@ -82,6 +126,34 @@ self.addEventListener('message', (event) => {
       data: { url, conversationId },
       tag: `message-${conversationId}`,
       renotify: true,
+    });
+  }
+
+  // Handle call notifications
+  if (event.data?.type === 'SHOW_CALL_NOTIFICATION') {
+    const { callerName, callType, conversationId, callerId } = event.data;
+    
+    const callTypeText = callType === 'video' ? 'Videochamada' : 'Chamada de voz';
+    
+    self.registration.showNotification(`${callerName} está ligando`, {
+      body: callTypeText,
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      vibrate: [200, 100, 200, 100, 200, 100, 200], // Vibração mais intensa para chamada
+      tag: `call-${conversationId}`,
+      requireInteraction: true, // Não desaparece automaticamente
+      renotify: true,
+      actions: [
+        { action: 'answer', title: 'Atender' },
+        { action: 'reject', title: 'Recusar' },
+      ],
+      data: { 
+        conversationId, 
+        callerId,
+        callType,
+        isCall: true,
+        url: `/messages/${conversationId}`,
+      },
     });
   }
 });

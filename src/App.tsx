@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
+import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import OrientationLock from "@/components/OrientationLock";
@@ -33,6 +34,11 @@ import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const CallNotificationHandler = () => {
+  useCallNotificationActions();
+  return null;
+};
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -174,6 +180,7 @@ const App = () => {
             <PwaAutoUpdate />
             <BrowserRouter>
               <MessageNotificationProvider>
+                <CallNotificationHandler />
                 <ScrollToTop />
                 <AnimatedRoutes />
               </MessageNotificationProvider>
