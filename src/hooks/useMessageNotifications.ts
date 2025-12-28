@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,9 +64,21 @@ export const useMessageNotifications = () => {
       );
     }
     
+    // Criar ícone para o toast
+    const iconElement = sender?.avatar_url 
+      ? React.createElement("img", {
+          src: sender.avatar_url,
+          alt: senderName,
+          className: "h-8 w-8 rounded-full object-cover"
+        })
+      : React.createElement("div", {
+          className: "h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium"
+        }, senderName.charAt(0).toUpperCase());
+
     // Mostrar toast in-app (clicável)
     toast(senderName, {
       description: messagePreview,
+      icon: iconElement,
       action: {
         label: "Ver",
         onClick: () => {
