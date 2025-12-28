@@ -383,7 +383,7 @@ export const FeedPost = ({
         </div>
       </div>
 
-      <div className="pb-3" />
+      
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
