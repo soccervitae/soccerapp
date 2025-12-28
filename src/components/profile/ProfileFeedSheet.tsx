@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { FeedPost } from "@/components/feed/FeedPost";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Post {
   id: string;
@@ -95,31 +96,55 @@ export const ProfileFeedSheet = ({
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-full p-0 border-0">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border flex items-center px-4 h-14">
-          <button 
-            onClick={() => onClose()}
-            className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
-          >
-            <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-          </button>
-          <span className="font-semibold ml-2">Posts</span>
-        </div>
-
-        {/* Feed */}
-        <div 
-          ref={scrollContainerRef}
-          className="h-[calc(100%-56px)] overflow-y-auto"
-        >
-          {posts.map((post, index) => (
-            <div 
-              key={post.id} 
-              ref={(el) => { postRefs.current[index] = el; }}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="h-full flex flex-col"
             >
-              <FeedPost post={transformPostForFeed(post)} />
-            </div>
-          ))}
-        </div>
+              {/* Header */}
+              <motion.div 
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="sticky top-0 z-10 bg-background border-b border-border flex items-center px-4 h-14"
+              >
+                <button 
+                  onClick={() => onClose()}
+                  className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+                </button>
+                <span className="font-semibold ml-2">Posts</span>
+              </motion.div>
+
+              {/* Feed */}
+              <div 
+                ref={scrollContainerRef}
+                className="flex-1 overflow-y-auto"
+              >
+                {posts.map((post, index) => (
+                  <motion.div 
+                    key={post.id} 
+                    ref={(el) => { postRefs.current[index] = el; }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ 
+                      duration: 0.4, 
+                      delay: Math.min(index * 0.08, 0.4),
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                  >
+                    <FeedPost post={transformPostForFeed(post)} />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </SheetContent>
     </Sheet>
   );
