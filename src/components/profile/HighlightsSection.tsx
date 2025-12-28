@@ -564,57 +564,61 @@ export const HighlightsSection = ({
               </div>
             </div>
 
-            {/* Media Display */}
-            <div className="flex-1 flex items-center justify-center bg-black relative">
-              {currentImages[currentImageIndex] && (
-                currentImages[currentImageIndex].media_type === 'video' ? (
-                  <video
-                    key={currentImages[currentImageIndex].id}
-                    src={currentImages[currentImageIndex].image_url}
-                    className="w-full h-full object-contain transition-all duration-300 ease-out"
-                    controls
-                    autoPlay
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={currentImages[currentImageIndex].image_url}
-                    alt={selectedHighlight?.title || 'Destaque'}
-                    className="w-full h-full object-contain transition-all duration-300 ease-out"
-                  />
-                )
-              )}
-            </div>
+            {/* Media Carousel */}
+            <div className="flex-1 flex items-center justify-center bg-black relative overflow-hidden">
+              <div ref={imageEmblaRef} className="w-full h-full overflow-hidden">
+                <div className="flex h-full">
+                  {currentImages.map((media, index) => (
+                    <div key={media.id} className="flex-none w-full h-full flex items-center justify-center">
+                      {media.media_type === 'video' ? (
+                        <video
+                          src={media.image_url}
+                          className="w-full h-full object-contain"
+                          controls
+                          autoPlay={index === currentImageIndex}
+                          playsInline
+                          muted={index !== currentImageIndex}
+                        />
+                      ) : (
+                        <img
+                          src={media.image_url}
+                          alt={selectedHighlight?.title || 'Destaque'}
+                          className="w-full h-full object-contain"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            {/* Navigation areas (invisible touch zones) */}
-            <div className="absolute inset-0 flex z-10">
-              <button 
-                onClick={() => {
-                  if (currentImageIndex > 0) {
-                    imageEmblaApi?.scrollPrev();
-                    setCurrentImageIndex(prev => prev - 1);
-                  } else if (currentHighlightIndex > 0) {
-                    handlePrevHighlight();
-                  }
-                }}
-                className="w-1/3 h-full focus:outline-none"
-                aria-label="Anterior"
-              />
-              <div className="w-1/3" />
-              <button 
-                onClick={() => {
-                  if (currentImageIndex < currentImages.length - 1) {
-                    imageEmblaApi?.scrollNext();
-                    setCurrentImageIndex(prev => prev + 1);
-                  } else if (currentHighlightIndex < displayHighlights.length - 1) {
-                    handleNextHighlight();
-                  } else {
-                    setViewDialogOpen(false);
-                  }
-                }}
-                className="w-1/3 h-full focus:outline-none"
-                aria-label="Próximo"
-              />
+              {/* Navigation touch zones - only for highlights when at first/last media */}
+              <div className="absolute inset-0 flex pointer-events-none z-10">
+                <button 
+                  onClick={() => {
+                    if (currentImageIndex === 0 && currentHighlightIndex > 0) {
+                      handlePrevHighlight();
+                    }
+                  }}
+                  className="w-1/4 h-full focus:outline-none pointer-events-auto"
+                  aria-label="Destaque anterior"
+                  style={{ opacity: 0 }}
+                />
+                <div className="flex-1" />
+                <button 
+                  onClick={() => {
+                    if (currentImageIndex === currentImages.length - 1) {
+                      if (currentHighlightIndex < displayHighlights.length - 1) {
+                        handleNextHighlight();
+                      } else {
+                        setViewDialogOpen(false);
+                      }
+                    }
+                  }}
+                  className="w-1/4 h-full focus:outline-none pointer-events-auto"
+                  aria-label="Próximo destaque"
+                  style={{ opacity: 0 }}
+                />
+              </div>
             </div>
 
             {/* Footer with gradient */}
