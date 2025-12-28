@@ -6,6 +6,7 @@ import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
+import { PostMediaViewer } from "./PostMediaViewer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +69,9 @@ export const FeedPost = ({ post }: FeedPostProps) => {
   const [showTags, setShowTags] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
+  const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const lastTapRef = useRef<number>(0);
 
   const { data: postTags = [] } = usePostTags(post.id);
@@ -117,7 +121,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
     likePost.mutate({ postId: post.id, isLiked: post.liked_by_user });
   };
 
-  const handleDoubleTap = () => {
+  const handleDoubleTap = (event: React.MouseEvent, index: number = 0) => {
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
       // Double tap detected
@@ -126,6 +130,12 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       }
       setShowHeartAnimation(true);
       setTimeout(() => setShowHeartAnimation(false), 1000);
+    } else {
+      // Single tap - open media viewer
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      setClickOrigin(rect);
+      setSelectedMediaIndex(index);
+      setMediaViewerOpen(true);
     }
     lastTapRef.current = now;
   };
@@ -285,12 +295,27 @@ export const FeedPost = ({ post }: FeedPostProps) => {
       {post.media_url && (
         <div className="relative aspect-square bg-muted">
           {post.media_type === "video" ? (
-            <video
-              src={post.media_url}
-              className="w-full h-full object-cover"
-              controls
-              playsInline
-            />
+            <div
+              className="w-full h-full cursor-pointer"
+              onClick={(e) => {
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                setClickOrigin(rect);
+                setSelectedMediaIndex(0);
+                setMediaViewerOpen(true);
+              }}
+            >
+              <video
+                src={post.media_url}
+                className="w-full h-full object-cover pointer-events-none"
+                playsInline
+                muted
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-3xl">play_arrow</span>
+                </div>
+              </div>
+            </div>
           ) : isCarousel ? (
             <>
               <Carousel setApi={setCarouselApi} className="w-full h-full">
@@ -300,8 +325,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
                       <img
                         src={url}
                         alt={`Foto ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onClick={handleDoubleTap}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={(e) => handleDoubleTap(e, index)}
                       />
                       {/* Tags overlay for this image */}
                       {showTags && postTags
@@ -350,8 +375,8 @@ export const FeedPost = ({ post }: FeedPostProps) => {
               <img
                 src={mediaUrls[0]}
                 alt="Post"
-                className="w-full h-full object-cover"
-                onClick={handleDoubleTap}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={(e) => handleDoubleTap(e, 0)}
               />
               {/* Tags overlay for single image */}
               {showTags && postTags
@@ -626,6 +651,16 @@ export const FeedPost = ({ post }: FeedPostProps) => {
         postId={post.id}
         open={isLikesSheetOpen}
         onOpenChange={setIsLikesSheetOpen}
+      />
+
+      {/* Media Viewer */}
+      <PostMediaViewer
+        mediaUrls={mediaUrls}
+        mediaType={post.media_type}
+        initialIndex={selectedMediaIndex}
+        isOpen={mediaViewerOpen}
+        onClose={() => setMediaViewerOpen(false)}
+        originRect={clickOrigin}
       />
     </article>
   );
