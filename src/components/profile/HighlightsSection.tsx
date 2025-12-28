@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Plus, Trash2, X, GripVertical } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { AddHighlightSheet } from "./AddHighlightSheet";
-import { UserHighlight, useDeleteHighlight, useReorderHighlights } from "@/hooks/useProfile";
+import { UserHighlight, useDeleteHighlight, useReorderHighlights, useUpdateHighlight } from "@/hooks/useProfile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,7 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DndContext,
   closestCenter,
@@ -33,6 +34,7 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import useEmblaCarousel from "embla-carousel-react";
 
 interface HighlightsSectionProps {
   highlights: UserHighlight[];
@@ -103,9 +105,18 @@ export const HighlightsSection = ({
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedHighlight, setSelectedHighlight] = useState<UserHighlight | null>(null);
   const [localHighlights, setLocalHighlights] = useState<UserHighlight[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
   
   const deleteHighlight = useDeleteHighlight();
   const reorderHighlights = useReorderHighlights();
+  const updateHighlight = useUpdateHighlight();
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false,
+    startIndex: currentIndex,
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -124,9 +135,38 @@ export const HighlightsSection = ({
   // Sync local state with props
   const displayHighlights = localHighlights.length > 0 ? localHighlights : highlights;
 
+  // Update selected highlight when navigating
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setCurrentIndex(index);
+    if (displayHighlights[index]) {
+      setSelectedHighlight(displayHighlights[index]);
+    }
+    setIsEditingTitle(false);
+  }, [emblaApi, displayHighlights]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Scroll to selected index when dialog opens
+  useEffect(() => {
+    if (viewDialogOpen && emblaApi) {
+      emblaApi.scrollTo(currentIndex, true);
+    }
+  }, [viewDialogOpen, emblaApi, currentIndex]);
+
   const handleHighlightClick = (highlight: UserHighlight) => {
+    const index = displayHighlights.findIndex(h => h.id === highlight.id);
+    setCurrentIndex(index >= 0 ? index : 0);
     setSelectedHighlight(highlight);
     setViewDialogOpen(true);
+    setIsEditingTitle(false);
   };
 
   const handleDelete = async () => {
@@ -162,6 +202,43 @@ export const HighlightsSection = ({
           setLocalHighlights([]);
         },
       });
+    }
+  };
+
+  const handlePrev = () => {
+    emblaApi?.scrollPrev();
+  };
+
+  const handleNext = () => {
+    emblaApi?.scrollNext();
+  };
+
+  const handleTitleClick = () => {
+    if (isOwnProfile && selectedHighlight) {
+      setEditedTitle(selectedHighlight.title);
+      setIsEditingTitle(true);
+    }
+  };
+
+  const handleTitleSave = () => {
+    if (selectedHighlight && editedTitle.trim()) {
+      updateHighlight.mutate(
+        { id: selectedHighlight.id, title: editedTitle.trim() },
+        {
+          onSuccess: () => {
+            setSelectedHighlight({ ...selectedHighlight, title: editedTitle.trim() });
+            setIsEditingTitle(false);
+          },
+        }
+      );
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleTitleSave();
+    } else if (e.key === "Escape") {
+      setIsEditingTitle(false);
     }
   };
 
@@ -236,43 +313,125 @@ export const HighlightsSection = ({
 
       <AddHighlightSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
 
-      {/* Fullscreen View Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+      {/* Fullscreen View Dialog with Carousel */}
+      <Dialog open={viewDialogOpen} onOpenChange={(open) => {
+        setViewDialogOpen(open);
+        if (!open) setIsEditingTitle(false);
+      }}>
         <DialogContent className="max-w-lg p-0 bg-background/95 backdrop-blur-sm border-none">
-          <div className="relative flex flex-col items-center p-6">
-            <button
-              onClick={() => setViewDialogOpen(false)}
-              className="absolute top-2 right-2 p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-            
-            {selectedHighlight && (
+          <div className="relative flex flex-col items-center">
+            {/* Header with counter and close button */}
+            <div className="w-full flex items-center justify-between p-4">
+              <span className="text-sm text-muted-foreground">
+                {currentIndex + 1} / {displayHighlights.length}
+              </span>
+              <button
+                onClick={() => setViewDialogOpen(false)}
+                className="p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors"
+              >
+                <X className="w-5 h-5 text-foreground" />
+              </button>
+            </div>
+
+            {/* Navigation arrows */}
+            {displayHighlights.length > 1 && (
               <>
-                <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
-                  <img
-                    src={selectedHighlight.image_url}
-                    alt={selectedHighlight.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <h3 className="mt-4 text-xl font-semibold text-foreground">
-                  {selectedHighlight.title}
-                </h3>
-                
-                {isOwnProfile && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="mt-6"
-                    onClick={() => setDeleteDialogOpen(true)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Remover destaque
-                  </Button>
-                )}
+                <button
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronLeft className="w-5 h-5 text-foreground" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  disabled={currentIndex === displayHighlights.length - 1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-muted/80 hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronRight className="w-5 h-5 text-foreground" />
+                </button>
               </>
+            )}
+            
+            {/* Carousel */}
+            <div className="w-full overflow-hidden px-6" ref={emblaRef}>
+              <div className="flex">
+                {displayHighlights.map((highlight) => (
+                  <div key={highlight.id} className="flex-[0_0_100%] min-w-0 flex flex-col items-center">
+                    <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
+                      <img
+                        src={highlight.image_url}
+                        alt={highlight.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Title - editable for own profile */}
+            <div className="mt-4 px-6 w-full flex justify-center">
+              {isEditingTitle && isOwnProfile ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-center text-lg font-semibold max-w-[200px]"
+                    autoFocus
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleTitleSave}
+                    disabled={updateHighlight.isPending}
+                  >
+                    <Check className="w-4 h-4 text-primary" />
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleTitleClick}
+                  className={`flex items-center gap-2 group ${isOwnProfile ? 'cursor-pointer hover:text-primary' : 'cursor-default'}`}
+                  disabled={!isOwnProfile}
+                >
+                  <h3 className="text-xl font-semibold text-foreground transition-colors">
+                    {selectedHighlight?.title}
+                  </h3>
+                  {isOwnProfile && (
+                    <Pencil className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </button>
+              )}
+            </div>
+            
+            {/* Delete button */}
+            {isOwnProfile && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="mt-6 mb-6"
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Remover destaque
+              </Button>
+            )}
+
+            {/* Dots indicator */}
+            {displayHighlights.length > 1 && (
+              <div className="flex gap-1.5 pb-4">
+                {displayHighlights.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => emblaApi?.scrollTo(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                    }`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </DialogContent>
