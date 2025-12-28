@@ -125,7 +125,7 @@ const Chat = () => {
       )}
 
       {/* Messages area */}
-      <div className={`flex-1 overflow-y-auto pb-24 px-4 ${isOffline ? 'pt-28' : 'pt-16'}`}>
+      <div className={`flex-1 overflow-y-auto pb-24 px-2 ${isOffline ? 'pt-28' : 'pt-16'}`}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <span className="material-symbols-outlined text-5xl text-muted-foreground mb-3">
