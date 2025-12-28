@@ -217,7 +217,7 @@ export const ProfileInfo = ({
         </div>}
 
       {/* Physical Stats */}
-      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 border border-border shadow-sm w-full mt-2 mx-px px-px">
+      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-2">
         <div className="flex flex-col gap-1 p-2 text-center">
           <p className="text-foreground text-sm font-bold">{age || "-"}</p>
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
