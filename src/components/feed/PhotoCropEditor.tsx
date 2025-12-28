@@ -11,6 +11,7 @@ interface PhotoCropEditorProps {
   imageUrl: string;
   initialCropData?: CropData;
   defaultAspectRatioId?: string;
+  cropShape?: 'rect' | 'round';
   onApply: (cropData: CropData) => void;
   onCancel: () => void;
 }
@@ -19,6 +20,7 @@ export const PhotoCropEditor = ({
   imageUrl,
   initialCropData,
   defaultAspectRatioId,
+  cropShape = 'rect',
   onApply,
   onCancel,
 }: PhotoCropEditorProps) => {
@@ -98,8 +100,8 @@ export const PhotoCropEditor = ({
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
-          cropShape="rect"
-          showGrid={true}
+          cropShape={cropShape}
+          showGrid={cropShape === 'rect'}
           style={{
             containerStyle: {
               backgroundColor: "rgba(0,0,0,0.9)",
