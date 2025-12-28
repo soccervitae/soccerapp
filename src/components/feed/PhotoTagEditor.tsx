@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PhotoTag, useSearchUsers } from "@/hooks/usePostTags";
+import { PhotoTag, useSearchFollowing } from "@/hooks/usePostTags";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface PhotoTagEditorProps {
@@ -29,7 +29,19 @@ export const PhotoTagEditor = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const imageRef = useRef<HTMLDivElement>(null);
-  const searchUsers = useSearchUsers();
+
+  const { data: followingList = [], isLoading } = useSearchFollowing(user?.id);
+
+  // Filter following list based on search query
+  const filteredFollowing = useMemo(() => {
+    if (!searchQuery.trim()) return followingList;
+    const query = searchQuery.toLowerCase();
+    return followingList.filter(
+      (profile) =>
+        profile.username.toLowerCase().includes(query) ||
+        (profile.full_name && profile.full_name.toLowerCase().includes(query))
+    );
+  }, [followingList, searchQuery]);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageRef.current) return;
@@ -45,13 +57,6 @@ export const PhotoTagEditor = ({
     setTapPosition({ x: clampedX, y: clampedY });
     setIsSearching(true);
     setSearchQuery("");
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      searchUsers.mutate(query);
-    }
   };
 
   const handleSelectUser = (profile: {
@@ -187,9 +192,9 @@ export const PhotoTagEditor = ({
               </span>
               <Input
                 type="text"
-                placeholder="Buscar usuários..."
+                placeholder="Buscar entre quem você segue..."
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 border-0 bg-transparent p-0 h-auto text-sm focus-visible:ring-0"
                 autoFocus
               />
@@ -204,22 +209,30 @@ export const PhotoTagEditor = ({
               </button>
             </div>
 
+            <p className="text-xs text-muted-foreground mb-2">Pessoas que você segue</p>
+
             <ScrollArea className="h-[200px]">
-              {searchUsers.isPending && (
+              {isLoading && (
                 <div className="flex items-center justify-center py-8">
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
 
-              {!searchUsers.isPending && searchQuery && searchUsers.data?.length === 0 && (
+              {!isLoading && followingList.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  Nenhum usuário encontrado
+                  Você não segue ninguém ainda
                 </div>
               )}
 
-              {!searchUsers.isPending && searchUsers.data && searchUsers.data.length > 0 && (
+              {!isLoading && followingList.length > 0 && filteredFollowing.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  Nenhum resultado para "{searchQuery}"
+                </div>
+              )}
+
+              {!isLoading && filteredFollowing.length > 0 && (
                 <div className="space-y-1">
-                  {searchUsers.data.map((profile) => (
+                  {filteredFollowing.map((profile) => (
                     <button
                       key={profile.id}
                       onClick={() => handleSelectUser(profile)}
@@ -245,12 +258,6 @@ export const PhotoTagEditor = ({
                       )}
                     </button>
                   ))}
-                </div>
-              )}
-
-              {!searchUsers.isPending && !searchQuery && (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  Digite para buscar usuários
                 </div>
               )}
             </ScrollArea>
