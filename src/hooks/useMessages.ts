@@ -317,51 +317,17 @@ export const useCreateConversation = () => {
     const existingId = await findExistingConversation(otherUserId);
     if (existingId) return existingId;
 
-    // Função auxiliar para criar conversa
-    const attemptCreateConversation = async () => {
-      // Create new conversation
-      const { data: conversation, error: convError } = await supabase
-        .from("conversations")
-        .insert({})
-        .select()
-        .single();
-
-      if (convError) throw convError;
-
-      // Add both participants
-      const { error: partError } = await supabase
-        .from("conversation_participants")
-        .insert([
-          { conversation_id: conversation.id, user_id: user.id },
-          { conversation_id: conversation.id, user_id: otherUserId },
-        ]);
-
-      if (partError) throw partError;
-
-      return conversation.id;
-    };
-
     try {
-      return await attemptCreateConversation();
+      // Use RPC function to create conversation (bypasses RLS with security definer)
+      const { data, error } = await supabase.rpc('create_conversation_with_user', {
+        p_other_user_id: otherUserId
+      });
+
+      if (error) throw error;
+
+      return data as string;
     } catch (error: any) {
       console.error("Error creating conversation:", error);
-      
-      // Se for erro de RLS, tentar refresh do token e retry
-      if (error?.code === '42501' || error?.message?.includes('row-level security')) {
-        console.log("RLS error detected, attempting session refresh...");
-        
-        try {
-          await supabase.auth.refreshSession();
-          
-          // Retry após refresh
-          return await attemptCreateConversation();
-        } catch (retryError) {
-          console.error("Retry failed after session refresh:", retryError);
-          toast.error("Erro ao criar conversa. Tente recarregar a página.");
-          return null;
-        }
-      }
-      
       toast.error("Não foi possível criar a conversa. Tente novamente.");
       return null;
     }
