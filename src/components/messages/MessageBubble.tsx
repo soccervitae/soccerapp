@@ -5,10 +5,20 @@ import type { MessageWithSender } from "@/hooks/useMessages";
 import type { ReactionWithUser } from "@/hooks/useMessageReactions";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus, Reply } from "lucide-react";
+import { Check, CheckCheck, Play, Pause, Clock, Flame, SmilePlus, Reply, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmojiReactionPicker } from "./EmojiReactionPicker";
 import { AudioWaveform } from "./AudioWaveform";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MessageBubbleProps {
   message: MessageWithSender;
@@ -16,6 +26,7 @@ interface MessageBubbleProps {
   reactions?: ReactionWithUser[];
   onAddReaction?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (reactionId: string) => void;
+  onDelete?: (messageId: string) => void;
 }
 
 export const MessageBubble = ({ 
@@ -23,13 +34,16 @@ export const MessageBubble = ({
   onReply, 
   reactions = [],
   onAddReaction,
-  onRemoveReaction 
+  onRemoveReaction,
+  onDelete
 }: MessageBubbleProps) => {
   const { user } = useAuth();
   const isOwn = message.sender_id === user?.id;
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Swipe to reply
@@ -100,8 +114,10 @@ export const MessageBubble = ({
   };
 
   const handleLongPress = () => {
-    setShowReactionPicker(true);
+    setShowActionMenu(true);
   };
+
+  const canDelete = isOwn && !isRead && !message.isPending;
 
   const handleReactionClick = (emoji: string, existingReaction?: ReactionWithUser) => {
     if (existingReaction && existingReaction.user_id === user?.id && onRemoveReaction) {
@@ -317,7 +333,84 @@ export const MessageBubble = ({
             })}
           </div>
         )}
+
+        {/* Action menu overlay */}
+        {showActionMenu && (
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setShowActionMenu(false)}
+          />
+        )}
+
+        {/* Action menu */}
+        {showActionMenu && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className={`absolute -top-14 ${isOwn ? "right-0" : "left-0"} bg-popover border border-border rounded-xl shadow-lg p-1 flex gap-1 z-50`}
+          >
+            {/* Reagir */}
+            <button
+              onClick={() => {
+                setShowActionMenu(false);
+                setShowReactionPicker(true);
+              }}
+              className="p-2.5 hover:bg-muted rounded-lg transition-colors"
+              title="Reagir"
+            >
+              <SmilePlus className="h-5 w-5 text-muted-foreground" />
+            </button>
+            
+            {/* Responder */}
+            <button
+              onClick={() => {
+                setShowActionMenu(false);
+                onReply?.(message);
+              }}
+              className="p-2.5 hover:bg-muted rounded-lg transition-colors"
+              title="Responder"
+            >
+              <Reply className="h-5 w-5 text-muted-foreground" />
+            </button>
+            
+            {/* Apagar - só aparece se for minha mensagem E não foi lida */}
+            {canDelete && (
+              <button
+                onClick={() => {
+                  setShowActionMenu(false);
+                  setShowDeleteConfirm(true);
+                }}
+                className="p-2.5 hover:bg-destructive/10 rounded-lg transition-colors"
+                title="Apagar"
+              >
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </button>
+            )}
+          </motion.div>
+        )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar mensagem?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta mensagem será apagada para todos. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => onDelete?.(message.id)}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
