@@ -10,6 +10,7 @@ import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { ChatInput } from "@/components/messages/ChatInput";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { VideoCallModal } from "@/components/messages/VideoCallModal";
+import { VoiceCallModal } from "@/components/messages/VoiceCallModal";
 import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +42,7 @@ const Chat = () => {
     remoteStream,
     callerInfo,
     connectionStatus,
+    callType,
     startCall,
     acceptCall,
     rejectCall,
@@ -48,6 +50,10 @@ const Chat = () => {
     toggleVideo,
     toggleAudio,
   } = useVideoCall(conversationId || null, participant);
+
+  // Call handlers
+  const handleVideoCall = useCallback(() => startCall('video'), [startCall]);
+  const handleVoiceCall = useCallback(() => startCall('voice'), [startCall]);
 
   // Fetch other participant
   useEffect(() => {
@@ -141,7 +147,8 @@ const Chat = () => {
       <ChatHeader 
         participant={participant} 
         isTyping={isAnyoneTyping}
-        onVideoCall={startCall}
+        onVideoCall={handleVideoCall}
+        onVoiceCall={handleVoiceCall}
         isCallActive={isCallActive}
       />
 
@@ -149,24 +156,41 @@ const Chat = () => {
       <IncomingCallModal
         isOpen={isIncomingCall}
         caller={callerInfo}
+        callType={callType || 'video'}
         onAccept={acceptCall}
         onReject={rejectCall}
       />
 
       {/* Video call modal */}
-      <VideoCallModal
-        isOpen={isCallActive}
-        participant={participant}
-        localStream={localStream}
-        remoteStream={remoteStream}
-        isCalling={isCalling}
-        isVideoEnabled={isVideoEnabled}
-        isAudioEnabled={isAudioEnabled}
-        connectionStatus={connectionStatus}
-        onToggleVideo={toggleVideo}
-        onToggleAudio={toggleAudio}
-        onEndCall={endCall}
-      />
+      {callType === 'video' && (
+        <VideoCallModal
+          isOpen={isCallActive}
+          participant={participant}
+          localStream={localStream}
+          remoteStream={remoteStream}
+          isCalling={isCalling}
+          isVideoEnabled={isVideoEnabled}
+          isAudioEnabled={isAudioEnabled}
+          connectionStatus={connectionStatus}
+          onToggleVideo={toggleVideo}
+          onToggleAudio={toggleAudio}
+          onEndCall={endCall}
+        />
+      )}
+
+      {/* Voice call modal */}
+      {callType === 'voice' && (
+        <VoiceCallModal
+          isOpen={isCallActive}
+          participant={participant}
+          remoteStream={remoteStream}
+          isCalling={isCalling}
+          isAudioEnabled={isAudioEnabled}
+          connectionStatus={connectionStatus}
+          onToggleAudio={toggleAudio}
+          onEndCall={endCall}
+        />
+      )}
 
       {/* Offline indicator */}
       {isOffline && (

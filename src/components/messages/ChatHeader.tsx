@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Video } from "lucide-react";
+import { ArrowLeft, Phone, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { formatDistanceToNow } from "date-fns";
@@ -13,10 +13,11 @@ interface ChatHeaderProps {
   participant: Profile | null;
   isTyping?: boolean;
   onVideoCall?: () => void;
+  onVoiceCall?: () => void;
   isCallActive?: boolean;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, isCallActive }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -74,16 +75,30 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, isCallActive }:
         </div>
       </div>
 
-      {/* Video call button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onVideoCall}
-        disabled={!participant || isCallActive}
-        className="text-primary hover:text-primary/80"
-      >
-        <Video className="h-5 w-5" />
-      </Button>
+      {/* Call buttons */}
+      <div className="flex items-center gap-1">
+        {/* Voice call button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onVoiceCall}
+          disabled={!participant || isCallActive}
+          className="text-primary hover:text-primary/80"
+        >
+          <Phone className="h-5 w-5" />
+        </Button>
+
+        {/* Video call button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onVideoCall}
+          disabled={!participant || isCallActive}
+          className="text-primary hover:text-primary/80"
+        >
+          <Video className="h-5 w-5" />
+        </Button>
+      </div>
     </div>
   );
 };
