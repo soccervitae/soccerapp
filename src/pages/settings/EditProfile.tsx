@@ -215,11 +215,22 @@ const EditProfile = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="font-semibold text-foreground">Editar Perfil</h1>
-          <div className="w-9" />
+          <button
+            type="submit"
+            form="edit-profile-form"
+            disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
+            className="p-2 -mr-2 text-primary hover:bg-muted rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Check className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="pt-14 pb-8">
+      <form id="edit-profile-form" onSubmit={handleSubmit} className="pt-14 pb-8">
         {/* Cover Photo */}
         <div className="relative">
           <div className="w-full h-36 bg-muted overflow-hidden">
@@ -428,20 +439,6 @@ const EditProfile = () => {
             </select>
           </div>
 
-          <Button
-            type="submit"
-            disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
-            className="w-full mt-6"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              "Salvar Alterações"
-            )}
-          </Button>
         </div>
       </form>
     </main>
