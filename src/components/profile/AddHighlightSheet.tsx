@@ -12,7 +12,7 @@ import { useAddHighlight } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, ImagePlus, X, GripVertical } from "lucide-react";
+import { Loader2, ImagePlus, X, GripVertical, Play, Film } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -35,17 +35,18 @@ interface AddHighlightSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface ImagePreview {
+interface MediaPreview {
   id: string;
   file: File;
   preview: string;
+  type: 'image' | 'video';
 }
 
-const SortableImage = ({ 
-  image, 
+const SortableMedia = ({ 
+  media, 
   onRemove 
 }: { 
-  image: ImagePreview; 
+  media: MediaPreview; 
   onRemove: () => void;
 }) => {
   const {
@@ -55,7 +56,7 @@ const SortableImage = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: image.id });
+  } = useSortable({ id: media.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -68,11 +69,26 @@ const SortableImage = ({
       style={style}
       className={`relative w-20 h-20 flex-shrink-0 group ${isDragging ? 'opacity-50 z-10' : ''}`}
     >
-      <img
-        src={image.preview}
-        alt="Preview"
-        className="w-full h-full object-cover rounded-lg border-2 border-border"
-      />
+      {media.type === 'video' ? (
+        <>
+          <video
+            src={media.preview}
+            className="w-full h-full object-cover rounded-lg border-2 border-border"
+            muted
+          />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
+              <Play className="w-3 h-3 text-white fill-white" />
+            </div>
+          </div>
+        </>
+      ) : (
+        <img
+          src={media.preview}
+          alt="Preview"
+          className="w-full h-full object-cover rounded-lg border-2 border-border"
+        />
+      )}
       <button
         type="button"
         onClick={onRemove}
@@ -95,7 +111,7 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
   const { user } = useAuth();
   const addHighlight = useAddHighlight();
   const [title, setTitle] = useState("");
-  const [images, setImages] = useState<ImagePreview[]>([]);
+  const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const sensors = useSensors(
@@ -112,39 +128,61 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
     })
   );
 
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages((prev) => [
+      const isVideo = file.type.startsWith('video/');
+      
+      if (isVideo) {
+        // For videos, create URL directly
+        const preview = URL.createObjectURL(file);
+        setMediaItems((prev) => [
           ...prev,
           {
             id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             file,
-            preview: reader.result as string,
+            preview,
+            type: 'video',
           },
         ]);
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // For images, use FileReader
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setMediaItems((prev) => [
+            ...prev,
+            {
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              file,
+              preview: reader.result as string,
+              type: 'image',
+            },
+          ]);
+        };
+        reader.readAsDataURL(file);
+      }
     });
     
     // Reset input
     e.target.value = "";
   };
 
-  const handleRemoveImage = (id: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== id));
+  const handleRemoveMedia = (id: string) => {
+    const item = mediaItems.find(m => m.id === id);
+    if (item?.type === 'video') {
+      URL.revokeObjectURL(item.preview);
+    }
+    setMediaItems((prev) => prev.filter((m) => m.id !== id));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setImages((prev) => {
-        const oldIndex = prev.findIndex((img) => img.id === active.id);
-        const newIndex = prev.findIndex((img) => img.id === over.id);
+      setMediaItems((prev) => {
+        const oldIndex = prev.findIndex((m) => m.id === active.id);
+        const newIndex = prev.findIndex((m) => m.id === over.id);
         return arrayMove(prev, oldIndex, newIndex);
       });
     }
@@ -158,8 +196,8 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
       return;
     }
 
-    if (images.length === 0) {
-      toast.error("Selecione pelo menos uma imagem");
+    if (mediaItems.length === 0) {
+      toast.error("Selecione pelo menos uma foto ou vídeo");
       return;
     }
 
@@ -171,16 +209,16 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
     setIsUploading(true);
 
     try {
-      // Upload all images
-      const uploadedUrls: string[] = [];
+      // Upload all media
+      const uploadedItems: Array<{ url: string; type: 'image' | 'video' }> = [];
       
-      for (const image of images) {
-        const fileExt = image.file.name.split('.').pop();
+      for (const item of mediaItems) {
+        const fileExt = item.file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from("post-media")
-          .upload(fileName, image.file);
+          .upload(fileName, item.file);
 
         if (uploadError) throw uploadError;
 
@@ -188,19 +226,26 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
           .from("post-media")
           .getPublicUrl(fileName);
 
-        uploadedUrls.push(publicUrl);
+        uploadedItems.push({ url: publicUrl, type: item.type });
       }
 
-      // Add highlight with all image URLs
+      // Add highlight with all media URLs
       await addHighlight.mutateAsync({
         title: title.trim(),
-        image_url: uploadedUrls[0], // First image as cover
-        image_urls: uploadedUrls,
+        image_url: uploadedItems[0].url, // First item as cover
+        media_items: uploadedItems,
+      });
+
+      // Cleanup video URLs
+      mediaItems.forEach(item => {
+        if (item.type === 'video') {
+          URL.revokeObjectURL(item.preview);
+        }
       });
 
       // Reset form and close
       setTitle("");
-      setImages([]);
+      setMediaItems([]);
       onOpenChange(false);
     } catch (error) {
       console.error("Error adding highlight:", error);
@@ -211,8 +256,14 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
   };
 
   const handleClose = () => {
+    // Cleanup video URLs
+    mediaItems.forEach(item => {
+      if (item.type === 'video') {
+        URL.revokeObjectURL(item.preview);
+      }
+    });
     setTitle("");
-    setImages([]);
+    setMediaItems([]);
     onOpenChange(false);
   };
 
@@ -236,7 +287,7 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Imagens ({images.length}/10)</Label>
+            <Label>Fotos e Vídeos ({mediaItems.length}/10)</Label>
             
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
               <DndContext
@@ -245,43 +296,44 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext
-                  items={images.map((img) => img.id)}
+                  items={mediaItems.map((m) => m.id)}
                   strategy={horizontalListSortingStrategy}
                 >
-                  {images.map((image) => (
-                    <SortableImage
-                      key={image.id}
-                      image={image}
-                      onRemove={() => handleRemoveImage(image.id)}
+                  {mediaItems.map((media) => (
+                    <SortableMedia
+                      key={media.id}
+                      media={media}
+                      onRemove={() => handleRemoveMedia(media.id)}
                     />
                   ))}
                 </SortableContext>
               </DndContext>
 
-              {images.length < 10 && (
+              {mediaItems.length < 10 && (
                 <label className="cursor-pointer flex-shrink-0">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     multiple
-                    onChange={handleImagesChange}
+                    onChange={handleMediaChange}
                     className="hidden"
                   />
-                  <div className="w-20 h-20 rounded-lg bg-muted border-2 border-dashed border-border flex items-center justify-center hover:bg-muted/80 transition-colors">
-                    <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                  <div className="w-20 h-20 rounded-lg bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors">
+                    <Film className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">Mídia</span>
                   </div>
                 </label>
               )}
             </div>
             
             <p className="text-xs text-muted-foreground">
-              Arraste para reordenar. A primeira imagem será a capa.
+              Arraste para reordenar. O primeiro item será a capa.
             </p>
           </div>
 
           <Button 
             type="submit" 
-            disabled={isUploading || !title.trim() || images.length === 0}
+            disabled={isUploading || !title.trim() || mediaItems.length === 0}
             className="w-full"
           >
             {isUploading ? (

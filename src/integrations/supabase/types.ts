@@ -292,6 +292,7 @@ export type Database = {
           highlight_id: string
           id: string
           image_url: string
+          media_type: string | null
         }
         Insert: {
           created_at?: string | null
@@ -299,6 +300,7 @@ export type Database = {
           highlight_id: string
           id?: string
           image_url: string
+          media_type?: string | null
         }
         Update: {
           created_at?: string | null
@@ -306,6 +308,7 @@ export type Database = {
           highlight_id?: string
           id?: string
           image_url?: string
+          media_type?: string | null
         }
         Relationships: [
           {
