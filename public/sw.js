@@ -135,14 +135,24 @@ self.addEventListener('message', (event) => {
     
     const callTypeText = callType === 'video' ? 'Videochamada' : 'Chamada de voz';
     
+    // Extended vibration pattern to simulate continuous ringtone
+    // Pattern: [vibrate, pause, vibrate, pause, ...] - total ~8 seconds
+    const extendedVibration = [
+      300, 200, 300, 200, 300, 500,  // Ring 1
+      300, 200, 300, 200, 300, 500,  // Ring 2
+      300, 200, 300, 200, 300, 500,  // Ring 3
+      300, 200, 300, 200, 300, 500,  // Ring 4
+    ];
+    
     self.registration.showNotification(`${callerName} está ligando`, {
       body: callTypeText,
       icon: '/pwa-192x192.png',
       badge: '/pwa-192x192.png',
-      vibrate: [200, 100, 200, 100, 200, 100, 200], // Vibração mais intensa para chamada
+      vibrate: extendedVibration,
       tag: `call-${conversationId}`,
-      requireInteraction: true, // Não desaparece automaticamente
+      requireInteraction: true,
       renotify: true,
+      silent: false,
       actions: [
         { action: 'answer', title: 'Atender' },
         { action: 'reject', title: 'Recusar' },
