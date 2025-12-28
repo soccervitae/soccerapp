@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -24,13 +25,33 @@ interface SignalingMessage {
   callerInfo?: Profile;
 }
 
+// ICE servers with TURN for NAT traversal
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
     { urls: "stun:stun2.l.google.com:19302" },
+    // TURN servers for NAT traversal when STUN fails
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
   ],
+  iceCandidatePoolSize: 10,
 };
+
+const CALL_TIMEOUT_MS = 30000; // 30 seconds timeout
 
 export const useVideoCall = (conversationId: string | null, participant: Profile | null) => {
   const { user } = useAuth();
@@ -49,6 +70,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const localStreamRef = useRef<MediaStream | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+  const callTimeoutRef = useRef<number | null>(null);
 
   // Initialize signaling channel
   useEffect(() => {
@@ -149,11 +171,20 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     }
   };
 
+  const clearCallTimeout = useCallback(() => {
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
+  }, []);
+
   const createPeerConnection = useCallback(() => {
+    console.log("[WebRTC] Creating peer connection with ICE servers:", ICE_SERVERS);
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
     pc.onicecandidate = (event) => {
       if (event.candidate && participant) {
+        console.log("[WebRTC] Sending ICE candidate:", event.candidate.type);
         sendSignalingMessage({
           type: "ice_candidate",
           to: participant.id,
@@ -162,8 +193,13 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       }
     };
 
+    pc.onicegatheringstatechange = () => {
+      console.log("[WebRTC] ICE gathering state:", pc.iceGatheringState);
+    };
+
     pc.ontrack = (event) => {
-      console.log("Remote track received");
+      console.log("[WebRTC] Remote track received:", event.track.kind);
+      clearCallTimeout();
       setCallState((prev) => ({
         ...prev,
         remoteStream: event.streams[0],
@@ -171,29 +207,60 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     };
 
     pc.oniceconnectionstatechange = () => {
-      console.log("ICE connection state:", pc.iceConnectionState);
+      console.log("[WebRTC] ICE connection state:", pc.iceConnectionState);
+      console.log("[WebRTC] Connection state:", pc.connectionState);
+      console.log("[WebRTC] Signaling state:", pc.signalingState);
+      
       if (pc.iceConnectionState === "connected") {
+        clearCallTimeout();
         setCallState((prev) => ({ ...prev, isCalling: false, isCallActive: true }));
-      } else if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+      } else if (pc.iceConnectionState === "disconnected") {
+        console.log("[WebRTC] Connection disconnected, attempting to recover...");
+        toast.error("Conexão perdida. Tentando reconectar...");
+      } else if (pc.iceConnectionState === "failed") {
+        console.log("[WebRTC] Connection failed");
+        toast.error("Falha na conexão. Tente novamente.");
+        cleanupCall();
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log("[WebRTC] Connection state changed:", pc.connectionState);
+      if (pc.connectionState === "failed") {
+        toast.error("Conexão falhou");
         cleanupCall();
       }
     };
 
     peerConnectionRef.current = pc;
     return pc;
-  }, [participant, sendSignalingMessage]);
+  }, [participant, sendSignalingMessage, clearCallTimeout]);
 
   const getLocalStream = async () => {
     try {
+      console.log("[WebRTC] Requesting media permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
+      console.log("[WebRTC] Got local stream with tracks:", stream.getTracks().map(t => t.kind));
       localStreamRef.current = stream;
       setCallState((prev) => ({ ...prev, localStream: stream }));
       return stream;
-    } catch (error) {
-      console.error("Error getting local stream:", error);
+    } catch (error: any) {
+      console.error("[WebRTC] Error getting local stream:", error);
+      
+      if (error.name === "NotAllowedError") {
+        toast.error("Permissão de câmera/microfone negada. Por favor, permita o acesso nas configurações do navegador.");
+      } else if (error.name === "NotFoundError") {
+        toast.error("Câmera ou microfone não encontrado no dispositivo.");
+      } else if (error.name === "NotReadableError") {
+        toast.error("Câmera ou microfone já está em uso por outro aplicativo.");
+      } else {
+        toast.error("Erro ao acessar câmera/microfone.");
+      }
+      
+      await cleanupCall();
       throw error;
     }
   };
@@ -253,6 +320,8 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const startCall = useCallback(async () => {
     if (!participant || !user) return;
 
+    console.log("[WebRTC] Starting call to:", participant.username);
+
     // Fetch current user's profile for caller info
     const { data: profile } = await supabase
       .from("profiles")
@@ -267,7 +336,17 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     });
 
     setCallState((prev) => ({ ...prev, isCalling: true }));
-  }, [participant, user, sendSignalingMessage]);
+
+    // Set timeout for unanswered call
+    clearCallTimeout();
+    callTimeoutRef.current = window.setTimeout(() => {
+      console.log("[WebRTC] Call timeout - no answer");
+      if (!callState.remoteStream) {
+        toast.error("Chamada não atendida");
+        cleanupCall();
+      }
+    }, CALL_TIMEOUT_MS);
+  }, [participant, user, sendSignalingMessage, clearCallTimeout, callState.remoteStream]);
 
   const acceptCall = useCallback(async () => {
     if (!callState.callerInfo) return;
@@ -305,15 +384,27 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     cleanupCall();
   }, [participant, sendSignalingMessage]);
 
-  const cleanupCall = async () => {
+  const cleanupCall = useCallback(async () => {
+    console.log("[WebRTC] Cleaning up call...");
+    
+    // Clear timeout
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
+
     // Stop all tracks
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current.getTracks().forEach((track) => {
+        console.log("[WebRTC] Stopping track:", track.kind);
+        track.stop();
+      });
       localStreamRef.current = null;
     }
 
     // Close peer connection
     if (peerConnectionRef.current) {
+      console.log("[WebRTC] Closing peer connection");
       peerConnectionRef.current.close();
       peerConnectionRef.current = null;
     }
@@ -331,7 +422,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       remoteStream: null,
       callerInfo: null,
     });
-  };
+  }, []);
 
   const toggleVideo = useCallback(() => {
     if (localStreamRef.current) {
