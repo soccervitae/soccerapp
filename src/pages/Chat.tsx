@@ -5,6 +5,7 @@ import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
+import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { ChatInput } from "@/components/messages/ChatInput";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,6 +152,12 @@ const Chat = () => {
                 />
               </div>
             ))}
+            
+            {/* Typing indicator */}
+            {isAnyoneTyping && typingUsers.length > 0 && (
+              <TypingIndicator username={typingUsers[0].username} />
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
         )}
