@@ -427,7 +427,7 @@ export const FeedPost = ({ post }: FeedPostProps) => {
 
       {/* Actions */}
       <div className="px-4 pt-3">
-        <div className="grid grid-cols-4 bg-card rounded-2xl border border-border shadow-sm">
+        <div className="grid grid-cols-4">
           <button 
             onClick={handleLike}
             disabled={likePost.isPending}
