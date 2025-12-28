@@ -17,8 +17,10 @@ export const FeedStories = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
   const [createReplayOpen, setCreateReplayOpen] = useState(false);
+  const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
 
-  const handleStoryClick = (groupIndex: number) => {
+  const handleStoryClick = (groupIndex: number, e: React.MouseEvent<HTMLDivElement>) => {
+    setClickOrigin(e.currentTarget.getBoundingClientRect());
     setSelectedGroupIndex(groupIndex);
     setViewerOpen(true);
   };
@@ -74,7 +76,8 @@ export const FeedStories = () => {
                 {/* User photo area - clickable to view stories */}
                 <div 
                   className={`flex-1 relative overflow-hidden ${hasOwnStories ? 'cursor-pointer' : ''}`}
-                  onClick={hasOwnStories ? () => {
+                  onClick={hasOwnStories ? (e: React.MouseEvent<HTMLDivElement>) => {
+                    setClickOrigin(e.currentTarget.getBoundingClientRect());
                     const ownIndex = groupedStories?.findIndex(g => g.userId === user?.id) ?? 0;
                     setSelectedGroupIndex(ownIndex);
                     setViewerOpen(true);
@@ -127,7 +130,7 @@ export const FeedStories = () => {
               <div
                 key={group.userId}
                 className="flex-none w-28 cursor-pointer group"
-                onClick={() => handleStoryClick(originalIndex)}
+                onClick={(e) => handleStoryClick(originalIndex, e)}
               >
                 <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
                   <img
@@ -173,6 +176,7 @@ export const FeedStories = () => {
           initialGroupIndex={selectedGroupIndex}
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
+          originRect={clickOrigin}
         />
       )}
 
