@@ -544,6 +544,7 @@ export interface HighlightImage {
   id: string;
   highlight_id: string;
   image_url: string;
+  media_type: string;
   display_order: number;
   created_at: string;
 }
@@ -590,7 +591,7 @@ export const useUserHighlights = (userId?: string) => {
   });
 };
 
-// Add highlight with multiple images
+// Add highlight with multiple images/videos
 export const useAddHighlight = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -600,7 +601,7 @@ export const useAddHighlight = () => {
       title: string;
       image_url: string;
       display_order?: number;
-      image_urls?: string[];
+      media_items?: Array<{ url: string; type: 'image' | 'video' }>;
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -618,11 +619,12 @@ export const useAddHighlight = () => {
 
       if (highlightError) throw highlightError;
 
-      // Then create the images
-      const imageUrls = highlight.image_urls || [highlight.image_url];
-      const imageInserts = imageUrls.map((url, index) => ({
+      // Then create the media items
+      const mediaItems = highlight.media_items || [{ url: highlight.image_url, type: 'image' as const }];
+      const imageInserts = mediaItems.map((item, index) => ({
         highlight_id: highlightData.id,
-        image_url: url,
+        image_url: item.url,
+        media_type: item.type,
         display_order: index,
       }));
 
@@ -644,14 +646,15 @@ export const useAddHighlight = () => {
   });
 };
 
-// Add image to existing highlight
+// Add media (image or video) to existing highlight
 export const useAddHighlightImage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ highlightId, imageUrl, displayOrder }: {
+    mutationFn: async ({ highlightId, imageUrl, mediaType = 'image', displayOrder }: {
       highlightId: string;
       imageUrl: string;
+      mediaType?: 'image' | 'video';
       displayOrder?: number;
     }) => {
       // Get current max order if not provided
@@ -671,6 +674,7 @@ export const useAddHighlightImage = () => {
         .insert({
           highlight_id: highlightId,
           image_url: imageUrl,
+          media_type: mediaType,
           display_order: order,
         })
         .select()
@@ -683,7 +687,7 @@ export const useAddHighlightImage = () => {
       queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
     },
     onError: () => {
-      toast.error("Erro ao adicionar imagem");
+      toast.error("Erro ao adicionar mídia");
     },
   });
 };

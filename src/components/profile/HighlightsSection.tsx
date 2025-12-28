@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images } from "lucide-react";
+import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film } from "lucide-react";
 import { AddHighlightSheet } from "./AddHighlightSheet";
 import { UserHighlight, HighlightImage, useDeleteHighlight, useReorderHighlights, useUpdateHighlight, useAddHighlightImage, useDeleteHighlightImage } from "@/hooks/useProfile";
 import {
@@ -69,6 +69,7 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
 
   const imageCount = highlight.images?.length || 1;
   const coverImage = highlight.images?.[0]?.image_url || highlight.image_url;
+  const hasVideo = highlight.images?.some(img => img.media_type === 'video');
 
   return (
     <div
@@ -85,6 +86,11 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
           style={{ backgroundImage: `url('${coverImage}')` }}
           aria-label={highlight.title}
         />
+        {hasVideo && (
+          <div className="absolute bottom-0 left-0 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center">
+            <Play className="w-2.5 h-2.5 text-white fill-white" />
+          </div>
+        )}
         {imageCount > 1 && (
           <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
             {imageCount}
@@ -258,11 +264,13 @@ export const HighlightsSection = ({
     }
   };
 
-  const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddMedia = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedHighlight || !user) return;
 
     setIsAddingImage(true);
+    const isVideo = file.type.startsWith('video/');
+    const mediaType = isVideo ? 'video' : 'image';
 
     try {
       const fileExt = file.name.split('.').pop();
@@ -281,6 +289,7 @@ export const HighlightsSection = ({
       await addHighlightImage.mutateAsync({
         highlightId: selectedHighlight.id,
         imageUrl: publicUrl,
+        mediaType,
       });
 
       // Update local state
@@ -288,6 +297,7 @@ export const HighlightsSection = ({
         id: `temp-${Date.now()}`,
         highlight_id: selectedHighlight.id,
         image_url: publicUrl,
+        media_type: mediaType,
         display_order: (selectedHighlight.images?.length || 0),
         created_at: new Date().toISOString(),
       };
@@ -297,10 +307,10 @@ export const HighlightsSection = ({
         images: [...(selectedHighlight.images || []), newImage],
       });
 
-      toast.success("Imagem adicionada!");
+      toast.success(isVideo ? "Vídeo adicionado!" : "Foto adicionada!");
     } catch (error) {
-      console.error("Error adding image:", error);
-      toast.error("Erro ao adicionar imagem");
+      console.error("Error adding media:", error);
+      toast.error("Erro ao adicionar mídia");
     } finally {
       setIsAddingImage(false);
       e.target.value = "";
@@ -389,6 +399,7 @@ export const HighlightsSection = ({
       id: selectedHighlight.id,
       highlight_id: selectedHighlight.id,
       image_url: selectedHighlight.image_url,
+      media_type: 'image',
       display_order: 0,
       created_at: selectedHighlight.created_at,
     }];
@@ -553,14 +564,25 @@ export const HighlightsSection = ({
               </div>
             </div>
 
-            {/* Image Display */}
+            {/* Media Display */}
             <div className="flex-1 flex items-center justify-center bg-black relative">
               {currentImages[currentImageIndex] && (
-                <img
-                  src={currentImages[currentImageIndex].image_url}
-                  alt={selectedHighlight?.title || 'Destaque'}
-                  className="w-full h-full object-contain transition-all duration-300 ease-out"
-                />
+                currentImages[currentImageIndex].media_type === 'video' ? (
+                  <video
+                    key={currentImages[currentImageIndex].id}
+                    src={currentImages[currentImageIndex].image_url}
+                    className="w-full h-full object-contain transition-all duration-300 ease-out"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={currentImages[currentImageIndex].image_url}
+                    alt={selectedHighlight?.title || 'Destaque'}
+                    className="w-full h-full object-contain transition-all duration-300 ease-out"
+                  />
+                )
               )}
             </div>
 
@@ -603,8 +625,8 @@ export const HighlightsSection = ({
                   <label className="cursor-pointer">
                     <input
                       type="file"
-                      accept="image/*"
-                      onChange={handleAddImage}
+                      accept="image/*,video/*"
+                      onChange={handleAddMedia}
                       className="hidden"
                       disabled={isAddingImage}
                     />
@@ -612,9 +634,9 @@ export const HighlightsSection = ({
                       {isAddingImage ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <ImagePlus className="w-5 h-5" />
+                        <Film className="w-5 h-5" />
                       )}
-                      <span className="text-sm font-medium">Adicionar foto</span>
+                      <span className="text-sm font-medium">Adicionar mídia</span>
                     </span>
                   </label>
                   {currentImages.length > 1 && (
@@ -626,7 +648,7 @@ export const HighlightsSection = ({
                       className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors"
                     >
                       <X className="w-5 h-5" />
-                      <span className="text-sm font-medium">Remover foto</span>
+                      <span className="text-sm font-medium">Remover mídia</span>
                     </button>
                   )}
                 </div>
