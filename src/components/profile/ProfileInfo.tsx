@@ -198,24 +198,6 @@ export const ProfileInfo = ({
         )}
       </div>
 
-      {/* Stats Row */}
-      {followStats && <div className="flex items-center gap-8 py-2">
-          <button 
-            onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)}
-            className="text-center hover:opacity-70 transition-opacity"
-          >
-            <p className="text-foreground font-bold">{followStats.followers}</p>
-            <p className="text-muted-foreground text-xs">Torcedores</p>
-          </button>
-          <button 
-            onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)}
-            className="text-center hover:opacity-70 transition-opacity"
-          >
-            <p className="text-foreground font-bold">{followStats.following}</p>
-            <p className="text-muted-foreground text-xs">Torcendo</p>
-          </button>
-        </div>}
-
       {/* Physical Stats */}
       <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-2">
         <div className="flex flex-col gap-1 p-2 text-center">
@@ -235,6 +217,24 @@ export const ProfileInfo = ({
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
         </div>
       </div>
+
+      {/* Stats Row */}
+      {followStats && <div className="flex items-center gap-8 py-2">
+          <button 
+            onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)}
+            className="text-center hover:opacity-70 transition-opacity"
+          >
+            <p className="text-foreground font-bold">{followStats.followers}</p>
+            <p className="text-muted-foreground text-xs">Torcedores</p>
+          </button>
+          <button 
+            onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)}
+            className="text-center hover:opacity-70 transition-opacity"
+          >
+            <p className="text-foreground font-bold">{followStats.following}</p>
+            <p className="text-muted-foreground text-xs">Torcendo</p>
+          </button>
+        </div>}
 
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
