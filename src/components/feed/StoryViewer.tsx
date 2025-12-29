@@ -237,7 +237,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
             {/* Overlay */}
             <motion.div
               key="story-overlay"
-              className="fixed inset-0 bg-black z-50"
+              className="fixed inset-0 bg-black z-[60]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.95 }}
               exit={{ opacity: 0 }}
@@ -248,7 +248,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
             {/* Story Content */}
             <motion.div
               key="story-content"
-              className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+              className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
               initial={getInitialPosition()}
               animate={{ 
                 opacity: 1, 

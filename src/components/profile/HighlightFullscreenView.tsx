@@ -151,7 +151,7 @@ export const HighlightFullscreenView = ({
           {/* Overlay */}
           <motion.div
             key="highlight-overlay"
-            className="fixed inset-0 bg-black z-50"
+            className="fixed inset-0 bg-black z-[60]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.95 }}
             exit={{ opacity: 0 }}
@@ -162,7 +162,7 @@ export const HighlightFullscreenView = ({
           {/* Content */}
           <motion.div
             key="highlight-content"
-            className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden"
+            className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none overflow-hidden"
             initial={getInitialPosition()}
             animate={{ 
               opacity: 1, 
