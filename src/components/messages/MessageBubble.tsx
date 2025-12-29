@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EmojiReactionPicker } from "./EmojiReactionPicker";
 import { AudioWaveform } from "./AudioWaveform";
+import { SharedContentPreview, isSharedContentMessage, parseSharedContent } from "./SharedContentPreview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,6 +155,10 @@ export const MessageBubble = ({
   const isVideoCallMessage = message.media_type === "video_call";
   const isVoiceCallMessage = message.media_type === "voice_call";
   const isCallMessage = isVideoCallMessage || isVoiceCallMessage;
+
+  // Check if this is a shared content message
+  const isSharedContent = isSharedContentMessage(message.media_type);
+  const sharedContentData = isSharedContent ? parseSharedContent(message.content) : null;
 
   // Render call card
   if (isCallMessage) {
@@ -302,8 +307,15 @@ export const MessageBubble = ({
             </div>
           )}
 
+          {/* Shared content preview */}
+          {isSharedContent && sharedContentData && (
+            <div className="mb-2">
+              <SharedContentPreview data={sharedContentData} isOwn={isOwn} />
+            </div>
+          )}
+
           {/* Media content */}
-          {message.media_url && (
+          {message.media_url && !isSharedContent && (
             <div className="mb-2 rounded-lg overflow-hidden">
               {message.media_type === "audio" ? (
                 <div className="flex items-center gap-2 min-w-[180px]">
@@ -372,8 +384,8 @@ export const MessageBubble = ({
             </div>
           )}
 
-          {/* Text content - hide emoji placeholders for audio */}
-          {message.content && message.content !== "🎤" && (
+          {/* Text content - hide emoji placeholders for audio and shared content */}
+          {message.content && message.content !== "🎤" && !isSharedContent && (
             <p className="text-sm whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>{message.content}</p>
           )}
 
