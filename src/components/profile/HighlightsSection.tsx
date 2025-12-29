@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2 } from "lucide-react";
+import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2, Eye } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { AddHighlightSheet } from "./AddHighlightSheet";
 import { SelectHighlightSheet } from "./SelectHighlightSheet";
 import { HighlightFullscreenView } from "./HighlightFullscreenView";
 import { UserHighlight, HighlightImage, useDeleteHighlight, useReorderHighlights, useUpdateHighlight, useAddHighlightImage, useDeleteHighlightImage } from "@/hooks/useProfile";
+import { useHighlightsNewViews } from "@/hooks/useHighlightInteractions";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,10 +41,11 @@ interface HighlightsSectionProps {
 interface SortableHighlightItemProps {
   highlight: UserHighlight;
   isOwnProfile: boolean;
+  hasNewViews?: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHighlightItemProps) => {
+const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }: SortableHighlightItemProps) => {
   const {
     attributes,
     listeners,
@@ -67,7 +69,11 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
       className={`flex-none w-20 flex flex-col gap-2 items-center ${isDragging ? 'opacity-50 scale-105 z-10' : ''}`}
     >
       <div 
-        className={`w-16 h-16 rounded-full p-[2px] bg-muted cursor-pointer hover:bg-primary/30 transition-colors group relative`}
+        className={`w-16 h-16 rounded-full p-[2px] cursor-pointer transition-colors group relative
+          ${hasNewViews && isOwnProfile
+            ? 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 animate-pulse' 
+            : 'bg-muted hover:bg-primary/30'
+          }`}
         onClick={(e) => onClick(e)}
       >
         <div 
@@ -75,7 +81,14 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
           style={{ backgroundImage: `url('${coverImage}')` }}
           aria-label={highlight.title}
         />
-        {isOwnProfile && (
+        {/* New views indicator */}
+        {hasNewViews && isOwnProfile && (
+          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-lg">
+            <Eye className="w-3 h-3 text-primary-foreground" />
+          </div>
+        )}
+        {/* Drag handle - only show when no new views or on hover */}
+        {isOwnProfile && !hasNewViews && (
           <div
             {...attributes}
             {...listeners}
@@ -121,6 +134,10 @@ export const HighlightsSection = ({
   const updateHighlight = useUpdateHighlight();
   const addHighlightImage = useAddHighlightImage();
   const deleteHighlightImage = useDeleteHighlightImage();
+  
+  // Fetch new views status for highlights (only for own profile)
+  const displayHighlightsForViews = localHighlights.length > 0 ? localHighlights : highlights;
+  const { data: newViewsMap = {} } = useHighlightsNewViews(displayHighlightsForViews, isOwnProfile);
 
   // Carousel for navigating between highlights
   const [highlightEmblaRef, highlightEmblaApi] = useEmblaCarousel({ 
@@ -466,6 +483,7 @@ export const HighlightsSection = ({
       key={highlight.id}
       highlight={highlight}
       isOwnProfile={isOwnProfile}
+      hasNewViews={newViewsMap[highlight.id] || false}
       onClick={(e: React.MouseEvent<HTMLDivElement>) => handleHighlightClick(highlight, e)}
     />
   ));

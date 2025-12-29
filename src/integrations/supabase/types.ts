@@ -1434,6 +1434,7 @@ export type Database = {
           image_url: string
           title: string
           user_id: string
+          views_seen_at: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1442,6 +1443,7 @@ export type Database = {
           image_url: string
           title: string
           user_id: string
+          views_seen_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1450,6 +1452,7 @@ export type Database = {
           image_url?: string
           title?: string
           user_id?: string
+          views_seen_at?: string | null
         }
         Relationships: [
           {

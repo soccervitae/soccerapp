@@ -558,6 +558,7 @@ export interface UserHighlight {
   display_order: number;
   created_at: string;
   images?: HighlightImage[];
+  views_seen_at?: string | null;
 }
 
 // Fetch user highlights with images
