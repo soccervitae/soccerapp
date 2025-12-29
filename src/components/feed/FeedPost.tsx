@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 interface FeedPostProps {
   post: Post;
 }
@@ -303,9 +304,7 @@ export const FeedPost = ({
 
           {/* Applause animation overlay */}
           {showApplauseAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <span className="material-symbols-outlined fill-1 text-white text-[100px] animate-applause-burst drop-shadow-lg">
-                handshake
-              </span>
+              <ClappingHandsIcon className="w-24 h-24 text-white animate-applause-burst drop-shadow-lg" filled />
             </div>}
 
           {/* Tags toggle button */}
@@ -363,9 +362,7 @@ export const FeedPost = ({
       <div className="px-4 pt-3 py-[4px]">
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${post.liked_by_user ? 'text-amber-500' : 'text-foreground hover:text-muted-foreground'}`}>
-            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-applause-pop' : ''}`}>
-              handshake
-            </span>
+            <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} />
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
           </button>
           <div className="flex items-center justify-center relative">

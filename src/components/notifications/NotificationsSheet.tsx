@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useNotifications";
 import { Bell, MessageCircle, UserPlus, Check } from "lucide-react";
 import { useState } from "react";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 
 interface NotificationsSheetProps {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ interface NotificationsSheetProps {
 const NotificationIcon = ({ type }: { type: string }) => {
   switch (type) {
     case "like":
-      return <span className="material-symbols-outlined text-[16px] text-amber-500">handshake</span>;
+      return <ClappingHandsIcon className="w-4 h-4 text-amber-500" filled />;
     case "comment":
       return <MessageCircle className="w-4 h-4 text-blue-500" />;
     case "follow":

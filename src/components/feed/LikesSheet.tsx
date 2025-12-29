@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 
 interface LikesSheetProps {
   postId: string;
@@ -154,9 +155,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">
-                handshake
-              </span>
+              <ClappingHandsIcon className="w-10 h-10 text-muted-foreground mb-2" />
               <p className="text-muted-foreground">Nenhum aplauso ainda</p>
             </div>
           )}

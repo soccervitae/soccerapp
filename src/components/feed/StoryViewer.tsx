@@ -6,6 +6,7 @@ import { useStoryLikeStatus, useSendStoryReply, useStoryViewerCount, useStoryRep
 import { useQueryClient } from "@tanstack/react-query";
 import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -364,9 +365,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                     {/* Applause animation */}
                     {showLikeAnimation && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                        <span className="material-symbols-outlined fill-1 text-amber-500 text-[80px] animate-ping">
-                          handshake
-                        </span>
+                        <ClappingHandsIcon className="w-20 h-20 text-amber-500 animate-ping" filled />
                       </div>
                     )}
                   </div>
@@ -437,14 +436,9 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                         />
                         <button 
                           onClick={handleLike}
-                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                          className={`w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors ${isLiked ? 'text-amber-500' : 'text-white'}`}
                         >
-                          <span 
-                            className={`material-symbols-outlined text-[24px] transition-colors ${isLiked ? 'text-amber-500' : ''}`}
-                            style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}
-                          >
-                            handshake
-                          </span>
+                          <ClappingHandsIcon className="w-6 h-6" filled={isLiked} />
                         </button>
                         <button 
                           onClick={handleSendMessage}
