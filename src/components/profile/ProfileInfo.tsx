@@ -173,7 +173,7 @@ export const ProfileInfo = ({
       </div>
 
       {/* Stats Row */}
-      {followStats && <div className="flex items-center gap-6 py-1">
+      {followStats && <div className="flex items-center gap-6">
           <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
             <span className="text-foreground font-bold">{followStats.followers}</span>
             <span className="text-muted-foreground text-xs">Torcedores</span>
@@ -185,7 +185,7 @@ export const ProfileInfo = ({
         </div>}
 
       {/* Physical Stats */}
-      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-1 py-[4px]">
+      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
         <div className="flex flex-col gap-1 p-2 text-center">
           <p className="text-foreground text-sm font-bold">{age || "-"}</p>
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
