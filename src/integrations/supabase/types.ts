@@ -320,6 +320,67 @@ export type Database = {
           },
         ]
       }
+      highlight_likes: {
+        Row: {
+          created_at: string
+          highlight_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          highlight_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          highlight_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlight_likes_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "user_highlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      highlight_replies: {
+        Row: {
+          content: string
+          created_at: string
+          highlight_id: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          highlight_id: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          highlight_id?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlight_replies_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "user_highlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       highlight_views: {
         Row: {
           highlight_id: string
