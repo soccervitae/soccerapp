@@ -1,5 +1,6 @@
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Play, Film, Loader2 } from "lucide-react";
+import { Trash2, X, Pencil, Check, Play, Film, Loader2, Pause } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
@@ -23,6 +24,7 @@ interface HighlightFullscreenViewProps {
   handleTitleClick: () => void;
   setDeleteDialogOpen: (open: boolean) => void;
   imageEmblaRef: (node: HTMLDivElement | null) => void;
+  imageEmblaApi: EmblaCarouselType | undefined;
   highlightEmblaApi: EmblaCarouselType | undefined;
   handlePrevHighlight: () => void;
   handleNextHighlight: () => void;
@@ -51,6 +53,7 @@ export const HighlightFullscreenView = ({
   handleTitleClick,
   setDeleteDialogOpen,
   imageEmblaRef,
+  imageEmblaApi,
   highlightEmblaApi,
   handlePrevHighlight,
   handleNextHighlight,
@@ -59,6 +62,68 @@ export const HighlightFullscreenView = ({
   setSelectedImageToDelete,
   setDeleteImageDialogOpen,
 }: HighlightFullscreenViewProps) => {
+  const [progress, setProgress] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const currentMedia = currentImages[currentImageIndex];
+  const isVideo = currentMedia?.media_type === 'video';
+
+  // Timer for images (5 seconds)
+  useEffect(() => {
+    if (!viewDialogOpen || isPaused || isVideo || isEditingTitle) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          // Go to next image or highlight
+          if (currentImageIndex < currentImages.length - 1) {
+            imageEmblaApi?.scrollNext();
+          } else if (currentHighlightIndex < displayHighlights.length - 1) {
+            handleNextHighlight();
+          } else {
+            onClose();
+          }
+          return 0;
+        }
+        return prev + 2; // ~5 seconds (100/2 = 50 intervals * 100ms = 5000ms)
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [viewDialogOpen, isPaused, isVideo, isEditingTitle, currentImageIndex, currentImages.length, currentHighlightIndex, displayHighlights.length, imageEmblaApi, handleNextHighlight, onClose]);
+
+  // Reset progress when media changes
+  useEffect(() => {
+    setProgress(0);
+  }, [currentImageIndex, currentHighlightIndex, selectedHighlight?.id]);
+
+  // Handle video end
+  const handleVideoEnded = () => {
+    if (currentImageIndex < currentImages.length - 1) {
+      imageEmblaApi?.scrollNext();
+    } else if (currentHighlightIndex < displayHighlights.length - 1) {
+      handleNextHighlight();
+    } else {
+      onClose();
+    }
+  };
+
+  const handlePauseStart = () => {
+    setIsPaused(true);
+    if (videoRef.current && isVideo) {
+      videoRef.current.pause();
+    }
+  };
+
+  const handlePauseEnd = () => {
+    setIsPaused(false);
+    if (videoRef.current && isVideo) {
+      videoRef.current.play();
+    }
+  };
   // Calculate initial position inside the component to ensure fresh clickOrigin
   const getInitialPosition = () => {
     if (!clickOrigin) {
@@ -118,20 +183,28 @@ export const HighlightFullscreenView = ({
             <div className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto">
               <div className="relative w-full h-full flex flex-col overflow-hidden">
                 {/* Progress bars for images */}
-                {currentImages.length > 1 && (
-                  <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
-                    {currentImages.map((_, index) => (
+                <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
+                  {currentImages.map((media, index) => {
+                    const mediaIsVideo = media.media_type === 'video';
+                    let barProgress = 0;
+                    if (index < currentImageIndex) {
+                      barProgress = 100;
+                    } else if (index === currentImageIndex) {
+                      barProgress = mediaIsVideo ? 100 : progress;
+                    }
+                    return (
                       <div key={index} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-white transition-all duration-200"
+                          className="h-full bg-white"
                           style={{ 
-                            width: index < currentImageIndex ? '100%' : index === currentImageIndex ? '100%' : '0%' 
+                            width: `${barProgress}%`,
+                            transition: mediaIsVideo || index !== currentImageIndex ? 'none' : 'width 100ms linear'
                           }}
                         />
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
 
                 {/* Header */}
                 <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4">
@@ -204,12 +277,13 @@ export const HighlightFullscreenView = ({
                         <div key={media.id} className="flex-none w-full h-full flex items-center justify-center">
                           {media.media_type === 'video' ? (
                             <video
+                              ref={index === currentImageIndex ? videoRef : undefined}
                               src={media.image_url}
                               className="w-full h-full object-contain"
-                              controls
                               autoPlay={index === currentImageIndex}
                               playsInline
                               muted={index !== currentImageIndex}
+                              onEnded={handleVideoEnded}
                             />
                           ) : (
                             <img
@@ -223,8 +297,15 @@ export const HighlightFullscreenView = ({
                     </div>
                   </div>
 
-                  {/* Navigation touch zones - only for highlights when at first/last media */}
-                  <div className="absolute inset-0 flex pointer-events-none z-10">
+                  {/* Navigation touch zones with pause functionality */}
+                  <div 
+                    className="absolute inset-0 flex pointer-events-none z-10"
+                    onMouseDown={handlePauseStart}
+                    onMouseUp={handlePauseEnd}
+                    onMouseLeave={handlePauseEnd}
+                    onTouchStart={handlePauseStart}
+                    onTouchEnd={handlePauseEnd}
+                  >
                     <button 
                       onClick={() => {
                         if (currentImageIndex === 0 && currentHighlightIndex > 0) {
@@ -235,7 +316,7 @@ export const HighlightFullscreenView = ({
                       aria-label="Destaque anterior"
                       style={{ opacity: 0 }}
                     />
-                    <div className="flex-1" />
+                    <div className="flex-1 pointer-events-auto" />
                     <button 
                       onClick={() => {
                         if (currentImageIndex === currentImages.length - 1) {
@@ -251,6 +332,15 @@ export const HighlightFullscreenView = ({
                       style={{ opacity: 0 }}
                     />
                   </div>
+
+                  {/* Pause indicator */}
+                  {isPaused && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                      <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center">
+                        <Pause className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer with gradient */}
