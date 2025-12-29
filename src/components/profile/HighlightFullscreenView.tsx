@@ -162,6 +162,35 @@ export const HighlightFullscreenView = ({
       videoRef.current.play();
     }
   };
+  // Instagram-style tap navigation
+  const handleTapNavigation = (e: React.MouseEvent | React.TouchEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = 'touches' in e 
+      ? e.changedTouches[0].clientX 
+      : e.clientX;
+    const x = clientX - rect.left;
+    const isLeft = x < rect.width / 3;
+    const isRight = x > (rect.width / 3);
+
+    if (isLeft) {
+      // Navigate to previous media/highlight
+      if (currentImageIndex > 0) {
+        imageEmblaApi?.scrollPrev();
+      } else if (currentHighlightIndex > 0) {
+        handlePrevHighlight();
+      }
+    } else if (isRight) {
+      // Navigate to next media/highlight
+      if (currentImageIndex < currentImages.length - 1) {
+        imageEmblaApi?.scrollNext();
+      } else if (currentHighlightIndex < displayHighlights.length - 1) {
+        handleNextHighlight();
+      } else {
+        onClose();
+      }
+    }
+  };
+
   // Calculate initial position inside the component to ensure fresh clickOrigin
   const getInitialPosition = () => {
     if (!clickOrigin) {
@@ -340,41 +369,21 @@ export const HighlightFullscreenView = ({
                     </div>
                   </div>
 
-                  {/* Navigation touch zones with pause functionality */}
+                  {/* Navigation touch zones with pause functionality - Instagram style */}
                   <div 
-                    className="absolute inset-0 flex pointer-events-none z-10"
+                    className="absolute inset-0 z-10"
                     onMouseDown={handlePauseStart}
-                    onMouseUp={handlePauseEnd}
+                    onMouseUp={(e) => {
+                      handlePauseEnd();
+                      handleTapNavigation(e);
+                    }}
                     onMouseLeave={handlePauseEnd}
                     onTouchStart={handlePauseStart}
-                    onTouchEnd={handlePauseEnd}
-                  >
-                    <button 
-                      onClick={() => {
-                        if (currentImageIndex === 0 && currentHighlightIndex > 0) {
-                          handlePrevHighlight();
-                        }
-                      }}
-                      className="w-1/4 h-full focus:outline-none pointer-events-auto"
-                      aria-label="Destaque anterior"
-                      style={{ opacity: 0 }}
-                    />
-                    <div className="flex-1 pointer-events-auto" />
-                    <button 
-                      onClick={() => {
-                        if (currentImageIndex === currentImages.length - 1) {
-                          if (currentHighlightIndex < displayHighlights.length - 1) {
-                            handleNextHighlight();
-                          } else {
-                            onClose();
-                          }
-                        }
-                      }}
-                      className="w-1/4 h-full focus:outline-none pointer-events-auto"
-                      aria-label="Próximo destaque"
-                      style={{ opacity: 0 }}
-                    />
-                  </div>
+                    onTouchEnd={(e) => {
+                      handlePauseEnd();
+                      handleTapNavigation(e);
+                    }}
+                  />
 
                   {/* Pause indicator */}
                   {isPaused && (
