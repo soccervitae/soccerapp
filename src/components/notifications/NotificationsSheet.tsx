@@ -18,7 +18,7 @@ import {
   useMarkAllNotificationsRead,
   type Notification,
 } from "@/hooks/useNotifications";
-import { Bell, Heart, MessageCircle, UserPlus, Check } from "lucide-react";
+import { Bell, MessageCircle, UserPlus, Check } from "lucide-react";
 import { useState } from "react";
 
 interface NotificationsSheetProps {
@@ -28,7 +28,7 @@ interface NotificationsSheetProps {
 const NotificationIcon = ({ type }: { type: string }) => {
   switch (type) {
     case "like":
-      return <Heart className="w-4 h-4 text-red-500" />;
+      return <span className="text-sm">👏</span>;
     case "comment":
       return <MessageCircle className="w-4 h-4 text-blue-500" />;
     case "follow":
@@ -43,7 +43,7 @@ const getNotificationText = (notification: Notification) => {
   
   switch (notification.type) {
     case "like":
-      return `${actorName} curtiu sua publicação`;
+      return `${actorName} aplaudiu sua publicação`;
     case "comment":
       return `${actorName} comentou: "${notification.content?.slice(0, 50)}${(notification.content?.length || 0) > 50 ? '...' : ''}"`;
     case "follow":

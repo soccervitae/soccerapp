@@ -84,12 +84,12 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "heart-pop": {
+        "applause-pop": {
           "0%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.3)" },
           "100%": { transform: "scale(1)" },
         },
-        "heart-burst": {
+        "applause-burst": {
           "0%": { transform: "scale(0)", opacity: "0" },
           "15%": { transform: "scale(1.2)", opacity: "1" },
           "30%": { transform: "scale(0.95)", opacity: "1" },
@@ -110,8 +110,8 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "heart-pop": "heart-pop 0.3s ease-in-out",
-        "heart-burst": "heart-burst 1s ease-out forwards",
+        "applause-pop": "applause-pop 0.3s ease-in-out",
+        "applause-burst": "applause-burst 1s ease-out forwards",
         "splash-logo": "splash-logo 0.6s ease-out forwards",
         "splash-pulse": "splash-pulse 1s ease-in-out infinite",
       },

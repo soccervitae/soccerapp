@@ -361,11 +361,11 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                       />
                     )}
 
-                    {/* Like animation */}
+                    {/* Applause animation */}
                     {showLikeAnimation && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                        <span className="material-symbols-outlined text-red-500 text-[80px] animate-ping">
-                          favorite
+                        <span className="text-[80px] animate-ping">
+                          👏
                         </span>
                       </div>
                     )}
@@ -440,10 +440,9 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                           className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
                         >
                           <span 
-                            className={`material-symbols-outlined text-[24px] transition-colors ${isLiked ? 'text-red-500' : ''}`}
-                            style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}
+                            className={`text-[24px] transition-transform ${isLiked ? 'scale-110' : ''}`}
                           >
-                            favorite
+                            👏
                           </span>
                         </button>
                         <button 
