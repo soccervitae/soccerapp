@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserHighlight } from "@/hooks/useProfile";
 
 interface HighlightViewer {
   id: string;
@@ -87,6 +88,54 @@ export const useMarkHighlightViewed = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["highlight-viewers"] });
       queryClient.invalidateQueries({ queryKey: ["highlight-viewer-count"] });
+    },
+  });
+};
+
+// Check if highlight has new views (views after views_seen_at)
+export const useHighlightsNewViews = (highlights: UserHighlight[], isOwnProfile: boolean) => {
+  return useQuery({
+    queryKey: ["highlights-new-views", highlights.map(h => h.id).join(",")],
+    queryFn: async (): Promise<Record<string, boolean>> => {
+      const result: Record<string, boolean> = {};
+      
+      for (const highlight of highlights) {
+        let query = supabase
+          .from("highlight_views")
+          .select("id", { count: "exact", head: true })
+          .eq("highlight_id", highlight.id);
+
+        // If owner has seen views before, check for newer ones
+        if (highlight.views_seen_at) {
+          query = query.gt("viewed_at", highlight.views_seen_at);
+        }
+
+        const { count } = await query;
+        result[highlight.id] = (count || 0) > 0;
+      }
+      
+      return result;
+    },
+    enabled: highlights.length > 0 && isOwnProfile,
+  });
+};
+
+// Mark views as seen (when owner opens the viewers sheet)
+export const useMarkViewsSeen = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (highlightId: string) => {
+      const { error } = await supabase
+        .from("user_highlights")
+        .update({ views_seen_at: new Date().toISOString() })
+        .eq("id", highlightId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["highlights-new-views"] });
+      queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
     },
   });
 };

@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useHighlightViewers } from "@/hooks/useHighlightInteractions";
+import { useHighlightViewers, useMarkViewsSeen } from "@/hooks/useHighlightInteractions";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -12,6 +13,14 @@ interface HighlightViewersSheetProps {
 
 export const HighlightViewersSheet = ({ highlightId, isOpen, onClose }: HighlightViewersSheetProps) => {
   const { data: viewers = [], isLoading } = useHighlightViewers(highlightId);
+  const markViewsSeen = useMarkViewsSeen();
+
+  // Mark views as seen when sheet opens
+  useEffect(() => {
+    if (isOpen && highlightId) {
+      markViewsSeen.mutate(highlightId);
+    }
+  }, [isOpen, highlightId]);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
