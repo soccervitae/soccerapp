@@ -12,6 +12,7 @@ interface PhotoCropEditorProps {
   initialCropData?: CropData;
   defaultAspectRatioId?: string;
   cropShape?: 'rect' | 'round';
+  hideAspectRatioOptions?: boolean;
   onApply: (cropData: CropData) => void;
   onCancel: () => void;
 }
@@ -21,6 +22,7 @@ export const PhotoCropEditor = ({
   initialCropData,
   defaultAspectRatioId,
   cropShape = 'rect',
+  hideAspectRatioOptions = false,
   onApply,
   onCancel,
 }: PhotoCropEditorProps) => {
@@ -134,25 +136,27 @@ export const PhotoCropEditor = ({
       {/* Aspect Ratio Options */}
       <div className="border-t border-border">
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto">
-            {aspectRatioOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => handleAspectChange(option)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px] ${
-                  selectedAspect.id === option.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[20px]">
-                  {option.icon}
-                </span>
-                <span className="text-[10px] font-medium">{option.label}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2 ml-2">
+          {!hideAspectRatioOptions && (
+            <div className="flex gap-2 overflow-x-auto">
+              {aspectRatioOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleAspectChange(option)}
+                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px] ${
+                    selectedAspect.id === option.id
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {option.icon}
+                  </span>
+                  <span className="text-[10px] font-medium">{option.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={`flex gap-2 ${hideAspectRatioOptions ? 'w-full justify-center' : 'ml-2'}`}>
             <button
               onClick={handleRotate}
               className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
