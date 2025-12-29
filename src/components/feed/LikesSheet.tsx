@@ -155,7 +155,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">
-                volunteer_activism
+                handshake
               </span>
               <p className="text-muted-foreground">Nenhum aplauso ainda</p>
             </div>

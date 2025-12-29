@@ -304,7 +304,7 @@ export const FeedPost = ({
           {/* Applause animation overlay */}
           {showApplauseAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
               <span className="material-symbols-outlined fill-1 text-white text-[100px] animate-applause-burst drop-shadow-lg">
-                volunteer_activism
+                handshake
               </span>
             </div>}
 
@@ -364,7 +364,7 @@ export const FeedPost = ({
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${post.liked_by_user ? 'text-amber-500' : 'text-foreground hover:text-muted-foreground'}`}>
             <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-applause-pop' : ''}`}>
-              volunteer_activism
+              handshake
             </span>
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
           </button>
