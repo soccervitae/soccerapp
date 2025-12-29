@@ -58,9 +58,7 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
     transition,
   };
 
-  const imageCount = highlight.images?.length || 1;
   const coverImage = highlight.images?.[0]?.image_url || highlight.image_url;
-  const hasVideo = highlight.images?.some(img => img.media_type === 'video');
 
   return (
     <div
@@ -77,16 +75,6 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
           style={{ backgroundImage: `url('${coverImage}')` }}
           aria-label={highlight.title}
         />
-        {hasVideo && (
-          <div className="absolute bottom-0 left-0 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center">
-            <Play className="w-2.5 h-2.5 text-white fill-white" />
-          </div>
-        )}
-        {imageCount > 1 && (
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
-            {imageCount}
-          </div>
-        )}
         {isOwnProfile && (
           <div
             {...attributes}
