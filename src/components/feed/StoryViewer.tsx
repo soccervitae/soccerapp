@@ -7,16 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
 interface StoryViewerProps {
   groupedStories: GroupedStories[];
@@ -471,26 +462,18 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
         </>
       )}
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir replay?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O replay será excluído permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteStory}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete confirmation sheet */}
+      <ResponsiveAlertModal
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Excluir replay?"
+        description="Esta ação não pode ser desfeita. O replay será excluído permanentemente."
+        cancelText="Cancelar"
+        confirmText="Excluir"
+        onConfirm={handleDeleteStory}
+        confirmVariant="destructive"
+        zIndex={70}
+      />
     </>
   );
 };
