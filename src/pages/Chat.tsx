@@ -28,6 +28,7 @@ const Chat = () => {
   const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -88,10 +89,23 @@ const Chat = () => {
     }
   }, [messages, fetchReactionsForMessages]);
 
+  // Reset initial load when conversation changes
+  useEffect(() => {
+    setIsInitialLoad(true);
+  }, [conversationId]);
+
   // Scroll to bottom on new messages or typing
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isAnyoneTyping]);
+    if (messages.length > 0 || isAnyoneTyping) {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: isInitialLoad ? "instant" : "smooth" 
+      });
+      
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
+    }
+  }, [messages, isAnyoneTyping, isInitialLoad]);
 
   const handleTyping = useCallback(() => {
     startTyping();
