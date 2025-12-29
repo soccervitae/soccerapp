@@ -82,13 +82,12 @@ export const PhotoCropEditor = ({
           Cancelar
         </button>
         <span className="text-base font-bold text-foreground">Recortar</span>
-        <Button
+        <button
           onClick={handleApply}
-          size="sm"
-          className="rounded font-semibold text-xs h-8 px-4"
+          className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
         >
           Aplicar
-        </Button>
+        </button>
       </div>
 
       {/* Crop Area */}
