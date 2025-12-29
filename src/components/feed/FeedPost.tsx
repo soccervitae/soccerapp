@@ -7,6 +7,7 @@ import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
 import { PostMediaViewer } from "./PostMediaViewer";
+import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -58,6 +59,7 @@ export const FeedPost = ({
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const lastTapRef = useRef<number>(0);
   const {
     data: postTags = []
@@ -374,7 +376,10 @@ export const FeedPost = ({
           </div>
           <div className="flex items-center justify-center relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
-            <button className="flex items-center justify-center p-3 text-foreground hover:text-muted-foreground transition-colors">
+            <button 
+              onClick={() => setShareSheetOpen(true)}
+              className="flex items-center justify-center p-3 text-foreground hover:text-muted-foreground transition-colors"
+            >
               <span className="material-symbols-outlined text-[24px]">send</span>
             </button>
           </div>
@@ -471,5 +476,16 @@ export const FeedPost = ({
 
       {/* Media Viewer */}
       <PostMediaViewer mediaUrls={mediaUrls} mediaType={post.media_type} initialIndex={selectedMediaIndex} isOpen={mediaViewerOpen} onClose={() => setMediaViewerOpen(false)} originRect={clickOrigin} />
+
+      {/* Share to Chat Sheet */}
+      <ShareToChatSheet
+        open={shareSheetOpen}
+        onOpenChange={setShareSheetOpen}
+        contentType="post"
+        contentId={post.id}
+        contentUrl={`${window.location.origin}/post/${post.id}`}
+        contentPreview={mediaUrls[0]}
+        contentTitle={post.content.substring(0, 50)}
+      />
     </article>;
 };

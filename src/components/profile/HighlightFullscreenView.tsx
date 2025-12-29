@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, Share2, Link, Copy } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, Share2, Link, Copy, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 
 interface HighlightFullscreenViewProps {
   viewDialogOpen: boolean;
@@ -65,6 +66,7 @@ export const HighlightFullscreenView = ({
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [shareToChatSheetOpen, setShareToChatSheetOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const currentMedia = currentImages[currentImageIndex];
@@ -450,6 +452,18 @@ export const HighlightFullscreenView = ({
               </SheetHeader>
               <div className="flex flex-col gap-3 py-4">
                 <button 
+                  onClick={() => {
+                    setShareSheetOpen(false);
+                    setShareToChatSheetOpen(true);
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="font-medium">Enviar no chat</span>
+                </button>
+                <button 
                   onClick={handleCopyLink}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
                 >
@@ -505,6 +519,17 @@ export const HighlightFullscreenView = ({
           </Sheet>
         </>
       )}
+
+      {/* Share to Chat Sheet */}
+      <ShareToChatSheet
+        open={shareToChatSheetOpen}
+        onOpenChange={setShareToChatSheetOpen}
+        contentType="highlight"
+        contentId={selectedHighlight?.id || ''}
+        contentUrl={shareUrl}
+        contentPreview={currentImages[0]?.image_url}
+        contentTitle={selectedHighlight?.title}
+      />
     </AnimatePresence>
   );
 };

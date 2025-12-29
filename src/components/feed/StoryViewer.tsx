@@ -8,6 +8,8 @@ import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
+import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
+import { Send } from "lucide-react";
 
 interface StoryViewerProps {
   groupedStories: GroupedStories[];
@@ -63,6 +65,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showViewersSheet, setShowViewersSheet] = useState(false);
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
@@ -436,6 +439,12 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                         >
                           <span className="material-symbols-outlined text-[24px]">send</span>
                         </button>
+                        <button 
+                          onClick={() => setShareSheetOpen(true)}
+                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                        >
+                          <Send className="w-5 h-5" />
+                        </button>
                       </div>
                     )}
                   </div>
@@ -474,6 +483,18 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
         confirmVariant="destructive"
         zIndex={70}
       />
+
+      {/* Share to Chat Sheet */}
+      {currentStory && (
+        <ShareToChatSheet
+          open={shareSheetOpen}
+          onOpenChange={setShareSheetOpen}
+          contentType="story"
+          contentId={currentStory.id}
+          contentUrl={`${window.location.origin}/story/${currentStory.id}`}
+          contentPreview={currentStory.media_url}
+        />
+      )}
     </>
   );
 };
