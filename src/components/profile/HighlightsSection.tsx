@@ -5,16 +5,7 @@ import { AddHighlightSheet } from "./AddHighlightSheet";
 import { SelectHighlightSheet } from "./SelectHighlightSheet";
 import { HighlightFullscreenView } from "./HighlightFullscreenView";
 import { UserHighlight, HighlightImage, useDeleteHighlight, useReorderHighlights, useUpdateHighlight, useAddHighlightImage, useDeleteHighlightImage } from "@/hooks/useProfile";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -579,51 +570,33 @@ export const HighlightsSection = ({
         setDeleteImageDialogOpen={setDeleteImageDialogOpen}
       />
 
-      {/* Delete Highlight Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover destaque?</AlertDialogTitle>
-            <AlertDialogDescription>
-              O destaque "{selectedHighlight?.title}" e todas as suas imagens serão removidos permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Highlight Confirmation Sheet */}
+      <ResponsiveAlertModal
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Remover destaque?"
+        description={`O destaque "${selectedHighlight?.title}" e todas as suas imagens serão removidos permanentemente.`}
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={handleDelete}
+        confirmVariant="destructive"
+        zIndex={70}
+      />
 
-      {/* Delete Image Confirmation Dialog */}
-      <AlertDialog open={deleteImageDialogOpen} onOpenChange={setDeleteImageDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover imagem?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {currentImages.length <= 1 
-                ? "Esta é a única imagem do destaque. Remover ela irá deletar o destaque inteiro."
-                : "Esta imagem será removida do destaque."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteImage}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Image Confirmation Sheet */}
+      <ResponsiveAlertModal
+        open={deleteImageDialogOpen}
+        onOpenChange={setDeleteImageDialogOpen}
+        title="Remover imagem?"
+        description={currentImages.length <= 1 
+          ? "Esta é a única imagem do destaque. Remover ela irá deletar o destaque inteiro."
+          : "Esta imagem será removida do destaque."}
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={handleDeleteImage}
+        confirmVariant="destructive"
+        zIndex={70}
+      />
     </section>
   );
 };

@@ -189,6 +189,7 @@ interface ResponsiveAlertModalProps {
   confirmText?: string;
   onConfirm: () => void;
   confirmVariant?: "default" | "destructive";
+  zIndex?: number;
 }
 
 export function ResponsiveAlertModal({
@@ -200,13 +201,14 @@ export function ResponsiveAlertModal({
   confirmText = "Confirmar",
   onConfirm,
   confirmVariant = "default",
+  zIndex,
 }: ResponsiveAlertModalProps) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-4 pb-6">
+        <DrawerContent className="px-4 pb-6" style={zIndex ? { zIndex } : undefined}>
           <DrawerHeader className="text-left">
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
@@ -232,7 +234,7 @@ export function ResponsiveAlertModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent style={zIndex ? { zIndex } : undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
