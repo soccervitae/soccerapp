@@ -385,7 +385,7 @@ const EditProfile = () => {
 
       <form id="edit-profile-form" onSubmit={handleSubmit} className="pt-14 pb-8">
         {/* Cover Photo */}
-        <div className="relative">
+        <div className="relative mb-14">
           <div className="w-full h-36 bg-muted overflow-hidden">
             <img
               src={coverPreview || profile?.cover_url || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"}
@@ -408,32 +408,32 @@ const EditProfile = () => {
             onChange={handleCoverChange}
             className="hidden"
           />
-        </div>
 
-        {/* Avatar */}
-        <div className="flex justify-center -mt-12 relative z-10">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
-              <img
-                src={avatarPreview || profile?.avatar_url || "/placeholder.svg"}
-                alt="Avatar"
-                className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
+          {/* Avatar - positioned inside cover area, below edit icon */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-10">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
+                <img
+                  src={avatarPreview || profile?.avatar_url || "/placeholder.svg"}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleAvatarIconClick}
+                className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
               />
             </div>
-            <button
-              type="button"
-              onClick={handleAvatarIconClick}
-              className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
-            >
-              <Camera className="w-4 h-4" />
-            </button>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="hidden"
-            />
           </div>
         </div>
 
