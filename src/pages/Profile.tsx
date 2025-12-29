@@ -95,6 +95,7 @@ const Profile = () => {
             highlights={highlights || []} 
             isLoading={highlightsLoading}
             isOwnProfile={isOwnProfile}
+            profileUsername={profile.username}
           />
           <PostsGrid 
             posts={posts || []} 
