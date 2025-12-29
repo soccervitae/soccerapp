@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, Share2, Link, Copy, MessageCircle } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, Share2, Link, Copy, MessageCircle, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
+import { useMarkHighlightViewed, useHighlightViewerCount } from "@/hooks/useHighlightInteractions";
+import { HighlightViewersSheet } from "@/components/profile/HighlightViewersSheet";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HighlightFullscreenViewProps {
   viewDialogOpen: boolean;
@@ -67,7 +70,21 @@ export const HighlightFullscreenView = ({
   const [isPaused, setIsPaused] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [shareToChatSheetOpen, setShareToChatSheetOpen] = useState(false);
+  const [viewersSheetOpen, setViewersSheetOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  
+  const { user } = useAuth();
+  const markViewed = useMarkHighlightViewed();
+  const { data: viewerCount = 0 } = useHighlightViewerCount(
+    isOwnProfile ? selectedHighlight?.id : undefined
+  );
+  
+  // Mark highlight as viewed when opened (only if not own profile)
+  useEffect(() => {
+    if (viewDialogOpen && selectedHighlight && user && !isOwnProfile) {
+      markViewed.mutate(selectedHighlight.id);
+    }
+  }, [viewDialogOpen, selectedHighlight?.id, user, isOwnProfile]);
 
   const currentMedia = currentImages[currentImageIndex];
   const isVideo = currentMedia?.media_type === 'video';
@@ -398,20 +415,30 @@ export const HighlightFullscreenView = ({
                 {/* Footer with gradient */}
                 <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
                   {isOwnProfile ? (
-                    // Owner footer: action buttons
-                    <div className="flex items-center justify-center gap-4">
-                      {currentImages.length > 1 && (
-                        <button 
-                          onClick={() => {
-                            setSelectedImageToDelete(currentImages[currentImageIndex]);
-                            setDeleteImageDialogOpen(true);
-                          }}
-                          className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors"
-                        >
-                          <X className="w-5 h-5" />
-                          <span className="text-sm font-medium">Remover mídia</span>
-                        </button>
-                      )}
+                    // Owner footer: views count and action buttons
+                    <div className="flex items-center justify-between">
+                      <button 
+                        onClick={() => setViewersSheetOpen(true)}
+                        className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+                      >
+                        <Eye className="w-5 h-5" />
+                        <span className="text-sm font-medium">{viewerCount}</span>
+                      </button>
+                      
+                      <div className="flex items-center gap-2">
+                        {currentImages.length > 1 && (
+                          <button 
+                            onClick={() => {
+                              setSelectedImageToDelete(currentImages[currentImageIndex]);
+                              setDeleteImageDialogOpen(true);
+                            }}
+                            className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors"
+                          >
+                            <X className="w-5 h-5" />
+                            <span className="text-sm font-medium">Remover mídia</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     // Visitor footer: highlight dots
@@ -539,6 +566,15 @@ export const HighlightFullscreenView = ({
         contentPreview={currentImages[0]?.image_url}
         contentTitle={selectedHighlight?.title}
       />
+
+      {/* Highlight Viewers Sheet */}
+      {isOwnProfile && selectedHighlight && (
+        <HighlightViewersSheet
+          highlightId={selectedHighlight.id}
+          isOpen={viewersSheetOpen}
+          onClose={() => setViewersSheetOpen(false)}
+        />
+      )}
     </AnimatePresence>
   );
 };
