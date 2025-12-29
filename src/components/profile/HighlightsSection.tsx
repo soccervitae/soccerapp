@@ -575,8 +575,6 @@ export const HighlightsSection = ({
         highlightEmblaApi={highlightEmblaApi}
         handlePrevHighlight={handlePrevHighlight}
         handleNextHighlight={handleNextHighlight}
-        isAddingImage={isAddingImage}
-        handleAddMedia={handleAddMedia}
         setSelectedImageToDelete={setSelectedImageToDelete}
         setDeleteImageDialogOpen={setDeleteImageDialogOpen}
       />

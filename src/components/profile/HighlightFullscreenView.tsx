@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Play, Film, Loader2, Pause } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
@@ -28,8 +28,6 @@ interface HighlightFullscreenViewProps {
   highlightEmblaApi: EmblaCarouselType | undefined;
   handlePrevHighlight: () => void;
   handleNextHighlight: () => void;
-  isAddingImage: boolean;
-  handleAddMedia: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setSelectedImageToDelete: (image: HighlightImage) => void;
   setDeleteImageDialogOpen: (open: boolean) => void;
 }
@@ -57,8 +55,6 @@ export const HighlightFullscreenView = ({
   highlightEmblaApi,
   handlePrevHighlight,
   handleNextHighlight,
-  isAddingImage,
-  handleAddMedia,
   setSelectedImageToDelete,
   setDeleteImageDialogOpen,
 }: HighlightFullscreenViewProps) => {
@@ -246,7 +242,6 @@ export const HighlightFullscreenView = ({
                         </button>
                       )}
                       <p className="text-white/60 text-xs">
-                        {currentImages.length > 1 && `${currentImageIndex + 1}/${currentImages.length} • `}
                         {currentHighlightIndex + 1}/{displayHighlights.length} destaques
                       </p>
                     </div>
@@ -348,23 +343,6 @@ export const HighlightFullscreenView = ({
                   {isOwnProfile ? (
                     // Owner footer: action buttons
                     <div className="flex items-center justify-center gap-4">
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          accept="image/*,video/*"
-                          onChange={handleAddMedia}
-                          className="hidden"
-                          disabled={isAddingImage}
-                        />
-                        <span className="flex items-center gap-2 text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors cursor-pointer">
-                          {isAddingImage ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : (
-                            <Film className="w-5 h-5" />
-                          )}
-                          <span className="text-sm font-medium">Adicionar mídia</span>
-                        </span>
-                      </label>
                       {currentImages.length > 1 && (
                         <button 
                           onClick={() => {
