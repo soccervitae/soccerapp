@@ -501,6 +501,7 @@ export const HighlightsSection = ({
         handleTitleClick={handleTitleClick}
         setDeleteDialogOpen={setDeleteDialogOpen}
         imageEmblaRef={imageEmblaRef}
+        imageEmblaApi={imageEmblaApi}
         highlightEmblaApi={highlightEmblaApi}
         handlePrevHighlight={handlePrevHighlight}
         handleNextHighlight={handleNextHighlight}
