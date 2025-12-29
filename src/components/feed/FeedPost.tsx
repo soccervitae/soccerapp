@@ -52,7 +52,7 @@ export const FeedPost = ({
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTags, setShowTags] = useState(false);
-  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [showApplauseAnimation, setShowApplauseAnimation] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
@@ -113,8 +113,8 @@ export const FeedPost = ({
       if (!post.liked_by_user) {
         handleLike();
       }
-      setShowHeartAnimation(true);
-      setTimeout(() => setShowHeartAnimation(false), 1000);
+      setShowApplauseAnimation(true);
+      setTimeout(() => setShowApplauseAnimation(false), 1000);
     } else {
       // Single tap - open media viewer
       const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -301,10 +301,10 @@ export const FeedPost = ({
                   </button>)}
             </>}
 
-          {/* Heart animation overlay */}
-          {showHeartAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <span className="material-symbols-outlined fill-1 text-white text-[100px] animate-heart-burst drop-shadow-lg">
-                favorite
+          {/* Applause animation overlay */}
+          {showApplauseAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+              <span className="text-[100px] animate-applause-burst drop-shadow-lg">
+                👏
               </span>
             </div>}
 
@@ -342,7 +342,7 @@ export const FeedPost = ({
             
             {/* Text */}
             <p className="text-sm text-foreground">
-              Curtido por{" "}
+              Aplaudido por{" "}
               <span className="font-semibold group-hover:underline" onClick={e => {
             e.stopPropagation();
             navigate(`/${post.recent_likes[0].username}`);
@@ -362,9 +362,9 @@ export const FeedPost = ({
       {/* Actions */}
       <div className="px-4 pt-3 py-[4px]">
         <div className="grid grid-cols-4">
-          <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${post.liked_by_user ? 'text-red-500' : 'text-foreground hover:text-muted-foreground'}`}>
-            <span className={`material-symbols-outlined text-[24px] ${post.liked_by_user ? 'fill-1' : ''} ${isLikeAnimating ? 'animate-heart-pop' : ''}`}>
-              {post.liked_by_user ? 'favorite' : 'favorite_border'}
+          <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${post.liked_by_user ? 'text-amber-500' : 'text-foreground hover:text-muted-foreground'}`}>
+            <span className={`text-[24px] ${isLikeAnimating ? 'animate-applause-pop' : ''}`}>
+              👏
             </span>
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
           </button>

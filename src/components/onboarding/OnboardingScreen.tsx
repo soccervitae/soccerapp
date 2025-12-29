@@ -26,13 +26,13 @@ const slides: OnboardingSlide[] = [
   {
     icon: <MessageCircle className="w-16 h-16" />,
     title: "Compartilhe momentos",
-    description: "Publique fotos, vídeos e atualizações. Interaja com a comunidade através de curtidas e comentários.",
+    description: "Publique fotos, vídeos e atualizações. Interaja com a comunidade através de aplausos e comentários.",
     color: "from-blue-500/20 to-blue-500/5",
   },
   {
     icon: <Bell className="w-16 h-16" />,
     title: "Fique por dentro",
-    description: "Receba notificações de novos seguidores, curtidas e mensagens. Nunca perca uma oportunidade.",
+    description: "Receba notificações de novos seguidores, aplausos e mensagens. Nunca perca uma oportunidade.",
     color: "from-purple-500/20 to-purple-500/5",
   },
 ];

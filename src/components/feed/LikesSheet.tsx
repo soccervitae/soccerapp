@@ -82,7 +82,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[70vh] rounded-t-xl">
         <SheetHeader className="border-b border-border pb-3">
-          <SheetTitle className="text-center">Curtidas</SheetTitle>
+          <SheetTitle className="text-center">Aplausos</SheetTitle>
         </SheetHeader>
 
         <div className="overflow-y-auto h-[calc(100%-60px)] pt-2">
@@ -154,10 +154,10 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">
-                favorite_border
+              <span className="text-4xl mb-2">
+                👏
               </span>
-              <p className="text-muted-foreground">Nenhuma curtida ainda</p>
+              <p className="text-muted-foreground">Nenhum aplauso ainda</p>
             </div>
           )}
         </div>
