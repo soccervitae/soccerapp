@@ -72,20 +72,25 @@ export const ShareToChatSheet = ({
         throw new Error("Não foi possível criar a conversa");
       }
 
-      // Create the shared message
-      const messageContent = contentTitle
-        ? `📸 Compartilhei um(a) ${getContentLabel()}: "${contentTitle}"\n${contentUrl}`
-        : `📸 Compartilhei um(a) ${getContentLabel()}\n${contentUrl}`;
+      // Create the shared message with structured JSON format
+      const sharedContent = JSON.stringify({
+        type: "shared_content",
+        contentType: contentType,
+        contentId: contentId,
+        url: contentUrl,
+        preview: contentPreview || null,
+        title: contentTitle || null,
+      });
 
-      // Send the message
+      // Send the message with special media_type
       const { error: messageError } = await supabase
         .from("messages")
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
-          content: messageContent,
-          media_url: contentPreview || null,
-          media_type: contentPreview ? "image" : null,
+          content: sharedContent,
+          media_url: null,
+          media_type: "shared_content",
         });
 
       if (messageError) throw messageError;
