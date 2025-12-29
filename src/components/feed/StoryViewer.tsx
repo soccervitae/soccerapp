@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useViewStory, useLikeStory, useDeleteStory, type GroupedStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStoryLikeStatus, useSendStoryReply, useStoryViewerCount, useStoryReplyCount } from "@/hooks/useStoryInteractions";
@@ -228,21 +228,6 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     };
   };
 
-  // Drag values for swipe-to-close
-  const dragY = useMotionValue(0);
-  const dragOpacity = useTransform(dragY, [0, 200], [1, 0.5]);
-  const dragScale = useTransform(dragY, [0, 200], [1, 0.85]);
-  const dragBorderRadius = useTransform(dragY, [0, 100], [0, 24]);
-  const overlayOpacity = useTransform(dragY, [0, 200], [0.95, 0.3]);
-
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > 100 || info.velocity.y > 500) {
-      onClose();
-    } else {
-      // Spring back to original position
-      dragY.set(0);
-    }
-  };
 
   return (
     <>
@@ -253,7 +238,6 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
             <motion.div
               key="story-overlay"
               className="fixed inset-0 bg-black z-50"
-              style={{ opacity: overlayOpacity }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.95 }}
               exit={{ opacity: 0 }}
@@ -265,17 +249,6 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
             <motion.div
               key="story-content"
               className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
-              style={{ 
-                y: dragY, 
-                opacity: dragOpacity, 
-                scale: dragScale,
-                borderRadius: dragBorderRadius,
-              }}
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.7 }}
-              dragDirectionLock
-              onDragEnd={handleDragEnd}
               initial={getInitialPosition()}
               animate={{ 
                 opacity: 1, 
