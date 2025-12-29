@@ -172,6 +172,18 @@ export const ProfileInfo = ({
           </p>}
       </div>
 
+      {/* Stats Row */}
+      {followStats && <div className="flex items-center gap-6 py-2">
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+            <span className="text-foreground font-bold">{followStats.followers}</span>
+            <span className="text-muted-foreground text-xs">Torcedores</span>
+          </button>
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+            <span className="text-foreground font-bold">{followStats.following}</span>
+            <span className="text-muted-foreground text-xs">Torcendo</span>
+          </button>
+        </div>}
+
       {/* Physical Stats */}
       <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full mt-2 py-[4px]">
         <div className="flex flex-col gap-1 p-2 text-center">
@@ -191,18 +203,6 @@ export const ProfileInfo = ({
           <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
         </div>
       </div>
-
-      {/* Stats Row */}
-      {followStats && <div className="flex items-center gap-6 py-2">
-          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
-            <span className="text-foreground font-bold">{followStats.followers}</span>
-            <span className="text-muted-foreground text-xs">Torcedores</span>
-          </button>
-          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
-            <span className="text-foreground font-bold">{followStats.following}</span>
-            <span className="text-muted-foreground text-xs">Torcendo</span>
-          </button>
-        </div>}
 
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
