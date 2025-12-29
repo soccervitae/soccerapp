@@ -34,6 +34,7 @@ interface HighlightsSectionProps {
   highlights: UserHighlight[];
   isLoading?: boolean;
   isOwnProfile?: boolean;
+  profileUsername?: string;
 }
 
 interface SortableHighlightItemProps {
@@ -106,7 +107,8 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, onClick }: SortableHig
 export const HighlightsSection = ({ 
   highlights = [], 
   isLoading = false, 
-  isOwnProfile = false 
+  isOwnProfile = false,
+  profileUsername,
 }: HighlightsSectionProps) => {
   const { user } = useAuth();
   const [selectSheetOpen, setSelectSheetOpen] = useState(false);
@@ -568,6 +570,7 @@ export const HighlightsSection = ({
         handleNextHighlight={handleNextHighlight}
         setSelectedImageToDelete={setSelectedImageToDelete}
         setDeleteImageDialogOpen={setDeleteImageDialogOpen}
+        profileUsername={profileUsername}
       />
 
       {/* Delete Highlight Confirmation Sheet */}
