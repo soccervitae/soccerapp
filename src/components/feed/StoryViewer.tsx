@@ -28,6 +28,31 @@ interface StoryViewerProps {
 
 type TransitionDirection = "next" | "prev" | null;
 
+const formatTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  
+  if (diffMinutes < 1) return "Agora";
+  if (diffMinutes < 60) return `${diffMinutes} min`;
+  if (diffHours < 24) return `${diffHours} h`;
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) {
+    return `Ontem, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+  
+  return date.toLocaleDateString('pt-BR', { 
+    day: '2-digit', 
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(',', ' às');
+};
+
 export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose, originRect }: StoryViewerProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -296,7 +321,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                       </div>
                       <div>
                         <p className="text-white text-sm font-semibold">{currentGroup.fullName || currentGroup.username}</p>
-                        <p className="text-white/60 text-xs">Agora</p>
+                        <p className="text-white/60 text-xs">{formatTimeAgo(currentStory.created_at)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
