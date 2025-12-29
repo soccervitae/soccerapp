@@ -333,7 +333,7 @@ export const FeedPost = ({
 
       {/* Liked by section */}
       {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="px-4 pt-2 pb-1">
-          <button onClick={() => setIsLikesSheetOpen(true)} className="flex items-center gap-2 group">
+          <button onClick={() => setIsLikesSheetOpen(true)} className="flex items-center gap-2 group text-left">
             {/* Stacked avatars */}
             <div className="flex -space-x-2">
               {post.recent_likes.slice(0, 3).map((like, index) => <img key={like.user_id} src={like.avatar_url || "/placeholder.svg"} alt={like.username} className="w-6 h-6 rounded-full border-2 border-background object-cover" style={{
