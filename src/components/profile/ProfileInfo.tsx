@@ -172,8 +172,8 @@ export const ProfileInfo = ({
           </p>}
       </div>
 
-      {/* Stats Row */}
-      {followStats && <div className="flex items-center gap-6">
+      {/* Stats Row - Only visible for logged in users */}
+      {followStats && user && <div className="flex items-center gap-6">
           <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
             <span className="text-foreground font-bold">{followStats.followers}</span>
             <span className="text-muted-foreground text-xs">Torcedores</span>
