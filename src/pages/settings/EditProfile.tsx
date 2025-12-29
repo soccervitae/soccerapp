@@ -684,7 +684,7 @@ const EditProfile = () => {
             imageUrl={imageToCrop}
             defaultAspectRatioId={cropType === 'cover' ? 'landscape' : 'square'}
             cropShape={cropType === 'avatar' ? 'round' : 'rect'}
-            hideAspectRatioOptions={cropType === 'avatar'}
+            hideAspectRatioOptions
             onApply={handleCropApply}
             onCancel={handleCropCancel}
           />
