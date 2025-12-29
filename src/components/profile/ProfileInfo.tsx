@@ -193,14 +193,14 @@ export const ProfileInfo = ({
       </div>
 
       {/* Stats Row */}
-      {followStats && <div className="flex items-center gap-8 py-2">
-          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="text-center hover:opacity-70 transition-opacity">
-            <p className="text-foreground font-bold">{followStats.followers}</p>
-            <p className="text-muted-foreground text-xs">Torcedores</p>
+      {followStats && <div className="flex items-center gap-6 py-2">
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+            <span className="text-foreground font-bold">{followStats.followers}</span>
+            <span className="text-muted-foreground text-xs">Torcedores</span>
           </button>
-          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="text-center hover:opacity-70 transition-opacity">
-            <p className="text-foreground font-bold">{followStats.following}</p>
-            <p className="text-muted-foreground text-xs">Torcendo</p>
+          <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+            <span className="text-foreground font-bold">{followStats.following}</span>
+            <span className="text-muted-foreground text-xs">Torcendo</span>
           </button>
         </div>}
 
