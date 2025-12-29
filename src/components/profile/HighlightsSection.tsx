@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { AddHighlightSheet } from "./AddHighlightSheet";
+import { SelectHighlightSheet } from "./SelectHighlightSheet";
 import { HighlightFullscreenView } from "./HighlightFullscreenView";
 import { UserHighlight, HighlightImage, useDeleteHighlight, useReorderHighlights, useUpdateHighlight, useAddHighlightImage, useDeleteHighlightImage } from "@/hooks/useProfile";
 import {
@@ -117,6 +118,7 @@ export const HighlightsSection = ({
   isOwnProfile = false 
 }: HighlightsSectionProps) => {
   const { user } = useAuth();
+  const [selectSheetOpen, setSelectSheetOpen] = useState(false);
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteImageDialogOpen, setDeleteImageDialogOpen] = useState(false);
@@ -130,6 +132,8 @@ export const HighlightsSection = ({
   const [editedTitle, setEditedTitle] = useState("");
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
   const [isAddingImage, setIsAddingImage] = useState(false);
+  const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
+  const addMediaInputRef = useRef<HTMLInputElement>(null);
   
   const deleteHighlight = useDeleteHighlight();
   const reorderHighlights = useReorderHighlights();
@@ -317,6 +321,54 @@ export const HighlightsSection = ({
     }
   };
 
+  // Handle adding media to an existing highlight from the selection sheet
+  const handleAddMediaToExistingHighlight = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedHighlightForMedia || !user) return;
+
+    setIsAddingImage(true);
+    const isVideo = file.type.startsWith('video/');
+    const mediaType = isVideo ? 'video' : 'image';
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("post-media")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("post-media")
+        .getPublicUrl(fileName);
+
+      await addHighlightImage.mutateAsync({
+        highlightId: selectedHighlightForMedia.id,
+        imageUrl: publicUrl,
+        mediaType,
+      });
+
+      toast.success(isVideo ? "Vídeo adicionado ao destaque!" : "Foto adicionada ao destaque!");
+    } catch (error) {
+      console.error("Error adding media:", error);
+      toast.error("Erro ao adicionar mídia");
+    } finally {
+      setIsAddingImage(false);
+      setSelectedHighlightForMedia(null);
+      e.target.value = "";
+    }
+  };
+
+  const handleSelectExistingHighlight = (highlight: UserHighlight) => {
+    setSelectedHighlightForMedia(highlight);
+    // Trigger file input
+    setTimeout(() => {
+      addMediaInputRef.current?.click();
+    }, 100);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -447,7 +499,7 @@ export const HighlightsSection = ({
         {isOwnProfile && canAddMore && (
           <div 
             className="flex-none w-20 flex flex-col gap-2 items-center cursor-pointer"
-            onClick={() => setAddSheetOpen(true)}
+            onClick={() => setSelectSheetOpen(true)}
           >
             <div className="w-16 h-16 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center hover:bg-muted/80 transition-colors">
               <Plus className="w-6 h-6 text-muted-foreground" />
@@ -475,6 +527,24 @@ export const HighlightsSection = ({
           highlightItems
         )}
       </div>
+
+      {/* Hidden input for adding media to existing highlight */}
+      <input
+        ref={addMediaInputRef}
+        type="file"
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleAddMediaToExistingHighlight}
+      />
+
+      {/* Select Highlight Sheet */}
+      <SelectHighlightSheet
+        open={selectSheetOpen}
+        onOpenChange={setSelectSheetOpen}
+        highlights={displayHighlights}
+        onSelectHighlight={handleSelectExistingHighlight}
+        onCreateNew={() => setAddSheetOpen(true)}
+      />
 
       <AddHighlightSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
 
