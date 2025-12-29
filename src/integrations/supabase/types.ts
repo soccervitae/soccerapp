@@ -320,6 +320,42 @@ export type Database = {
           },
         ]
       }
+      highlight_views: {
+        Row: {
+          highlight_id: string
+          id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          highlight_id: string
+          id?: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          highlight_id?: string
+          id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlight_views_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "user_highlights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "highlight_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
