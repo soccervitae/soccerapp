@@ -1,14 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, Share2, Link, Copy, MessageCircle, Eye } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, Share2, Copy, MessageCircle, Eye, Heart, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
-import { useMarkHighlightViewed, useHighlightViewerCount } from "@/hooks/useHighlightInteractions";
+import { 
+  useMarkHighlightViewed, 
+  useHighlightViewerCount,
+  useHighlightLikeStatus,
+  useToggleHighlightLike,
+  useSendHighlightReply,
+  useHighlightReplyCount
+} from "@/hooks/useHighlightInteractions";
 import { HighlightViewersSheet } from "@/components/profile/HighlightViewersSheet";
+import { HighlightRepliesSheet } from "@/components/profile/HighlightRepliesSheet";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface HighlightFullscreenViewProps {
@@ -71,11 +79,25 @@ export const HighlightFullscreenView = ({
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [shareToChatSheetOpen, setShareToChatSheetOpen] = useState(false);
   const [viewersSheetOpen, setViewersSheetOpen] = useState(false);
+  const [repliesSheetOpen, setRepliesSheetOpen] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const replyInputRef = useRef<HTMLInputElement | null>(null);
   
   const { user } = useAuth();
   const markViewed = useMarkHighlightViewed();
   const { data: viewerCount = 0 } = useHighlightViewerCount(
+    isOwnProfile ? selectedHighlight?.id : undefined
+  );
+  
+  // Likes and replies hooks (for visitors)
+  const { data: isLiked = false } = useHighlightLikeStatus(
+    !isOwnProfile ? selectedHighlight?.id : undefined
+  );
+  const toggleLike = useToggleHighlightLike();
+  const sendReply = useSendHighlightReply();
+  const { data: replyCount = 0 } = useHighlightReplyCount(
     isOwnProfile ? selectedHighlight?.id : undefined
   );
   
@@ -121,6 +143,44 @@ export const HighlightFullscreenView = ({
       setShareSheetOpen(false);
     } catch {
       toast.error("Erro ao copiar link");
+    }
+  };
+
+  // Handle like action
+  const handleLike = () => {
+    if (!selectedHighlight || !user) return;
+    
+    toggleLike.mutate({ highlightId: selectedHighlight.id, isLiked });
+    
+    if (!isLiked) {
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1000);
+    }
+  };
+
+  // Handle reply submit
+  const handleReplySubmit = () => {
+    if (!replyText.trim() || !selectedHighlight) return;
+    
+    sendReply.mutate({ highlightId: selectedHighlight.id, content: replyText.trim() });
+    setReplyText("");
+    replyInputRef.current?.blur();
+  };
+
+  // Handle double tap to like
+  const lastTapRef = useRef<number>(0);
+  const handleDoubleTap = (e: React.MouseEvent | React.TouchEvent) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap - like
+      if (!isOwnProfile && !isLiked) {
+        handleLike();
+      }
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
     }
   };
 
@@ -392,18 +452,35 @@ export const HighlightFullscreenView = ({
                     onMouseDown={handlePauseStart}
                     onMouseUp={(e) => {
                       handlePauseEnd();
+                      handleDoubleTap(e);
                       handleTapNavigation(e);
                     }}
                     onMouseLeave={handlePauseEnd}
                     onTouchStart={handlePauseStart}
                     onTouchEnd={(e) => {
                       handlePauseEnd();
+                      handleDoubleTap(e);
                       handleTapNavigation(e);
                     }}
                   />
 
+                  {/* Heart animation on double tap */}
+                  <AnimatePresence>
+                    {showHeartAnimation && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Heart className="w-24 h-24 text-red-500 fill-red-500" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Pause indicator */}
-                  {isPaused && (
+                  {isPaused && !showHeartAnimation && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                       <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center">
                         <Pause className="w-8 h-8 text-white" />
@@ -415,15 +492,24 @@ export const HighlightFullscreenView = ({
                 {/* Footer with gradient */}
                 <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
                   {isOwnProfile ? (
-                    // Owner footer: views count and action buttons
+                    // Owner footer: views, replies count and action buttons
                     <div className="flex items-center justify-between">
-                      <button 
-                        onClick={() => setViewersSheetOpen(true)}
-                        className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
-                      >
-                        <Eye className="w-5 h-5" />
-                        <span className="text-sm font-medium">{viewerCount}</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => setViewersSheetOpen(true)}
+                          className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+                        >
+                          <Eye className="w-5 h-5" />
+                          <span className="text-sm font-medium">{viewerCount}</span>
+                        </button>
+                        <button 
+                          onClick={() => setRepliesSheetOpen(true)}
+                          className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+                        >
+                          <MessageCircle className="w-5 h-5" />
+                          <span className="text-sm font-medium">{replyCount}</span>
+                        </button>
+                      </div>
                       
                       <div className="flex items-center gap-2">
                         {currentImages.length > 1 && (
@@ -441,28 +527,49 @@ export const HighlightFullscreenView = ({
                       </div>
                     </div>
                   ) : (
-                    // Visitor footer: highlight dots
-                    <div className="flex justify-center">
-                      {displayHighlights.length > 1 && (
-                        <div className="flex gap-2">
-                          {displayHighlights.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => highlightEmblaApi?.scrollTo(index)}
-                              className={`w-2 h-2 rounded-full transition-colors ${
-                                index === currentHighlightIndex ? 'bg-white' : 'bg-white/30'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      )}
+                    // Visitor footer: reply input and like button
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 relative">
+                        <Input
+                          ref={replyInputRef}
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Enviar mensagem..."
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10 rounded-full"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleReplySubmit();
+                            }
+                          }}
+                          onFocus={() => setIsPaused(true)}
+                          onBlur={() => setIsPaused(false)}
+                        />
+                        {replyText.trim() && (
+                          <button
+                            onClick={handleReplySubmit}
+                            disabled={sendReply.isPending}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-colors"
+                          >
+                            <Send className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleLike}
+                        disabled={toggleLike.isPending}
+                        className="flex items-center justify-center w-10 h-10 text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
+                      >
+                        <Heart 
+                          className={`w-6 h-6 transition-colors ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'}`}
+                        />
+                      </button>
                     </div>
                   )}
                 </div>
 
-                {/* Highlight dots for owner too */}
-                {isOwnProfile && displayHighlights.length > 1 && (
-                  <div className="absolute bottom-20 left-0 right-0 z-20 flex justify-center">
+                {/* Highlight dots */}
+                {displayHighlights.length > 1 && (
+                  <div className={`absolute left-0 right-0 z-20 flex justify-center ${isOwnProfile ? 'bottom-20' : 'bottom-24'}`}>
                     <div className="flex gap-2">
                       {displayHighlights.map((_, index) => (
                         <button
@@ -573,6 +680,15 @@ export const HighlightFullscreenView = ({
           highlightId={selectedHighlight.id}
           isOpen={viewersSheetOpen}
           onClose={() => setViewersSheetOpen(false)}
+        />
+      )}
+
+      {/* Highlight Replies Sheet */}
+      {isOwnProfile && selectedHighlight && (
+        <HighlightRepliesSheet
+          highlightId={selectedHighlight.id}
+          isOpen={repliesSheetOpen}
+          onClose={() => setRepliesSheetOpen(false)}
         />
       )}
     </AnimatePresence>
