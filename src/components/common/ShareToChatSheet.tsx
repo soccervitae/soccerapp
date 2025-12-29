@@ -1,13 +1,14 @@
 import { useState, useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFollowing } from "@/hooks/useFollowList";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Loader2, Check, MessageCircle } from "lucide-react";
+import { Search, Loader2, Check, MessageCircle, Send } from "lucide-react";
 
 interface ShareToChatSheetProps {
   open: boolean;
@@ -33,7 +34,8 @@ export const ShareToChatSheet = ({
   const { createConversation } = useCreateConversation();
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [sendingTo, setSendingTo] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [isSending, setIsSending] = useState(false);
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
 
   const filteredFollowing = useMemo(() => {
@@ -59,51 +61,81 @@ export const ShareToChatSheet = ({
     }
   };
 
-  const handleSendTo = async (userId: string) => {
-    if (!user || sendingTo) return;
+  const toggleUserSelection = (userId: string) => {
+    if (sentTo.has(userId)) return;
     
-    setSendingTo(userId);
-    
-    try {
-      // Create or get existing conversation
-      const conversationId = await createConversation(userId);
-      
-      if (!conversationId) {
-        throw new Error("Não foi possível criar a conversa");
+    setSelectedUsers((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
       }
+      return newSet;
+    });
+  };
 
-      // Create the shared message with structured JSON format
-      const sharedContent = JSON.stringify({
-        type: "shared_content",
-        contentType: contentType,
-        contentId: contentId,
-        url: contentUrl,
-        preview: contentPreview || null,
-        title: contentTitle || null,
-      });
+  const handleSendToSelected = async () => {
+    if (!user || selectedUsers.size === 0 || isSending) return;
+    
+    setIsSending(true);
+    
+    const sharedContent = JSON.stringify({
+      type: "shared_content",
+      contentType: contentType,
+      contentId: contentId,
+      url: contentUrl,
+      preview: contentPreview || null,
+      title: contentTitle || null,
+    });
 
-      // Send the message with special media_type
-      const { error: messageError } = await supabase
-        .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: sharedContent,
-          media_url: null,
-          media_type: "shared_content",
-        });
+    let successCount = 0;
+    let errorCount = 0;
+    const newSentTo = new Set(sentTo);
 
-      if (messageError) throw messageError;
+    for (const userId of selectedUsers) {
+      try {
+        const conversationId = await createConversation(userId);
+        
+        if (!conversationId) {
+          errorCount++;
+          continue;
+        }
 
-      // Mark as sent
-      setSentTo((prev) => new Set([...prev, userId]));
-      toast.success("Enviado com sucesso!");
-    } catch (error) {
-      console.error("Error sharing to chat:", error);
-      toast.error("Erro ao enviar mensagem");
-    } finally {
-      setSendingTo(null);
+        const { error: messageError } = await supabase
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: sharedContent,
+            media_url: null,
+            media_type: "shared_content",
+          });
+
+        if (messageError) {
+          errorCount++;
+        } else {
+          successCount++;
+          newSentTo.add(userId);
+        }
+      } catch (error) {
+        console.error("Error sharing to user:", userId, error);
+        errorCount++;
+      }
     }
+
+    setSentTo(newSentTo);
+    setSelectedUsers(new Set());
+
+    if (successCount > 0 && errorCount === 0) {
+      toast.success(`Enviado para ${successCount} pessoa${successCount > 1 ? "s" : ""}!`);
+    } else if (successCount > 0 && errorCount > 0) {
+      toast.warning(`Enviado para ${successCount}, falhou para ${errorCount}`);
+    } else {
+      toast.error("Erro ao enviar mensagens");
+    }
+
+    setIsSending(false);
   };
 
   const getInitials = (name: string) => {
@@ -115,11 +147,12 @@ export const ShareToChatSheet = ({
       .toUpperCase();
   };
 
-  // Reset sent state when sheet closes
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setSearchQuery("");
+      setSelectedUsers(new Set());
       setSentTo(new Set());
+      setIsSending(false);
     }
     onOpenChange(isOpen);
   };
@@ -143,7 +176,7 @@ export const ShareToChatSheet = ({
         </div>
 
         {/* Following list */}
-        <div className="flex-1 overflow-y-auto -mx-6 px-6">
+        <div className="flex-1 overflow-y-auto -mx-6 px-6 pb-20">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -158,14 +191,14 @@ export const ShareToChatSheet = ({
           ) : (
             <div className="flex flex-col gap-1">
               {filteredFollowing.map((followingUser) => {
-                const isSending = sendingTo === followingUser.id;
+                const isSelected = selectedUsers.has(followingUser.id);
                 const wasSent = sentTo.has(followingUser.id);
 
                 return (
                   <button
                     key={followingUser.id}
-                    onClick={() => handleSendTo(followingUser.id)}
-                    disabled={isSending || wasSent}
+                    onClick={() => toggleUserSelection(followingUser.id)}
+                    disabled={wasSent || isSending}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors disabled:opacity-50"
                   >
                     <Avatar className="w-12 h-12">
@@ -191,17 +224,19 @@ export const ShareToChatSheet = ({
                       </span>
                     </div>
 
-                    {isSending ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                    ) : wasSent ? (
+                    {wasSent ? (
                       <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[18px] text-primary-foreground">
-                          send
-                        </span>
+                      <div
+                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isSelected
+                            ? "bg-primary border-primary"
+                            : "border-muted-foreground/40"
+                        }`}
+                      >
+                        {isSelected && <Check className="w-4 h-4 text-primary-foreground" />}
                       </div>
                     )}
                   </button>
@@ -210,6 +245,30 @@ export const ShareToChatSheet = ({
             </div>
           )}
         </div>
+
+        {/* Fixed footer with send button */}
+        {selectedUsers.size > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
+            <Button
+              onClick={handleSendToSelected}
+              disabled={isSending}
+              className="w-full gap-2"
+              size="lg"
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Enviar para {selectedUsers.size} pessoa{selectedUsers.size > 1 ? "s" : ""}
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
