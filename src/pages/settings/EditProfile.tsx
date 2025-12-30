@@ -73,7 +73,30 @@ const EditProfile = () => {
   const [cropType, setCropType] = useState<'cover' | 'avatar'>('cover');
   const [userType, setUserType] = useState<'atleta' | 'comissao_tecnica'>('atleta');
   const [nationalityOpen, setNationalityOpen] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Validation errors
+  const validationErrors = useMemo(() => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.full_name.trim()) errors.full_name = "Nome completo é obrigatório";
+    if (!formData.gender) errors.gender = "Sexo é obrigatório";
+    if (!formData.position) errors.position = userType === 'comissao_tecnica' ? "Função é obrigatória" : "Posição é obrigatória";
+    if (!formData.birth_date) errors.birth_date = "Data de nascimento é obrigatória";
+    if (!formData.nationality) errors.nationality = "Nacionalidade é obrigatória";
+    
+    // Additional validations for athletes
+    if (userType === 'atleta') {
+      if (!formData.height) errors.height = "Altura é obrigatória";
+      if (!formData.weight) errors.weight = "Peso é obrigatório";
+      if (!formData.preferred_foot) errors.preferred_foot = "Pé preferido é obrigatório";
+    }
+    
+    return errors;
+  }, [formData, userType]);
+
+  const isFormValid = Object.keys(validationErrors).length === 0;
 
   // Check username availability
   const checkUsernameAvailability = async (username: string) => {
@@ -325,6 +348,14 @@ const EditProfile = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Show validation errors if form is not valid
+    if (!isFormValid) {
+      setShowValidationErrors(true);
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -501,13 +532,19 @@ const EditProfile = () => {
         {/* Form Fields */}
         <div className="px-4 mt-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="full_name">Nome Completo</Label>
+            <Label htmlFor="full_name" className="flex items-center gap-1">
+              Nome Completo <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
               placeholder="Seu nome completo"
+              className={showValidationErrors && validationErrors.full_name ? "border-destructive" : ""}
             />
+            {showValidationErrors && validationErrors.full_name && (
+              <p className="text-sm text-destructive">{validationErrors.full_name}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -530,9 +567,11 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gender">Sexo</Label>
+            <Label htmlFor="gender" className="flex items-center gap-1">
+              Sexo <span className="text-destructive">*</span>
+            </Label>
             <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
-              <SelectTrigger>
+              <SelectTrigger className={showValidationErrors && validationErrors.gender ? "border-destructive" : ""}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -540,6 +579,9 @@ const EditProfile = () => {
                 <SelectItem value="mulher">Mulher</SelectItem>
               </SelectContent>
             </Select>
+            {showValidationErrors && validationErrors.gender && (
+              <p className="text-sm text-destructive">{validationErrors.gender}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -582,15 +624,15 @@ const EditProfile = () => {
 
           {/* Position for athletes, Function (Função) for technical staff - both use position field */}
           <div className="space-y-2">
-            <Label htmlFor="position">
-              {userType === 'comissao_tecnica' ? 'Função' : 'Posição'}
+            <Label htmlFor="position" className="flex items-center gap-1">
+              {userType === 'comissao_tecnica' ? 'Função' : 'Posição'} <span className="text-destructive">*</span>
             </Label>
             {userType === 'comissao_tecnica' ? (
               <Select
                 value={formData.position}
                 onValueChange={(value) => setFormData({ ...formData, position: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
                   <SelectValue placeholder="Selecione a função" />
                 </SelectTrigger>
                 <SelectContent>
@@ -607,7 +649,7 @@ const EditProfile = () => {
                 value={formData.position}
                 onValueChange={(value) => setFormData({ ...formData, position: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
                   <SelectValue placeholder="Selecione a posição" />
                 </SelectTrigger>
                 <SelectContent>
@@ -624,6 +666,9 @@ const EditProfile = () => {
                 </SelectContent>
               </Select>
             )}
+            {showValidationErrors && validationErrors.position && (
+              <p className="text-sm text-destructive">{validationErrors.position}</p>
+            )}
           </div>
 
           {/* Physical Stats - Only for athletes */}
@@ -631,64 +676,89 @@ const EditProfile = () => {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="height">Altura (cm)</Label>
+                  <Label htmlFor="height" className="flex items-center gap-1">
+                    Altura (cm) <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="height"
                     type="number"
                     value={formData.height}
                     onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                     placeholder="175"
+                    className={showValidationErrors && validationErrors.height ? "border-destructive" : ""}
                   />
+                  {showValidationErrors && validationErrors.height && (
+                    <p className="text-sm text-destructive">{validationErrors.height}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Label htmlFor="weight" className="flex items-center gap-1">
+                    Peso (kg) <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="weight"
                     type="number"
                     value={formData.weight}
                     onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                     placeholder="70"
+                    className={showValidationErrors && validationErrors.weight ? "border-destructive" : ""}
                   />
+                  {showValidationErrors && validationErrors.weight && (
+                    <p className="text-sm text-destructive">{validationErrors.weight}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="preferred_foot">Pé Preferido</Label>
+                <Label htmlFor="preferred_foot" className="flex items-center gap-1">
+                  Pé Preferido <span className="text-destructive">*</span>
+                </Label>
                 <select
                   id="preferred_foot"
                   value={formData.preferred_foot}
                   onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${showValidationErrors && validationErrors.preferred_foot ? "border-destructive" : "border-input"}`}
                 >
                   <option value="">Selecione</option>
                   <option value="right">Direito</option>
                   <option value="left">Esquerdo</option>
                   <option value="both">Ambos</option>
                 </select>
+                {showValidationErrors && validationErrors.preferred_foot && (
+                  <p className="text-sm text-destructive">{validationErrors.preferred_foot}</p>
+                )}
               </div>
             </>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="birth_date">Data de Nascimento</Label>
+            <Label htmlFor="birth_date" className="flex items-center gap-1">
+              Data de Nascimento <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="birth_date"
               type="date"
               value={formData.birth_date}
               onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+              className={showValidationErrors && validationErrors.birth_date ? "border-destructive" : ""}
             />
+            {showValidationErrors && validationErrors.birth_date && (
+              <p className="text-sm text-destructive">{validationErrors.birth_date}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nationality">Nacionalidade</Label>
+            <Label htmlFor="nationality" className="flex items-center gap-1">
+              Nacionalidade <span className="text-destructive">*</span>
+            </Label>
             <Popover open={nationalityOpen} onOpenChange={setNationalityOpen}>
               <PopoverTrigger asChild>
                 <button
                   type="button"
                   role="combobox"
                   aria-expanded={nationalityOpen}
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className={`flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${showValidationErrors && validationErrors.nationality ? "border-destructive" : "border-input"}`}
                 >
                   {formData.nationality ? (
                     <div className="flex items-center gap-2">
@@ -738,6 +808,9 @@ const EditProfile = () => {
                 </Command>
               </PopoverContent>
             </Popover>
+            {showValidationErrors && validationErrors.nationality && (
+              <p className="text-sm text-destructive">{validationErrors.nationality}</p>
+            )}
           </div>
 
         </div>
