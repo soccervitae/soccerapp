@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock } from "lucide-react";
+import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock, Users, Dumbbell } from "lucide-react";
 
 interface Country {
   id: number;
@@ -24,6 +24,7 @@ const CompleteProfile = () => {
   const { data: profile, isLoading: profileLoading } = useProfile();
 
   const [username, setUsername] = useState("");
+  const [profileType, setProfileType] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [position, setPosition] = useState("");
   const [nationality, setNationality] = useState<string>("");
@@ -36,6 +37,7 @@ const CompleteProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [touched, setTouched] = useState({
+    profileType: false,
     birthDate: false,
     position: false,
     nationality: false,
@@ -62,6 +64,7 @@ const CompleteProfile = () => {
   useEffect(() => {
     if (profile) {
       if (profile.username) setUsername(profile.username);
+      if (profile.role) setProfileType(profile.role);
       if (profile.birth_date) setBirthDate(profile.birth_date);
       if (profile.position) setPosition(profile.position);
       if (profile.height) setHeight(profile.height.toString());
@@ -71,6 +74,7 @@ const CompleteProfile = () => {
   }, [profile]);
 
   // Validations (username removed - auto-generated and read-only)
+  const isProfileTypeValid = !!profileType;
   const isBirthDateValid = !!birthDate;
   const isPositionValid = !!position;
   const isNationalityValid = !!nationality;
@@ -79,6 +83,7 @@ const CompleteProfile = () => {
   const isPreferredFootValid = !!preferredFoot;
 
   const isFormValid =
+    isProfileTypeValid &&
     isBirthDateValid &&
     isPositionValid &&
     isNationalityValid &&
@@ -110,6 +115,7 @@ const CompleteProfile = () => {
       const { error } = await supabase
         .from("profiles")
         .update({
+          role: profileType,
           birth_date: birthDate,
           position,
           nationality: Number(nationality),
@@ -143,8 +149,8 @@ const CompleteProfile = () => {
     );
   }
 
-  const completedFields = [isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length;
-  const totalFields = 6;
+  const completedFields = [isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length;
+  const totalFields = 7;
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,6 +201,43 @@ const CompleteProfile = () => {
           <p className="text-xs text-muted-foreground">
             Seu nome de usuário foi gerado automaticamente e não pode ser alterado.
           </p>
+        </div>
+
+        {/* Profile Type - Atleta ou Comissão Técnica */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Tipo de perfil <span className="text-destructive">*</span>
+          </Label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => { setProfileType("atleta"); handleBlur("profileType"); }}
+              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                profileType === "atleta"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Dumbbell className="h-8 w-8" />
+              <span className="font-medium">Atleta</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setProfileType("comissao_tecnica"); handleBlur("profileType"); }}
+              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                profileType === "comissao_tecnica"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Users className="h-8 w-8" />
+              <span className="font-medium text-center">Comissão Técnica</span>
+            </button>
+          </div>
+          {touched.profileType && !isProfileTypeValid && (
+            <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
+          )}
         </div>
 
         {/* Birth Date */}
