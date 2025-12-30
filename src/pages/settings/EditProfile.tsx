@@ -482,40 +482,12 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="username">Nome de Usuário</Label>
-              <div className="flex items-center gap-2">
-                {usernameStatus === "checking" && (
-                  <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-                )}
-                {usernameStatus === "available" && (
-                  <span className="flex items-center gap-1 text-xs text-green-500">
-                    <Check className="w-3 h-3" /> Disponível
-                  </span>
-                )}
-                {usernameStatus === "taken" && (
-                  <span className="flex items-center gap-1 text-xs text-destructive">
-                    <X className="w-3 h-3" /> Indisponível
-                  </span>
-                )}
-                <span className={`text-xs ${formData.username.length > 20 ? "text-destructive" : "text-muted-foreground"}`}>
-                  {formData.username.length}/20
-                </span>
-              </div>
+            <Label>Nome de Usuário</Label>
+            <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
+              @{formData.username}
             </div>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) => handleUsernameChange(e.target.value)}
-              placeholder="usuario"
-              required
-              maxLength={20}
-              className={usernameStatus === "taken" ? "border-destructive focus-visible:ring-destructive" : ""}
-            />
-            <p className="text-xs text-muted-foreground">
-              Apenas letras, números e underline (_)
-            </p>
           </div>
+
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
