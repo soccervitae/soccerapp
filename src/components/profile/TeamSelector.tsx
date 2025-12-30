@@ -22,6 +22,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   const [paisId, setPaisId] = useState<number | null>(null);
   const [estadoId, setEstadoId] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
   const debouncedSearch = useDebouncedValue(searchInput, 300);
 
   const addUserToTeam = useAddUserToTeam();
@@ -34,6 +35,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
       setPaisId(null);
       setEstadoId(null);
       setSearchInput("");
+      setCountrySearch("");
     }
   }, [open]);
 
@@ -167,37 +169,64 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
         {/* Step 1: Country Selection */}
         {step === "country" && (
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-2">
-              {countriesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                countries.map((country) => (
+          <>
+            {/* Country Search */}
+            <div className="px-4 py-3 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar país..."
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  className="pl-9 pr-9"
+                />
+                {countrySearch && (
                   <button
-                    key={country.id}
-                    onClick={() => handleCountrySelect(country.id)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors text-left"
+                    onClick={() => setCountrySearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <div className="w-10 h-7 rounded overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
-                      {country.bandeira_url ? (
-                        <img
-                          src={country.bandeira_url}
-                          alt={country.nome}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-muted-foreground text-xs">🏳️</span>
-                      )}
-                    </div>
-                    <span className="font-medium text-foreground flex-1">{country.nome}</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    <X className="w-4 h-4" />
                   </button>
-                ))
-              )}
+                )}
+              </div>
             </div>
-          </ScrollArea>
+
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-2">
+                {countriesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  countries
+                    .filter((country) =>
+                      country.nome.toLowerCase().includes(countrySearch.toLowerCase())
+                    )
+                    .map((country) => (
+                      <button
+                        key={country.id}
+                        onClick={() => handleCountrySelect(country.id)}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors text-left"
+                      >
+                        <div className="w-10 h-7 rounded overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
+                          {country.bandeira_url ? (
+                            <img
+                              src={country.bandeira_url}
+                              alt={country.nome}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-muted-foreground text-xs">🏳️</span>
+                          )}
+                        </div>
+                        <span className="font-medium text-foreground flex-1">{country.nome}</span>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    ))
+                )}
+              </div>
+            </ScrollArea>
+          </>
         )}
 
         {/* Step 2: State Selection */}
