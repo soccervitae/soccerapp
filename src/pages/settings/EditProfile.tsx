@@ -53,6 +53,7 @@ const EditProfile = () => {
   const [showCropEditor, setShowCropEditor] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [cropType, setCropType] = useState<'cover' | 'avatar'>('cover');
+  const [userType, setUserType] = useState<'atleta' | 'comissao_tecnica'>('atleta');
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Check username availability
@@ -124,8 +125,22 @@ const EditProfile = () => {
         preferred_foot: profile.preferred_foot || "",
         gender: profile.gender || "",
       });
+      // Set user type based on whether they have a role (technical staff) or not (athlete)
+      setUserType(profile.role ? 'comissao_tecnica' : 'atleta');
     }
   }, [profile]);
+
+  // Handle user type change
+  const handleUserTypeChange = (newType: 'atleta' | 'comissao_tecnica') => {
+    setUserType(newType);
+    if (newType === 'atleta') {
+      // Clear role when switching to athlete
+      setFormData(prev => ({ ...prev, role: '' }));
+    } else {
+      // Clear position and physical stats when switching to technical staff
+      setFormData(prev => ({ ...prev, position: '', height: '', weight: '', preferred_foot: '' }));
+    }
+  };
 
   // Check if form has unsaved changes
   const hasUnsavedChanges = useMemo(() => {
@@ -510,9 +525,38 @@ const EditProfile = () => {
             />
           </div>
 
+          {/* User Type Selector */}
+          <div className="space-y-2">
+            <Label>Tipo de Usuário</Label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange('atleta')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  userType === 'atleta'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                Atleta
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange('comissao_tecnica')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  userType === 'comissao_tecnica'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                Comissão Técnica
+              </button>
+            </div>
+          </div>
+
           {/* Position for athletes, Role for technical staff */}
           <div className="grid grid-cols-2 gap-4">
-            {profile?.role ? (
+            {userType === 'comissao_tecnica' ? (
               <div className="space-y-2">
                 <Label htmlFor="role">Função</Label>
                 <Input
@@ -545,8 +589,8 @@ const EditProfile = () => {
             </div>
           </div>
 
-          {/* Physical Stats - Only for athletes (no role means athlete) */}
-          {!profile?.role && (
+          {/* Physical Stats - Only for athletes */}
+          {userType === 'atleta' && (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
