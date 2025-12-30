@@ -4,7 +4,7 @@ import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { PostsGrid } from "@/components/profile/PostsGrid";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { 
   useProfile, 
   useProfileByUsername,
@@ -18,11 +18,23 @@ import {
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
   const { user } = useAuth();
+  const location = useLocation();
+  
+  // Check if coming from onboarding
+  const [fromOnboarding, setFromOnboarding] = useState(false);
+  
+  useEffect(() => {
+    // Check if navigated from welcome page (onboarding)
+    if (location.state?.fromOnboarding) {
+      setFromOnboarding(true);
+    }
+  }, [location.state]);
   
   // If username in URL, fetch by username; otherwise show current user's profile
   const { data: profileByUsername, isLoading: usernameLoading } = useProfileByUsername(username || "");
@@ -80,8 +92,33 @@ const Profile = () => {
     );
   }
 
-  return (
-    <main className="bg-background min-h-screen relative pb-24">
+  // Animation variants for onboarding entrance
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+  };
+
+  const MainContent = () => (
+    <>
       <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
       
       <div className="pt-12 flex flex-col gap-6">
@@ -111,6 +148,58 @@ const Profile = () => {
           />
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <main className="bg-background min-h-screen relative pb-24">
+      {fromOnboarding ? (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants}>
+            <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
+          </motion.div>
+          
+          <div className="pt-12 flex flex-col gap-6">
+            <motion.div variants={itemVariants}>
+              <ProfileInfo 
+                profile={profile} 
+                followStats={followStats}
+                isOwnProfile={isOwnProfile}
+              />
+            </motion.div>
+            <div className="px-4 flex flex-col gap-6">
+              <motion.div variants={itemVariants}>
+                <HighlightsSection 
+                  highlights={highlights || []} 
+                  isLoading={highlightsLoading}
+                  isOwnProfile={isOwnProfile}
+                  profileUsername={profile.username}
+                />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <PostsGrid 
+                  posts={posts || []} 
+                  taggedPosts={taggedPosts || []}
+                  championships={championships || []}
+                  achievements={achievements || []}
+                  isLoading={postsLoading} 
+                  isChampionshipsLoading={championshipsLoading}
+                  isAchievementsLoading={achievementsLoading}
+                  isTaggedLoading={taggedLoading}
+                  isOwnProfile={isOwnProfile}
+                  profile={profile}
+                />
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <MainContent />
+      )}
       
       {user ? (
         <BottomNavigation activeTab="profile" />
