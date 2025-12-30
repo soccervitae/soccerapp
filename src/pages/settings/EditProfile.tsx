@@ -525,33 +525,21 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* User Type Selector */}
+          {/* Profile Type Selector */}
           <div className="space-y-2">
-            <Label>Tipo de Usuário</Label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleUserTypeChange('atleta')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  userType === 'atleta'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                Atleta
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUserTypeChange('comissao_tecnica')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  userType === 'comissao_tecnica'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                Comissão Técnica
-              </button>
-            </div>
+            <Label htmlFor="profile_type">Tipo de Perfil</Label>
+            <Select 
+              value={userType} 
+              onValueChange={(value: 'atleta' | 'comissao_tecnica') => handleUserTypeChange(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="atleta">Atleta</SelectItem>
+                <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Position for athletes, Role for technical staff */}
