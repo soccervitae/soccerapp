@@ -205,36 +205,19 @@ const CompleteProfile = () => {
 
         {/* Profile Type - Atleta ou Comissão Técnica */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2">
+          <Label htmlFor="profileType" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Tipo de perfil <span className="text-destructive">*</span>
           </Label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => { setProfileType("atleta"); handleBlur("profileType"); }}
-              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                profileType === "atleta"
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Dumbbell className="h-8 w-8" />
-              <span className="font-medium">Atleta</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setProfileType("comissao_tecnica"); handleBlur("profileType"); }}
-              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                profileType === "comissao_tecnica"
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Users className="h-8 w-8" />
-              <span className="font-medium text-center">Comissão Técnica</span>
-            </button>
-          </div>
+          <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); }}>
+            <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
+              <SelectValue placeholder="Selecione o tipo de perfil" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="atleta">Atleta</SelectItem>
+              <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+            </SelectContent>
+          </Select>
           {touched.profileType && !isProfileTypeValid && (
             <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
           )}
