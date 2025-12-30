@@ -528,29 +528,49 @@ const EditProfile = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="height">Altura (cm)</Label>
-              <Input
-                id="height"
-                type="number"
-                value={formData.height}
-                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                placeholder="175"
-              />
-            </div>
+          {/* Physical Stats - Only for athletes (no role means athlete) */}
+          {!profile?.role && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="height">Altura (cm)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    value={formData.height}
+                    onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                    placeholder="175"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="weight">Peso (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                value={formData.weight}
-                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                placeholder="70"
-              />
-            </div>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    value={formData.weight}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    placeholder="70"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="preferred_foot">Pé Preferido</Label>
+                <select
+                  id="preferred_foot"
+                  value={formData.preferred_foot}
+                  onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="">Selecione</option>
+                  <option value="right">Direito</option>
+                  <option value="left">Esquerdo</option>
+                  <option value="both">Ambos</option>
+                </select>
+              </div>
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -575,21 +595,6 @@ const EditProfile = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="preferred_foot">Pé Preferido</Label>
-            <select
-              id="preferred_foot"
-              value={formData.preferred_foot}
-              onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="">Selecione</option>
-              <option value="right">Direito</option>
-              <option value="left">Esquerdo</option>
-              <option value="both">Ambos</option>
-            </select>
           </div>
 
         </div>
