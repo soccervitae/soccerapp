@@ -73,14 +73,17 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
+  // Check if profile type is athlete
+  const isAthlete = profileType === "atleta";
+
   // Validations (username removed - auto-generated and read-only)
   const isProfileTypeValid = !!profileType;
   const isBirthDateValid = !!birthDate;
-  const isPositionValid = !!position;
+  const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
   const isNationalityValid = !!nationality;
-  const isHeightValid = !!height && Number(height) > 0 && Number(height) <= 250;
-  const isWeightValid = !!weight && Number(weight) > 0 && Number(weight) <= 200;
-  const isPreferredFootValid = !!preferredFoot;
+  const isHeightValid = isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true;
+  const isWeightValid = isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true;
+  const isPreferredFootValid = isAthlete ? !!preferredFoot : true;
 
   const isFormValid =
     isProfileTypeValid &&
@@ -112,18 +115,24 @@ const CompleteProfile = () => {
 
     setIsSubmitting(true);
     try {
+      const updateData: Record<string, unknown> = {
+        role: profileType,
+        birth_date: birthDate,
+        nationality: Number(nationality),
+        profile_completed: true,
+      };
+
+      // Add athlete-specific fields only for athletes
+      if (isAthlete) {
+        updateData.position = position;
+        updateData.height = Number(height);
+        updateData.weight = Number(weight);
+        updateData.preferred_foot = preferredFoot;
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update({
-          role: profileType,
-          birth_date: birthDate,
-          position,
-          nationality: Number(nationality),
-          height: Number(height),
-          weight: Number(weight),
-          preferred_foot: preferredFoot,
-          profile_completed: true,
-        })
+        .update(updateData)
         .eq("id", user.id);
 
       if (error) throw error;
@@ -149,8 +158,12 @@ const CompleteProfile = () => {
     );
   }
 
-  const completedFields = [isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length;
-  const totalFields = 7;
+  // Calculate completed fields based on profile type
+  const athleteFields = [isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
+  const staffFields = [isProfileTypeValid, isBirthDateValid, isNationalityValid];
+  
+  const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
+  const totalFields = isAthlete ? 7 : 3;
 
   return (
     <div className="min-h-screen bg-background">
@@ -243,28 +256,30 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* Position */}
-        <div className="space-y-2">
-          <Label htmlFor="position" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Posição <span className="text-destructive">*</span>
-          </Label>
-          <Select value={position} onValueChange={(value) => { setPosition(value); handleBlur("position"); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isPositionValid, touched.position))}>
-              <SelectValue placeholder="Selecione sua posição" />
-            </SelectTrigger>
-            <SelectContent>
-              {positions.map((pos) => (
-                <SelectItem key={pos.id} value={pos.name}>
-                  {pos.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {touched.position && !isPositionValid && (
-            <p className="text-xs text-destructive">Selecione sua posição em campo.</p>
-          )}
-        </div>
+        {/* Position - Only for Athletes */}
+        {isAthlete && (
+          <div className="space-y-2">
+            <Label htmlFor="position" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Posição <span className="text-destructive">*</span>
+            </Label>
+            <Select value={position} onValueChange={(value) => { setPosition(value); handleBlur("position"); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isPositionValid, touched.position))}>
+                <SelectValue placeholder="Selecione sua posição" />
+              </SelectTrigger>
+              <SelectContent>
+                {positions.map((pos) => (
+                  <SelectItem key={pos.id} value={pos.name}>
+                    {pos.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {touched.position && !isPositionValid && (
+              <p className="text-xs text-destructive">Selecione sua posição em campo.</p>
+            )}
+          </div>
+        )}
 
         {/* Nationality */}
         <div className="space-y-2">
@@ -294,84 +309,88 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* Height & Weight Row */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Height */}
-          <div className="space-y-2">
-            <Label htmlFor="height" className="flex items-center gap-2">
-              <Ruler className="h-4 w-4" />
-              Altura (cm) <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <Input
-                id="height"
-                type="number"
-                value={height}
-                onChange={(e) => setHeight(e.target.value)}
-                onBlur={() => handleBlur("height")}
-                placeholder="180"
-                min="100"
-                max="250"
-                className={getInputClass(getFieldStatus(isHeightValid, touched.height))}
-              />
-              {touched.height && isHeightValid && (
-                <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+        {/* Height & Weight Row - Only for Athletes */}
+        {isAthlete && (
+          <div className="grid grid-cols-2 gap-4">
+            {/* Height */}
+            <div className="space-y-2">
+              <Label htmlFor="height" className="flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                Altura (cm) <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="height"
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  onBlur={() => handleBlur("height")}
+                  placeholder="180"
+                  min="100"
+                  max="250"
+                  className={getInputClass(getFieldStatus(isHeightValid, touched.height))}
+                />
+                {touched.height && isHeightValid && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                )}
+              </div>
+              {touched.height && !isHeightValid && height && (
+                <p className="text-xs text-destructive">Altura inválida.</p>
               )}
             </div>
-            {touched.height && !isHeightValid && height && (
-              <p className="text-xs text-destructive">Altura inválida.</p>
-            )}
-          </div>
 
-          {/* Weight */}
-          <div className="space-y-2">
-            <Label htmlFor="weight" className="flex items-center gap-2">
-              <Weight className="h-4 w-4" />
-              Peso (kg) <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <Input
-                id="weight"
-                type="number"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                onBlur={() => handleBlur("weight")}
-                placeholder="75"
-                min="30"
-                max="200"
-                step="0.1"
-                className={getInputClass(getFieldStatus(isWeightValid, touched.weight))}
-              />
-              {touched.weight && isWeightValid && (
-                <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+            {/* Weight */}
+            <div className="space-y-2">
+              <Label htmlFor="weight" className="flex items-center gap-2">
+                <Weight className="h-4 w-4" />
+                Peso (kg) <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="weight"
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  onBlur={() => handleBlur("weight")}
+                  placeholder="75"
+                  min="30"
+                  max="200"
+                  step="0.1"
+                  className={getInputClass(getFieldStatus(isWeightValid, touched.weight))}
+                />
+                {touched.weight && isWeightValid && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                )}
+              </div>
+              {touched.weight && !isWeightValid && weight && (
+                <p className="text-xs text-destructive">Peso inválido.</p>
               )}
             </div>
-            {touched.weight && !isWeightValid && weight && (
-              <p className="text-xs text-destructive">Peso inválido.</p>
+          </div>
+        )}
+
+        {/* Preferred Foot - Only for Athletes */}
+        {isAthlete && (
+          <div className="space-y-2">
+            <Label htmlFor="preferredFoot" className="flex items-center gap-2">
+              <Footprints className="h-4 w-4" />
+              Pé preferido <span className="text-destructive">*</span>
+            </Label>
+            <Select value={preferredFoot} onValueChange={(value) => { setPreferredFoot(value); handleBlur("preferredFoot"); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isPreferredFootValid, touched.preferredFoot))}>
+                <SelectValue placeholder="Selecione o pé preferido" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="right">Direito</SelectItem>
+                <SelectItem value="left">Esquerdo</SelectItem>
+                <SelectItem value="both">Ambos</SelectItem>
+              </SelectContent>
+            </Select>
+            {touched.preferredFoot && !isPreferredFootValid && (
+              <p className="text-xs text-destructive">Selecione seu pé preferido.</p>
             )}
           </div>
-        </div>
-
-        {/* Preferred Foot */}
-        <div className="space-y-2">
-          <Label htmlFor="preferredFoot" className="flex items-center gap-2">
-            <Footprints className="h-4 w-4" />
-            Pé preferido <span className="text-destructive">*</span>
-          </Label>
-          <Select value={preferredFoot} onValueChange={(value) => { setPreferredFoot(value); handleBlur("preferredFoot"); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isPreferredFootValid, touched.preferredFoot))}>
-              <SelectValue placeholder="Selecione o pé preferido" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="right">Direito</SelectItem>
-              <SelectItem value="left">Esquerdo</SelectItem>
-              <SelectItem value="both">Ambos</SelectItem>
-            </SelectContent>
-          </Select>
-          {touched.preferredFoot && !isPreferredFootValid && (
-            <p className="text-xs text-destructive">Selecione seu pé preferido.</p>
-          )}
-        </div>
+        )}
 
         {/* Submit Button */}
         <Button
