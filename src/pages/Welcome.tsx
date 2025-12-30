@@ -152,26 +152,11 @@ export default function Welcome() {
             <Trophy className="w-12 h-12 text-white" />
           </motion.div>
 
-          {/* Avatar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-4"
-          >
-            <Avatar className="w-20 h-20 border-4 border-primary/20">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                {firstName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </motion.div>
-
           {/* Welcome Text */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.3 }}
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -184,17 +169,6 @@ export default function Welcome() {
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
               Seu perfil está completo e você faz parte da comunidade Soccer Vitae.
             </p>
-          </motion.div>
-
-          {/* Success Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-600 rounded-full mb-8"
-          >
-            <Check className="w-4 h-4" />
-            <span className="text-sm font-medium">Perfil verificado</span>
           </motion.div>
 
           {/* Buttons */}
