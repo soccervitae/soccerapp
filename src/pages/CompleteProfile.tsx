@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ interface Country {
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
 
@@ -119,6 +121,9 @@ const CompleteProfile = () => {
         .eq("id", user.id);
 
       if (error) throw error;
+
+      // Invalidar cache do perfil para que o ProtectedRoute veja os dados atualizados
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
 
       toast.success("Perfil completo!");
       navigate("/welcome");
