@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock, Users, Dumbbell } from "lucide-react";
+import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock, Users, Briefcase } from "lucide-react";
 
 interface Country {
   id: number;
@@ -34,12 +34,15 @@ const CompleteProfile = () => {
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [positions, setPositions] = useState<{ id: number; name: string }[]>([]);
+  const [functions, setFunctions] = useState<{ id: number; name: string }[]>([]);
+  const [staffFunction, setStaffFunction] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [touched, setTouched] = useState({
     profileType: false,
     birthDate: false,
     position: false,
+    staffFunction: false,
     nationality: false,
     height: false,
     weight: false,
@@ -69,6 +72,20 @@ const CompleteProfile = () => {
     loadPositions();
   }, [profile?.gender]);
 
+  // Load functions for technical staff based on user gender
+  useEffect(() => {
+    const loadFunctions = async () => {
+      if (!profile?.gender) return;
+      
+      const isFemale = profile.gender === "mulher" || profile.gender === "feminino" || profile.gender === "female";
+      const table = isFemale ? "funcao_feminina" : "funcao";
+      
+      const { data } = await supabase.from(table).select("id, name").order("name");
+      if (data) setFunctions(data);
+    };
+    loadFunctions();
+  }, [profile?.gender]);
+
   // Load existing profile data
   useEffect(() => {
     if (profile) {
@@ -82,13 +99,15 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
-  // Check if profile type is athlete
+  // Check if profile type is athlete or technical staff
   const isAthlete = profileType === "atleta";
+  const isStaff = profileType === "comissao_tecnica";
 
   // Validations (username removed - auto-generated and read-only)
   const isProfileTypeValid = !!profileType;
   const isBirthDateValid = !!birthDate;
   const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
+  const isStaffFunctionValid = isStaff ? !!staffFunction : true; // Only required for staff
   const isNationalityValid = !!nationality;
   const isHeightValid = isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true;
   const isWeightValid = isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true;
@@ -98,6 +117,7 @@ const CompleteProfile = () => {
     isProfileTypeValid &&
     isBirthDateValid &&
     isPositionValid &&
+    isStaffFunctionValid &&
     isNationalityValid &&
     isHeightValid &&
     isWeightValid &&
@@ -139,6 +159,11 @@ const CompleteProfile = () => {
         updateData.preferred_foot = preferredFoot;
       }
 
+      // Add staff-specific fields only for technical staff
+      if (isStaff) {
+        updateData.position = staffFunction; // Store function in position field
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update(updateData)
@@ -169,10 +194,10 @@ const CompleteProfile = () => {
 
   // Calculate completed fields based on profile type
   const athleteFields = [isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isProfileTypeValid, isBirthDateValid, isNationalityValid];
+  const staffFields = [isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
   const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isAthlete ? 7 : 3;
+  const totalFields = isAthlete ? 7 : 4;
 
   return (
     <div className="min-h-screen bg-background">
@@ -266,6 +291,31 @@ const CompleteProfile = () => {
             </Select>
             {touched.position && !isPositionValid && (
               <p className="text-xs text-destructive">Selecione sua posição em campo.</p>
+            )}
+          </div>
+        )}
+
+        {/* Function - Only for Technical Staff */}
+        {isStaff && (
+          <div className="space-y-2">
+            <Label htmlFor="staffFunction" className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              Função <span className="text-destructive">*</span>
+            </Label>
+            <Select value={staffFunction} onValueChange={(value) => { setStaffFunction(value); handleBlur("staffFunction"); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isStaffFunctionValid, touched.staffFunction))}>
+                <SelectValue placeholder="Selecione sua função" />
+              </SelectTrigger>
+              <SelectContent>
+                {functions.map((func) => (
+                  <SelectItem key={func.id} value={func.name}>
+                    {func.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {touched.staffFunction && !isStaffFunctionValid && (
+              <p className="text-xs text-destructive">Selecione sua função.</p>
             )}
           </div>
         )}
