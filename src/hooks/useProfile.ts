@@ -142,7 +142,6 @@ export const useUpdateProfile = () => {
       if (data) {
         cacheProfile(data).catch(console.error);
       }
-      toast.success("Perfil atualizado!");
     },
     onError: () => {
       toast.error("Erro ao atualizar perfil");
