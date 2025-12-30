@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, X, User, Calendar, Ruler, Weight, Target, Flag, Footprints } from "lucide-react";
+import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock } from "lucide-react";
 
 interface Country {
   id: number;
@@ -20,7 +20,6 @@ const CompleteProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
-  const updateProfile = useUpdateProfile();
 
   const [username, setUsername] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -32,12 +31,9 @@ const CompleteProfile = () => {
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [positions, setPositions] = useState<{ id: number; name: string }[]>([]);
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [touched, setTouched] = useState({
-    username: false,
     birthDate: false,
     position: false,
     nationality: false,
@@ -72,37 +68,7 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
-  // Check username availability with debounce
-  useEffect(() => {
-    if (!username || username.length < 3) {
-      setUsernameAvailable(null);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsCheckingUsername(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .neq("id", user?.id || "")
-        .maybeSingle();
-
-      setIsCheckingUsername(false);
-      setUsernameAvailable(!data && !error);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [username, user?.id]);
-
-  // Count numbers in username
-  const countNumbers = (str: string): number => {
-    return (str.match(/\d/g) || []).length;
-  };
-
-  // Validations
-  const usernameNumberCount = countNumbers(username);
-  const isUsernameValid = username.length >= 3 && usernameNumberCount >= 3 && usernameAvailable === true;
+  // Validations (username removed - auto-generated and read-only)
   const isBirthDateValid = !!birthDate;
   const isPositionValid = !!position;
   const isNationalityValid = !!nationality;
@@ -111,7 +77,6 @@ const CompleteProfile = () => {
   const isPreferredFootValid = !!preferredFoot;
 
   const isFormValid =
-    isUsernameValid &&
     isBirthDateValid &&
     isPositionValid &&
     isNationalityValid &&
@@ -143,7 +108,6 @@ const CompleteProfile = () => {
       const { error } = await supabase
         .from("profiles")
         .update({
-          username,
           birth_date: birthDate,
           position,
           nationality: Number(nationality),
@@ -174,6 +138,9 @@ const CompleteProfile = () => {
     );
   }
 
+  const completedFields = [isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length;
+  const totalFields = 6;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -189,57 +156,40 @@ const CompleteProfile = () => {
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Progresso</span>
           <span className="font-medium">
-            {[isUsernameValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length} / 7 campos
+            {completedFields} / {totalFields} campos
           </span>
         </div>
         <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{
-              width: `${([isUsernameValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid].filter(Boolean).length / 7) * 100}%`,
+              width: `${(completedFields / totalFields) * 100}%`,
             }}
           />
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
-        {/* Username */}
+        {/* Username - Read Only */}
         <div className="space-y-2">
           <Label htmlFor="username" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            Nome de usuário <span className="text-destructive">*</span>
+            Nome de usuário
+            <Lock className="h-3 w-3 text-muted-foreground" />
           </Label>
           <div className="relative">
             <Input
               id="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-              onBlur={() => handleBlur("username")}
-              placeholder="jogador123"
-              className={getInputClass(getFieldStatus(isUsernameValid, touched.username))}
+              disabled
+              className="bg-muted cursor-not-allowed"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {isCheckingUsername && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-              {!isCheckingUsername && touched.username && isUsernameValid && (
-                <Check className="h-4 w-4 text-green-500" />
-              )}
-              {!isCheckingUsername && touched.username && !isUsernameValid && username.length > 0 && (
-                <X className="h-4 w-4 text-destructive" />
-              )}
-            </div>
+            <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
           </div>
           <p className="text-xs text-muted-foreground">
-            Mínimo 3 caracteres com pelo menos 3 números (ex: maria123, joao007)
+            Seu nome de usuário foi gerado automaticamente e não pode ser alterado.
           </p>
-          {touched.username && username.length > 0 && usernameNumberCount < 3 && (
-            <p className="text-xs text-destructive">
-              Faltam {3 - usernameNumberCount} número(s). Adicione mais números ao username.
-            </p>
-          )}
-          {touched.username && usernameAvailable === false && (
-            <p className="text-xs text-destructive">Este nome de usuário já está em uso.</p>
-          )}
         </div>
 
         {/* Birth Date */}
