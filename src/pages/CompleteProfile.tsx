@@ -240,7 +240,7 @@ const CompleteProfile = () => {
         {/* Nickname - Required */}
         <div className="space-y-2">
           <Label htmlFor="nickname">
-            Apelido / Nome artístico <span className="text-destructive">*</span>
+            Apelido <span className="text-destructive">*</span>
           </Label>
           <Input
             id="nickname"
