@@ -134,12 +134,16 @@ const EditProfile = () => {
   // Initialize form when profile loads
   useEffect(() => {
     if (profile && !formInitialized) {
+      // Normalize role to determine user type correctly
+      const roleNormalized = (profile.role ?? '').trim().toLowerCase();
+      const isComissaoTecnica = roleNormalized === 'comissao_tecnica';
+      
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
         bio: profile.bio || "",
         position: profile.position || "",
-        role: profile.role || "",
+        role: isComissaoTecnica ? 'comissao_tecnica' : "",
         team: profile.team || "",
         height: profile.height?.toString() || "",
         weight: profile.weight?.toString() || "",
@@ -148,8 +152,8 @@ const EditProfile = () => {
         gender: profile.gender || "",
         nationality: profile.nationality?.toString() || "",
       });
-      // Set user type based on whether they have a role (technical staff) or not (athlete)
-      setUserType(profile.role ? 'comissao_tecnica' : 'atleta');
+      // Set user type based on normalized role
+      setUserType(isComissaoTecnica ? 'comissao_tecnica' : 'atleta');
       setFormInitialized(true);
     }
   }, [profile, formInitialized]);
@@ -158,11 +162,11 @@ const EditProfile = () => {
   const handleUserTypeChange = (newType: 'atleta' | 'comissao_tecnica') => {
     setUserType(newType);
     if (newType === 'atleta') {
-      // Clear role when switching to athlete, keep position
-      setFormData(prev => ({ ...prev, role: '' }));
+      // Clear role and position when switching to athlete (position options are different)
+      setFormData(prev => ({ ...prev, role: '', position: '' }));
     } else {
-      // Set role to comissao_tecnica, clear physical stats but keep position for function
-      setFormData(prev => ({ ...prev, role: 'comissao_tecnica', height: '', weight: '', preferred_foot: '' }));
+      // Set role to comissao_tecnica, clear physical stats and position (function options are different)
+      setFormData(prev => ({ ...prev, role: 'comissao_tecnica', position: '', height: '', weight: '', preferred_foot: '' }));
     }
   };
 
@@ -339,13 +343,13 @@ const EditProfile = () => {
         if (url) coverUrl = url;
       }
 
-      // Update profile
+      // Update profile - derive role from userType for consistency
       await updateProfile.mutateAsync({
         full_name: formData.full_name || null,
         username: formData.username,
         bio: formData.bio || null,
         position: formData.position || null,
-        role: formData.role || null,
+        role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
         team: formData.team || null,
         height: formData.height ? Number(formData.height) : null,
         weight: formData.weight ? Number(formData.weight) : null,
