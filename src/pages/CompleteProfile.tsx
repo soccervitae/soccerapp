@@ -189,7 +189,7 @@ const CompleteProfile = () => {
       // Invalidar cache do perfil para que o ProtectedRoute veja os dados atualizados
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
 
-      toast.success("Perfil completo!");
+      
       navigate("/welcome");
     } catch (error) {
       console.error("Error updating profile:", error);
