@@ -521,6 +521,18 @@ const EditProfile = () => {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="gender">Sexo</Label>
+            <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="homem">Homem</SelectItem>
+                <SelectItem value="mulher">Mulher</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -561,51 +573,49 @@ const EditProfile = () => {
           </div>
 
           {/* Position for athletes, Function (Função) for technical staff - both use position field */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="position">
-                {userType === 'comissao_tecnica' ? 'Função' : 'Posição'}
-              </Label>
-              {userType === 'comissao_tecnica' ? (
-                <Select
-                  value={formData.position}
-                  onValueChange={(value) => setFormData({ ...formData, position: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a função" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Treinador">Treinador</SelectItem>
-                    <SelectItem value="Auxiliar Técnico">Auxiliar Técnico</SelectItem>
-                    <SelectItem value="Preparador Físico">Preparador Físico</SelectItem>
-                    <SelectItem value="Preparador de Goleiro">Preparador de Goleiro</SelectItem>
-                    <SelectItem value="Massagista">Massagista</SelectItem>
-                    <SelectItem value="Roupeiro">Roupeiro</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Select
-                  value={formData.position}
-                  onValueChange={(value) => setFormData({ ...formData, position: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a posição" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Goleiro">Goleiro</SelectItem>
-                    <SelectItem value="Zagueiro">Zagueiro</SelectItem>
-                    <SelectItem value="Lateral Direito">Lateral Direito</SelectItem>
-                    <SelectItem value="Lateral Esquerdo">Lateral Esquerdo</SelectItem>
-                    <SelectItem value="Volante">Volante</SelectItem>
-                    <SelectItem value="Meio-campo Central">Meio-campo Central</SelectItem>
-                    <SelectItem value="Meia Atacante">Meia Atacante</SelectItem>
-                    <SelectItem value="Ponta Direita">Ponta Direita</SelectItem>
-                    <SelectItem value="Ponta Esquerda">Ponta Esquerda</SelectItem>
-                    <SelectItem value="Centroavante">Centroavante</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="position">
+              {userType === 'comissao_tecnica' ? 'Função' : 'Posição'}
+            </Label>
+            {userType === 'comissao_tecnica' ? (
+              <Select
+                value={formData.position}
+                onValueChange={(value) => setFormData({ ...formData, position: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a função" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Treinador">Treinador</SelectItem>
+                  <SelectItem value="Auxiliar Técnico">Auxiliar Técnico</SelectItem>
+                  <SelectItem value="Preparador Físico">Preparador Físico</SelectItem>
+                  <SelectItem value="Preparador de Goleiro">Preparador de Goleiro</SelectItem>
+                  <SelectItem value="Massagista">Massagista</SelectItem>
+                  <SelectItem value="Roupeiro">Roupeiro</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={formData.position}
+                onValueChange={(value) => setFormData({ ...formData, position: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a posição" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Goleiro">Goleiro</SelectItem>
+                  <SelectItem value="Zagueiro">Zagueiro</SelectItem>
+                  <SelectItem value="Lateral Direito">Lateral Direito</SelectItem>
+                  <SelectItem value="Lateral Esquerdo">Lateral Esquerdo</SelectItem>
+                  <SelectItem value="Volante">Volante</SelectItem>
+                  <SelectItem value="Meio-campo Central">Meio-campo Central</SelectItem>
+                  <SelectItem value="Meia Atacante">Meia Atacante</SelectItem>
+                  <SelectItem value="Ponta Direita">Ponta Direita</SelectItem>
+                  <SelectItem value="Ponta Esquerda">Ponta Esquerda</SelectItem>
+                  <SelectItem value="Centroavante">Centroavante</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* Physical Stats - Only for athletes */}
@@ -652,29 +662,14 @@ const EditProfile = () => {
             </>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="gender">Sexo</Label>
-              <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="homem">Homem</SelectItem>
-                  <SelectItem value="mulher">Mulher</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="birth_date">Data de Nascimento</Label>
-              <Input
-                id="birth_date"
-                type="date"
-                value={formData.birth_date}
-                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="birth_date">Data de Nascimento</Label>
+            <Input
+              id="birth_date"
+              type="date"
+              value={formData.birth_date}
+              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+            />
           </div>
 
           <div className="space-y-2">
