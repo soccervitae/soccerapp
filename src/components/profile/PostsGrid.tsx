@@ -66,9 +66,9 @@ type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas"
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: "posts", label: "Posts", icon: "grid_view" },
+  { id: "times", label: "Times", icon: "shield" },
   { id: "videos", label: "Vídeos", icon: "movie" },
   { id: "fotos", label: "Fotos", icon: "photo_camera" },
-  { id: "times", label: "Times", icon: "shield" },
   { id: "campeonatos", label: "Campeonatos", icon: "emoji_events" },
   { id: "conquistas", label: "Conquistas", icon: "military_tech" },
   { id: "tagged", label: "Marcado", icon: "assignment_ind" },
@@ -227,6 +227,11 @@ export const PostsGrid = ({
             {renderPostGrid(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library")}
           </div>
           
+          {/* Times */}
+          <div className="flex-[0_0_100%] min-w-0">
+            <TeamsTab userId={profile?.id} />
+          </div>
+          
           {/* Videos */}
           <div className="flex-[0_0_100%] min-w-0">
             {renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie")}
@@ -235,11 +240,6 @@ export const PostsGrid = ({
           {/* Fotos */}
           <div className="flex-[0_0_100%] min-w-0">
             {renderPostGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
-          </div>
-          
-          {/* Times */}
-          <div className="flex-[0_0_100%] min-w-0">
-            <TeamsTab userId={profile?.id} />
           </div>
           
           {/* Campeonatos */}
