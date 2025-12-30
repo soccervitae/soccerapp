@@ -31,6 +31,7 @@ const EditProfile = () => {
     username: "",
     bio: "",
     position: "",
+    role: "",
     team: "",
     height: "",
     weight: "",
@@ -115,6 +116,7 @@ const EditProfile = () => {
         username: profile.username || "",
         bio: profile.bio || "",
         position: profile.position || "",
+        role: profile.role || "",
         team: profile.team || "",
         height: profile.height?.toString() || "",
         weight: profile.weight?.toString() || "",
@@ -134,6 +136,7 @@ const EditProfile = () => {
       formData.username !== (profile.username || "") ||
       formData.bio !== (profile.bio || "") ||
       formData.position !== (profile.position || "") ||
+      formData.role !== (profile.role || "") ||
       formData.team !== (profile.team || "") ||
       formData.height !== (profile.height?.toString() || "") ||
       formData.weight !== (profile.weight?.toString() || "") ||
@@ -303,6 +306,7 @@ const EditProfile = () => {
         username: formData.username,
         bio: formData.bio || null,
         position: formData.position || null,
+        role: formData.role || null,
         team: formData.team || null,
         height: formData.height ? Number(formData.height) : null,
         weight: formData.weight ? Number(formData.weight) : null,
@@ -506,16 +510,29 @@ const EditProfile = () => {
             />
           </div>
 
+          {/* Position for athletes, Role for technical staff */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="position">Posição</Label>
-              <Input
-                id="position"
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                placeholder="Ex: Atacante"
-              />
-            </div>
+            {profile?.role ? (
+              <div className="space-y-2">
+                <Label htmlFor="role">Função</Label>
+                <Input
+                  id="role"
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  placeholder="Ex: Treinador"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="position">Posição</Label>
+                <Input
+                  id="position"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  placeholder="Ex: Atacante"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="team">Time</Label>
