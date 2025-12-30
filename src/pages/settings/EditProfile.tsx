@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
@@ -24,6 +25,19 @@ const EditProfile = () => {
   const uploadMedia = useUploadMedia();
   const { takePhoto, pickFromGallery, isNative } = useDeviceCamera();
 
+  // Fetch countries for nationality selector
+  const { data: countries = [] } = useQuery({
+    queryKey: ['countries'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('paises')
+        .select('id, nome, sigla, bandeira_url')
+        .order('nome');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +53,7 @@ const EditProfile = () => {
     birth_date: "",
     preferred_foot: "",
     gender: "",
+    nationality: "",
   });
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -125,6 +140,7 @@ const EditProfile = () => {
         birth_date: profile.birth_date || "",
         preferred_foot: profile.preferred_foot || "",
         gender: profile.gender || "",
+        nationality: profile.nationality?.toString() || "",
       });
       // Set user type based on whether they have a role (technical staff) or not (athlete)
       setUserType(profile.role ? 'comissao_tecnica' : 'atleta');
@@ -329,6 +345,7 @@ const EditProfile = () => {
         birth_date: formData.birth_date || null,
         preferred_foot: formData.preferred_foot || null,
         gender: formData.gender || null,
+        nationality: formData.nationality ? Number(formData.nationality) : null,
         avatar_url: avatarUrl,
         cover_url: coverUrl,
       });
@@ -655,6 +672,43 @@ const EditProfile = () => {
                 onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nationality">Nacionalidade</Label>
+            <Select 
+              value={formData.nationality} 
+              onValueChange={(value) => setFormData({ ...formData, nationality: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione seu país">
+                  {formData.nationality && countries.find(c => c.id.toString() === formData.nationality) && (
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={countries.find(c => c.id.toString() === formData.nationality)?.bandeira_url} 
+                        alt="" 
+                        className="w-5 h-4 object-cover rounded-sm"
+                      />
+                      <span>{countries.find(c => c.id.toString() === formData.nationality)?.nome}</span>
+                    </div>
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {countries.map((country) => (
+                  <SelectItem key={country.id} value={country.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={country.bandeira_url} 
+                        alt={country.nome} 
+                        className="w-5 h-4 object-cover rounded-sm"
+                      />
+                      <span>{country.nome}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
         </div>
