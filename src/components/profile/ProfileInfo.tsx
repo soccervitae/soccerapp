@@ -188,25 +188,27 @@ export const ProfileInfo = ({
           </button>
         </div>}
 
-      {/* Physical Stats */}
-      <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
-        <div className="flex flex-col gap-1 p-2 text-center">
-          <p className="text-foreground text-sm font-bold">{age || "-"}</p>
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
+      {/* Physical Stats - Only for athletes (no role means athlete) */}
+      {!profile.role && (
+        <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
+          <div className="flex flex-col gap-1 p-2 text-center">
+            <p className="text-foreground text-sm font-bold">{age || "-"}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
+          </div>
+          <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+            <p className="text-foreground text-sm font-bold">{formatHeight(profile.height)}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Altura</p>
+          </div>
+          <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+            <p className="text-foreground text-sm font-bold">{formatWeight(profile.weight ? Number(profile.weight) : null)}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Peso</p>
+          </div>
+          <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+            <p className="text-foreground text-sm font-bold">{formatFoot(profile.preferred_foot)}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
-          <p className="text-foreground text-sm font-bold">{formatHeight(profile.height)}</p>
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Altura</p>
-        </div>
-        <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
-          <p className="text-foreground text-sm font-bold">{formatWeight(profile.weight ? Number(profile.weight) : null)}</p>
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Peso</p>
-        </div>
-        <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
-          <p className="text-foreground text-sm font-bold">{formatFoot(profile.preferred_foot)}</p>
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
-        </div>
-      </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
