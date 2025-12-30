@@ -6,6 +6,8 @@ import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet"
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useConversations } from "@/hooks/useConversations";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserTeams } from "@/hooks/useTeams";
 
 interface BottomNavigationProps {
   activeTab?: "home" | "search" | "add" | "messages" | "profile";
@@ -15,6 +17,8 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { totalUnread } = useConversations();
+  const { user } = useAuth();
+  const { data: userTeams = [] } = useUserTeams(user?.id);
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
@@ -97,7 +101,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       <TeamSelector 
         open={isTimesOpen} 
         onOpenChange={setIsTimesOpen}
-        selectedTeamIds={[]}
+        selectedTeamIds={userTeams.map(t => t.id)}
       />
 
       <AddChampionshipSheet 

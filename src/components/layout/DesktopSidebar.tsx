@@ -8,6 +8,7 @@ import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
+import { useUserTeams } from "@/hooks/useTeams";
 
 type CreateOption = "post" | "times" | "championship" | "achievement";
 
@@ -57,6 +58,7 @@ export const DesktopSidebar = () => {
   const {
     data: profile
   } = useProfile();
+  const { data: userTeams = [] } = useUserTeams(user?.id);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
@@ -120,7 +122,7 @@ export const DesktopSidebar = () => {
       {/* Create Sheets */}
       <CreateMenuSheet open={isMenuOpen} onOpenChange={setIsMenuOpen} onSelectOption={handleSelectOption} />
       <CreatePostSheet open={isPostOpen} onOpenChange={setIsPostOpen} />
-      <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={[]} />
+      <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
     </>;
