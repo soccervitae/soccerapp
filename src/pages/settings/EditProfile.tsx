@@ -406,11 +406,18 @@ const EditProfile = () => {
         {/* Cover Photo */}
         <div className="relative mb-14">
           <div className="w-full h-36 bg-muted overflow-hidden">
-            <img
-              src={coverPreview || profile?.cover_url || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"}
-              alt="Capa"
-              className="w-full h-full object-cover"
-            />
+            {coverPreview || profile?.cover_url ? (
+              <img
+                src={coverPreview || profile?.cover_url}
+                alt="Capa"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-1">
+                <span className="material-symbols-outlined text-3xl text-muted-foreground">add_photo_alternate</span>
+                <span className="text-xs text-muted-foreground">Adicionar foto de capa</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-black/30" />
           </div>
           <button
@@ -432,11 +439,17 @@ const EditProfile = () => {
           <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-10">
             <div className="relative">
               <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
-                <img
-                  src={avatarPreview || profile?.avatar_url || "/placeholder.svg"}
-                  alt="Avatar"
-                  className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
-                />
+                {avatarPreview || profile?.avatar_url ? (
+                  <img
+                    src={avatarPreview || profile?.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full rounded-full border-4 border-background bg-muted object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full border-4 border-background bg-muted flex items-center justify-center">
+                    <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
+                  </div>
+                )}
               </div>
               <button
                 type="button"
