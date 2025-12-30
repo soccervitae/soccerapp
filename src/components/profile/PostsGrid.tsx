@@ -62,7 +62,7 @@ interface PostsGridProps {
   profile?: Profile;
 }
 
-type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas" | "tagged";
+type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas";
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: "posts", label: "Posts", icon: "grid_view" },
@@ -71,7 +71,6 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: "fotos", label: "Fotos", icon: "photo_camera" },
   { id: "campeonatos", label: "Campeonatos", icon: "emoji_events" },
   { id: "conquistas", label: "Conquistas", icon: "military_tech" },
-  { id: "tagged", label: "Marcado", icon: "assignment_ind" },
 ];
 
 export const PostsGrid = ({ 
@@ -120,7 +119,6 @@ export const PostsGrid = ({
     if (tab === "videos") return posts.filter(post => post.media_type === "video");
     if (tab === "fotos") return posts.filter(post => post.media_type === "image");
     if (tab === "posts") return posts;
-    if (tab === "tagged") return taggedPosts;
     return [];
   };
 
@@ -260,18 +258,6 @@ export const PostsGrid = ({
             />
           </div>
           
-          {/* Tagged */}
-          <div className="flex-[0_0_100%] min-w-0">
-            {isTaggedLoading ? (
-              <div className="grid grid-cols-3 gap-1 mb-8">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              renderPostGrid(getFilteredPosts("tagged"), "Não marcado em nenhum post", "assignment_ind")
-            )}
-          </div>
         </div>
       </div>
 
