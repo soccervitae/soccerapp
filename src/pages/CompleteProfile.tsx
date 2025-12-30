@@ -40,6 +40,7 @@ const CompleteProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [touched, setTouched] = useState({
+    nickname: false,
     profileType: false,
     birthDate: false,
     position: false,
@@ -105,7 +106,11 @@ const CompleteProfile = () => {
   const isAthlete = profileType === "atleta";
   const isStaff = profileType === "comissao_tecnica";
 
-  // Validations (username removed - auto-generated and read-only)
+  // Validations
+  // Nickname validation: required, min 2 chars, only letters, numbers, spaces and common accents
+  const nicknameRegex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
+  const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
+  
   const isProfileTypeValid = !!profileType;
   const isBirthDateValid = !!birthDate;
   const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
@@ -116,6 +121,7 @@ const CompleteProfile = () => {
   const isPreferredFootValid = isAthlete ? !!preferredFoot : true;
 
   const isFormValid =
+    isNicknameValid &&
     isProfileTypeValid &&
     isBirthDateValid &&
     isPositionValid &&
@@ -196,11 +202,11 @@ const CompleteProfile = () => {
   }
 
   // Calculate completed fields based on profile type
-  const athleteFields = [isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
+  const athleteFields = [isNicknameValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
+  const staffFields = [isNicknameValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
   const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isAthlete ? 7 : 4;
+  const totalFields = isAthlete ? 8 : 5;
 
   return (
     <div className="min-h-screen bg-background">
@@ -231,22 +237,28 @@ const CompleteProfile = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
-        {/* Nickname - Optional */}
+        {/* Nickname - Required */}
         <div className="space-y-2">
           <Label htmlFor="nickname">
-            Apelido / Nome artístico
+            Apelido / Nome artístico <span className="text-destructive">*</span>
           </Label>
           <Input
             id="nickname"
             type="text"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
+            onBlur={() => handleBlur("nickname")}
             placeholder="Como você é conhecido"
             maxLength={50}
+            className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
           />
-          <p className="text-xs text-muted-foreground">
-            Opcional. Será exibido no seu perfil.
-          </p>
+          {touched.nickname && !isNicknameValid && (
+            <p className="text-xs text-destructive">
+              {nickname.trim().length < 2 
+                ? "Mínimo de 2 caracteres." 
+                : "Apenas letras, números e espaços são permitidos."}
+            </p>
+          )}
         </div>
 
         {/* Profile Type - Atleta ou Comissão Técnica */}
