@@ -7,7 +7,6 @@ interface SignUpData {
   password: string;
   firstName: string;
   lastName: string;
-  gender: string;
 }
 
 interface AuthContextType {
@@ -58,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async ({ email, password, firstName, lastName, gender }: SignUpData) => {
+  const signUp = async ({ email, password, firstName, lastName }: SignUpData) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -69,7 +68,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         data: {
           first_name: firstName,
           last_name: lastName,
-          gender: gender,
         },
       },
     });

@@ -24,6 +24,7 @@ const CompleteProfile = () => {
   const { data: profile, isLoading: profileLoading } = useProfile();
 
   const [username, setUsername] = useState("");
+  const [gender, setGender] = useState("");
   const [profileType, setProfileType] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [position, setPosition] = useState("");
@@ -41,6 +42,7 @@ const CompleteProfile = () => {
 
   const [touched, setTouched] = useState({
     nickname: false,
+    gender: false,
     profileType: false,
     birthDate: false,
     position: false,
@@ -60,38 +62,39 @@ const CompleteProfile = () => {
     loadCountries();
   }, []);
 
-  // Load positions based on user gender
+  // Load positions based on selected gender (not profile.gender)
   useEffect(() => {
     const loadPositions = async () => {
-      if (!profile?.gender) return;
+      if (!gender) return;
       
-      const isFemale = profile.gender === "mulher" || profile.gender === "feminino" || profile.gender === "female";
+      const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
       const table = isFemale ? "posicao_feminina" : "posicao_masculina";
       
       const { data } = await supabase.from(table).select("id, name").order("name");
       if (data) setPositions(data);
     };
     loadPositions();
-  }, [profile?.gender]);
+  }, [gender]);
 
-  // Load functions for technical staff based on user gender
+  // Load functions for technical staff based on selected gender
   useEffect(() => {
     const loadFunctions = async () => {
-      if (!profile?.gender) return;
+      if (!gender) return;
       
-      const isFemale = profile.gender === "mulher" || profile.gender === "feminino" || profile.gender === "female";
+      const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
       const table = isFemale ? "funcao_feminina" : "funcao";
       
       const { data } = await supabase.from(table).select("id, name").order("name");
       if (data) setFunctions(data);
     };
     loadFunctions();
-  }, [profile?.gender]);
+  }, [gender]);
 
   // Load existing profile data
   useEffect(() => {
     if (profile) {
       if (profile.username) setUsername(profile.username);
+      if (profile.gender) setGender(profile.gender);
       if (profile.role) setProfileType(profile.role);
       if (profile.birth_date) setBirthDate(profile.birth_date);
       if (profile.position) setPosition(profile.position);
@@ -111,6 +114,7 @@ const CompleteProfile = () => {
   const nicknameRegex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
   const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
   
+  const isGenderValid = !!gender;
   const isProfileTypeValid = !!profileType;
   const isBirthDateValid = !!birthDate;
   const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
@@ -122,6 +126,7 @@ const CompleteProfile = () => {
 
   const isFormValid =
     isNicknameValid &&
+    isGenderValid &&
     isProfileTypeValid &&
     isBirthDateValid &&
     isPositionValid &&
@@ -153,6 +158,7 @@ const CompleteProfile = () => {
     setIsSubmitting(true);
     try {
       const updateData: Record<string, unknown> = {
+        gender: gender,
         role: profileType,
         birth_date: birthDate,
         nationality: Number(nationality),
@@ -202,11 +208,11 @@ const CompleteProfile = () => {
   }
 
   // Calculate completed fields based on profile type
-  const athleteFields = [isNicknameValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isNicknameValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
+  const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
+  const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
   const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isAthlete ? 8 : 5;
+  const totalFields = isAthlete ? 9 : 6;
 
   return (
     <div className="min-h-screen bg-background">
@@ -261,6 +267,25 @@ const CompleteProfile = () => {
                 ? "Mínimo de 2 caracteres." 
                 : "Apenas letras, números e espaços são permitidos."}
             </p>
+          )}
+        </div>
+
+        {/* Gender - Sexo */}
+        <div className="space-y-2">
+          <Label htmlFor="gender">
+            Sexo <span className="text-destructive">*</span>
+          </Label>
+          <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
+            <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
+              <SelectValue placeholder="Selecione seu sexo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="homem">Homem</SelectItem>
+              <SelectItem value="mulher">Mulher</SelectItem>
+            </SelectContent>
+          </Select>
+          {touched.gender && !isGenderValid && (
+            <p className="text-xs text-destructive">Selecione seu sexo.</p>
           )}
         </div>
 
