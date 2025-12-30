@@ -245,27 +245,7 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* Birth Date */}
-        <div className="space-y-2">
-          <Label htmlFor="birthDate" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Data de nascimento <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="birthDate"
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            onBlur={() => handleBlur("birthDate")}
-            className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
-            max={new Date().toISOString().split("T")[0]}
-          />
-          {touched.birthDate && !isBirthDateValid && (
-            <p className="text-xs text-destructive">Selecione sua data de nascimento.</p>
-          )}
-        </div>
-
-        {/* Position - Only for Athletes */}
+        {/* Position - Only for Athletes (moved right after profile type) */}
         {isAthlete && (
           <div className="space-y-2">
             <Label htmlFor="position" className="flex items-center gap-2">
@@ -289,6 +269,26 @@ const CompleteProfile = () => {
             )}
           </div>
         )}
+
+        {/* Birth Date */}
+        <div className="space-y-2">
+          <Label htmlFor="birthDate" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Data de nascimento <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="birthDate"
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            onBlur={() => handleBlur("birthDate")}
+            className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
+            max={new Date().toISOString().split("T")[0]}
+          />
+          {touched.birthDate && !isBirthDateValid && (
+            <p className="text-xs text-destructive">Selecione sua data de nascimento.</p>
+          )}
+        </div>
 
         {/* Nationality */}
         <div className="space-y-2">
