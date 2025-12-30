@@ -103,7 +103,7 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
               <SettingsItem
                 icon="notifications"
                 label="Notificações"
-                onClick={() => handleComingSoon("Notificações")}
+                onClick={() => handleNavigation("/settings/notifications")}
               />
             </div>
 
