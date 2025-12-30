@@ -252,6 +252,9 @@ const CompleteProfile = () => {
             maxLength={50}
             className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
           />
+          <p className="text-xs text-muted-foreground">
+            O apelido é como te chamam no futebol.
+          </p>
           {touched.nickname && !isNicknameValid && (
             <p className="text-xs text-destructive">
               {nickname.trim().length < 2 
