@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, User, Calendar, Ruler, Weight, Target, Flag, Footprints, Lock, Users, Briefcase } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 
 interface Country {
   id: number;
@@ -228,32 +228,9 @@ const CompleteProfile = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
-        {/* Username - Read Only */}
-        <div className="space-y-2">
-          <Label htmlFor="username" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Nome de usuário
-            <Lock className="h-3 w-3 text-muted-foreground" />
-          </Label>
-          <div className="relative">
-            <Input
-              id="username"
-              type="text"
-              value={username}
-              disabled
-              className="bg-muted cursor-not-allowed"
-            />
-            <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Seu nome de usuário foi gerado automaticamente e não pode ser alterado.
-          </p>
-        </div>
-
         {/* Profile Type - Atleta ou Comissão Técnica */}
         <div className="space-y-2">
-          <Label htmlFor="profileType" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+          <Label htmlFor="profileType">
             Tipo de perfil <span className="text-destructive">*</span>
           </Label>
           <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); }}>
@@ -273,8 +250,7 @@ const CompleteProfile = () => {
         {/* Position - Only for Athletes (moved right after profile type) */}
         {isAthlete && (
           <div className="space-y-2">
-            <Label htmlFor="position" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
+            <Label htmlFor="position">
               Posição <span className="text-destructive">*</span>
             </Label>
             <Select value={position} onValueChange={(value) => { setPosition(value); handleBlur("position"); }}>
@@ -298,8 +274,7 @@ const CompleteProfile = () => {
         {/* Function - Only for Technical Staff */}
         {isStaff && (
           <div className="space-y-2">
-            <Label htmlFor="staffFunction" className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
+            <Label htmlFor="staffFunction">
               Função <span className="text-destructive">*</span>
             </Label>
             <Select value={staffFunction} onValueChange={(value) => { setStaffFunction(value); handleBlur("staffFunction"); }}>
@@ -322,8 +297,7 @@ const CompleteProfile = () => {
 
         {/* Birth Date */}
         <div className="space-y-2">
-          <Label htmlFor="birthDate" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
+          <Label htmlFor="birthDate">
             Data de nascimento <span className="text-destructive">*</span>
           </Label>
           <Input
@@ -342,8 +316,7 @@ const CompleteProfile = () => {
 
         {/* Nationality */}
         <div className="space-y-2">
-          <Label htmlFor="nationality" className="flex items-center gap-2">
-            <Flag className="h-4 w-4" />
+          <Label htmlFor="nationality">
             Nacionalidade <span className="text-destructive">*</span>
           </Label>
           <Select value={nationality} onValueChange={(value) => { setNationality(value); handleBlur("nationality"); }}>
@@ -373,8 +346,7 @@ const CompleteProfile = () => {
           <div className="grid grid-cols-2 gap-4">
             {/* Height */}
             <div className="space-y-2">
-              <Label htmlFor="height" className="flex items-center gap-2">
-                <Ruler className="h-4 w-4" />
+              <Label htmlFor="height">
                 Altura (cm) <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -400,8 +372,7 @@ const CompleteProfile = () => {
 
             {/* Weight */}
             <div className="space-y-2">
-              <Label htmlFor="weight" className="flex items-center gap-2">
-                <Weight className="h-4 w-4" />
+              <Label htmlFor="weight">
                 Peso (kg) <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -431,8 +402,7 @@ const CompleteProfile = () => {
         {/* Preferred Foot - Only for Athletes */}
         {isAthlete && (
           <div className="space-y-2">
-            <Label htmlFor="preferredFoot" className="flex items-center gap-2">
-              <Footprints className="h-4 w-4" />
+            <Label htmlFor="preferredFoot">
               Pé preferido <span className="text-destructive">*</span>
             </Label>
             <Select value={preferredFoot} onValueChange={(value) => { setPreferredFoot(value); handleBlur("preferredFoot"); }}>
