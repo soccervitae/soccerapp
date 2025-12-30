@@ -46,19 +46,28 @@ const CompleteProfile = () => {
     preferredFoot: false,
   });
 
-  // Load countries and positions
+  // Load countries
   useEffect(() => {
-    const loadData = async () => {
-      const [countriesRes, positionsRes] = await Promise.all([
-        supabase.from("paises").select("id, nome, bandeira_url").order("nome"),
-        supabase.from("posicao_masculina").select("id, name").order("name"),
-      ]);
-
-      if (countriesRes.data) setCountries(countriesRes.data);
-      if (positionsRes.data) setPositions(positionsRes.data);
+    const loadCountries = async () => {
+      const { data } = await supabase.from("paises").select("id, nome, bandeira_url").order("nome");
+      if (data) setCountries(data);
     };
-    loadData();
+    loadCountries();
   }, []);
+
+  // Load positions based on user gender
+  useEffect(() => {
+    const loadPositions = async () => {
+      if (!profile?.gender) return;
+      
+      const isFemale = profile.gender === "mulher" || profile.gender === "feminino" || profile.gender === "female";
+      const table = isFemale ? "posicao_feminina" : "posicao_masculina";
+      
+      const { data } = await supabase.from(table).select("id, name").order("name");
+      if (data) setPositions(data);
+    };
+    loadPositions();
+  }, [profile?.gender]);
 
   // Load existing profile data
   useEffect(() => {
