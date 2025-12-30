@@ -86,10 +86,10 @@ export default function Welcome() {
   const handleComplete = async () => {
     try {
       await updateProfile.mutateAsync({ onboarding_completed: true });
-      navigate("/", { replace: true });
+      navigate(`/profile/${user?.id}`, { replace: true });
     } catch (error) {
       toast.error("Erro ao concluir onboarding");
-      navigate("/", { replace: true });
+      navigate(`/profile/${user?.id}`, { replace: true });
     }
   };
 
@@ -190,7 +190,7 @@ export default function Welcome() {
               onClick={handleComplete}
               className="w-full text-muted-foreground"
             >
-              Pular e ir para o feed
+              Ir para o Perfil
             </Button>
           </motion.div>
         </motion.div>
