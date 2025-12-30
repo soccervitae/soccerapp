@@ -128,9 +128,12 @@ const EditProfile = () => {
     };
   }, []);
 
+  // Track if form has been initialized
+  const [formInitialized, setFormInitialized] = useState(false);
+
   // Initialize form when profile loads
   useEffect(() => {
-    if (profile && formData.username === "") {
+    if (profile && !formInitialized) {
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
@@ -147,8 +150,9 @@ const EditProfile = () => {
       });
       // Set user type based on whether they have a role (technical staff) or not (athlete)
       setUserType(profile.role ? 'comissao_tecnica' : 'atleta');
+      setFormInitialized(true);
     }
-  }, [profile]);
+  }, [profile, formInitialized]);
 
   // Handle user type change
   const handleUserTypeChange = (newType: 'atleta' | 'comissao_tecnica') => {
