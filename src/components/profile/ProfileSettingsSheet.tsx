@@ -80,8 +80,8 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
           <ResponsiveModalTitle className="text-center">Configurações</ResponsiveModalTitle>
         </ResponsiveModalHeader>
 
-        <ScrollArea className="max-h-[60vh]">
-          <div className="mt-4 space-y-2 pb-4">
+        <ScrollArea className="h-[calc(80vh-80px)] max-h-[500px]">
+          <div className="mt-4 space-y-2 pb-6 px-1">
             {/* Conta */}
             <div>
               <SectionHeader title="Conta" />
