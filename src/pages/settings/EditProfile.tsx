@@ -10,11 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon } from "lucide-react";
+import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronsUpDown } from "lucide-react";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
 
@@ -70,6 +72,7 @@ const EditProfile = () => {
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [cropType, setCropType] = useState<'cover' | 'avatar'>('cover');
   const [userType, setUserType] = useState<'atleta' | 'comissao_tecnica'>('atleta');
+  const [nationalityOpen, setNationalityOpen] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Check username availability
@@ -676,13 +679,15 @@ const EditProfile = () => {
 
           <div className="space-y-2">
             <Label htmlFor="nationality">Nacionalidade</Label>
-            <Select 
-              value={formData.nationality} 
-              onValueChange={(value) => setFormData({ ...formData, nationality: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione seu país">
-                  {formData.nationality && countries.find(c => c.id.toString() === formData.nationality) && (
+            <Popover open={nationalityOpen} onOpenChange={setNationalityOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  role="combobox"
+                  aria-expanded={nationalityOpen}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  {formData.nationality ? (
                     <div className="flex items-center gap-2">
                       <img 
                         src={countries.find(c => c.id.toString() === formData.nationality)?.bandeira_url} 
@@ -691,24 +696,45 @@ const EditProfile = () => {
                       />
                       <span>{countries.find(c => c.id.toString() === formData.nationality)?.nome}</span>
                     </div>
+                  ) : (
+                    <span className="text-muted-foreground">Buscar país...</span>
                   )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {countries.map((country) => (
-                  <SelectItem key={country.id} value={country.id.toString()}>
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={country.bandeira_url} 
-                        alt={country.nome} 
-                        className="w-5 h-4 object-cover rounded-sm"
-                      />
-                      <span>{country.nome}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar país..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhum país encontrado.</CommandEmpty>
+                    <CommandGroup>
+                      {countries.map((country) => (
+                        <CommandItem
+                          key={country.id}
+                          value={country.nome}
+                          onSelect={() => {
+                            setFormData({ ...formData, nationality: country.id.toString() });
+                            setNationalityOpen(false);
+                          }}
+                        >
+                          <div className="flex items-center gap-2 flex-1">
+                            <img 
+                              src={country.bandeira_url} 
+                              alt={country.nome} 
+                              className="w-5 h-4 object-cover rounded-sm"
+                            />
+                            <span>{country.nome}</span>
+                          </div>
+                          {formData.nationality === country.id.toString() && (
+                            <Check className="h-4 w-4 text-primary" />
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
         </div>
