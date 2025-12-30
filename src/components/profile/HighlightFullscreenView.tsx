@@ -13,10 +13,12 @@ import {
   useHighlightLikeStatus,
   useToggleHighlightLike,
   useSendHighlightReply,
-  useHighlightReplyCount
+  useHighlightReplyCount,
+  useHighlightLikeCount
 } from "@/hooks/useHighlightInteractions";
 import { HighlightViewersSheet } from "@/components/profile/HighlightViewersSheet";
 import { HighlightRepliesSheet } from "@/components/profile/HighlightRepliesSheet";
+import { HighlightLikesSheet } from "@/components/profile/HighlightLikesSheet";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface HighlightFullscreenViewProps {
@@ -80,6 +82,7 @@ export const HighlightFullscreenView = ({
   const [shareToChatSheetOpen, setShareToChatSheetOpen] = useState(false);
   const [viewersSheetOpen, setViewersSheetOpen] = useState(false);
   const [repliesSheetOpen, setRepliesSheetOpen] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -98,6 +101,9 @@ export const HighlightFullscreenView = ({
   const toggleLike = useToggleHighlightLike();
   const sendReply = useSendHighlightReply();
   const { data: replyCount = 0 } = useHighlightReplyCount(
+    isOwnProfile ? selectedHighlight?.id : undefined
+  );
+  const { data: likeCount = 0 } = useHighlightLikeCount(
     isOwnProfile ? selectedHighlight?.id : undefined
   );
   
@@ -492,19 +498,26 @@ export const HighlightFullscreenView = ({
                 {/* Footer with gradient */}
                 <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
                   {isOwnProfile ? (
-                    // Owner footer: views, replies count and action buttons
+                    // Owner footer: views, likes, replies count and action buttons
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <button 
                           onClick={() => setViewersSheetOpen(true)}
-                          className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+                          className="flex items-center gap-1.5 text-white hover:bg-white/10 px-2.5 py-2 rounded-full transition-colors"
                         >
                           <Eye className="w-5 h-5" />
                           <span className="text-sm font-medium">{viewerCount}</span>
                         </button>
                         <button 
+                          onClick={() => setLikesSheetOpen(true)}
+                          className="flex items-center gap-1.5 text-white hover:bg-white/10 px-2.5 py-2 rounded-full transition-colors"
+                        >
+                          <Heart className="w-5 h-5" />
+                          <span className="text-sm font-medium">{likeCount}</span>
+                        </button>
+                        <button 
                           onClick={() => setRepliesSheetOpen(true)}
-                          className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+                          className="flex items-center gap-1.5 text-white hover:bg-white/10 px-2.5 py-2 rounded-full transition-colors"
                         >
                           <MessageCircle className="w-5 h-5" />
                           <span className="text-sm font-medium">{replyCount}</span>
@@ -689,6 +702,15 @@ export const HighlightFullscreenView = ({
           highlightId={selectedHighlight.id}
           isOpen={repliesSheetOpen}
           onClose={() => setRepliesSheetOpen(false)}
+        />
+      )}
+
+      {/* Highlight Likes Sheet */}
+      {isOwnProfile && selectedHighlight && (
+        <HighlightLikesSheet
+          highlightId={selectedHighlight.id}
+          isOpen={likesSheetOpen}
+          onClose={() => setLikesSheetOpen(false)}
         />
       )}
     </AnimatePresence>

@@ -229,6 +229,38 @@ export const useHighlightLikeCount = (highlightId: string | undefined) => {
   });
 };
 
+// Get likers for a highlight (for owner to see who liked)
+export const useHighlightLikers = (highlightId: string | undefined, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ["highlight-likers", highlightId],
+    queryFn: async () => {
+      if (!highlightId) return [];
+
+      const { data, error } = await supabase
+        .from("highlight_likes")
+        .select(`
+          id,
+          user_id,
+          created_at,
+          profile:profiles!highlight_likes_user_id_fkey (
+            id,
+            username,
+            full_name,
+            nickname,
+            avatar_url,
+            conta_verificada
+          )
+        `)
+        .eq("highlight_id", highlightId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!highlightId && enabled,
+  });
+};
+
 // ==================== REPLIES ====================
 
 // Get replies for a highlight (only owner can see)
