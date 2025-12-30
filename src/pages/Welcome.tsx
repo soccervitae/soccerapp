@@ -86,10 +86,10 @@ export default function Welcome() {
   const handleComplete = async () => {
     try {
       await updateProfile.mutateAsync({ onboarding_completed: true });
-      navigate(`/profile/${user?.id}`, { replace: true, state: { fromOnboarding: true } });
+      navigate(`/${profile?.username}`, { replace: true, state: { fromOnboarding: true } });
     } catch (error) {
       toast.error("Erro ao concluir onboarding");
-      navigate(`/profile/${user?.id}`, { replace: true, state: { fromOnboarding: true } });
+      navigate(`/${profile?.username}`, { replace: true, state: { fromOnboarding: true } });
     }
   };
 
