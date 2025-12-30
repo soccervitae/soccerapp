@@ -586,16 +586,6 @@ const EditProfile = () => {
                 </Select>
               )}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="team">Time</Label>
-              <Input
-                id="team"
-                value={formData.team}
-                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-                placeholder="Ex: Flamengo"
-              />
-            </div>
           </div>
 
           {/* Physical Stats - Only for athletes */}
@@ -644,16 +634,6 @@ const EditProfile = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="birth_date">Data de Nascimento</Label>
-              <Input
-                id="birth_date"
-                type="date"
-                value={formData.birth_date}
-                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="gender">Sexo</Label>
               <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
                 <SelectTrigger>
@@ -664,6 +644,16 @@ const EditProfile = () => {
                   <SelectItem value="mulher">Mulher</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="birth_date">Data de Nascimento</Label>
+              <Input
+                id="birth_date"
+                type="date"
+                value={formData.birth_date}
+                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+              />
             </div>
           </div>
 
