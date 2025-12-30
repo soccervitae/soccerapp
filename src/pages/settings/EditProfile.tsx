@@ -564,12 +564,26 @@ const EditProfile = () => {
                   </SelectContent>
                 </Select>
               ) : (
-                <Input
-                  id="position"
+                <Select
                   value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  placeholder="Ex: Atacante"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, position: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a posição" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Goleiro">Goleiro</SelectItem>
+                    <SelectItem value="Zagueiro">Zagueiro</SelectItem>
+                    <SelectItem value="Lateral Direito">Lateral Direito</SelectItem>
+                    <SelectItem value="Lateral Esquerdo">Lateral Esquerdo</SelectItem>
+                    <SelectItem value="Volante">Volante</SelectItem>
+                    <SelectItem value="Meio-campo Central">Meio-campo Central</SelectItem>
+                    <SelectItem value="Meia Atacante">Meia Atacante</SelectItem>
+                    <SelectItem value="Ponta Direita">Ponta Direita</SelectItem>
+                    <SelectItem value="Ponta Esquerda">Ponta Esquerda</SelectItem>
+                    <SelectItem value="Centroavante">Centroavante</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             </div>
 
