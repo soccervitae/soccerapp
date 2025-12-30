@@ -5,10 +5,12 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
-import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
-type CreateOption = "post" | "replay" | "championship" | "achievement";
+import { TeamSelector } from "@/components/profile/TeamSelector";
+
+type CreateOption = "post" | "times" | "championship" | "achievement";
+
 const navItems = [{
   id: "home",
   icon: "home",
@@ -45,6 +47,7 @@ const navItems = [{
   label: "Configurações",
   path: "/settings/edit"
 }];
+
 export const DesktopSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,15 +59,17 @@ export const DesktopSidebar = () => {
   } = useProfile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
-  const [isReplayOpen, setIsReplayOpen] = useState(false);
+  const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   const currentPath = location.pathname;
+  
   const isActive = (path: string | null) => {
     if (!path) return false;
     if (path === "/") return currentPath === "/";
     return currentPath.startsWith(path);
   };
+  
   const handleNavClick = (item: typeof navItems[0]) => {
     if (item.id === "create") {
       setIsMenuOpen(true);
@@ -72,13 +77,14 @@ export const DesktopSidebar = () => {
       navigate(item.path);
     }
   };
+  
   const handleSelectOption = (option: CreateOption) => {
     switch (option) {
       case "post":
         setIsPostOpen(true);
         break;
-      case "replay":
-        setIsReplayOpen(true);
+      case "times":
+        setIsTimesOpen(true);
         break;
       case "championship":
         setIsChampionshipOpen(true);
@@ -114,7 +120,7 @@ export const DesktopSidebar = () => {
       {/* Create Sheets */}
       <CreateMenuSheet open={isMenuOpen} onOpenChange={setIsMenuOpen} onSelectOption={handleSelectOption} />
       <CreatePostSheet open={isPostOpen} onOpenChange={setIsPostOpen} />
-      <CreateReplaySheet open={isReplayOpen} onOpenChange={setIsReplayOpen} />
+      <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={[]} />
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
     </>;
