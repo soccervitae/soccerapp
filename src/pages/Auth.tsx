@@ -493,7 +493,6 @@ interface SignupFormProps {
 const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -508,7 +507,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
-    gender: false,
     email: false,
     password: false,
     confirmPassword: false,
@@ -520,7 +518,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   // Validações individuais
   const isFirstNameValid = firstName.trim().length >= 2;
   const isLastNameValid = lastName.trim().length >= 2;
-  const isGenderValid = gender !== "";
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
 
@@ -664,15 +661,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    if (!gender) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Por favor, selecione seu sexo",
-      });
-      return;
-    }
-
     if (!validateEmail(email)) {
       toast({
         variant: "destructive",
@@ -707,7 +695,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       password,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      gender,
     });
 
     if (error) {
@@ -785,7 +772,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const isFormValid = 
     firstName.trim().length >= 2 && 
     lastName.trim().length >= 2 &&
-    gender !== "" &&
     emailStatus === "valid" &&
     isPasswordValid &&
     password === confirmPassword;
@@ -868,42 +854,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
           )}
         </div>
-      </div>
-
-      {/* Sexo */}
-      <div className="space-y-2">
-        <Label htmlFor="signup-gender" className="text-xs font-semibold uppercase text-muted-foreground">
-          Sexo <span className="text-destructive">*</span>
-        </Label>
-        <Select 
-          value={gender} 
-          onValueChange={(value) => {
-            setGender(value);
-            setTouched(prev => ({ ...prev, gender: true }));
-          }}
-          onOpenChange={(open) => {
-            if (!open && !gender) {
-              setTouched(prev => ({ ...prev, gender: true }));
-            }
-          }}
-        >
-          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
-            touched.gender 
-              ? isGenderValid 
-                ? "border-emerald-500 border" 
-                : "border-destructive border"
-              : "border-0"
-          }`}>
-            <SelectValue placeholder="Selecione seu sexo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="homem">Homem</SelectItem>
-            <SelectItem value="mulher">Mulher</SelectItem>
-          </SelectContent>
-        </Select>
-        {touched.gender && !isGenderValid && (
-          <p className="text-xs text-destructive">Selecione seu sexo</p>
-        )}
       </div>
 
       {/* Email */}
