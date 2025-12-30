@@ -76,6 +76,19 @@ const EditProfile = () => {
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Helper function to calculate age from birth date
+  const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   // Validation errors
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -83,7 +96,14 @@ const EditProfile = () => {
     if (!formData.full_name.trim()) errors.full_name = "Nome completo é obrigatório";
     if (!formData.gender) errors.gender = "Sexo é obrigatório";
     if (!formData.position) errors.position = userType === 'comissao_tecnica' ? "Função é obrigatória" : "Posição é obrigatória";
-    if (!formData.birth_date) errors.birth_date = "Data de nascimento é obrigatória";
+    
+    // Birth date validation with minimum age of 16
+    if (!formData.birth_date) {
+      errors.birth_date = "Data de nascimento é obrigatória";
+    } else if (calculateAge(formData.birth_date) < 16) {
+      errors.birth_date = "Você deve ter pelo menos 16 anos";
+    }
+    
     if (!formData.nationality) errors.nationality = "Nacionalidade é obrigatória";
     
     // Additional validations for athletes
