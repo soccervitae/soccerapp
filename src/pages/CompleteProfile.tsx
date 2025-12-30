@@ -31,6 +31,7 @@ const CompleteProfile = () => {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [preferredFoot, setPreferredFoot] = useState("");
+  const [nickname, setNickname] = useState("");
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [positions, setPositions] = useState<{ id: number; name: string }[]>([]);
@@ -96,6 +97,7 @@ const CompleteProfile = () => {
       if (profile.height) setHeight(profile.height.toString());
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
+      if (profile.nickname) setNickname(profile.nickname);
     }
   }, [profile]);
 
@@ -148,6 +150,7 @@ const CompleteProfile = () => {
         role: profileType,
         birth_date: birthDate,
         nationality: Number(nationality),
+        nickname: nickname.trim() || null,
         profile_completed: true,
       };
 
@@ -228,6 +231,24 @@ const CompleteProfile = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
+        {/* Nickname - Optional */}
+        <div className="space-y-2">
+          <Label htmlFor="nickname">
+            Apelido / Nome artístico
+          </Label>
+          <Input
+            id="nickname"
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="Como você é conhecido"
+            maxLength={50}
+          />
+          <p className="text-xs text-muted-foreground">
+            Opcional. Será exibido no seu perfil.
+          </p>
+        </div>
+
         {/* Profile Type - Atleta ou Comissão Técnica */}
         <div className="space-y-2">
           <Label htmlFor="profileType">

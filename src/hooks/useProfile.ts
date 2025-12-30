@@ -27,6 +27,7 @@ export interface Profile {
   preferred_foot: string | null;
   gender: string | null;
   role: string | null;
+  nickname: string | null;
   conta_verificada: boolean;
   created_at: string;
   profile_completed?: boolean;
