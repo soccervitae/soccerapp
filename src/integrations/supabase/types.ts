@@ -939,8 +939,14 @@ export type Database = {
           last_seen_at: string | null
           nationality: number | null
           nickname: string | null
+          notify_comments: boolean | null
+          notify_follows: boolean | null
+          notify_highlight_replies: boolean | null
+          notify_likes: boolean | null
+          notify_messages: boolean | null
           notify_new_device: boolean | null
           notify_security_events: boolean | null
+          notify_story_replies: boolean | null
           onboarding_completed: boolean | null
           password_reset_code: string | null
           password_reset_expires_at: string | null
@@ -973,8 +979,14 @@ export type Database = {
           last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
+          notify_comments?: boolean | null
+          notify_follows?: boolean | null
+          notify_highlight_replies?: boolean | null
+          notify_likes?: boolean | null
+          notify_messages?: boolean | null
           notify_new_device?: boolean | null
           notify_security_events?: boolean | null
+          notify_story_replies?: boolean | null
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
@@ -1007,8 +1019,14 @@ export type Database = {
           last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
+          notify_comments?: boolean | null
+          notify_follows?: boolean | null
+          notify_highlight_replies?: boolean | null
+          notify_likes?: boolean | null
+          notify_messages?: boolean | null
           notify_new_device?: boolean | null
           notify_security_events?: boolean | null
+          notify_story_replies?: boolean | null
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null

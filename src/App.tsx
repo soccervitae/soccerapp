@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import EditProfile from "./pages/settings/EditProfile";
 import Privacy from "./pages/settings/Privacy";
 import Security from "./pages/settings/Security";
+import Notifications from "./pages/settings/Notifications";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 import TwoFactorVerify from "./pages/TwoFactorVerify";
@@ -111,6 +112,11 @@ const AnimatedRoutes = () => {
         <Route path="/settings/security" element={
           <ProtectedRoute>
             <PageTransition><Security /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings/notifications" element={
+          <ProtectedRoute>
+            <PageTransition><Notifications /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
