@@ -166,7 +166,8 @@ export const ProfileInfo = ({
         </h2>
         <p className="text-muted-foreground font-medium text-sm">
           {(() => {
-            const displayRole = profile.role || profile.position;
+            // For technical staff, show position (function), for athletes also show position
+            const displayRole = profile.position;
             if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
             return displayRole || profile.team || `@${profile.username}`;
           })()}
