@@ -546,12 +546,31 @@ const EditProfile = () => {
               <Label htmlFor="position">
                 {userType === 'comissao_tecnica' ? 'Função' : 'Posição'}
               </Label>
-              <Input
-                id="position"
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                placeholder={userType === 'comissao_tecnica' ? 'Ex: Treinador' : 'Ex: Atacante'}
-              />
+              {userType === 'comissao_tecnica' ? (
+                <Select
+                  value={formData.position}
+                  onValueChange={(value) => setFormData({ ...formData, position: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a função" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Treinador">Treinador</SelectItem>
+                    <SelectItem value="Auxiliar Técnico">Auxiliar Técnico</SelectItem>
+                    <SelectItem value="Preparador Físico">Preparador Físico</SelectItem>
+                    <SelectItem value="Preparador de Goleiro">Preparador de Goleiro</SelectItem>
+                    <SelectItem value="Massagista">Massagista</SelectItem>
+                    <SelectItem value="Roupeiro">Roupeiro</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="position"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  placeholder="Ex: Atacante"
+                />
+              )}
             </div>
 
             <div className="space-y-2">
