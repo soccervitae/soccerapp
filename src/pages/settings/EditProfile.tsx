@@ -135,11 +135,11 @@ const EditProfile = () => {
   const handleUserTypeChange = (newType: 'atleta' | 'comissao_tecnica') => {
     setUserType(newType);
     if (newType === 'atleta') {
-      // Clear role when switching to athlete
+      // Clear role when switching to athlete, keep position
       setFormData(prev => ({ ...prev, role: '' }));
     } else {
-      // Clear position and physical stats when switching to technical staff
-      setFormData(prev => ({ ...prev, position: '', height: '', weight: '', preferred_foot: '' }));
+      // Set role to comissao_tecnica, clear physical stats but keep position for function
+      setFormData(prev => ({ ...prev, role: 'comissao_tecnica', height: '', weight: '', preferred_foot: '' }));
     }
   };
 
@@ -540,29 +540,19 @@ const EditProfile = () => {
             </Select>
           </div>
 
-          {/* Position for athletes, Role for technical staff */}
+          {/* Position for athletes, Function (Função) for technical staff - both use position field */}
           <div className="grid grid-cols-2 gap-4">
-            {userType === 'comissao_tecnica' ? (
-              <div className="space-y-2">
-                <Label htmlFor="role">Função</Label>
-                <Input
-                  id="role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  placeholder="Ex: Treinador"
-                />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="position">Posição</Label>
-                <Input
-                  id="position"
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  placeholder="Ex: Atacante"
-                />
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="position">
+                {userType === 'comissao_tecnica' ? 'Função' : 'Posição'}
+              </Label>
+              <Input
+                id="position"
+                value={formData.position}
+                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                placeholder={userType === 'comissao_tecnica' ? 'Ex: Treinador' : 'Ex: Atacante'}
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="team">Time</Label>
