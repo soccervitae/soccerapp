@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
@@ -482,7 +483,19 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Nome de Usuário</Label>
+            <div className="flex items-center gap-1.5">
+              <Label>Nome de Usuário</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="material-symbols-outlined text-muted-foreground text-[16px] cursor-help">info</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>O nome de usuário não pode ser alterado</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
               @{formData.username}
             </div>
