@@ -145,14 +145,29 @@ export const ProfileInfo = ({
   return <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
       <div className="w-full h-32 relative overflow-hidden">
-        <img src={profile.cover_url || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=300&fit=crop"} alt="Cover photo" className="w-full h-full object-cover" />
+        {profile.cover_url ? (
+          <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-1">
+            <span className="material-symbols-outlined text-3xl text-muted-foreground">add_photo_alternate</span>
+            {isOwnProfile && (
+              <span className="text-xs text-muted-foreground">Adicionar foto de capa</span>
+            )}
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
       </div>
 
       {/* Profile Picture */}
       <div className="relative -mt-16 z-10">
         <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
-          <img src={profile.avatar_url || "/placeholder.svg"} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" />
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" />
+          ) : (
+            <div className="w-full h-full rounded-full border-4 border-background bg-muted flex items-center justify-center">
+              <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
+            </div>
+          )}
         </div>
         {profile.conta_verificada && <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
             <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
