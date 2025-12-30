@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
-import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
+import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useConversations } from "@/hooks/useConversations";
 
 interface BottomNavigationProps {
@@ -18,19 +18,19 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
-  const [isReplayOpen, setIsReplayOpen] = useState(false);
+  const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
   const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
 
-  const handleSelectOption = (option: "post" | "replay" | "championship" | "achievement") => {
+  const handleSelectOption = (option: "post" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
         setIsPostOpen(true);
         break;
-      case "replay":
-        setIsReplayOpen(true);
+      case "times":
+        setIsTimesOpen(true);
         break;
       case "championship":
         setIsChampionshipOpen(true);
@@ -94,9 +94,10 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         onOpenChange={setIsPostOpen} 
       />
 
-      <CreateReplaySheet 
-        open={isReplayOpen} 
-        onOpenChange={setIsReplayOpen} 
+      <TeamSelector 
+        open={isTimesOpen} 
+        onOpenChange={setIsTimesOpen}
+        selectedTeamIds={[]}
       />
 
       <AddChampionshipSheet 

@@ -5,7 +5,7 @@ import {
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
 
-type CreateOption = "post" | "replay" | "championship" | "achievement";
+type CreateOption = "post" | "times" | "championship" | "achievement";
 
 interface CreateMenuSheetProps {
   open: boolean;
@@ -22,10 +22,10 @@ const menuOptions = [
     colorClass: "bg-blue-500/20 text-blue-500",
   },
   {
-    id: "replay" as CreateOption,
-    label: "Replay",
-    description: "Crie um story temporário",
-    icon: "slideshow",
+    id: "times" as CreateOption,
+    label: "Times",
+    description: "Selecione seus times",
+    icon: "shield",
     colorClass: "bg-red-500/20 text-red-500",
   },
   {
