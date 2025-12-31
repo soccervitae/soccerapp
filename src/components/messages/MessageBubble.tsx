@@ -355,7 +355,7 @@ export const MessageBubble = ({
             <p className="text-sm whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>{message.content}</p>
           )}
 
-          {/* Time and read status */}
+          {/* Time and read status - WhatsApp style */}
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
             <span className={`text-[10px] ${isOwn ? "text-green-700" : "text-muted-foreground"}`}>
               {formatTime(message.created_at)}
@@ -363,17 +363,17 @@ export const MessageBubble = ({
             {isOwn && (
               <motion.span 
                 className="flex items-center"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
                 key={message.isPending ? 'pending' : isRead ? 'read' : 'delivered'}
               >
                 {message.isPending ? (
-                  <Clock className="h-3.5 w-3.5 text-green-600" />
+                  <Clock className="h-3 w-3 text-green-600/70" />
                 ) : isRead ? (
                   <CheckCheck className="h-3.5 w-3.5 text-blue-500" />
                 ) : (
-                  <Check className="h-3.5 w-3.5 text-green-700" />
+                  <CheckCheck className="h-3.5 w-3.5 text-green-700/60" />
                 )}
               </motion.span>
             )}
