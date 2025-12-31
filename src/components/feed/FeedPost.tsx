@@ -348,12 +348,12 @@ export const FeedPost = ({
             e.stopPropagation();
             navigate(`/${post.recent_likes[0].username}`);
           }}>
-                {post.recent_likes[0].nickname || post.recent_likes[0].username}
+                {post.recent_likes[0].username}
               </span>
               {post.likes_count > 1 && <>
                   {" "}e{" "}
                   <span className="font-semibold group-hover:underline">
-                    {post.likes_count === 2 ? post.recent_likes[1]?.nickname || post.recent_likes[1]?.username || "outra pessoa" : `outras ${post.likes_count - 1} pessoas`}
+                    {post.likes_count === 2 ? post.recent_likes[1]?.username || "outra pessoa" : `outras ${post.likes_count - 1} pessoas`}
                   </span>
                 </>}
             </p>
