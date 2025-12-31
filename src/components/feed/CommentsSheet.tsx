@@ -51,7 +51,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
-      <ResponsiveModalContent className="sm:max-w-lg h-[70vh] sm:h-[500px] flex flex-col">
+      <ResponsiveModalContent className="sm:max-w-lg h-[70vh] sm:h-[500px] flex flex-col z-[70]" overlayClassName="z-[70]">
         <ResponsiveModalHeader className="border-b border-border pb-4">
           <ResponsiveModalTitle className="text-center">Comentários</ResponsiveModalTitle>
         </ResponsiveModalHeader>
