@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfile, useUserHighlights, useAddHighlightImage, UserHighlight } from "@/hooks/useProfile";
+import { useProfile, useUserHighlights, UserHighlight } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
@@ -10,11 +10,9 @@ import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet"
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
+import { EditHighlightSheet } from "@/components/profile/EditHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
-import { UploadProgressOverlay } from "@/components/common/UploadProgressOverlay";
 import { useUserTeams } from "@/hooks/useTeams";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
 
@@ -62,17 +60,14 @@ export const DesktopSidebar = () => {
   const { data: profile } = useProfile();
   const { data: userTeams = [] } = useUserTeams(user?.id);
   const { data: highlights = [] } = useUserHighlights(user?.id);
-  const addHighlightImage = useAddHighlightImage();
-  const addMediaInputRef = useRef<HTMLInputElement>(null);
-  const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
-  const [isAddingMedia, setIsAddingMedia] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
   const [isReplayOpen, setIsReplayOpen] = useState(false);
   const [isSelectHighlightOpen, setIsSelectHighlightOpen] = useState(false);
   const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
+  const [isEditHighlightOpen, setIsEditHighlightOpen] = useState(false);
+  const [selectedHighlightToEdit, setSelectedHighlightToEdit] = useState<UserHighlight | null>(null);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
@@ -116,67 +111,9 @@ export const DesktopSidebar = () => {
   };
 
   const handleSelectExistingHighlight = (highlight: UserHighlight) => {
-    setSelectedHighlightForMedia(highlight);
-    setTimeout(() => {
-      addMediaInputRef.current?.click();
-    }, 100);
-  };
-
-  const handleAddMediaToExistingHighlight = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0 || !selectedHighlightForMedia || !user) return;
-
-    setIsAddingMedia(true);
-    setUploadProgress({ current: 0, total: files.length });
-    let successCount = 0;
-    let errorCount = 0;
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        setUploadProgress({ current: i + 1, total: files.length });
-        
-        try {
-          const isVideo = file.type.startsWith('video/');
-          const mediaType = isVideo ? 'video' : 'image';
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from("post-media")
-            .upload(fileName, file);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from("post-media")
-            .getPublicUrl(fileName);
-
-          await addHighlightImage.mutateAsync({
-            highlightId: selectedHighlightForMedia.id,
-            imageUrl: publicUrl,
-            mediaType,
-          });
-
-          successCount++;
-        } catch (err) {
-          console.error("Error uploading file:", err);
-          errorCount++;
-        }
-      }
-
-      if (successCount > 0) {
-        toast.success(`${successCount} ${successCount === 1 ? 'mídia adicionada' : 'mídias adicionadas'} ao destaque!`);
-      }
-      if (errorCount > 0) {
-        toast.error(`Erro ao adicionar ${errorCount} ${errorCount === 1 ? 'mídia' : 'mídias'}`);
-      }
-    } finally {
-      setIsAddingMedia(false);
-      setUploadProgress({ current: 0, total: 0 });
-      setSelectedHighlightForMedia(null);
-      e.target.value = "";
-    }
+    setSelectedHighlightToEdit(highlight);
+    setIsSelectHighlightOpen(false);
+    setIsEditHighlightOpen(true);
   };
 
   const getInitials = (name: string | null | undefined) => {
@@ -203,16 +140,6 @@ export const DesktopSidebar = () => {
         </nav>
       </aside>
 
-      {/* Hidden input for adding media to existing highlight */}
-      <input
-        ref={addMediaInputRef}
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        className="hidden"
-        onChange={handleAddMediaToExistingHighlight}
-      />
-
       {/* Create Sheets */}
       <CreateMenuSheet open={isMenuOpen} onOpenChange={setIsMenuOpen} onSelectOption={handleSelectOption} />
       <CreatePostSheet open={isPostOpen} onOpenChange={setIsPostOpen} />
@@ -225,14 +152,13 @@ export const DesktopSidebar = () => {
         onCreateNew={() => setIsAddHighlightOpen(true)}
       />
       <AddHighlightSheet open={isAddHighlightOpen} onOpenChange={setIsAddHighlightOpen} />
+      <EditHighlightSheet
+        open={isEditHighlightOpen}
+        onOpenChange={setIsEditHighlightOpen}
+        highlight={selectedHighlightToEdit}
+      />
       <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
-      
-      <UploadProgressOverlay
-        isVisible={isAddingMedia}
-        current={uploadProgress.current}
-        total={uploadProgress.total}
-      />
     </>;
 };

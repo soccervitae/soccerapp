@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
@@ -7,14 +7,12 @@ import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet"
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
+import { EditHighlightSheet } from "@/components/profile/EditHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
-import { UploadProgressOverlay } from "@/components/common/UploadProgressOverlay";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
-import { useUserHighlights, useAddHighlightImage, UserHighlight } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useUserHighlights, UserHighlight } from "@/hooks/useProfile";
 
 interface BottomNavigationProps {
   activeTab?: "home" | "search" | "add" | "messages" | "profile";
@@ -27,17 +25,14 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
   const { data: highlights = [] } = useUserHighlights(user?.id);
-  const addHighlightImage = useAddHighlightImage();
-  const addMediaInputRef = useRef<HTMLInputElement>(null);
-  const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
-  const [isAddingMedia, setIsAddingMedia] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
   const [isReplayOpen, setIsReplayOpen] = useState(false);
   const [isSelectHighlightOpen, setIsSelectHighlightOpen] = useState(false);
   const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
+  const [isEditHighlightOpen, setIsEditHighlightOpen] = useState(false);
+  const [selectedHighlightToEdit, setSelectedHighlightToEdit] = useState<UserHighlight | null>(null);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
@@ -68,67 +63,9 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   };
 
   const handleSelectExistingHighlight = (highlight: UserHighlight) => {
-    setSelectedHighlightForMedia(highlight);
-    setTimeout(() => {
-      addMediaInputRef.current?.click();
-    }, 100);
-  };
-
-  const handleAddMediaToExistingHighlight = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0 || !selectedHighlightForMedia || !user) return;
-
-    setIsAddingMedia(true);
-    setUploadProgress({ current: 0, total: files.length });
-    let successCount = 0;
-    let errorCount = 0;
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        setUploadProgress({ current: i + 1, total: files.length });
-        
-        try {
-          const isVideo = file.type.startsWith('video/');
-          const mediaType = isVideo ? 'video' : 'image';
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from("post-media")
-            .upload(fileName, file);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from("post-media")
-            .getPublicUrl(fileName);
-
-          await addHighlightImage.mutateAsync({
-            highlightId: selectedHighlightForMedia.id,
-            imageUrl: publicUrl,
-            mediaType,
-          });
-
-          successCount++;
-        } catch (err) {
-          console.error("Error uploading file:", err);
-          errorCount++;
-        }
-      }
-
-      if (successCount > 0) {
-        toast.success(`${successCount} ${successCount === 1 ? 'mídia adicionada' : 'mídias adicionadas'} ao destaque!`);
-      }
-      if (errorCount > 0) {
-        toast.error(`Erro ao adicionar ${errorCount} ${errorCount === 1 ? 'mídia' : 'mídias'}`);
-      }
-    } finally {
-      setIsAddingMedia(false);
-      setUploadProgress({ current: 0, total: 0 });
-      setSelectedHighlightForMedia(null);
-      e.target.value = "";
-    }
+    setSelectedHighlightToEdit(highlight);
+    setIsSelectHighlightOpen(false);
+    setIsEditHighlightOpen(true);
   };
 
   return (
@@ -189,16 +126,6 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         onOpenChange={setIsReplayOpen} 
       />
 
-      {/* Hidden input for adding media to existing highlight */}
-      <input
-        ref={addMediaInputRef}
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        className="hidden"
-        onChange={handleAddMediaToExistingHighlight}
-      />
-
       <SelectHighlightSheet
         open={isSelectHighlightOpen}
         onOpenChange={setIsSelectHighlightOpen}
@@ -210,6 +137,12 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       <AddHighlightSheet 
         open={isAddHighlightOpen} 
         onOpenChange={setIsAddHighlightOpen} 
+      />
+
+      <EditHighlightSheet
+        open={isEditHighlightOpen}
+        onOpenChange={setIsEditHighlightOpen}
+        highlight={selectedHighlightToEdit}
       />
 
       <TeamSelector 
@@ -226,12 +159,6 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       <AddAchievementSheet 
         open={isAchievementOpen} 
         onOpenChange={setIsAchievementOpen} 
-      />
-
-      <UploadProgressOverlay
-        isVisible={isAddingMedia}
-        current={uploadProgress.current}
-        total={uploadProgress.total}
       />
     </>
   );
