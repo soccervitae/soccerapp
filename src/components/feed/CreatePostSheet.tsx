@@ -919,7 +919,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className={`${isPWA ? "h-full rounded-t-none" : "h-[90vh]"} p-0`}>
+        <DrawerContent className="max-h-[90dvh] p-0">
           {defaultContent}
         </DrawerContent>
       </Drawer>
