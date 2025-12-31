@@ -22,6 +22,7 @@ export interface Post {
   media_type: string | null;
   likes_count: number;
   comments_count: number;
+  shares_count: number;
   created_at: string;
   updated_at: string | null;
   location_name: string | null;

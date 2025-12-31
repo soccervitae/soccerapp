@@ -117,6 +117,17 @@ export const ShareToChatSheet = ({
         } else {
           successCount++;
           newSentTo.add(userId);
+          
+          // Record the share for post content type
+          if (contentType === "post" && contentId) {
+            await supabase
+              .from("post_shares")
+              .insert({
+                post_id: contentId,
+                user_id: user.id,
+                shared_to_user_id: userId,
+              });
+          }
         }
       } catch (error) {
         console.error("Error sharing to user:", userId, error);

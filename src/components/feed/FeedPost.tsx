@@ -378,9 +378,10 @@ export const FeedPost = ({
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
             <button 
               onClick={() => setShareSheetOpen(true)}
-              className="flex items-center justify-center p-3 text-foreground hover:text-muted-foreground transition-colors"
+              className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
             >
               <span className="material-symbols-outlined text-[24px]">send</span>
+              {(post.shares_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.shares_count)}</span>}
             </button>
           </div>
           <div className="flex items-center justify-center relative">

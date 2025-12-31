@@ -12,6 +12,7 @@ interface Post {
   user_id?: string;
   likes_count?: number;
   comments_count?: number;
+  shares_count?: number;
   location_name?: string | null;
   location_lat?: number | null;
   location_lng?: number | null;
@@ -64,6 +65,7 @@ export const ProfileFeedSheet = ({
     user_id: post.user_id || profile.id,
     likes_count: post.likes_count || 0,
     comments_count: post.comments_count || 0,
+    shares_count: post.shares_count || 0,
     location_name: post.location_name,
     location_lat: post.location_lat,
     location_lng: post.location_lng,
