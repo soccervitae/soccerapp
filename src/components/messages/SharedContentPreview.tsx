@@ -1,17 +1,8 @@
-import { useState } from "react";
-import { Play, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useMemo } from "react";
+import { Play } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import type { Post } from "@/hooks/usePosts";
-import {
-  fetchSharedPost,
-  fetchSharedStory,
-  fetchSharedHighlight,
-  sharedPostToPost,
-  storyToPost,
-  highlightToPost,
-} from "@/hooks/useSharedContentData";
 
 interface SharedContentAuthor {
   username: string;
@@ -34,90 +25,64 @@ interface SharedContentPreviewProps {
 }
 
 export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Unified viewer state
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [postData, setPostData] = useState<Post | null>(null);
-  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
-  const [mediaType, setMediaType] = useState<string | null>(null);
 
-  const parseMediaUrls = (mediaUrl: string | null, type: string | null): string[] => {
-    if (!mediaUrl) return [];
-    if (type === "carousel") {
-      try {
-        return JSON.parse(mediaUrl);
-      } catch {
-        return [mediaUrl];
-      }
-    }
-    return [mediaUrl];
-  };
+  // Create Post object from available data - no fetch needed!
+  const postData = useMemo<Post>(() => {
+    const mediaUrl = data.preview || "";
+    const isVideo = data.contentType === "story" || mediaUrl.endsWith(".webm") || mediaUrl.endsWith(".mp4");
+    
+    return {
+      id: data.contentId,
+      user_id: "",
+      content: data.title || "",
+      media_url: mediaUrl,
+      media_type: isVideo ? "video" : "image",
+      likes_count: 0,
+      comments_count: 0,
+      shares_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: null,
+      location_name: null,
+      location_lat: null,
+      location_lng: null,
+      music_track_id: null,
+      music_start_seconds: null,
+      music_end_seconds: null,
+      music_track: null,
+      profile: {
+        id: "",
+        username: data.author?.username || "Usuário",
+        full_name: data.author?.username || null,
+        avatar_url: data.author?.avatar_url || null,
+        nickname: null,
+        position: null,
+        team: null,
+        conta_verificada: false,
+      },
+      liked_by_user: false,
+      saved_by_user: false,
+      recent_likes: [],
+    };
+  }, [data]);
 
-  const handleClick = async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    
-    try {
-      switch (data.contentType) {
-        case "post": {
-          const post = await fetchSharedPost(data.contentId);
-          if (post) {
-            const postForViewer = sharedPostToPost(post);
-            const urls = parseMediaUrls(post.media_url, post.media_type);
-            setPostData(postForViewer);
-            setMediaUrls(urls);
-            setMediaType(post.media_type);
-            setViewerOpen(true);
-          } else {
-            toast.error("Publicação não encontrada");
-          }
-          break;
-        }
-        
-        case "story": {
-          const story = await fetchSharedStory(data.contentId);
-          if (story) {
-            setPostData(storyToPost(story));
-            setMediaUrls([story.media_url]);
-            setMediaType(story.media_type);
-            setViewerOpen(true);
-          } else {
-            toast.error("Replay não encontrado ou expirado");
-          }
-          break;
-        }
-        
-        case "highlight": {
-          const highlight = await fetchSharedHighlight(data.contentId);
-          if (highlight) {
-            setPostData(highlightToPost(highlight));
-            setMediaUrls(highlight.images.map(img => img.image_url));
-            setMediaType(highlight.images.length > 1 ? "carousel" : (highlight.images[0]?.media_type || "image"));
-            setViewerOpen(true);
-          } else {
-            toast.error("Destaque não encontrado");
-          }
-          break;
-        }
-        
-        default:
-          toast.error("Tipo de conteúdo não suportado");
-      }
-    } catch (error) {
-      console.error("Error loading shared content:", error);
-      toast.error("Erro ao carregar conteúdo");
-    } finally {
-      setIsLoading(false);
-    }
+  const mediaUrls = useMemo(() => {
+    if (!data.preview) return [];
+    return [data.preview];
+  }, [data.preview]);
+
+  const mediaType = useMemo(() => {
+    const isVideo = data.contentType === "story" || 
+      (data.preview && (data.preview.endsWith(".webm") || data.preview.endsWith(".mp4")));
+    return isVideo ? "video" : "image";
+  }, [data.contentType, data.preview]);
+
+  const handleClick = () => {
+    setViewerOpen(true);
   };
 
   const handleCloseViewer = () => {
     setViewerOpen(false);
-    setPostData(null);
-    setMediaUrls([]);
-    setMediaType(null);
   };
 
   const author = data.author;
@@ -135,10 +100,7 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
     <>
       <button
         onClick={handleClick}
-        disabled={isLoading}
-        className={`w-full max-w-[260px] rounded-lg overflow-hidden bg-muted/50 border border-border/50 transition-all hover:opacity-90 active:scale-[0.98] ${
-          isLoading ? "opacity-70" : ""
-        }`}
+        className="w-full max-w-[260px] rounded-lg overflow-hidden bg-muted/50 border border-border/50 transition-all hover:opacity-90 active:scale-[0.98]"
       >
         {/* Header with author */}
         {author && (
@@ -155,11 +117,7 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
         
         {/* Large thumbnail */}
         <div className="relative aspect-square w-full bg-muted">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : data.preview ? (
+          {data.preview ? (
             <img
               src={data.preview}
               alt="Preview"
@@ -172,7 +130,7 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
           )}
           
           {/* Play overlay for video content */}
-          {isVideoContent && data.preview && !isLoading && (
+          {isVideoContent && data.preview && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
                 <Play className="w-7 h-7 text-white fill-white ml-1" />
