@@ -43,6 +43,7 @@ const Chat = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -70,20 +71,21 @@ const Chat = () => {
   const handleVideoCall = useCallback(() => startCall('video'), [startCall]);
   const handleVoiceCall = useCallback(() => startCall('voice'), [startCall]);
 
-  // Fetch other participant and mute status
+  // Fetch other participant, mute and pin status
   useEffect(() => {
-    const fetchParticipantAndMuteStatus = async () => {
+    const fetchParticipantAndStatus = async () => {
       if (!conversationId || !user) return;
 
-      // Fetch mute status for current user
+      // Fetch mute and pin status for current user
       const { data: currentParticipation } = await supabase
         .from("conversation_participants")
-        .select("is_muted")
+        .select("is_muted, is_pinned")
         .eq("conversation_id", conversationId)
         .eq("user_id", user.id)
         .single();
 
       setIsMuted(currentParticipation?.is_muted || false);
+      setIsPinned(currentParticipation?.is_pinned || false);
 
       // Fetch other participant
       const { data: otherParticipant } = await supabase
@@ -103,7 +105,7 @@ const Chat = () => {
       }
     };
 
-    fetchParticipantAndMuteStatus();
+    fetchParticipantAndStatus();
   }, [conversationId, user]);
 
   // Fetch reactions when messages change
@@ -263,6 +265,28 @@ const Chat = () => {
     }
   };
 
+  const handleTogglePin = async () => {
+    if (!conversationId || !user) return;
+
+    try {
+      const newPinnedState = !isPinned;
+
+      const { error } = await supabase
+        .from("conversation_participants")
+        .update({ is_pinned: newPinnedState })
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setIsPinned(newPinnedState);
+      toast.success(newPinnedState ? "Conversa fixada" : "Conversa desafixada");
+    } catch (error) {
+      console.error("Error toggling pin:", error);
+      toast.error("Erro ao alterar configurações");
+    }
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -288,6 +312,8 @@ const Chat = () => {
         onDelete={() => setShowDeleteDialog(true)}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
+        isPinned={isPinned}
+        onTogglePin={handleTogglePin}
       />
 
       {/* Delete confirmation dialog */}

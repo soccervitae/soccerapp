@@ -18,6 +18,7 @@ export interface ConversationWithDetails extends Conversation {
   lastMessage: Message | null;
   unreadCount: number;
   isMuted?: boolean;
+  isPinned?: boolean;
 }
 
 export const useConversations = () => {
@@ -68,7 +69,7 @@ export const useConversations = () => {
       // Get all conversation IDs where user is participant (excluding archived)
       const { data: participations, error: partError } = await supabase
         .from("conversation_participants")
-        .select("conversation_id, is_muted")
+        .select("conversation_id, is_muted, is_pinned")
         .eq("user_id", user.id)
         .eq("is_archived", false);
 
@@ -82,6 +83,7 @@ export const useConversations = () => {
 
       const conversationIds = participations.map((p) => p.conversation_id);
       const muteStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_muted]));
+      const pinStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_pinned]));
 
       // Get conversations
       const { data: convData, error: convError } = await supabase
@@ -138,9 +140,17 @@ export const useConversations = () => {
             lastMessage: lastMessageData,
             unreadCount: count || 0,
             isMuted: muteStatusMap.get(conv.id) || false,
+            isPinned: pinStatusMap.get(conv.id) || false,
           };
         })
       );
+
+      // Sort: pinned first, then by updated_at
+      conversationsWithDetails.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      });
 
       setConversations(conversationsWithDetails);
       setTotalUnread(conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0));
