@@ -144,6 +144,23 @@
   animation: heart-pop 0.3s ease-out;
 }
 
+/* Story ring pulse animation */
+@keyframes story-ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+}
+
+.animate-story-ring-pulse {
+  animation: story-ring-pulse 2s ease-out infinite;
+}
+
 /* Orientation lock - show overlay in landscape on mobile */
 @media (orientation: landscape) and (max-height: 500px) {
   .orientation-lock-overlay {

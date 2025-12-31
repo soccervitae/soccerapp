@@ -196,7 +196,7 @@ export const ProfileInfo = ({
           className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${
             hasActiveStories 
               ? (hasUnviewedStories 
-                  ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer' 
+                  ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' 
                   : 'bg-muted-foreground/40 cursor-pointer')
               : 'bg-gradient-to-tr from-primary to-emerald-600'
           }`}
