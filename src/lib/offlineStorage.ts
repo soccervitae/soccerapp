@@ -304,6 +304,17 @@ export const getCachedUserPosts = async (userId: string): Promise<unknown[]> => 
   });
 };
 
+// Cache timestamp functions
+const POSTS_CACHE_TIMESTAMP_KEY = 'posts_cached_at';
+
+export const setPostsCacheTimestamp = (): void => {
+  localStorage.setItem(POSTS_CACHE_TIMESTAMP_KEY, new Date().toISOString());
+};
+
+export const getPostsCacheTimestamp = (): string | null => {
+  return localStorage.getItem(POSTS_CACHE_TIMESTAMP_KEY);
+};
+
 // Clear all cached data
 export const clearCache = async (): Promise<void> => {
   const database = await openDB();
@@ -313,6 +324,8 @@ export const clearCache = async (): Promise<void> => {
   for (const storeName of stores) {
     tx.objectStore(storeName).clear();
   }
+  
+  localStorage.removeItem(POSTS_CACHE_TIMESTAMP_KEY);
 
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
