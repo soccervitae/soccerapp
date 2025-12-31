@@ -127,6 +127,7 @@ export type Database = {
           id: string
           is_archived: boolean | null
           is_muted: boolean | null
+          is_pinned: boolean | null
           joined_at: string
           last_read_at: string | null
           user_id: string
@@ -136,6 +137,7 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_muted?: boolean | null
+          is_pinned?: boolean | null
           joined_at?: string
           last_read_at?: string | null
           user_id: string
@@ -145,6 +147,7 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_muted?: boolean | null
+          is_pinned?: boolean | null
           joined_at?: string
           last_read_at?: string | null
           user_id?: string

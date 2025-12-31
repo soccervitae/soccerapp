@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, BellOff, BellRing } from "lucide-react";
+import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, BellOff, BellRing, Pin, PinOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +26,11 @@ interface ChatHeaderProps {
   onDelete?: () => void;
   isMuted?: boolean;
   onToggleMute?: () => void;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -118,6 +120,20 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-card">
+            <DropdownMenuItem onClick={onTogglePin} className="gap-2 cursor-pointer">
+              {isPinned ? (
+                <>
+                  <PinOff className="h-4 w-4" />
+                  Desafixar conversa
+                </>
+              ) : (
+                <>
+                  <Pin className="h-4 w-4" />
+                  Fixar conversa
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onToggleMute} className="gap-2 cursor-pointer">
               {isMuted ? (
                 <>
