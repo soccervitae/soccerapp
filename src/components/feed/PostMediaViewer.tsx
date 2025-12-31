@@ -382,11 +382,21 @@ export const PostMediaViewer = ({
                       disabled={likePost.isPending}
                       className="flex items-center gap-1.5 transition-all active:scale-110"
                     >
-                      <ClappingHandsIcon
-                        className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
-                        filled={post.liked_by_user}
-                        variant="white"
-                      />
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={post.liked_by_user ? "liked" : "unliked"}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.8, opacity: 0 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
+                        >
+                          <ClappingHandsIcon
+                            className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
+                            filled={post.liked_by_user}
+                            variant="white"
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                       {post.likes_count > 0 && (
                         <span className="text-sm font-medium text-white">
                           {formatNumber(post.likes_count)}
