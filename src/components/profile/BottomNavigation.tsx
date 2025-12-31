@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
@@ -18,7 +18,7 @@ interface BottomNavigationProps {
   activeTab?: "home" | "search" | "add" | "messages" | "profile";
 }
 
-export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
+export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>(({ activeTab }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { totalUnread } = useConversations();
@@ -70,7 +70,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
 
   return (
     <>
-      <nav className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
+      <nav ref={ref} className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
         <div className="flex justify-around items-center">
           <button 
             onClick={() => navigate("/")}
@@ -164,4 +164,6 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       />
     </>
   );
-};
+});
+
+BottomNavigation.displayName = "BottomNavigation";
