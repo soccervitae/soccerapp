@@ -6,12 +6,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserHighlight, HighlightImage, useAddHighlightImage, useDeleteHighlightImage, useReorderHighlightImages } from "@/hooks/useProfile";
+import { UserHighlight, HighlightImage, useAddHighlightImage, useDeleteHighlightImage, useReorderHighlightImages, useUpdateHighlight } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, X, GripVertical, Play, Film } from "lucide-react";
+import { Loader2, X, GripVertical, Play, Film, Pencil, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import {
   DndContext,
@@ -113,20 +114,27 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
   const addHighlightImage = useAddHighlightImage();
   const deleteHighlightImage = useDeleteHighlightImage();
   const reorderHighlightImages = useReorderHighlightImages();
+  const updateHighlight = useUpdateHighlight();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [localImages, setLocalImages] = useState<HighlightImage[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
 
-  // Sync local images with highlight prop
+  // Sync local images and title with highlight prop
   useEffect(() => {
     if (highlight?.images) {
       setLocalImages([...highlight.images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
     } else {
       setLocalImages([]);
     }
+    if (highlight?.title) {
+      setEditedTitle(highlight.title);
+    }
+    setIsEditingTitle(false);
   }, [highlight]);
 
   const sensors = useSensors(
@@ -242,7 +250,27 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
     }
   };
 
+  const handleSaveTitle = async () => {
+    if (!highlight || !editedTitle.trim()) return;
+    
+    const trimmedTitle = editedTitle.trim();
+    if (trimmedTitle === highlight.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      await updateHighlight.mutateAsync({ id: highlight.id, title: trimmedTitle });
+      toast.success("Título atualizado");
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error("Error updating title:", error);
+      toast.error("Erro ao atualizar título");
+    }
+  };
+
   const handleClose = () => {
+    setIsEditingTitle(false);
     onOpenChange(false);
   };
 
@@ -256,7 +284,51 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Editar: {highlight.title}</SheetTitle>
+          <SheetTitle className="flex items-center gap-2">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2 flex-1">
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  maxLength={20}
+                  className="h-8 text-base"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveTitle();
+                    if (e.key === 'Escape') {
+                      setEditedTitle(highlight.title);
+                      setIsEditingTitle(false);
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={handleSaveTitle}
+                  disabled={updateHighlight.isPending || !editedTitle.trim()}
+                >
+                  {updateHighlight.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <span>Editar: {highlight.title}</span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          </SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col gap-4 mt-4">
