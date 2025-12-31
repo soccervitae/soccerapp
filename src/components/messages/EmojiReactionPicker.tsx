@@ -90,9 +90,9 @@ export const EmojiReactionPicker = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: position === "top" ? 10 : -10 }}
               transition={{ duration: 0.15 }}
-              className={`fixed ${
-                position === "top" ? "bottom-auto" : "top-auto"
-              } left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-fit`}
+              className={`absolute ${
+                position === "top" ? "bottom-full mb-2" : "top-full mt-2"
+              } left-1/2 -translate-x-1/2 z-50`}
             >
               <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-full px-2 py-1.5 shadow-lg">
                 {REACTION_EMOJIS.map((emoji) => (
