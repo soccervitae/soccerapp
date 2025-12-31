@@ -48,7 +48,7 @@ export const FeedStories = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex-none w-28">
-              <Skeleton className="h-44 w-full rounded-xl" />
+              <Skeleton className="h-44 w-full rounded-lg" />
             </div>
           ))}
         </div>
@@ -71,7 +71,7 @@ export const FeedStories = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {/* Add Story Button - Instagram Style */}
           <div className="flex-none w-28 group">
-            <div className={`relative h-44 rounded-xl overflow-hidden shadow-md ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
+            <div className={`relative h-44 rounded-lg overflow-hidden shadow-md ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
               <div className="w-full h-full bg-muted flex flex-col">
                 {/* User photo area - clickable to view stories */}
                 <div 
@@ -132,7 +132,7 @@ export const FeedStories = () => {
                 className="flex-none w-28 cursor-pointer group"
                 onClick={(e) => handleStoryClick(originalIndex, e)}
               >
-                <div className="relative h-44 rounded-xl overflow-hidden shadow-md">
+                <div className="relative h-44 rounded-lg overflow-hidden shadow-md">
                   <img
                     src={group.stories[0]?.media_url || "/placeholder.svg"}
                     alt={group.username}
@@ -162,7 +162,7 @@ export const FeedStories = () => {
 
           {/* Empty state */}
           {(!groupedStories || groupedStories.length === 0) && (
-            <div className="flex-none w-28 flex flex-col items-center justify-center h-44 bg-muted/50 rounded-xl">
+            <div className="flex-none w-28 flex flex-col items-center justify-center h-44 bg-muted/50 rounded-lg">
               <span className="material-symbols-outlined text-[32px] text-muted-foreground/50">movie</span>
               <p className="text-[10px] text-muted-foreground mt-1">Sem replays</p>
             </div>
