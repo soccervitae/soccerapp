@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
@@ -6,10 +6,14 @@ import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
+import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
+import { useUserHighlights, useAddHighlightImage, UserHighlight } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface BottomNavigationProps {
   activeTab?: "home" | "search" | "add" | "messages" | "profile";
@@ -21,11 +25,17 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const { totalUnread } = useConversations();
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
+  const { data: highlights = [] } = useUserHighlights(user?.id);
+  const addHighlightImage = useAddHighlightImage();
+  const addMediaInputRef = useRef<HTMLInputElement>(null);
+  const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
+  const [isAddingMedia, setIsAddingMedia] = useState(false);
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
   const [isReplayOpen, setIsReplayOpen] = useState(false);
-  const [isHighlightOpen, setIsHighlightOpen] = useState(false);
+  const [isSelectHighlightOpen, setIsSelectHighlightOpen] = useState(false);
+  const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
@@ -41,7 +51,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         setIsReplayOpen(true);
         break;
       case "highlight":
-        setIsHighlightOpen(true);
+        setIsSelectHighlightOpen(true);
         break;
       case "times":
         setIsTimesOpen(true);
@@ -52,6 +62,52 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       case "achievement":
         setIsAchievementOpen(true);
         break;
+    }
+  };
+
+  const handleSelectExistingHighlight = (highlight: UserHighlight) => {
+    setSelectedHighlightForMedia(highlight);
+    setTimeout(() => {
+      addMediaInputRef.current?.click();
+    }, 100);
+  };
+
+  const handleAddMediaToExistingHighlight = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedHighlightForMedia || !user) return;
+
+    setIsAddingMedia(true);
+    const isVideo = file.type.startsWith('video/');
+    const mediaType = isVideo ? 'video' : 'image';
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("post-media")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("post-media")
+        .getPublicUrl(fileName);
+
+      await addHighlightImage.mutateAsync({
+        highlightId: selectedHighlightForMedia.id,
+        imageUrl: publicUrl,
+        mediaType,
+      });
+
+      toast.success(isVideo ? "Vídeo adicionado ao destaque!" : "Foto adicionada ao destaque!");
+    } catch (error) {
+      console.error("Error adding media:", error);
+      toast.error("Erro ao adicionar mídia");
+    } finally {
+      setIsAddingMedia(false);
+      setSelectedHighlightForMedia(null);
+      e.target.value = "";
     }
   };
 
@@ -113,9 +169,26 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
         onOpenChange={setIsReplayOpen} 
       />
 
+      {/* Hidden input for adding media to existing highlight */}
+      <input
+        ref={addMediaInputRef}
+        type="file"
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleAddMediaToExistingHighlight}
+      />
+
+      <SelectHighlightSheet
+        open={isSelectHighlightOpen}
+        onOpenChange={setIsSelectHighlightOpen}
+        highlights={highlights}
+        onSelectHighlight={handleSelectExistingHighlight}
+        onCreateNew={() => setIsAddHighlightOpen(true)}
+      />
+
       <AddHighlightSheet 
-        open={isHighlightOpen} 
-        onOpenChange={setIsHighlightOpen} 
+        open={isAddHighlightOpen} 
+        onOpenChange={setIsAddHighlightOpen} 
       />
 
       <TeamSelector 
