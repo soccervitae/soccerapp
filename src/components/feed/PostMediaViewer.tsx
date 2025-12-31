@@ -385,6 +385,7 @@ export const PostMediaViewer = ({
                       <ClappingHandsIcon
                         className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
                         filled={post.liked_by_user}
+                        variant="white"
                       />
                       {post.likes_count > 0 && (
                         <span className="text-sm font-medium text-white">
