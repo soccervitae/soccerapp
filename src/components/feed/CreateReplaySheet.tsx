@@ -257,7 +257,17 @@ export const CreateReplaySheet = ({
   // Show text/sticker editor fullscreen
   if (viewMode === "text-sticker-editor") {
     const mediaToEdit = multiSelect ? selectedImages[0] : selectedMedia;
-    return <ReplayTextStickerEditor mediaUrl={mediaToEdit!} mediaType={selectedMediaType} onPublish={handleFinalPublish} onCancel={() => setViewMode("default")} />;
+    
+    // Find the blob for the selected media
+    const selectedMediaBlob = capturedMedia.find(m => m.url === mediaToEdit)?.blob;
+    
+    return <ReplayTextStickerEditor 
+      mediaUrl={mediaToEdit!} 
+      mediaType={selectedMediaType} 
+      mediaBlob={selectedMediaBlob}
+      onPublish={handleFinalPublish} 
+      onCancel={() => setViewMode("default")} 
+    />;
   }
 
   // Main content with integrated gallery
