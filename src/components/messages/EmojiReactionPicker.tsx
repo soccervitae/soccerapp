@@ -92,18 +92,14 @@ export const EmojiReactionPicker = ({
               transition={{ duration: 0.15 }}
               className={`fixed ${
                 position === "top" ? "bottom-auto" : "top-auto"
-              } left-1/2 -translate-x-1/2 z-50`}
-              style={{ 
-                maxWidth: 'calc(100vw - 1rem)',
-                [position === "top" ? "bottom" : "top"]: "auto"
-              }}
+              } left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-fit`}
             >
-              <div className="flex items-center gap-0.5 bg-card border border-border rounded-full px-1.5 py-1 shadow-lg">
+              <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-full px-2 py-1.5 shadow-lg">
                 {REACTION_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
                     onClick={() => handleEmojiClick(emoji)}
-                    className="text-lg hover:scale-110 transition-transform p-0.5 hover:bg-muted rounded-full"
+                    className="text-base hover:scale-110 transition-transform p-1 hover:bg-muted rounded-full min-w-[28px] flex items-center justify-center"
                   >
                     {emoji}
                   </button>
