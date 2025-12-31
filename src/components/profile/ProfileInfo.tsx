@@ -198,9 +198,9 @@ return <section className="flex flex-col items-center gap-4">
               ? (hasUnviewedStories 
                   ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' 
                   : 'bg-muted-foreground/40 cursor-pointer')
-              : 'bg-gradient-to-tr from-primary to-emerald-600'
+              : ''
           }`}
-          onClick={handleStoryClick}
+          onClick={hasActiveStories ? handleStoryClick : undefined}
         >
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" />
