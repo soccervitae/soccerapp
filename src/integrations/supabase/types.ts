@@ -126,6 +126,7 @@ export type Database = {
           conversation_id: string
           id: string
           is_archived: boolean | null
+          is_muted: boolean | null
           joined_at: string
           last_read_at: string | null
           user_id: string
@@ -134,6 +135,7 @@ export type Database = {
           conversation_id: string
           id?: string
           is_archived?: boolean | null
+          is_muted?: boolean | null
           joined_at?: string
           last_read_at?: string | null
           user_id: string
@@ -142,6 +144,7 @@ export type Database = {
           conversation_id?: string
           id?: string
           is_archived?: boolean | null
+          is_muted?: boolean | null
           joined_at?: string
           last_read_at?: string | null
           user_id?: string

@@ -3,6 +3,7 @@ import type { ConversationWithDetails } from "@/hooks/useConversations";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { usePresenceContext } from "@/contexts/PresenceContext";
+import { BellOff } from "lucide-react";
 
 interface ConversationItemProps {
   conversation: ConversationWithDetails;
@@ -10,7 +11,7 @@ interface ConversationItemProps {
 }
 
 export const ConversationItem = ({ conversation, onClick }: ConversationItemProps) => {
-  const { participant, lastMessage, unreadCount } = conversation;
+  const { participant, lastMessage, unreadCount, isMuted } = conversation;
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
 
@@ -83,6 +84,9 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
             </span>
             {isOnline && (
               <span className="text-xs text-green-500 font-medium">online</span>
+            )}
+            {isMuted && (
+              <BellOff className="h-3.5 w-3.5 text-muted-foreground" />
             )}
           </div>
           <div className="flex items-center gap-2">

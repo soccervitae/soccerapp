@@ -10,7 +10,8 @@ import { NotificationPermissionButton } from "@/components/notifications/Notific
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
-import { Search, UserPlus, Circle } from "lucide-react";
+import { Search, UserPlus, Circle, Archive } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -80,8 +81,11 @@ const Messages = () => {
   };
   return <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <h1 className="text-lg font-semibold">Mensagens</h1>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/messages/archived")}>
+          <Archive className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* Content */}

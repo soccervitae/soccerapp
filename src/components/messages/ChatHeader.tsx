@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive } from "lucide-react";
+import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, BellOff, BellRing } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +24,11 @@ interface ChatHeaderProps {
   isCallActive?: boolean;
   onArchive?: () => void;
   onDelete?: () => void;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -116,6 +118,20 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-card">
+            <DropdownMenuItem onClick={onToggleMute} className="gap-2 cursor-pointer">
+              {isMuted ? (
+                <>
+                  <BellRing className="h-4 w-4" />
+                  Ativar notificações
+                </>
+              ) : (
+                <>
+                  <BellOff className="h-4 w-4" />
+                  Silenciar notificações
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
               <Archive className="h-4 w-4" />
               Arquivar conversa
