@@ -121,37 +121,50 @@ export const DesktopSidebar = () => {
   };
 
   const handleAddMediaToExistingHighlight = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedHighlightForMedia || !user) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !selectedHighlightForMedia || !user) return;
 
     setIsAddingMedia(true);
-    const isVideo = file.type.startsWith('video/');
-    const mediaType = isVideo ? 'video' : 'image';
+    let successCount = 0;
+    let errorCount = 0;
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("post-media")
-        .upload(fileName, file);
+      for (const file of files) {
+        try {
+          const isVideo = file.type.startsWith('video/');
+          const mediaType = isVideo ? 'video' : 'image';
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("post-media")
+            .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("post-media")
-        .getPublicUrl(fileName);
+          const { data: { publicUrl } } = supabase.storage
+            .from("post-media")
+            .getPublicUrl(fileName);
 
-      await addHighlightImage.mutateAsync({
-        highlightId: selectedHighlightForMedia.id,
-        imageUrl: publicUrl,
-        mediaType,
-      });
+          await addHighlightImage.mutateAsync({
+            highlightId: selectedHighlightForMedia.id,
+            imageUrl: publicUrl,
+            mediaType,
+          });
 
-      toast.success(isVideo ? "Vídeo adicionado ao destaque!" : "Foto adicionada ao destaque!");
-    } catch (error) {
-      console.error("Error adding media:", error);
-      toast.error("Erro ao adicionar mídia");
+          successCount++;
+        } catch (err) {
+          console.error("Error uploading file:", err);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} ${successCount === 1 ? 'mídia adicionada' : 'mídias adicionadas'} ao destaque!`);
+      }
+      if (errorCount > 0) {
+        toast.error(`Erro ao adicionar ${errorCount} ${errorCount === 1 ? 'mídia' : 'mídias'}`);
+      }
     } finally {
       setIsAddingMedia(false);
       setSelectedHighlightForMedia(null);
@@ -188,6 +201,7 @@ export const DesktopSidebar = () => {
         ref={addMediaInputRef}
         type="file"
         accept="image/*,video/*"
+        multiple
         className="hidden"
         onChange={handleAddMediaToExistingHighlight}
       />
