@@ -18,7 +18,6 @@ import {
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
-import { RefetchOverlay } from "@/components/common/RefetchOverlay";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -152,7 +151,6 @@ const Profile = () => {
 
   return (
     <main className="bg-background min-h-screen relative pb-24">
-      <RefetchOverlay isRefetching={isRefetching} />
       {fromOnboarding ? (
         <motion.div
           variants={containerVariants}

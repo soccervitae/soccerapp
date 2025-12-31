@@ -15,7 +15,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { MessagesSkeleton, OnlineUsersSkeleton } from "@/components/skeletons/MessagesSkeleton";
-import { RefetchOverlay } from "@/components/common/RefetchOverlay";
 import type { Database } from "@/integrations/supabase/types";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Messages = () => {
@@ -80,7 +79,6 @@ const Messages = () => {
     }
   };
   return <div className="min-h-screen bg-background pb-20">
-      <RefetchOverlay isRefetching={isRefetching} />
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center">
         <h1 className="text-lg font-semibold">Mensagens</h1>

@@ -11,7 +11,6 @@ import { usePosts } from "@/hooks/usePosts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { FeedSkeleton } from "@/components/skeletons/FeedSkeleton";
-import { RefetchOverlay } from "@/components/common/RefetchOverlay";
 import { OfflineCacheIndicator } from "@/components/common/OfflineCacheIndicator";
 import { getPostsCacheTimestamp } from "@/lib/offlineStorage";
 import { AnimatePresence } from "framer-motion";
@@ -54,7 +53,6 @@ const Index = () => {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <RefetchOverlay isRefetching={isRefetching} />
         <FeedHeader />
         <main className="pt-16">
           <AnimatePresence>
