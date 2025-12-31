@@ -32,6 +32,27 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
     return text.slice(0, maxLength) + "...";
   };
 
+  const getSharedContentLabel = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.type === "shared_content") {
+        switch (parsed.contentType) {
+          case "post":
+            return "📷 Publicação compartilhada";
+          case "story":
+            return "📱 Replay compartilhado";
+          case "highlight":
+            return "⭐ Destaque compartilhado";
+          default:
+            return "📤 Conteúdo compartilhado";
+        }
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
   const hasUnread = unreadCount > 0;
 
   return (
@@ -75,7 +96,11 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
         <div className="flex items-center justify-between gap-2">
           <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
             {lastMessage ? (
-              lastMessage.media_url ? (
+              lastMessage.media_type === "shared_content" ? (
+                <span className="flex items-center gap-1">
+                  {getSharedContentLabel(lastMessage.content) || "📤 Conteúdo compartilhado"}
+                </span>
+              ) : lastMessage.media_url ? (
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px]">
                     {lastMessage.media_type === "video" ? "videocam" : "image"}
