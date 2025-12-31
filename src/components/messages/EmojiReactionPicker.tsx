@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 
-const REACTION_EMOJIS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
+const REACTION_EMOJIS = ["⚽", "🥅", "🏆", "🔥", "👏", "💪"];
 
 interface EmojiReactionPickerProps {
   isOpen: boolean;
