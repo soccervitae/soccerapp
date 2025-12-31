@@ -206,12 +206,12 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 <div className="w-8" />
               )}
               <SheetTitle className="text-center flex-1">{getStepTitle()}</SheetTitle>
-              {hasChanges ? (
+              {step === "teams" ? (
                 <Button
                   variant="default"
                   size="sm"
                   onClick={handleSave}
-                  disabled={isSaving}
+                  disabled={isSaving || !hasChanges}
                   className="h-8 px-3"
                 >
                   {isSaving ? (
@@ -389,51 +389,62 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                       <p className="text-sm mt-1">Tente buscar por outro nome</p>
                     </div>
                   ) : (
-                    teams.map((team) => {
-                      const isSelected = localSelectedIds.includes(team.id);
-                      return (
-                        <button
-                          key={team.id}
-                          onClick={() => handleTeamToggle(team)}
-                          disabled={isSaving}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
-                            isSelected
-                              ? "bg-primary/10 border-2 border-primary"
-                              : "bg-card border border-border hover:bg-muted"
-                          } disabled:opacity-50`}
-                        >
-                          {/* Team Logo */}
-                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {team.escudo_url ? (
-                              <img
-                                src={team.escudo_url}
-                                alt={team.nome}
-                                className="w-full h-full object-contain p-1"
-                              />
-                            ) : (
-                              <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                                shield
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Team Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground truncate">{team.nome}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {[team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
-                            </p>
-                          </div>
-
-                          {/* Selected indicator */}
-                          {isSelected && (
-                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                              <Check className="w-4 h-4 text-primary-foreground" />
+                    <>
+                      <p className="text-xs text-muted-foreground text-center mb-3">
+                        Toque nos times para selecionar
+                      </p>
+                      {teams.map((team) => {
+                        const isSelected = localSelectedIds.includes(team.id);
+                        return (
+                          <button
+                            key={team.id}
+                            onClick={() => handleTeamToggle(team)}
+                            disabled={isSaving}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
+                              isSelected
+                                ? "bg-primary/10 border-2 border-primary"
+                                : "bg-card border border-border hover:bg-muted"
+                            } disabled:opacity-50`}
+                          >
+                            {/* Selection indicator - always visible */}
+                            <div 
+                              className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                isSelected 
+                                  ? "bg-primary border-primary" 
+                                  : "border-muted-foreground/40 bg-transparent"
+                              }`}
+                            >
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-primary-foreground" />
+                              )}
                             </div>
-                          )}
-                        </button>
-                      );
-                    })
+
+                            {/* Team Logo */}
+                            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {team.escudo_url ? (
+                                <img
+                                  src={team.escudo_url}
+                                  alt={team.nome}
+                                  className="w-full h-full object-contain p-1"
+                                />
+                              ) : (
+                                <span className="material-symbols-outlined text-2xl text-muted-foreground">
+                                  shield
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Team Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground truncate">{team.nome}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {[team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </>
                   )}
                 </div>
               </ScrollArea>
