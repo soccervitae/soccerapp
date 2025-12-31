@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,7 @@ import { LikesSheet } from "@/components/feed/LikesSheet";
 import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Send } from "lucide-react";
+
 interface PostMediaViewerProps {
   post: Post;
   mediaUrls: string[];
@@ -38,7 +39,9 @@ export const PostMediaViewer = ({
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const [showDoubleTapAnimation, setShowDoubleTapAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastTapRef = useRef<number>(0);
 
   // Hooks for interactions
   const likePost = useLikePost();
@@ -61,7 +64,7 @@ export const PostMediaViewer = ({
     };
   }, [isOpen]);
 
-  const handleLike = () => {
+  const handleLike = useCallback(() => {
     if (!user) {
       navigate("/login");
       return;
@@ -72,27 +75,64 @@ export const PostMediaViewer = ({
       postId: post.id,
       isLiked: post.liked_by_user,
     });
-  };
+  }, [user, navigate, likePost, post.id, post.liked_by_user]);
+
+  const handleDoubleTapLike = useCallback(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    // Show animation
+    setShowDoubleTapAnimation(true);
+    setTimeout(() => setShowDoubleTapAnimation(false), 1000);
+    
+    // Only like if not already liked
+    if (!post.liked_by_user) {
+      likePost.mutate({
+        postId: post.id,
+        isLiked: false,
+      });
+    }
+  }, [user, navigate, likePost, post.id, post.liked_by_user]);
 
   const handleProfileClick = (username: string) => {
     onClose();
     navigate(`/${username}`);
   };
 
-  const handleTapNavigation = (e: React.MouseEvent) => {
+  const handleTapNavigation = (e: React.MouseEvent | React.TouchEvent) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap detected
+      e.preventDefault();
+      handleDoubleTapLike();
+      lastTapRef.current = 0;
+      return;
+    }
+    
+    lastTapRef.current = now;
+    
+    // Single tap for carousel navigation (with delay to check for double tap)
     if (!isCarousel) return;
     
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const width = rect.width;
-    
-    if (x < width / 3) {
-      // Left third - previous
-      setCurrentIndex((prev) => Math.max(0, prev - 1));
-    } else if (x > (width * 2) / 3) {
-      // Right two thirds - next
-      setCurrentIndex((prev) => Math.min(mediaUrls.length - 1, prev + 1));
-    }
+    setTimeout(() => {
+      if (lastTapRef.current !== now) return; // Double tap occurred, skip navigation
+      
+      const rect = (e.target as HTMLElement).getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? 0 : (e as React.MouseEvent).clientX;
+      const x = clientX - rect.left;
+      const width = rect.width;
+      
+      if (x < width / 3) {
+        // Left third - previous
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+      } else if (x > (width * 2) / 3) {
+        // Right two thirds - next
+        setCurrentIndex((prev) => Math.min(mediaUrls.length - 1, prev + 1));
+      }
+    }, DOUBLE_TAP_DELAY);
   };
 
   const getInitialPosition = () => {
@@ -190,6 +230,23 @@ export const PostMediaViewer = ({
                     className="w-full h-full object-contain"
                   />
                 )}
+
+                {/* Double tap applause animation */}
+                <AnimatePresence>
+                  {showDoubleTapAnimation && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <ClappingHandsIcon 
+                        className="w-24 h-24 text-amber-500 animate-applause-burst drop-shadow-lg" 
+                        filled={true}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Progress bar for carousel */}
