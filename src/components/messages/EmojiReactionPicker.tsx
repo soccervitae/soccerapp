@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { RedCardAnimation } from "./RedCardAnimation";
 import { GoalAnimation } from "./GoalAnimation";
 import { TrophyAnimation } from "./TrophyAnimation";
+import { useWhistleSound } from "@/hooks/useWhistleSound";
 
 const REACTION_EMOJIS = ["⚽", "🥅", "🏆", "🔥", "👏", "💪", "🟨", "🟥"];
 
@@ -23,11 +24,17 @@ export const EmojiReactionPicker = ({
   const [showGoalAnimation, setShowGoalAnimation] = useState(false);
   const [showTrophyAnimation, setShowTrophyAnimation] = useState(false);
   const [pendingEmoji, setPendingEmoji] = useState<string | null>(null);
+  const { playWhistle } = useWhistleSound();
 
   const handleEmojiClick = (emoji: string) => {
     if (emoji === "🟥") {
+      playWhistle();
       setPendingEmoji(emoji);
       setShowRedCardAnimation(true);
+      onClose();
+    } else if (emoji === "🟨") {
+      playWhistle();
+      onSelect(emoji);
       onClose();
     } else if (emoji === "🥅") {
       setPendingEmoji(emoji);
