@@ -5,12 +5,14 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
+import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
+import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useUserTeams } from "@/hooks/useTeams";
 
-type CreateOption = "post" | "times" | "championship" | "achievement";
+type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
 
 const navItems = [{
   id: "home",
@@ -61,6 +63,8 @@ export const DesktopSidebar = () => {
   const { data: userTeams = [] } = useUserTeams(user?.id);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
+  const [isReplayOpen, setIsReplayOpen] = useState(false);
+  const [isHighlightOpen, setIsHighlightOpen] = useState(false);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
@@ -84,6 +88,12 @@ export const DesktopSidebar = () => {
     switch (option) {
       case "post":
         setIsPostOpen(true);
+        break;
+      case "replay":
+        setIsReplayOpen(true);
+        break;
+      case "highlight":
+        setIsHighlightOpen(true);
         break;
       case "times":
         setIsTimesOpen(true);
@@ -122,6 +132,8 @@ export const DesktopSidebar = () => {
       {/* Create Sheets */}
       <CreateMenuSheet open={isMenuOpen} onOpenChange={setIsMenuOpen} onSelectOption={handleSelectOption} />
       <CreatePostSheet open={isPostOpen} onOpenChange={setIsPostOpen} />
+      <CreateReplaySheet open={isReplayOpen} onOpenChange={setIsReplayOpen} />
+      <AddHighlightSheet open={isHighlightOpen} onOpenChange={setIsHighlightOpen} />
       <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
