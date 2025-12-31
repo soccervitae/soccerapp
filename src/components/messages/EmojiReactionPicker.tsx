@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RedCardAnimation } from "./RedCardAnimation";
 import { GoalAnimation } from "./GoalAnimation";
+import { TrophyAnimation } from "./TrophyAnimation";
 
 const REACTION_EMOJIS = ["⚽", "🥅", "🏆", "🔥", "👏", "💪", "🟨", "🟥"];
 
@@ -20,6 +21,7 @@ export const EmojiReactionPicker = ({
 }: EmojiReactionPickerProps) => {
   const [showRedCardAnimation, setShowRedCardAnimation] = useState(false);
   const [showGoalAnimation, setShowGoalAnimation] = useState(false);
+  const [showTrophyAnimation, setShowTrophyAnimation] = useState(false);
   const [pendingEmoji, setPendingEmoji] = useState<string | null>(null);
 
   const handleEmojiClick = (emoji: string) => {
@@ -31,6 +33,10 @@ export const EmojiReactionPicker = ({
       setPendingEmoji(emoji);
       setShowGoalAnimation(true);
       onClose();
+    } else if (emoji === "🏆") {
+      setPendingEmoji(emoji);
+      setShowTrophyAnimation(true);
+      onClose();
     } else {
       onSelect(emoji);
       onClose();
@@ -40,6 +46,7 @@ export const EmojiReactionPicker = ({
   const handleAnimationComplete = () => {
     setShowRedCardAnimation(false);
     setShowGoalAnimation(false);
+    setShowTrophyAnimation(false);
     if (pendingEmoji) {
       onSelect(pendingEmoji);
       setPendingEmoji(null);
@@ -54,6 +61,10 @@ export const EmojiReactionPicker = ({
       />
       <GoalAnimation
         isVisible={showGoalAnimation}
+        onComplete={handleAnimationComplete}
+      />
+      <TrophyAnimation
+        isVisible={showTrophyAnimation}
         onComplete={handleAnimationComplete}
       />
       
