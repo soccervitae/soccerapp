@@ -726,6 +726,38 @@ export type Database = {
         }
         Relationships: []
       }
+      post_shares: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          shared_to_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          shared_to_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          shared_to_user_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_tags: {
         Row: {
           created_at: string | null
@@ -786,6 +818,7 @@ export type Database = {
           music_end_seconds: number | null
           music_start_seconds: number | null
           music_track_id: string | null
+          shares_count: number | null
           updated_at: string | null
           user_id: string
         }
@@ -803,6 +836,7 @@ export type Database = {
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null
+          shares_count?: number | null
           updated_at?: string | null
           user_id: string
         }
@@ -820,6 +854,7 @@ export type Database = {
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null
+          shares_count?: number | null
           updated_at?: string | null
           user_id?: string
         }
