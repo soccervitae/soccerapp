@@ -38,8 +38,7 @@ const Explore = () => {
     navigate(`/${username}`);
   };
 
-  const handleFollowClick = (e: React.MouseEvent, userId: string, isFollowing: boolean) => {
-    e.stopPropagation();
+  const handleFollowClick = (userId: string, isFollowing: boolean) => {
     if (!user) {
       navigate("/login");
       return;
@@ -103,36 +102,40 @@ const Explore = () => {
               const isFollowing = followingIds?.has(profile.id) || false;
 
               return (
-                <button
+                <div
                   key={profile.id}
-                  onClick={() => handleProfileClick(profile.username)}
-                  className="bg-card border border-border rounded-xl p-3 text-left hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
+                  className="bg-card border border-border rounded-xl p-3 hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
                 >
-                  <div className="relative shrink-0">
-                    <img
-                      src={profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`}
-                      alt={profile.full_name || profile.username}
-                      className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
-                    />
-                    {profile.conta_verificada && (
-                      <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-sm truncate">
-                      {profile.full_name || profile.username}
-                    </h3>
-                    {profile.position && (
-                      <span className="text-xs text-primary font-medium">
-                        {profile.position}
-                        {profile.team && ` • ${profile.team}`}
-                      </span>
-                    )}
+                  <div 
+                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                    onClick={() => handleProfileClick(profile.username)}
+                  >
+                    <div className="relative shrink-0">
+                      <img
+                        src={profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`}
+                        alt={profile.full_name || profile.username}
+                        className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
+                      />
+                      {profile.conta_verificada && (
+                        <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm truncate">
+                        {profile.full_name || profile.username}
+                      </h3>
+                      {profile.position && (
+                        <span className="text-xs text-primary font-medium">
+                          {profile.position}
+                          {profile.team && ` • ${profile.team}`}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <Button
                     size="sm"
                     variant={isFollowing ? "outline" : "default"}
-                    onClick={(e) => handleFollowClick(e, profile.id, isFollowing)}
+                    onClick={() => handleFollowClick(profile.id, isFollowing)}
                     disabled={isFollowPending}
                     className="shrink-0 h-7 px-3 text-xs"
                   >
@@ -144,7 +147,7 @@ const Explore = () => {
                       "Torcer"
                     )}
                   </Button>
-                </button>
+                </div>
               );
             })
           ) : (
