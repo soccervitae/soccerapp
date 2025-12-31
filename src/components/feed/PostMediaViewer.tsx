@@ -165,7 +165,7 @@ export const PostMediaViewer = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex">
+        <div className="fixed inset-0 z-[60] flex">
           {/* Overlay */}
           <motion.div
             className="absolute inset-0 bg-black"
