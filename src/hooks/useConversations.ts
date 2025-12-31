@@ -64,11 +64,12 @@ export const useConversations = () => {
     }
 
     try {
-      // Get all conversation IDs where user is participant
+      // Get all conversation IDs where user is participant (excluding archived)
       const { data: participations, error: partError } = await supabase
         .from("conversation_participants")
         .select("conversation_id")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .eq("is_archived", false);
 
       if (partError) throw partError;
 

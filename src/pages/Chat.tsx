@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useMessages } from "@/hooks/useMessages";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { useVideoCall } from "@/hooks/useVideoCall";
@@ -23,6 +33,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 const Chat = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { messages, isLoading, isSending, isOffline, sendMessage, deleteMessage } = useMessages(conversationId || null);
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
@@ -30,6 +41,7 @@ const Chat = () => {
   const [participant, setParticipant] = useState<Profile | null>(null);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -169,6 +181,54 @@ const Chat = () => {
     toast.success("Mensagem apagada para todos");
   };
 
+  const handleArchiveConversation = async () => {
+    if (!conversationId || !user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("conversation_participants")
+        .update({ is_archived: true })
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+      
+      toast.success("Conversa arquivada");
+      navigate("/messages");
+    } catch (error) {
+      console.error("Error archiving conversation:", error);
+      toast.error("Erro ao arquivar conversa");
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    if (!conversationId || !user) return;
+    
+    try {
+      // Apagar todas as mensagens enviadas pelo usuário nesta conversa
+      await supabase
+        .from("messages")
+        .delete()
+        .eq("conversation_id", conversationId)
+        .eq("sender_id", user.id);
+      
+      // Remover participação do usuário da conversa
+      const { error } = await supabase
+        .from("conversation_participants")
+        .delete()
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+      
+      toast.success("Conversa apagada");
+      navigate("/messages");
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast.error("Erro ao apagar conversa");
+    }
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -190,7 +250,30 @@ const Chat = () => {
         onVideoCall={handleVideoCall}
         onVoiceCall={handleVoiceCall}
         isCallActive={isCallActive}
+        onArchive={handleArchiveConversation}
+        onDelete={() => setShowDeleteDialog(true)}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar conversa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Todas as suas mensagens nesta conversa serão apagadas permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConversation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Incoming call modal */}
       <IncomingCallModal
