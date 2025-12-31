@@ -8,6 +8,7 @@ import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
+import { UploadProgressOverlay } from "@/components/common/UploadProgressOverlay";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
@@ -30,6 +31,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   const addMediaInputRef = useRef<HTMLInputElement>(null);
   const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
   const [isAddingMedia, setIsAddingMedia] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
@@ -77,11 +79,15 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
     if (files.length === 0 || !selectedHighlightForMedia || !user) return;
 
     setIsAddingMedia(true);
+    setUploadProgress({ current: 0, total: files.length });
     let successCount = 0;
     let errorCount = 0;
 
     try {
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadProgress({ current: i + 1, total: files.length });
+        
         try {
           const isVideo = file.type.startsWith('video/');
           const mediaType = isVideo ? 'video' : 'image';
@@ -119,6 +125,7 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       }
     } finally {
       setIsAddingMedia(false);
+      setUploadProgress({ current: 0, total: 0 });
       setSelectedHighlightForMedia(null);
       e.target.value = "";
     }
@@ -219,6 +226,12 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       <AddAchievementSheet 
         open={isAchievementOpen} 
         onOpenChange={setIsAchievementOpen} 
+      />
+
+      <UploadProgressOverlay
+        isVisible={isAddingMedia}
+        current={uploadProgress.current}
+        total={uploadProgress.total}
       />
     </>
   );

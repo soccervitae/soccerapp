@@ -11,6 +11,7 @@ import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
+import { UploadProgressOverlay } from "@/components/common/UploadProgressOverlay";
 import { useUserTeams } from "@/hooks/useTeams";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -65,6 +66,7 @@ export const DesktopSidebar = () => {
   const addMediaInputRef = useRef<HTMLInputElement>(null);
   const [selectedHighlightForMedia, setSelectedHighlightForMedia] = useState<UserHighlight | null>(null);
   const [isAddingMedia, setIsAddingMedia] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
@@ -125,11 +127,15 @@ export const DesktopSidebar = () => {
     if (files.length === 0 || !selectedHighlightForMedia || !user) return;
 
     setIsAddingMedia(true);
+    setUploadProgress({ current: 0, total: files.length });
     let successCount = 0;
     let errorCount = 0;
 
     try {
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadProgress({ current: i + 1, total: files.length });
+        
         try {
           const isVideo = file.type.startsWith('video/');
           const mediaType = isVideo ? 'video' : 'image';
@@ -167,6 +173,7 @@ export const DesktopSidebar = () => {
       }
     } finally {
       setIsAddingMedia(false);
+      setUploadProgress({ current: 0, total: 0 });
       setSelectedHighlightForMedia(null);
       e.target.value = "";
     }
@@ -221,5 +228,11 @@ export const DesktopSidebar = () => {
       <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
+      
+      <UploadProgressOverlay
+        isVisible={isAddingMedia}
+        current={uploadProgress.current}
+        total={uploadProgress.total}
+      />
     </>;
 };
