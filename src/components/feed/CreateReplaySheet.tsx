@@ -364,6 +364,14 @@ export const CreateReplaySheet = ({
 
           {/* Gallery items grid */}
           {(!isGalleryLoading || filteredMedia.length > 0) && <div className="grid grid-cols-4 gap-0.5">
+              {/* Gallery picker tile */}
+              <button onClick={handlePickFromGallery} disabled={isLoading} className="relative aspect-square overflow-hidden bg-muted flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors disabled:opacity-50">
+                <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[24px] text-blue-500">photo_library</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground font-medium">Galeria</span>
+              </button>
+
               {/* Camera tile */}
               <button onClick={handleTakePhoto} disabled={isLoading} className="relative aspect-square overflow-hidden bg-muted flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors disabled:opacity-50">
                 <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
