@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -345,7 +346,17 @@ return <section className="flex flex-col items-center gap-4">
                 }}>
                   favorite
                 </span>
-                {isCheering ? "Torcendo" : "Torcer"}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={isCheering ? "cheering" : "cheer"}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    {isCheering ? "Torcendo" : "Torcer"}
+                  </motion.span>
+                </AnimatePresence>
               </button>
               
               {/* Animated heart overlay */}
