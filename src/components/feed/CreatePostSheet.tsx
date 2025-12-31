@@ -667,14 +667,17 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             Cancelar
           </button>
           <span className="text-base font-bold">Nova Publicação</span>
-          <Button 
+          <button 
             onClick={handlePost} 
-            size="sm" 
-            className="rounded font-semibold text-xs h-8 px-4" 
+            className={`text-sm font-semibold transition-colors ${
+              isButtonDisabled 
+                ? "text-muted-foreground cursor-not-allowed" 
+                : "text-primary hover:text-primary/80"
+            }`}
             disabled={isButtonDisabled}
           >
             {isPublishing ? "Publicando..." : "Publicar"}
-          </Button>
+          </button>
         </div>
       </div>
 
