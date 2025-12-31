@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserTeams } from "@/hooks/useTeams";
+
 import { useStories } from "@/hooks/useStories";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -63,9 +63,6 @@ export const ProfileInfo = ({
     setStoryViewerOpen(true);
   };
   
-  // Fetch user teams
-  const { data: userTeams = [] } = useUserTeams(profile.id);
-
   // Use Sheet on mobile or PWA, DropdownMenu on desktop
   const useSheet = isMobile || isPWA;
   const profileUrl = `${window.location.origin}/${profile.username}`;
@@ -267,39 +264,6 @@ return <section className="flex flex-col items-center gap-4">
         </div>
       )}
 
-      {/* User Teams */}
-      {userTeams.length > 0 && (
-        <div className="w-full">
-          <ScrollArea className="w-full">
-            <div className="flex gap-3 px-4 py-2">
-              {userTeams.map((team) => (
-                <div
-                  key={team.id}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0"
-                >
-                  <div className="w-14 h-14 rounded-xl bg-card border border-border flex items-center justify-center overflow-hidden">
-                    {team.escudo_url ? (
-                      <img
-                        src={team.escudo_url}
-                        alt={team.nome}
-                        className="w-full h-full object-contain p-2"
-                      />
-                    ) : (
-                      <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                        shield
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center max-w-[60px] truncate">
-                    {team.nome}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-      )}
 
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
