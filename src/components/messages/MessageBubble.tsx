@@ -223,14 +223,27 @@ export const MessageBubble = ({
 
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
-      <div className="relative max-w-[80%]">
+      <div className="relative max-w-[80%] group/bubble">
+        {/* Deletable indicator - shows on hover for unread own messages */}
+        {canDelete && (
+          <div className={`absolute top-1/2 -translate-y-1/2 ${isOwn ? "-left-7" : "-right-7"} opacity-0 group-hover/bubble:opacity-50 transition-opacity pointer-events-none`}>
+            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+        )}
+
         {/* Message bubble */}
         <div
           className={`w-fit max-w-full rounded-2xl px-4 py-2 ${
             isOwn
               ? "bg-green-100 dark:bg-green-200 text-green-900 dark:text-green-900 rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
-          } ${isTemporary ? "border-2 border-orange-500/50" : ""}`}
+          } ${isTemporary ? "border-2 border-orange-500/50" : ""} ${canDelete ? "cursor-pointer" : ""}`}
+          onClick={() => {
+            // Click to open action menu if own message and can delete
+            if (canDelete) {
+              setShowActionMenu(true);
+            }
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             handleLongPress();
@@ -425,6 +438,13 @@ export const MessageBubble = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className={`absolute -top-14 ${isOwn ? "right-0" : "left-0"} bg-popover border border-border rounded-xl shadow-lg p-1 flex gap-1 z-50`}
           >
+            {/* Badge showing message is unread */}
+            {canDelete && (
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
+                Ainda não lida
+              </div>
+            )}
+
             {/* Reagir */}
             <button
               onClick={() => {
@@ -457,7 +477,7 @@ export const MessageBubble = ({
                   setShowDeleteConfirm(true);
                 }}
                 className="p-2.5 hover:bg-destructive/10 rounded-lg transition-colors"
-                title="Apagar"
+                title="Apagar para todos"
               >
                 <Trash2 className="h-5 w-5 text-destructive" />
               </button>

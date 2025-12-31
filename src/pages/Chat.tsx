@@ -15,6 +15,7 @@ import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { ChatSkeleton } from "@/components/skeletons/ChatSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { MessageWithSender } from "@/hooks/useMessages";
 
@@ -163,6 +164,11 @@ const Chat = () => {
     setReplyTo(message);
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    await deleteMessage(messageId);
+    toast.success("Mensagem apagada para todos");
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -257,7 +263,7 @@ const Chat = () => {
                   reactions={getReactionsForMessage(message.id)}
                   onAddReaction={addReaction}
                   onRemoveReaction={removeReaction}
-                  onDelete={deleteMessage}
+                  onDelete={handleDeleteMessage}
                 />
               </div>
             ))}
