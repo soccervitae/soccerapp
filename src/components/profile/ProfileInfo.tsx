@@ -333,7 +333,7 @@ export const ProfileInfo = ({
                 </DropdownMenuContent>
               </DropdownMenu>}
           </> : <>
-            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-primary/10 text-primary border border-primary hover:bg-primary/15 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
+            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
               <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} style={{
             fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
           }}>
