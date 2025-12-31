@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Play } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
@@ -24,8 +24,24 @@ interface SharedContentPreviewProps {
   isOwn: boolean;
 }
 
+// Preload image into browser cache
+const preloadImage = (src: string) => {
+  const img = new Image();
+  img.src = src;
+};
+
 export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   const [viewerOpen, setViewerOpen] = useState(false);
+
+  // Preload preview image and author avatar on mount
+  useEffect(() => {
+    if (data.preview) {
+      preloadImage(data.preview);
+    }
+    if (data.author?.avatar_url) {
+      preloadImage(data.author.avatar_url);
+    }
+  }, [data.preview, data.author?.avatar_url]);
 
   // Create Post object from available data - no fetch needed!
   const postData = useMemo<Post>(() => {
