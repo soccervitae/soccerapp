@@ -1,4 +1,9 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useHighlightReplies } from "@/hooks/useHighlightInteractions";
@@ -24,16 +29,16 @@ export const HighlightRepliesSheet = ({ highlightId, isOpen, onClose }: Highligh
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[70vh] z-[70] rounded-t-3xl">
-        <SheetHeader className="pb-4 border-b">
-          <SheetTitle className="flex items-center gap-2">
+    <ResponsiveModal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col z-[70]" overlayClassName="z-[70]">
+        <ResponsiveModalHeader className="pb-4 border-b border-border">
+          <ResponsiveModalTitle className="flex items-center justify-center gap-2">
             <MessageCircle className="w-5 h-5" />
             Respostas ({replies.length})
-          </SheetTitle>
-        </SheetHeader>
+          </ResponsiveModalTitle>
+        </ResponsiveModalHeader>
         
-        <ScrollArea className="h-[calc(70vh-80px)] mt-4">
+        <ScrollArea className="flex-1 mt-4">
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -85,7 +90,7 @@ export const HighlightRepliesSheet = ({ highlightId, isOpen, onClose }: Highligh
             </div>
           )}
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };
