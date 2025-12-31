@@ -1571,7 +1571,7 @@ export type Database = {
         Returns: undefined
       }
       add_user_to_team: {
-        Args: { team_id: string; user_id: string }
+        Args: { p_team_id: string; p_user_id: string }
         Returns: undefined
       }
       can_access_conversation: {
@@ -1622,7 +1622,7 @@ export type Database = {
         Returns: undefined
       }
       remove_user_from_team: {
-        Args: { team_id: string; user_id: string }
+        Args: { p_team_id: string; p_user_id: string }
         Returns: undefined
       }
     }
