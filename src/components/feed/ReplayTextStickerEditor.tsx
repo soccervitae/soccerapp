@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { useUploadMedia } from "@/hooks/useUploadMedia";
 
 interface OverlayElement {
   id: string;
@@ -27,6 +28,7 @@ interface DrawPath {
 interface ReplayTextStickerEditorProps {
   mediaUrl: string;
   mediaType: "photo" | "video";
+  mediaBlob?: Blob;
   onPublish: (finalMediaUrl: string, caption: string) => void;
   onCancel: () => void;
 }
@@ -114,6 +116,7 @@ const getAngle = (touch1: React.Touch, touch2: React.Touch): number => {
 export const ReplayTextStickerEditor = ({
   mediaUrl,
   mediaType,
+  mediaBlob,
   onPublish,
   onCancel,
 }: ReplayTextStickerEditorProps) => {
@@ -127,6 +130,8 @@ export const ReplayTextStickerEditor = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [gestureMode, setGestureMode] = useState<GestureMode>("none");
+  
+  const { uploadMedia, isUploading } = useUploadMedia();
 
   // Caption state (WhatsApp style)
   const [caption, setCaption] = useState("");
@@ -518,14 +523,38 @@ export const ReplayTextStickerEditor = ({
     setIsExporting(true);
     try {
       let finalUrl = mediaUrl;
+      let blobToUpload: Blob | null = null;
       
+      // If we have overlays on photos, export with overlays
       if ((elements.length > 0 || paths.length > 0) && mediaType === "photo") {
-        finalUrl = await exportWithOverlays();
+        const dataUrl = await exportWithOverlays();
+        const response = await fetch(dataUrl);
+        blobToUpload = await response.blob();
+      } else if (mediaBlob) {
+        // Use the provided blob
+        blobToUpload = mediaBlob;
+      } else if (mediaUrl.startsWith("blob:") || mediaUrl.startsWith("data:")) {
+        // Convert blob/data URL to blob for upload
+        const response = await fetch(mediaUrl);
+        blobToUpload = await response.blob();
+      }
+      
+      // Upload to Supabase Storage if we have a blob
+      if (blobToUpload) {
+        const ext = mediaType === "video" ? "mp4" : "png";
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-replay.${ext}`;
+        const uploadedUrl = await uploadMedia(blobToUpload, "story-media", fileName);
+        
+        if (!uploadedUrl) {
+          throw new Error("Falha no upload da mídia");
+        }
+        
+        finalUrl = uploadedUrl;
       }
       
       onPublish(finalUrl, caption);
     } catch (error) {
-      toast.error("Erro ao processar imagem");
+      toast.error("Erro ao processar e enviar mídia");
       console.error(error);
     } finally {
       setIsExporting(false);
@@ -588,9 +617,9 @@ export const ReplayTextStickerEditor = ({
           size="sm"
           variant="ghost"
           className="text-primary font-semibold text-sm hover:bg-transparent"
-          disabled={isExporting}
+          disabled={isExporting || isUploading}
         >
-          {isExporting ? "Salvando..." : "Publicar"}
+          {isExporting ? "Processando..." : isUploading ? "Enviando..." : "Publicar"}
         </Button>
       </div>
 
