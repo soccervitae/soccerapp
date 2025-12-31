@@ -147,7 +147,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
         ...toRemove.map(id => removeUserFromTeam.mutateAsync(id))
       ]);
 
-      toast.success("Times atualizados!");
+      
       onOpenChange(false);
     } catch (error) {
       toast.error("Erro ao salvar times");
