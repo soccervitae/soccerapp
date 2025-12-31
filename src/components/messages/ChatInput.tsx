@@ -26,6 +26,7 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
   const {
     isRecording,
     recordedAudio,
+    recordingTime,
     formattedTime,
     startRecording,
     stopRecording,
@@ -101,30 +102,76 @@ export const ChatInput = ({ onSend, isSending, replyTo, onCancelReply, onTyping 
 
   // Recording mode UI
   if (isRecording) {
+    const maxDuration = 120; // 2 minutes max
+    const progress = (recordingTime / maxDuration) * 100;
+    const isNearLimit = recordingTime >= 100; // 1:40 - warn when near limit
+    
     return (
       <div className="border-t border-border bg-background p-3">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={cancelRecording}
-            className="text-destructive"
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-            <span className="font-mono text-lg">{formattedTime}</span>
+        <div className="flex flex-col gap-3">
+          {/* Progress bar */}
+          <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden">
+            <div 
+              className={cn(
+                "h-full rounded-full transition-all duration-300",
+                isNearLimit ? "bg-orange-500" : "bg-destructive"
+              )}
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+            {/* Limit marker at 2 min */}
+            <div className="absolute right-0 top-0 h-full w-0.5 bg-muted-foreground/50" />
           </div>
 
-          <Button
-            variant="default"
-            size="icon"
-            onClick={stopRecording}
-          >
-            <Square className="h-4 w-4 fill-current" />
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={cancelRecording}
+              className="text-destructive"
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
+
+            <div className="flex items-center gap-3">
+              {/* Recording indicator with waveform animation */}
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
+                <div className="flex items-end gap-0.5 h-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="w-0.5 bg-destructive rounded-full animate-pulse"
+                      style={{
+                        height: `${Math.random() * 100}%`,
+                        minHeight: '20%',
+                        animationDelay: `${i * 100}ms`,
+                        animationDuration: `${400 + i * 50}ms`
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex items-baseline gap-1">
+                <span className={cn(
+                  "font-mono text-lg font-semibold tabular-nums",
+                  isNearLimit && "text-orange-500"
+                )}>
+                  {formattedTime}
+                </span>
+                <span className="text-xs text-muted-foreground">/02:00</span>
+              </div>
+            </div>
+
+            <Button
+              variant="default"
+              size="icon"
+              onClick={stopRecording}
+              className="bg-primary"
+            >
+              <Square className="h-4 w-4 fill-current" />
+            </Button>
+          </div>
         </div>
       </div>
     );
