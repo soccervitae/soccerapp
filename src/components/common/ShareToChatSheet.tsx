@@ -79,6 +79,48 @@ export const ShareToChatSheet = ({
     if (!user || selectedUsers.size === 0 || isSending) return;
     
     setIsSending(true);
+
+    // Fetch author data for the shared content
+    let authorData: { username: string; avatar_url: string | null } | null = null;
+    try {
+      let authorUserId: string | null = null;
+      
+      if (contentType === "post") {
+        const { data: post } = await supabase
+          .from("posts")
+          .select("user_id")
+          .eq("id", contentId)
+          .single();
+        authorUserId = post?.user_id || null;
+      } else if (contentType === "story") {
+        const { data: story } = await supabase
+          .from("stories")
+          .select("user_id")
+          .eq("id", contentId)
+          .single();
+        authorUserId = story?.user_id || null;
+      } else if (contentType === "highlight") {
+        const { data: highlight } = await supabase
+          .from("user_highlights")
+          .select("user_id")
+          .eq("id", contentId)
+          .single();
+        authorUserId = highlight?.user_id || null;
+      }
+
+      if (authorUserId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("id", authorUserId)
+          .single();
+        if (profile) {
+          authorData = { username: profile.username, avatar_url: profile.avatar_url };
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching author data:", error);
+    }
     
     const sharedContent = JSON.stringify({
       type: "shared_content",
@@ -87,6 +129,7 @@ export const ShareToChatSheet = ({
       url: contentUrl,
       preview: contentPreview || null,
       title: contentTitle || null,
+      author: authorData,
     });
 
     let successCount = 0;
