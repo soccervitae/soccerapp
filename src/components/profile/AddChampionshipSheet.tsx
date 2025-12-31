@@ -29,22 +29,11 @@ interface AddChampionshipSheetProps {
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
 
-const positions = [
-  "Campeão",
-  "Vice-campeão",
-  "3º Lugar",
-  "4º Lugar",
-  "Semifinalista",
-  "Quartas de Final",
-  "Oitavas de Final",
-  "Fase de Grupos",
-];
 
 export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChampionshipSheetProps) => {
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
   const [team, setTeam] = useState("");
-  const [position, setPosition] = useState("");
   const [games, setGames] = useState("");
   const [goals, setGoals] = useState("");
 
@@ -59,7 +48,6 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
       custom_championship_name: name.trim(),
       year: parseInt(year),
       team_name: team || undefined,
-      position_achieved: position || undefined,
       games_played: games ? parseInt(games) : undefined,
       goals_scored: goals ? parseInt(goals) : undefined,
     });
@@ -68,7 +56,6 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
     setName("");
     setYear("");
     setTeam("");
-    setPosition("");
     setGames("");
     setGoals("");
     onOpenChange(false);
@@ -97,38 +84,20 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="year">Ano *</Label>
-                <Select value={year} onValueChange={setYear} required>
-                  <SelectTrigger id="year">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((y) => (
-                      <SelectItem key={y} value={y.toString()}>
-                        {y}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="position">Posição</Label>
-                <Select value={position} onValueChange={setPosition}>
-                  <SelectTrigger id="position">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {positions.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="year">Ano *</Label>
+              <Select value={year} onValueChange={setYear} required>
+                <SelectTrigger id="year">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
