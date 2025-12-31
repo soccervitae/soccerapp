@@ -1,5 +1,10 @@
 import { useState, useMemo } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -212,14 +217,14 @@ export const ShareToChatSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="bottom" className="z-[70] h-[70vh] flex flex-col rounded-t-2xl" overlayClassName="z-[70]">
-        <SheetHeader className="pb-2">
-          <SheetTitle>Compartilhar com...</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal open={open} onOpenChange={handleOpenChange}>
+      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col" overlayClassName="z-[70]">
+        <ResponsiveModalHeader className="border-b border-border pb-3">
+          <ResponsiveModalTitle className="text-center">Compartilhar com...</ResponsiveModalTitle>
+        </ResponsiveModalHeader>
         
         {/* Search */}
-        <div className="relative mb-4">
+        <div className="relative my-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar torcendo..."
@@ -230,7 +235,7 @@ export const ShareToChatSheet = ({
         </div>
 
         {/* Following list */}
-        <div className="flex-1 overflow-y-auto -mx-6 px-6 pb-20">
+        <div className="flex-1 overflow-y-auto -mx-4 px-4 pb-20">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -323,7 +328,7 @@ export const ShareToChatSheet = ({
             </Button>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };
