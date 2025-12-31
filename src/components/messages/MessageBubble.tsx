@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageWithSender } from "@/hooks/useMessages";
 import type { ReactionWithUser } from "@/hooks/useMessageReactions";
@@ -51,36 +51,6 @@ export const MessageBubble = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Swipe to reply
-  const x = useMotionValue(0);
-  const swipeThreshold = 60;
-
-  // Opacity of reply icon based on swipe distance
-  const replyIconOpacity = useTransform(
-    x,
-    isOwn ? [-swipeThreshold, -20, 0] : [0, 20, swipeThreshold],
-    isOwn ? [1, 0.3, 0] : [0, 0.3, 1]
-  );
-
-  const replyIconScale = useTransform(
-    x,
-    isOwn ? [-swipeThreshold, -20, 0] : [0, 20, swipeThreshold],
-    isOwn ? [1, 0.5, 0.3] : [0.3, 0.5, 1]
-  );
-
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const offset = info.offset.x;
-    
-    if (isOwn && offset < -swipeThreshold) {
-      // Haptic feedback
-      if (navigator.vibrate) navigator.vibrate(50);
-      onReply?.(message);
-    } else if (!isOwn && offset > swipeThreshold) {
-      // Haptic feedback
-      if (navigator.vibrate) navigator.vibrate(50);
-      onReply?.(message);
-    }
-  };
 
   const formatTime = (date: string) => {
     return format(new Date(date), "HH:mm", { locale: ptBR });
@@ -254,26 +224,9 @@ export const MessageBubble = ({
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
       <div className="relative max-w-[80%]">
-        {/* Reply icon - behind the bubble */}
-        <motion.div
-          className={`absolute top-1/2 -translate-y-1/2 ${
-            isOwn ? "-left-10" : "-right-10"
-          } pointer-events-none`}
-          style={{ opacity: replyIconOpacity, scale: replyIconScale }}
-        >
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <Reply className={`h-4 w-4 text-primary ${!isOwn ? "scale-x-[-1]" : ""}`} />
-          </div>
-        </motion.div>
-
-        {/* Message bubble with swipe */}
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: isOwn ? -80 : 0, right: isOwn ? 0 : 80 }}
-          dragElastic={0.1}
-          onDragEnd={handleDragEnd}
-          style={{ x }}
-          className={`w-fit max-w-full rounded-2xl px-4 py-2 cursor-grab active:cursor-grabbing ${
+        {/* Message bubble */}
+        <div
+          className={`w-fit max-w-full rounded-2xl px-4 py-2 ${
             isOwn
               ? "bg-green-100 dark:bg-green-200 text-green-900 dark:text-green-900 rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
@@ -429,7 +382,7 @@ export const MessageBubble = ({
             onClose={() => setShowReactionPicker(false)}
             position={isOwn ? "top" : "top"}
           />
-        </motion.div>
+        </div>
 
         {/* Reactions display */}
         {Object.keys(groupedReactions).length > 0 && (
