@@ -36,7 +36,7 @@ import {
   areFiltersDefault,
   getCSSFilterWithFade,
 } from "@/hooks/useImageFilters";
-import { CropData, getCroppedImg, hasCropData } from "@/hooks/useImageCrop";
+import { CropData, getCroppedImg } from "@/hooks/useImageCrop";
 import { PhotoTagEditor } from "@/components/feed/PhotoTagEditor";
 import { PhotoTag, useCreatePostTags } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +59,7 @@ interface MediaItem {
   filters?: ImageFilters;
   cropData?: CropData;
   croppedUrl?: string;
+  croppedBlob?: Blob;
   tags?: PhotoTag[];
 }
 
@@ -207,17 +208,22 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const uploadAllMedia = async (): Promise<string[]> => {
     const uploadedUrls: string[] = [];
     
-    for (const media of selectedMediaList) {
+    for (let index = 0; index < selectedMediaList.length; index++) {
+      const media = selectedMediaList[index];
       let uploadedUrl: string | null = null;
       
+      // Gerar nome único com timestamp + índice + random
+      const uniqueFileName = `${Date.now()}_${index}_${Math.random().toString(36).substring(7)}`;
+      
       if (media.blob && selectedMediaType === "video") {
-        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
-      } else if (media.isLocal && (media.blob || media.url)) {
+        uploadedUrl = await uploadMedia(media.blob, "post-media", `${uniqueFileName}.webm`);
+      } else if (media.isLocal && (media.blob || media.croppedBlob || media.url)) {
         try {
           let blob: Blob;
           
-          if (hasCropData(media.cropData)) {
-            blob = await getCroppedImg(media.url, media.cropData!.croppedAreaPixels);
+          // Usar o blob recortado se existir, em vez de refazer o crop
+          if (media.croppedBlob) {
+            blob = media.croppedBlob;
           } else if (media.blob) {
             blob = media.blob;
           } else {
@@ -236,7 +242,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           }
           
           const compressed = await compressImage(blob);
-          uploadedUrl = await uploadMedia(compressed, "post-media", `${Date.now()}.jpg`);
+          uploadedUrl = await uploadMedia(compressed, "post-media", `${uniqueFileName}.jpg`);
         } catch (err) {
           console.error("Error processing/uploading image:", err);
         }
@@ -385,7 +391,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         setSelectedMediaList((prev) =>
           prev.map((item, i) =>
             i === editingPhotoIndex 
-              ? { ...item, cropData, croppedUrl } 
+              ? { ...item, cropData, croppedUrl, croppedBlob } 
               : item
           )
         );
