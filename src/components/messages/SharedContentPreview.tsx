@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Image, Play, Star, Loader2 } from "lucide-react";
+import { Play, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
 import { SharedStoryViewer } from "@/components/messages/SharedStoryViewer";
 import { SharedHighlightViewer } from "@/components/messages/SharedHighlightViewer";
@@ -13,6 +14,11 @@ import {
   type SharedHighlight,
 } from "@/hooks/useSharedContentData";
 
+interface SharedContentAuthor {
+  username: string;
+  avatar_url?: string | null;
+}
+
 interface SharedContentData {
   type: "shared_content";
   contentType: "post" | "story" | "highlight";
@@ -20,6 +26,7 @@ interface SharedContentData {
   url: string;
   preview?: string | null;
   title?: string | null;
+  author?: SharedContentAuthor | null;
 }
 
 interface SharedContentPreviewProps {
@@ -27,7 +34,7 @@ interface SharedContentPreviewProps {
   isOwn: boolean;
 }
 
-export const SharedContentPreview = ({ data, isOwn }: SharedContentPreviewProps) => {
+export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Post viewer state
@@ -41,32 +48,6 @@ export const SharedContentPreview = ({ data, isOwn }: SharedContentPreviewProps)
   // Highlight viewer state
   const [highlightViewerOpen, setHighlightViewerOpen] = useState(false);
   const [loadedHighlight, setLoadedHighlight] = useState<SharedHighlight | null>(null);
-
-  const getContentLabel = () => {
-    switch (data.contentType) {
-      case "post":
-        return "Publicação";
-      case "story":
-        return "Replay";
-      case "highlight":
-        return "Destaque";
-      default:
-        return "Conteúdo";
-    }
-  };
-
-  const getContentIcon = () => {
-    switch (data.contentType) {
-      case "post":
-        return Image;
-      case "story":
-        return Play;
-      case "highlight":
-        return Star;
-      default:
-        return Image;
-    }
-  };
 
   const handleClick = async () => {
     if (isLoading) return;
@@ -119,10 +100,14 @@ export const SharedContentPreview = ({ data, isOwn }: SharedContentPreviewProps)
     }
   };
 
-  const ContentIcon = getContentIcon();
+  const author = data.author;
+  const authorInitial = author?.username?.[0]?.toUpperCase() || "?";
+  const isVideoContent = data.contentType === "story";
+
+  // Truncate title to 2 lines worth
   const truncatedTitle = data.title
-    ? data.title.length > 60
-      ? data.title.substring(0, 60) + "..."
+    ? data.title.length > 80
+      ? data.title.substring(0, 80) + "..."
       : data.title
     : null;
 
@@ -131,67 +116,59 @@ export const SharedContentPreview = ({ data, isOwn }: SharedContentPreviewProps)
       <button
         onClick={handleClick}
         disabled={isLoading}
-        className={`w-full rounded-xl overflow-hidden border transition-all hover:opacity-90 active:scale-[0.98] ${
-          isOwn
-            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-            : "bg-background/80 border-border"
-        } ${isLoading ? "opacity-70" : ""}`}
+        className={`w-full max-w-[260px] rounded-lg overflow-hidden bg-muted/50 border border-border/50 transition-all hover:opacity-90 active:scale-[0.98] ${
+          isLoading ? "opacity-70" : ""
+        }`}
       >
-        <div className="flex gap-3 p-2">
-          {/* Thumbnail */}
-          <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-            {isLoading ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <Loader2 className={`w-6 h-6 animate-spin ${isOwn ? "text-green-600" : "text-muted-foreground"}`} />
-              </div>
-            ) : data.preview ? (
-              <img
-                src={data.preview}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ContentIcon className={`w-6 h-6 ${isOwn ? "text-green-600" : "text-muted-foreground"}`} />
-              </div>
-            )}
-            {/* Play overlay for stories */}
-            {data.contentType === "story" && data.preview && !isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <Play className="w-6 h-6 text-white fill-white" />
-              </div>
-            )}
-          </div>
-
-          {/* Content info */}
-          <div className="flex-1 flex flex-col justify-center text-left min-w-0">
-            {/* Label */}
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <ContentIcon className={`w-3.5 h-3.5 ${isOwn ? "text-green-600" : "text-primary"}`} />
-              <span className={`text-xs font-medium uppercase tracking-wide ${
-                isOwn ? "text-green-600" : "text-primary"
-              }`}>
-                {getContentLabel()}
-              </span>
-            </div>
-
-            {/* Title/description */}
-            {truncatedTitle && (
-              <p className={`text-sm leading-tight line-clamp-2 ${
-                isOwn ? "text-green-800 dark:text-green-100" : "text-foreground"
-              }`}>
-                {truncatedTitle}
-              </p>
-            )}
-
-            {/* CTA */}
-            <span className={`text-xs mt-1 ${
-              isOwn ? "text-green-600/80" : "text-muted-foreground"
-            }`}>
-              {isLoading ? "Carregando..." : "Toque para ver →"}
+        {/* Header with author */}
+        {author && (
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-border/30">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={author.avatar_url || undefined} />
+              <AvatarFallback className="text-[10px]">{authorInitial}</AvatarFallback>
+            </Avatar>
+            <span className="text-xs font-medium text-foreground truncate">
+              {author.username}
             </span>
           </div>
+        )}
+        
+        {/* Large thumbnail */}
+        <div className="relative aspect-square w-full bg-muted">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : data.preview ? (
+            <img
+              src={data.preview}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <Play className="w-12 h-12 text-muted-foreground" />
+            </div>
+          )}
+          
+          {/* Play overlay for video content */}
+          {isVideoContent && data.preview && !isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                <Play className="w-7 h-7 text-white fill-white ml-1" />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Caption */}
+        {truncatedTitle && (
+          <div className="px-3 py-2.5">
+            <p className="text-xs text-foreground text-left line-clamp-2 leading-relaxed">
+              {truncatedTitle}
+            </p>
+          </div>
+        )}
       </button>
 
       {/* Post Feed Sheet */}
