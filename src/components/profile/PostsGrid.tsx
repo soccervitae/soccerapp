@@ -3,13 +3,18 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { ProfileFeedSheet } from "./ProfileFeedSheet";
+import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 
 interface Post {
   id: string;
   media_url: string | null;
   media_type: string | null;
   content: string;
+  created_at?: string;
+  user_id?: string;
+  likes_count?: number;
+  comments_count?: number;
+  location_name?: string | null;
 }
 
 interface Championship {
@@ -87,9 +92,8 @@ export const PostsGrid = ({
 }: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
-  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
-  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  const [feedPosts, setFeedPosts] = useState<Post[]>([]);
+  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -122,10 +126,57 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (filteredPosts: Post[], index: number) => {
-    setFeedPosts(filteredPosts);
-    setSelectedPostIndex(index);
-    setFeedSheetOpen(true);
+  const handlePostClick = (post: Post) => {
+    if (!post.media_url) return;
+    setSelectedPost(post);
+    setMediaViewerOpen(true);
+  };
+
+  const getMediaUrls = (post: Post): string[] => {
+    if (!post.media_url) return [];
+    if (post.media_type === "carousel") {
+      try {
+        return JSON.parse(post.media_url);
+      } catch {
+        return [post.media_url];
+      }
+    }
+    return [post.media_url];
+  };
+
+  const transformPostForViewer = (post: Post) => {
+    if (!profile) return null;
+    return {
+      id: post.id,
+      content: post.content,
+      media_url: post.media_url,
+      media_type: post.media_type,
+      created_at: post.created_at || new Date().toISOString(),
+      updated_at: null,
+      user_id: post.user_id || profile.id,
+      likes_count: post.likes_count || 0,
+      comments_count: post.comments_count || 0,
+      location_name: post.location_name || null,
+      location_lat: null,
+      location_lng: null,
+      music_track_id: null,
+      music_start_seconds: null,
+      music_end_seconds: null,
+      music_track: null,
+      profile: {
+        id: profile.id,
+        username: profile.username,
+        full_name: profile.full_name,
+        nickname: null,
+        avatar_url: profile.avatar_url,
+        position: null,
+        team: null,
+        conta_verificada: profile.conta_verificada || false,
+      },
+      liked_by_user: false,
+      saved_by_user: false,
+      recent_likes: [],
+    };
   };
 
   const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
@@ -140,11 +191,11 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post, index) => (
+        {filteredPosts.map((post) => (
           <div 
             key={post.id} 
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onClick={() => handlePostClick(filteredPosts, index)}
+            onClick={() => handlePostClick(post)}
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -159,6 +210,32 @@ export const PostsGrid = ({
                     <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
                   </div>
                 </>
+              ) : post.media_type === "carousel" ? (
+                (() => {
+                  try {
+                    const urls = JSON.parse(post.media_url);
+                    return (
+                      <>
+                        <img 
+                          src={urls[0]} 
+                          alt={post.content}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
+                        </div>
+                      </>
+                    );
+                  } catch {
+                    return (
+                      <img 
+                        src={post.media_url} 
+                        alt={post.content}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    );
+                  }
+                })()
               ) : (
                 <img 
                   src={post.media_url} 
@@ -196,6 +273,8 @@ export const PostsGrid = ({
       </section>
     );
   }
+
+  const viewerPost = selectedPost ? transformPostForViewer(selectedPost) : null;
 
   return (
     <section>
@@ -261,14 +340,18 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Profile Feed Sheet */}
-      {profile && (
-        <ProfileFeedSheet
-          posts={feedPosts}
-          initialPostIndex={selectedPostIndex}
-          isOpen={feedSheetOpen}
-          onClose={() => setFeedSheetOpen(false)}
-          profile={profile}
+      {/* Post Media Viewer - Fullscreen */}
+      {selectedPost && viewerPost && (
+        <PostMediaViewer
+          post={viewerPost}
+          mediaUrls={getMediaUrls(selectedPost)}
+          mediaType={selectedPost.media_type || "image"}
+          initialIndex={0}
+          isOpen={mediaViewerOpen}
+          onClose={() => {
+            setMediaViewerOpen(false);
+            setSelectedPost(null);
+          }}
         />
       )}
     </section>
