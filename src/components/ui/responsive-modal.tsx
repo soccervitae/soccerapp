@@ -34,6 +34,7 @@ interface ResponsiveModalContentProps {
   children: React.ReactNode;
   className?: string;
   useFullHeight?: boolean;
+  overlayClassName?: string;
 }
 
 interface ResponsiveModalHeaderProps {
@@ -84,7 +85,7 @@ export function ResponsiveModal({ open, onOpenChange, children }: ResponsiveModa
   );
 }
 
-export function ResponsiveModalContent({ children, className, useFullHeight = false }: ResponsiveModalContentProps) {
+export function ResponsiveModalContent({ children, className, useFullHeight = false, overlayClassName }: ResponsiveModalContentProps) {
   const { isMobile, isPWA } = React.useContext(ResponsiveModalContext);
 
   // Para sheets com useFullHeight: PWA = 100%, Web = 90vh
@@ -94,6 +95,7 @@ export function ResponsiveModalContent({ children, className, useFullHeight = fa
     return (
       <DrawerContent 
         fullHeight={shouldUseFullHeight}
+        overlayClassName={overlayClassName}
         className={cn(
           "px-4 pb-6",
           useFullHeight && !isPWA && "h-[90vh]",

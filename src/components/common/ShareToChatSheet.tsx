@@ -170,7 +170,7 @@ export const ShareToChatSheet = ({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="bottom" className="z-[70] h-[70vh] flex flex-col rounded-t-2xl">
+      <SheetContent side="bottom" className="z-[70] h-[70vh] flex flex-col rounded-t-2xl" overlayClassName="z-[70]">
         <SheetHeader className="pb-2">
           <SheetTitle>Compartilhar com...</SheetTitle>
         </SheetHeader>

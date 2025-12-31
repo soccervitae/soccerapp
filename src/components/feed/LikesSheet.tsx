@@ -81,7 +81,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-xl">
+      <SheetContent side="bottom" className="h-[70vh] rounded-t-xl z-[70]" overlayClassName="z-[70]">
         <SheetHeader className="border-b border-border pb-3">
           <SheetTitle className="text-center">Aplausos</SheetTitle>
         </SheetHeader>
