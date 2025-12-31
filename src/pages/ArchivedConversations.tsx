@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, MoreVertical, ArchiveRestore, Trash2, Archive } from "lucide-react";
+import { ArrowLeft, MoreVertical, ArchiveRestore, Trash2, Archive, PowerOff } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ const ArchivedConversations = () => {
   const navigate = useNavigate();
   const { conversations, isLoading, unarchiveConversation, deleteConversation } = useArchivedConversations();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   const getInitials = (name: string) => {
@@ -44,6 +45,27 @@ const ArchivedConversations = () => {
 
   const formatTime = (date: string) => {
     return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
+  };
+
+  const getSharedContentLabel = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.type === "shared_content") {
+        switch (parsed.contentType) {
+          case "post":
+            return "📷 Publicação compartilhada";
+          case "story":
+            return "📱 Replay compartilhado";
+          case "highlight":
+            return "⭐ Destaque compartilhado";
+          default:
+            return "📤 Conteúdo compartilhado";
+        }
+      }
+    } catch {
+      return null;
+    }
+    return null;
   };
 
   const handleUnarchive = async (conversationId: string) => {
@@ -60,6 +82,11 @@ const ArchivedConversations = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleDeactivateClick = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    setDeactivateDialogOpen(true);
+  };
+
   const handleDeleteConfirm = async () => {
     if (!selectedConversationId) return;
     
@@ -70,6 +97,19 @@ const ArchivedConversations = () => {
       toast.error("Erro ao apagar conversa");
     }
     setDeleteDialogOpen(false);
+    setSelectedConversationId(null);
+  };
+
+  const handleDeactivateConfirm = async () => {
+    if (!selectedConversationId) return;
+    
+    const success = await deleteConversation(selectedConversationId);
+    if (success) {
+      toast.success("Conversa desativada");
+    } else {
+      toast.error("Erro ao desativar conversa");
+    }
+    setDeactivateDialogOpen(false);
     setSelectedConversationId(null);
   };
 
@@ -146,7 +186,9 @@ const ArchivedConversations = () => {
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground truncate">
-                          {conversation.lastMessage?.content || "Sem mensagens"}
+                          {conversation.lastMessage 
+                            ? (getSharedContentLabel(conversation.lastMessage.content) || conversation.lastMessage.content || "Sem mensagens")
+                            : "Sem mensagens"}
                         </p>
                       </div>
                     </button>
@@ -164,6 +206,13 @@ const ArchivedConversations = () => {
                         >
                           <ArchiveRestore className="h-4 w-4" />
                           Desarquivar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeactivateClick(conversation.id)}
+                          className="gap-2 cursor-pointer text-orange-500 focus:text-orange-500"
+                        >
+                          <PowerOff className="h-4 w-4" />
+                          Desativar conversa
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -199,6 +248,27 @@ const ArchivedConversations = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Deactivate confirmation dialog */}
+      <AlertDialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Desativar conversa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao desativar esta conversa, ela será removida permanentemente e você não receberá mais mensagens desta pessoa.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeactivateConfirm}
+              className="bg-orange-500 text-white hover:bg-orange-600"
+            >
+              Desativar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
