@@ -1,6 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video } from "lucide-react";
+import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { formatDistanceToNow } from "date-fns";
@@ -15,9 +22,11 @@ interface ChatHeaderProps {
   onVideoCall?: () => void;
   onVoiceCall?: () => void;
   isCallActive?: boolean;
+  onArchive?: () => void;
+  onDelete?: () => void;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -75,7 +84,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
         </div>
       </div>
 
-      {/* Call buttons */}
+      {/* Call buttons and menu */}
       <div className="flex items-center gap-1">
         {/* Voice call button */}
         <Button
@@ -98,6 +107,26 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
         >
           <Video className="h-5 w-5" />
         </Button>
+
+        {/* Options menu (3 dots) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-card">
+            <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
+              <Archive className="h-4 w-4" />
+              Arquivar conversa
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+              <Trash2 className="h-4 w-4" />
+              Apagar conversa
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
