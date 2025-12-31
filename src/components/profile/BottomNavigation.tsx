@@ -153,12 +153,14 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
 
       <AddChampionshipSheet 
         open={isChampionshipOpen} 
-        onOpenChange={setIsChampionshipOpen} 
+        onOpenChange={setIsChampionshipOpen}
+        userTeams={userTeams}
       />
 
       <AddAchievementSheet 
         open={isAchievementOpen} 
-        onOpenChange={setIsAchievementOpen} 
+        onOpenChange={setIsAchievementOpen}
+        userTeams={userTeams}
       />
     </>
   );
