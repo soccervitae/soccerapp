@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikePost, type Post } from "@/hooks/usePosts";
 import { usePostLikes } from "@/hooks/usePostLikes";
@@ -37,11 +37,6 @@ export const PostMediaViewer = ({
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const dragY = useMotionValue(0);
-  const dragOpacity = useTransform(dragY, [-200, 0, 200], [0.5, 1, 0.5]);
-  const dragScale = useTransform(dragY, [-200, 0, 200], [0.9, 1, 0.9]);
-  const overlayOpacity = useTransform(dragY, [-200, 0, 200], [0.3, 1, 0.3]);
-
   // Hooks for interactions
   const likePost = useLikePost();
   const { data: likers = [] } = usePostLikes(post.id, isOpen && post.likes_count > 0);
@@ -62,14 +57,6 @@ export const PostMediaViewer = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
-
-  const handleDragEnd = (_: any, info: { velocity: { y: number }; offset: { y: number } }) => {
-    if (Math.abs(info.offset.y) > 100 || Math.abs(info.velocity.y) > 500) {
-      onClose();
-    } else {
-      dragY.set(0);
-    }
-  };
 
   const handleLike = () => {
     if (!user) {
@@ -157,8 +144,6 @@ export const PostMediaViewer = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ opacity: overlayOpacity }}
-              onClick={onClose}
             />
 
             {/* Main container - story style */}
@@ -180,15 +165,6 @@ export const PostMediaViewer = ({
                 mass: 0.8,
                 opacity: { duration: 0.25 },
               }}
-              style={{
-                opacity: dragOpacity,
-                scale: dragScale,
-                y: dragY,
-              }}
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.7}
-              onDragEnd={handleDragEnd}
             >
               {/* Media - fullscreen */}
               <div 
