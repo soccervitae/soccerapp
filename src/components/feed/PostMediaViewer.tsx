@@ -273,9 +273,9 @@ export const PostMediaViewer = ({
             </div>
 
             {/* Interactions Section */}
-            <div className="flex-1 lg:flex-[1] bg-background flex flex-col max-h-[60vh] lg:max-h-full">
+            <div className="flex-1 lg:flex-[1] bg-black flex flex-col max-h-[60vh] lg:max-h-full">
               {/* Header with author info */}
-              <div className="flex items-center gap-3 p-4 border-b border-border">
+              <div className="flex items-center gap-3 p-4 border-b border-white/20">
                 <button
                   onClick={() => handleProfileClick(post.profile.username)}
                   className="flex items-center gap-3 flex-1"
@@ -286,7 +286,7 @@ export const PostMediaViewer = ({
                   </Avatar>
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-sm text-foreground">
+                      <span className="font-semibold text-sm text-white">
                         {post.profile.nickname || post.profile.full_name || post.profile.username}
                       </span>
                       {post.profile.conta_verificada && (
@@ -294,22 +294,22 @@ export const PostMediaViewer = ({
                       )}
                     </div>
                     {post.profile.position && (
-                      <p className="text-xs text-muted-foreground">{post.profile.position}</p>
+                      <p className="text-xs text-white/60">{post.profile.position}</p>
                     )}
                   </div>
                 </button>
-                <span className="text-xs text-muted-foreground">{getTimeAgo(post.created_at)}</span>
+                <span className="text-xs text-white/60">{getTimeAgo(post.created_at)}</span>
               </div>
 
               {/* Caption and location */}
-              <div className="p-4 border-b border-border space-y-2">
-                <p className="text-sm text-foreground">{post.content}</p>
+              <div className="p-4 border-b border-white/20 space-y-2">
+                <p className="text-sm text-white">{post.content}</p>
                 {post.location_name && (
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    className="flex items-center gap-1 text-xs text-white/60 hover:text-primary transition-colors"
                   >
                     <span className="material-symbols-outlined text-[14px]">location_on</span>
                     <span className="truncate">{post.location_name}</span>
@@ -321,7 +321,7 @@ export const PostMediaViewer = ({
               <ScrollArea className="flex-1 min-h-0">
                 <div className="p-4 space-y-4">
                   {comments.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">
+                    <p className="text-sm text-white/60 text-center py-8">
                       Nenhum comentário ainda. Seja o primeiro!
                     </p>
                   ) : (
@@ -337,15 +337,15 @@ export const PostMediaViewer = ({
                           <div className="flex items-baseline gap-2">
                             <button
                               onClick={() => handleProfileClick(comment.profile.username)}
-                              className="font-semibold text-sm text-foreground hover:underline"
+                              className="font-semibold text-sm text-white hover:underline"
                             >
                               {comment.profile.nickname || comment.profile.username}
                             </button>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-white/60">
                               {getTimeAgo(comment.created_at)}
                             </span>
                           </div>
-                          <p className="text-sm text-foreground">{comment.content}</p>
+                          <p className="text-sm text-white">{comment.content}</p>
                         </div>
                       </div>
                     ))
@@ -354,7 +354,7 @@ export const PostMediaViewer = ({
               </ScrollArea>
 
               {/* Actions bar */}
-              <div className="border-t border-border p-4 space-y-3">
+              <div className="border-t border-white/20 p-4 space-y-3">
                 {/* Like count and actions */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -362,7 +362,7 @@ export const PostMediaViewer = ({
                       onClick={handleLike}
                       disabled={likePost.isPending}
                       className={`flex items-center gap-1.5 transition-all active:scale-110 ${
-                        post.liked_by_user ? "text-amber-500" : "text-foreground hover:text-muted-foreground"
+                        post.liked_by_user ? "text-amber-500" : "text-white hover:text-white/60"
                       }`}
                     >
                       <ClappingHandsIcon
@@ -372,7 +372,7 @@ export const PostMediaViewer = ({
                     </button>
                     <button
                       onClick={() => commentInputRef.current?.focus()}
-                      className="text-foreground hover:text-muted-foreground transition-colors"
+                      className="text-white hover:text-white/60 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
                     </button>
@@ -383,7 +383,7 @@ export const PostMediaViewer = ({
                 {post.likes_count > 0 && (
                   <button
                     onClick={() => setShowLikesSheet(!showLikesSheet)}
-                    className="text-sm font-semibold text-foreground hover:underline text-left"
+                    className="text-sm font-semibold text-white hover:underline text-left"
                   >
                     {formatNumber(post.likes_count)} {post.likes_count === 1 ? "aplauso" : "aplausos"}
                   </button>
@@ -391,25 +391,25 @@ export const PostMediaViewer = ({
 
                 {/* Likes list (expanded) */}
                 {showLikesSheet && likes.length > 0 && (
-                  <div className="bg-muted rounded-lg p-3 max-h-32 overflow-y-auto">
+                  <div className="bg-white/10 rounded-lg p-3 max-h-32 overflow-y-auto">
                     <div className="space-y-2">
                       {likes.slice(0, 10).map((like: any) => (
                         <button
                           key={like.user_id}
                           onClick={() => handleProfileClick(like.username)}
-                          className="flex items-center gap-2 w-full hover:bg-background rounded-lg p-1 transition-colors"
+                          className="flex items-center gap-2 w-full hover:bg-white/10 rounded-lg p-1 transition-colors"
                         >
                           <Avatar className="w-6 h-6">
                             <AvatarImage src={like.avatar_url || "/placeholder.svg"} />
                             <AvatarFallback>{like.username[0].toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-medium text-foreground truncate">
+                          <span className="text-sm font-medium text-white truncate">
                             {like.nickname || like.full_name || like.username}
                           </span>
                         </button>
                       ))}
                       {likes.length > 10 && (
-                        <p className="text-xs text-muted-foreground text-center">
+                        <p className="text-xs text-white/60 text-center">
                           e mais {likes.length - 10} pessoas
                         </p>
                       )}
@@ -424,7 +424,7 @@ export const PostMediaViewer = ({
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Adicione um comentário..."
-                    className="flex-1"
+                    className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
