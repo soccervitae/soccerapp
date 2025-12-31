@@ -4,6 +4,7 @@ import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
+import { useStories } from "@/hooks/useStories";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, ResponsiveModalTitle } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { StoryViewer } from "@/components/feed/StoryViewer";
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
@@ -44,6 +46,22 @@ export const ProfileInfo = ({
   const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  // Story viewer state
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
+  
+  // Fetch stories to check if user has active replays
+  const { data: groupedStories } = useStories();
+  const userStoryGroup = groupedStories?.find(g => g.userId === profile.id);
+  const hasActiveStories = !!userStoryGroup && userStoryGroup.stories.length > 0;
+  const hasUnviewedStories = userStoryGroup?.hasNewStory ?? false;
+  
+  const handleStoryClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!hasActiveStories) return;
+    setClickOrigin(e.currentTarget.getBoundingClientRect());
+    setStoryViewerOpen(true);
+  };
   
   // Fetch user teams
   const { data: userTeams = [] } = useUserTeams(profile.id);
@@ -174,7 +192,16 @@ export const ProfileInfo = ({
 
       {/* Profile Picture */}
       <div className="relative -mt-16 z-10">
-        <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary to-emerald-600">
+        <div 
+          className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${
+            hasActiveStories 
+              ? (hasUnviewedStories 
+                  ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer' 
+                  : 'bg-muted-foreground/40 cursor-pointer')
+              : 'bg-gradient-to-tr from-primary to-emerald-600'
+          }`}
+          onClick={handleStoryClick}
+        >
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" />
           ) : (
@@ -402,5 +429,16 @@ export const ProfileInfo = ({
           </div>
         </ResponsiveModalContent>
       </ResponsiveModal>
+
+      {/* Story Viewer */}
+      {groupedStories && hasActiveStories && (
+        <StoryViewer
+          groupedStories={groupedStories}
+          initialGroupIndex={groupedStories.findIndex(g => g.userId === profile.id)}
+          isOpen={storyViewerOpen}
+          onClose={() => setStoryViewerOpen(false)}
+          originRect={clickOrigin}
+        />
+      )}
     </section>;
 };
