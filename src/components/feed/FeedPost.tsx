@@ -321,8 +321,6 @@ export const FeedPost = ({
           <span className="truncate">{post.location_name}</span>
         </a>}
 
-      {/* Music Player */}
-      {post.music_track && <PostMusicPlayer track={post.music_track} startSeconds={post.music_start_seconds ?? 0} endSeconds={post.music_end_seconds ?? post.music_track.duration_seconds} />}
 
       {/* Caption */}
       <div className="px-4 pt-3">
