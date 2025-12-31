@@ -430,7 +430,17 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                           onClick={handleLike}
                           className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"
                         >
-                          <ClappingHandsIcon className="w-6 h-6" filled={isLiked} />
+                          <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                              key={isLiked ? "liked" : "unliked"}
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.8, opacity: 0 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                            >
+                              <ClappingHandsIcon className="w-6 h-6" filled={isLiked} />
+                            </motion.div>
+                          </AnimatePresence>
                         </button>
                         <button 
                           onClick={handleSendMessage}
