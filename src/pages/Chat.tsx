@@ -97,15 +97,39 @@ const Chat = () => {
   // Scroll to bottom on new messages or typing
   useEffect(() => {
     if (messages.length > 0 || isAnyoneTyping) {
-      messagesEndRef.current?.scrollIntoView({ 
-        behavior: isInitialLoad ? "instant" : "smooth" 
-      });
-      
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({ 
+            behavior: isInitialLoad ? "instant" : "smooth" 
+          });
+          
+          if (isInitialLoad) {
+            setIsInitialLoad(false);
+          }
+        });
+      };
+
       if (isInitialLoad) {
-        setIsInitialLoad(false);
+        // Delay maior no carregamento inicial para permitir que mídia carregue
+        setTimeout(scrollToBottom, 100);
+      } else {
+        scrollToBottom();
       }
     }
   }, [messages, isAnyoneTyping, isInitialLoad]);
+
+  // Forçar scroll quando o loading terminar
+  useEffect(() => {
+    if (!isLoading && messages.length > 0 && isInitialLoad) {
+      const timer = setTimeout(() => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+        });
+      }, 150);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, messages.length, isInitialLoad]);
 
   const handleTyping = useCallback(() => {
     startTyping();
