@@ -2,16 +2,15 @@ import { useState } from "react";
 import { Play, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
-import { SharedStoryViewer } from "@/components/messages/SharedStoryViewer";
-import { SharedHighlightViewer } from "@/components/messages/SharedHighlightViewer";
+import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import type { Post } from "@/hooks/usePosts";
 import {
   fetchSharedPost,
   fetchSharedStory,
   fetchSharedHighlight,
-  type SharedPost,
-  type SharedStory,
-  type SharedHighlight,
+  sharedPostToPost,
+  storyToPost,
+  highlightToPost,
 } from "@/hooks/useSharedContentData";
 
 interface SharedContentAuthor {
@@ -37,17 +36,23 @@ interface SharedContentPreviewProps {
 export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
-  // Post viewer state
-  const [postFeedOpen, setPostFeedOpen] = useState(false);
-  const [loadedPost, setLoadedPost] = useState<SharedPost | null>(null);
-  
-  // Story viewer state
-  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
-  const [loadedStory, setLoadedStory] = useState<SharedStory | null>(null);
-  
-  // Highlight viewer state
-  const [highlightViewerOpen, setHighlightViewerOpen] = useState(false);
-  const [loadedHighlight, setLoadedHighlight] = useState<SharedHighlight | null>(null);
+  // Unified viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [postData, setPostData] = useState<Post | null>(null);
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [mediaType, setMediaType] = useState<string | null>(null);
+
+  const parseMediaUrls = (mediaUrl: string | null, type: string | null): string[] => {
+    if (!mediaUrl) return [];
+    if (type === "carousel") {
+      try {
+        return JSON.parse(mediaUrl);
+      } catch {
+        return [mediaUrl];
+      }
+    }
+    return [mediaUrl];
+  };
 
   const handleClick = async () => {
     if (isLoading) return;
@@ -59,8 +64,12 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
         case "post": {
           const post = await fetchSharedPost(data.contentId);
           if (post) {
-            setLoadedPost(post);
-            setPostFeedOpen(true);
+            const postForViewer = sharedPostToPost(post);
+            const urls = parseMediaUrls(post.media_url, post.media_type);
+            setPostData(postForViewer);
+            setMediaUrls(urls);
+            setMediaType(post.media_type);
+            setViewerOpen(true);
           } else {
             toast.error("Publicação não encontrada");
           }
@@ -70,8 +79,10 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
         case "story": {
           const story = await fetchSharedStory(data.contentId);
           if (story) {
-            setLoadedStory(story);
-            setStoryViewerOpen(true);
+            setPostData(storyToPost(story));
+            setMediaUrls([story.media_url]);
+            setMediaType(story.media_type);
+            setViewerOpen(true);
           } else {
             toast.error("Replay não encontrado ou expirado");
           }
@@ -81,8 +92,10 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
         case "highlight": {
           const highlight = await fetchSharedHighlight(data.contentId);
           if (highlight) {
-            setLoadedHighlight(highlight);
-            setHighlightViewerOpen(true);
+            setPostData(highlightToPost(highlight));
+            setMediaUrls(highlight.images.map(img => img.image_url));
+            setMediaType(highlight.images.length > 1 ? "carousel" : (highlight.images[0]?.media_type || "image"));
+            setViewerOpen(true);
           } else {
             toast.error("Destaque não encontrado");
           }
@@ -98,6 +111,13 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseViewer = () => {
+    setViewerOpen(false);
+    setPostData(null);
+    setMediaUrls([]);
+    setMediaType(null);
   };
 
   const author = data.author;
@@ -171,62 +191,14 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
         )}
       </button>
 
-      {/* Post Feed Sheet */}
-      {loadedPost && (
-        <ProfileFeedSheet
-          isOpen={postFeedOpen}
-          onClose={() => {
-            setPostFeedOpen(false);
-            setLoadedPost(null);
-          }}
-          posts={[{
-            id: loadedPost.id,
-            content: loadedPost.content,
-            media_url: loadedPost.media_url,
-            media_type: loadedPost.media_type,
-            created_at: loadedPost.created_at,
-            user_id: loadedPost.user_id,
-            likes_count: loadedPost.likes_count,
-            comments_count: loadedPost.comments_count,
-            location_name: loadedPost.location_name,
-            location_lat: loadedPost.location_lat,
-            location_lng: loadedPost.location_lng,
-            music_track_id: loadedPost.music_track_id,
-            music_start_seconds: loadedPost.music_start_seconds,
-            music_end_seconds: loadedPost.music_end_seconds,
-          }]}
-          initialPostIndex={0}
-          profile={{
-            id: loadedPost.profile.id,
-            username: loadedPost.profile.username,
-            full_name: loadedPost.profile.full_name,
-            avatar_url: loadedPost.profile.avatar_url,
-            conta_verificada: loadedPost.profile.conta_verificada,
-          }}
-        />
-      )}
-
-      {/* Story Viewer */}
-      {loadedStory && (
-        <SharedStoryViewer
-          story={loadedStory}
-          isOpen={storyViewerOpen}
-          onClose={() => {
-            setStoryViewerOpen(false);
-            setLoadedStory(null);
-          }}
-        />
-      )}
-
-      {/* Highlight Viewer */}
-      {loadedHighlight && (
-        <SharedHighlightViewer
-          highlight={loadedHighlight}
-          isOpen={highlightViewerOpen}
-          onClose={() => {
-            setHighlightViewerOpen(false);
-            setLoadedHighlight(null);
-          }}
+      {/* Unified Post Media Viewer */}
+      {postData && (
+        <PostMediaViewer
+          post={postData}
+          mediaUrls={mediaUrls}
+          mediaType={mediaType}
+          isOpen={viewerOpen}
+          onClose={handleCloseViewer}
         />
       )}
     </>
