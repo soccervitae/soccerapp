@@ -96,6 +96,7 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
         ) : (
           championships.map((champ) => {
             const champName = champ.championship?.name || champ.custom_championship_name || "Campeonato";
+            const teamData = userTeams.find(t => t.nome === champ.team_name);
             
             return (
               <div 
@@ -103,16 +104,16 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
                 className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors group"
               >
                 <div className="flex gap-3">
-                  {/* Logo */}
+                  {/* Team Logo */}
                   <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {champ.championship?.logo_url ? (
+                    {teamData?.escudo_url ? (
                       <img 
-                        src={champ.championship.logo_url} 
-                        alt={champName}
+                        src={teamData.escudo_url} 
+                        alt={champ.team_name || "Time"}
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <span className="material-symbols-outlined text-[24px] text-muted-foreground">emoji_events</span>
+                      <span className="material-symbols-outlined text-[24px] text-muted-foreground">shield</span>
                     )}
                   </div>
                   
@@ -120,23 +121,17 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground truncate">{champName}</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{champ.year}</span>
                       {champ.team_name && (
                         <>
-                          <span>•</span>
                           <span className="truncate">{champ.team_name}</span>
+                          <span>•</span>
                         </>
                       )}
+                      <span>{champ.year}</span>
                     </div>
                     
                     {/* Stats */}
                     <div className="flex gap-4 mt-2">
-                      {champ.position_achieved && (
-                        <div className="flex items-center gap-1 text-xs">
-                          <span className="material-symbols-outlined text-[14px] text-primary">military_tech</span>
-                          <span className="text-foreground">{champ.position_achieved}</span>
-                        </div>
-                      )}
                       {champ.games_played !== null && champ.games_played > 0 && (
                         <div className="flex items-center gap-1 text-xs">
                           <span className="material-symbols-outlined text-[14px] text-muted-foreground">sports_soccer</span>
