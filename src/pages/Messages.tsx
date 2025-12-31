@@ -5,16 +5,16 @@ import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
-
 import { OnlineUserAvatar } from "@/components/messages/OnlineUserAvatar";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2, UserPlus, Circle } from "lucide-react";
+import { Search, UserPlus, Circle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { MessagesSkeleton, OnlineUsersSkeleton } from "@/components/skeletons/MessagesSkeleton";
 import type { Database } from "@/integrations/supabase/types";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Messages = () => {
@@ -101,9 +101,14 @@ const Messages = () => {
         </div>
 
         {/* Loading state */}
-        {isLoadingFollowing && <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>}
+        {isLoadingFollowing && (
+          <div className="px-3">
+            <OnlineUsersSkeleton />
+            <div className="mt-4">
+              <MessagesSkeleton />
+            </div>
+          </div>
+        )}
 
         {/* Empty state - não segue ninguém */}
         {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && <div className="flex flex-col items-center justify-center py-8 text-center px-4">

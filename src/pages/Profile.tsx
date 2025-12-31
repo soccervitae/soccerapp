@@ -17,7 +17,7 @@ import {
   useUserHighlights
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -67,13 +67,7 @@ const Profile = () => {
     return (
       <main className="bg-background min-h-screen relative pb-24">
         <div className="pt-16">
-          <Skeleton className="w-full h-32" />
-          <div className="flex flex-col items-center -mt-16 px-4">
-            <Skeleton className="w-28 h-28 rounded-full" />
-            <Skeleton className="h-6 w-40 mt-4" />
-            <Skeleton className="h-4 w-32 mt-2" />
-            <Skeleton className="h-20 w-full mt-4 rounded-xl" />
-          </div>
+          <ProfileSkeleton />
         </div>
         <BottomNavigation activeTab="profile" />
       </main>

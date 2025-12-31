@@ -10,7 +10,7 @@ import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen";
 import { usePosts } from "@/hooks/usePosts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOnboarding } from "@/hooks/useOnboarding";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FeedSkeleton } from "@/components/skeletons/FeedSkeleton";
 
 const Index = () => {
   const { data: posts, isLoading } = usePosts();
@@ -25,21 +25,7 @@ const Index = () => {
   const renderFeed = () => (
     <>
       {isLoading ? (
-        <div className="space-y-4 p-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Skeleton className="w-11 h-11 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
-              </div>
-              <Skeleton className="w-full aspect-square rounded-lg" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ))}
-        </div>
+        <FeedSkeleton />
       ) : posts && posts.length > 0 ? (
         posts.map((post) => <FeedPost key={post.id} post={post} />)
       ) : (

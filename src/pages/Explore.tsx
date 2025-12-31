@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSearchProfiles, useFollowingIds, usePopularProfiles } from "@/hooks/useSearchProfiles";
 import { useFollowUser } from "@/hooks/useProfile";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ExploreSkeleton } from "@/components/skeletons/ExploreSkeleton";
 
 const positions = ["Todos", "Goleiro", "Lateral", "Zagueiro", "Volante", "Meia", "Atacante"];
 
@@ -97,20 +97,7 @@ const Explore = () => {
       <div className="px-4 py-2">
         <div className="flex flex-col gap-2">
           {isLoading ? (
-            // Loading skeletons
-            Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-card border border-border rounded-xl p-3 flex items-center gap-3"
-              >
-                <Skeleton className="w-11 h-11 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-                <Skeleton className="h-7 w-16 rounded-md" />
-              </div>
-            ))
+            <ExploreSkeleton />
           ) : profiles && profiles.length > 0 ? (
             profiles.map((profile) => {
               const isFollowing = followingIds?.has(profile.id) || false;
