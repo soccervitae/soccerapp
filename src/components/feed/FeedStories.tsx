@@ -71,7 +71,7 @@ export const FeedStories = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {/* Add Story Button - Instagram Style */}
           <div className="flex-none w-28 group">
-            <div className={`relative h-44 rounded-lg overflow-hidden shadow-md ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
+            <div className={`relative h-44 rounded-lg overflow-hidden shadow-sm ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
               <div className="w-full h-full bg-muted flex flex-col">
                 {/* User photo area - clickable to view stories */}
                 <div 
@@ -132,7 +132,7 @@ export const FeedStories = () => {
                 className="flex-none w-28 cursor-pointer group"
                 onClick={(e) => handleStoryClick(originalIndex, e)}
               >
-                <div className="relative h-44 rounded-lg overflow-hidden shadow-md">
+                <div className="relative h-44 rounded-lg overflow-hidden shadow-sm">
                   <img
                     src={group.stories[0]?.media_url || "/placeholder.svg"}
                     alt={group.username}
