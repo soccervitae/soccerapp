@@ -354,6 +354,16 @@ export const PostMediaViewer = ({
                       />
                     </button>
 
+                    {/* Likes count - clickable to open sheet */}
+                    {post.likes_count > 0 && (
+                      <button
+                        onClick={() => setShowLikesSheet(true)}
+                        className="text-sm font-medium text-white hover:text-white/80 transition-colors"
+                      >
+                        {formatNumber(post.likes_count)}
+                      </button>
+                    )}
+
                     {/* Comment button */}
                     <button
                       onClick={() => setShowCommentsSheet(true)}
