@@ -15,6 +15,7 @@ import { MessageNotificationProvider } from "@/components/notifications/MessageN
 import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
+import { GlobalOfflineBanner } from "@/components/common/GlobalOfflineBanner";
 import OrientationLock from "@/components/OrientationLock";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -196,6 +197,7 @@ const App = () => {
               <MessageNotificationProvider>
                 <CallNotificationHandler />
                 <ScrollToTop />
+                <GlobalOfflineBanner />
                 <AnimatedRoutes />
               </MessageNotificationProvider>
             </BrowserRouter>
