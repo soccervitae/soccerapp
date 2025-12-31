@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 export const useOfflineSync = () => {
   const { user } = useAuth();
   const [online, setOnline] = useState(isOnline());
+  const previousOnlineStatus = useRef<boolean | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -57,15 +58,24 @@ export const useOfflineSync = () => {
 
   // Listen for online/offline changes
   useEffect(() => {
-    const unsubscribe = onOnlineStatusChange((isOnline) => {
-      setOnline(isOnline);
+    // Initialize previous status on mount
+    previousOnlineStatus.current = isOnline();
+
+    const unsubscribe = onOnlineStatusChange((currentOnline) => {
+      const wasOffline = previousOnlineStatus.current === false;
       
-      if (isOnline) {
+      setOnline(currentOnline);
+      
+      if (currentOnline && wasOffline) {
+        // Only show toast if user was actually offline before
         toast.success('Você está online novamente');
         syncPendingMessages();
-      } else {
+      } else if (!currentOnline) {
         toast.warning('Você está offline. Mensagens serão enviadas quando voltar online.');
       }
+      
+      // Update previous status
+      previousOnlineStatus.current = currentOnline;
     });
 
     return unsubscribe;
