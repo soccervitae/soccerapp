@@ -104,8 +104,8 @@ export const useAddUserToTeam = () => {
       if (!user) throw new Error("User not authenticated");
 
       const { error } = await supabase.rpc("add_user_to_team", {
-        team_id: teamId,
-        user_id: user.id,
+        p_team_id: teamId,
+        p_user_id: user.id,
       });
 
       if (error) throw error;
@@ -126,8 +126,8 @@ export const useRemoveUserFromTeam = () => {
       if (!user) throw new Error("User not authenticated");
 
       const { error } = await supabase.rpc("remove_user_from_team", {
-        team_id: teamId,
-        user_id: user.id,
+        p_team_id: teamId,
+        p_user_id: user.id,
       });
 
       if (error) throw error;
