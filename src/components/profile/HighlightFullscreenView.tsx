@@ -277,7 +277,7 @@ export const HighlightFullscreenView = ({
   // Calculate initial position inside the component to ensure fresh clickOrigin
   const getInitialPosition = () => {
     if (!clickOrigin) {
-      return { opacity: 0, scale: 0.9, borderRadius: "16px" };
+      return { opacity: 0, scale: 0.8, borderRadius: "24px" };
     }
     
     const centerX = window.innerWidth / 2;
@@ -287,10 +287,10 @@ export const HighlightFullscreenView = ({
     
     return {
       opacity: 0,
-      scale: Math.min(clickOrigin.width / window.innerWidth, 0.2),
+      scale: Math.min(clickOrigin.width / window.innerWidth, 0.15),
       x: originCenterX - centerX,
       y: originCenterY - centerY,
-      borderRadius: "16px",
+      borderRadius: "50%",
     };
   };
 
