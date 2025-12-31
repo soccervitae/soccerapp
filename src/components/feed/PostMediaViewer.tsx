@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikePost, type Post } from "@/hooks/usePosts";
+import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LikesSheet } from "@/components/feed/LikesSheet";
 import { CommentsSheet } from "@/components/feed/CommentsSheet";
-
 interface PostMediaViewerProps {
   post: Post;
   mediaUrls: string[];
@@ -44,6 +44,7 @@ export const PostMediaViewer = ({
 
   // Hooks for interactions
   const likePost = useLikePost();
+  const { data: likers = [] } = usePostLikes(post.id, isOpen && post.likes_count > 0);
 
   useEffect(() => {
     if (isOpen) {
@@ -297,6 +298,45 @@ export const PostMediaViewer = ({
                   </a>
                 )}
 
+                {/* Applauded by section */}
+                {post.likes_count > 0 && (
+                  <button
+                    onClick={() => setShowLikesSheet(true)}
+                    className="flex items-center gap-2 text-left"
+                  >
+                    {/* Stacked avatars */}
+                    {likers.length > 0 && (
+                      <div className="flex -space-x-2">
+                        {likers.slice(0, 3).map((liker, index) => (
+                          <Avatar 
+                            key={liker.user_id} 
+                            className="w-5 h-5 border border-black"
+                            style={{ zIndex: 3 - index }}
+                          >
+                            <AvatarImage src={liker.avatar_url || "/placeholder.svg"} />
+                            <AvatarFallback className="text-[8px]">
+                              {liker.username[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    )}
+                    <span className="text-xs text-white/90 drop-shadow-lg">
+                      {likers.length > 0 ? (
+                        <>
+                          Aplaudido por{" "}
+                          <span className="font-semibold">{likers[0]?.username}</span>
+                          {post.likes_count > 1 && (
+                            <> e <span className="font-semibold">outros {post.likes_count - 1}</span></>
+                          )}
+                        </>
+                      ) : (
+                        <span className="font-semibold">{formatNumber(post.likes_count)} aplausos</span>
+                      )}
+                    </span>
+                  </button>
+                )}
+
                 {/* Actions */}
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-4">
@@ -312,11 +352,6 @@ export const PostMediaViewer = ({
                         }`}
                         filled={post.liked_by_user}
                       />
-                      {post.likes_count > 0 && (
-                        <span className="text-sm font-medium text-white">
-                          {formatNumber(post.likes_count)}
-                        </span>
-                      )}
                     </button>
 
                     {/* Comment button */}
