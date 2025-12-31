@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
+import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
+import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,16 +24,24 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPostOpen, setIsPostOpen] = useState(false);
+  const [isReplayOpen, setIsReplayOpen] = useState(false);
+  const [isHighlightOpen, setIsHighlightOpen] = useState(false);
   const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
   const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
 
-  const handleSelectOption = (option: "post" | "times" | "championship" | "achievement") => {
+  const handleSelectOption = (option: "post" | "replay" | "highlight" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
         setIsPostOpen(true);
+        break;
+      case "replay":
+        setIsReplayOpen(true);
+        break;
+      case "highlight":
+        setIsHighlightOpen(true);
         break;
       case "times":
         setIsTimesOpen(true);
@@ -96,6 +106,16 @@ export const BottomNavigation = ({ activeTab }: BottomNavigationProps) => {
       <CreatePostSheet 
         open={isPostOpen} 
         onOpenChange={setIsPostOpen} 
+      />
+
+      <CreateReplaySheet 
+        open={isReplayOpen} 
+        onOpenChange={setIsReplayOpen} 
+      />
+
+      <AddHighlightSheet 
+        open={isHighlightOpen} 
+        onOpenChange={setIsHighlightOpen} 
       />
 
       <TeamSelector 
