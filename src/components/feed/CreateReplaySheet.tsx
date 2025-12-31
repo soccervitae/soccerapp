@@ -27,21 +27,6 @@ interface CreateReplaySheetProps {
 type MediaType = "photo" | "video";
 type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor";
 
-// Fallback gallery images (used when device gallery is not available)
-const fallbackGalleryImages = [
-  "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=400&fit=crop",
-];
 
 export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: CreateReplaySheetProps) => {
   const isMobile = useIsMobile();
@@ -92,13 +77,6 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     }
   }, [deviceGallery, selectedMedia, capturedMedia.length]);
 
-  // Auto-select first fallback image on web
-  useEffect(() => {
-    if (open && !isNative && !isGalleryNative && !selectedMedia && fallbackGalleryImages.length > 0) {
-      setSelectedMedia(fallbackGalleryImages[0]);
-      setSelectedMediaType("photo");
-    }
-  }, [open, isNative, isGalleryNative, selectedMedia]);
 
   useEffect(() => {
     if (error || galleryError) {
@@ -230,20 +208,9 @@ export const CreateReplaySheet = ({ open, onOpenChange, onReplayCreated }: Creat
     type: (item.type === "video" ? "video" : "photo") as MediaType
   }));
 
-  // Only show fallback images on web (not on native mobile devices)
-  const fallbackMedia = (!isNative && !isGalleryNative) || (!isNative && deviceGallery.length === 0)
-    ? fallbackGalleryImages.map((url, index) => ({ 
-        url, 
-        originalPath: url,
-        id: `fallback-${index}`,
-        type: (index % 4 === 2 ? "video" : "photo") as MediaType 
-      }))
-    : [];
-
   const allMedia = [
     ...capturedMedia.map(m => ({ ...m, originalPath: m.url, id: `captured-${m.url}` })),
     ...deviceGalleryMedia,
-    ...fallbackMedia
   ];
 
   const filteredMedia = allMedia.filter(media => {
