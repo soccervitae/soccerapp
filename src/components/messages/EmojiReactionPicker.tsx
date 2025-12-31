@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RedCardAnimation } from "./RedCardAnimation";
+import { GoalAnimation } from "./GoalAnimation";
 
 const REACTION_EMOJIS = ["⚽", "🥅", "🏆", "🔥", "👏", "💪", "🟨", "🟥"];
 
@@ -18,12 +19,17 @@ export const EmojiReactionPicker = ({
   position = "top",
 }: EmojiReactionPickerProps) => {
   const [showRedCardAnimation, setShowRedCardAnimation] = useState(false);
+  const [showGoalAnimation, setShowGoalAnimation] = useState(false);
   const [pendingEmoji, setPendingEmoji] = useState<string | null>(null);
 
   const handleEmojiClick = (emoji: string) => {
     if (emoji === "🟥") {
       setPendingEmoji(emoji);
       setShowRedCardAnimation(true);
+      onClose();
+    } else if (emoji === "🥅") {
+      setPendingEmoji(emoji);
+      setShowGoalAnimation(true);
       onClose();
     } else {
       onSelect(emoji);
@@ -33,6 +39,7 @@ export const EmojiReactionPicker = ({
 
   const handleAnimationComplete = () => {
     setShowRedCardAnimation(false);
+    setShowGoalAnimation(false);
     if (pendingEmoji) {
       onSelect(pendingEmoji);
       setPendingEmoji(null);
@@ -44,6 +51,10 @@ export const EmojiReactionPicker = ({
       <RedCardAnimation 
         isVisible={showRedCardAnimation} 
         onComplete={handleAnimationComplete} 
+      />
+      <GoalAnimation
+        isVisible={showGoalAnimation}
+        onComplete={handleAnimationComplete}
       />
       
       <AnimatePresence>
