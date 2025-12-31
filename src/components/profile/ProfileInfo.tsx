@@ -333,7 +333,7 @@ export const ProfileInfo = ({
                 </DropdownMenuContent>
               </DropdownMenu>}
           </> : <>
-            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-300 flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-primary/10 text-primary border border-primary hover:bg-primary/20" : "bg-primary hover:bg-primary-dark text-primary-foreground"}`}>
+            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-primary/10 text-primary border border-primary hover:bg-primary/15 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
               <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} style={{
             fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
           }}>
@@ -341,8 +341,8 @@ export const ProfileInfo = ({
               </span>
               {isCheering ? "Torcendo" : "Torcer"}
             </button>
-            <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background hover:bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 disabled:opacity-50">
-              {isStartingChat ? <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> : <span className="material-symbols-outlined text-[16px]">chat</span>}
+            <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center gap-1.5 disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
+              <span className="material-symbols-outlined text-[16px]">chat</span>
               Mensagem
             </button>
           </>}
