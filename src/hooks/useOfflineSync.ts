@@ -70,9 +70,8 @@ export const useOfflineSync = () => {
         // Only show toast if user was actually offline before
         toast.success('Você está online novamente');
         syncPendingMessages();
-      } else if (!currentOnline) {
-        toast.warning('Você está offline. Mensagens serão enviadas quando voltar online.');
       }
+      // Removed offline toast - now using GlobalOfflineBanner instead
       
       // Update previous status
       previousOnlineStatus.current = currentOnline;
