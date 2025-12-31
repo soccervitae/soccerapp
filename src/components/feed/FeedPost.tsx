@@ -475,7 +475,7 @@ export const FeedPost = ({
       <LikesSheet postId={post.id} open={isLikesSheetOpen} onOpenChange={setIsLikesSheetOpen} />
 
       {/* Media Viewer */}
-      <PostMediaViewer mediaUrls={mediaUrls} mediaType={post.media_type} initialIndex={selectedMediaIndex} isOpen={mediaViewerOpen} onClose={() => setMediaViewerOpen(false)} originRect={clickOrigin} />
+      <PostMediaViewer post={post} mediaUrls={mediaUrls} mediaType={post.media_type} initialIndex={selectedMediaIndex} isOpen={mediaViewerOpen} onClose={() => setMediaViewerOpen(false)} originRect={clickOrigin} />
 
       {/* Share to Chat Sheet */}
       <ShareToChatSheet

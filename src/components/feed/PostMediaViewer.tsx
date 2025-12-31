@@ -1,5 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLikePost, type Post } from "@/hooks/usePosts";
+import { usePostComments, useCreateComment } from "@/hooks/usePosts";
+import { usePostLikes } from "@/hooks/usePostLikes";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +18,7 @@ import {
 } from "@/components/ui/carousel";
 
 interface PostMediaViewerProps {
+  post: Post;
   mediaUrls: string[];
   mediaType: string | null;
   initialIndex?: number;
@@ -17,6 +28,7 @@ interface PostMediaViewerProps {
 }
 
 export const PostMediaViewer = ({
+  post,
   mediaUrls,
   mediaType,
   initialIndex = 0,
@@ -24,13 +36,25 @@ export const PostMediaViewer = ({
   onClose,
   originRect,
 }: PostMediaViewerProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [newComment, setNewComment] = useState("");
+  const [showLikesSheet, setShowLikesSheet] = useState(false);
+  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
   const dragY = useMotionValue(0);
   const dragOpacity = useTransform(dragY, [-200, 0, 200], [0.5, 1, 0.5]);
   const dragScale = useTransform(dragY, [-200, 0, 200], [0.9, 1, 0.9]);
   const overlayOpacity = useTransform(dragY, [-200, 0, 200], [0.3, 1, 0.3]);
+
+  // Hooks for interactions
+  const likePost = useLikePost();
+  const { data: comments = [], refetch: refetchComments } = usePostComments(post.id);
+  const createComment = useCreateComment();
+  const { data: likes = [] } = usePostLikes(post.id, showLikesSheet);
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -50,13 +74,14 @@ export const PostMediaViewer = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      refetchComments();
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, refetchComments]);
 
   const handleDragEnd = (_: any, info: { velocity: { y: number }; offset: { y: number } }) => {
     if (Math.abs(info.offset.y) > 100 || Math.abs(info.velocity.y) > 500) {
@@ -64,6 +89,37 @@ export const PostMediaViewer = ({
     } else {
       dragY.set(0);
     }
+  };
+
+  const handleLike = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setIsLikeAnimating(true);
+    setTimeout(() => setIsLikeAnimating(false), 300);
+    likePost.mutate({
+      postId: post.id,
+      isLiked: post.liked_by_user,
+    });
+  };
+
+  const handleSubmitComment = () => {
+    if (!newComment.trim() || !user) return;
+    createComment.mutate(
+      { postId: post.id, content: newComment.trim() },
+      {
+        onSuccess: () => {
+          setNewComment("");
+          refetchComments();
+        },
+      }
+    );
+  };
+
+  const handleProfileClick = (username: string) => {
+    onClose();
+    navigate(`/${username}`);
   };
 
   const getInitialPosition = () => {
@@ -85,13 +141,31 @@ export const PostMediaViewer = ({
     };
   };
 
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffInSeconds < 60) return "agora";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} h`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} d`;
+    return date.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1).replace(".0", "") + "k";
+    }
+    return num.toString();
+  };
+
   const isCarousel = mediaUrls.length > 1;
   const isVideo = mediaType === "video";
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] flex">
           {/* Overlay */}
           <motion.div
             className="absolute inset-0 bg-black"
@@ -102,9 +176,9 @@ export const PostMediaViewer = ({
             onClick={onClose}
           />
 
-          {/* Content */}
+          {/* Content - Desktop side-by-side, Mobile stacked */}
           <motion.div
-            className="relative w-full h-full flex items-center justify-center pointer-events-none"
+            className="relative w-full h-full flex flex-col lg:flex-row"
             initial={getInitialPosition()}
             animate={{
               opacity: 1,
@@ -131,19 +205,20 @@ export const PostMediaViewer = ({
             dragElastic={0.7}
             onDragEnd={handleDragEnd}
           >
-            <div className="w-full h-full max-w-3xl max-h-[90vh] pointer-events-auto overflow-hidden">
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-50 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
 
+            {/* Media Section */}
+            <div className="flex-1 lg:flex-[2] flex items-center justify-center bg-black relative min-h-[40vh] lg:min-h-full">
               {isVideo ? (
                 <video
                   src={mediaUrls[0]}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain max-h-[60vh] lg:max-h-full"
                   controls
                   autoPlay
                   playsInline
@@ -161,7 +236,7 @@ export const PostMediaViewer = ({
                           <img
                             src={url}
                             alt={`Foto ${index + 1}`}
-                            className="max-w-full max-h-full object-contain"
+                            className="max-w-full max-h-[60vh] lg:max-h-full object-contain"
                           />
                         </CarouselItem>
                       ))}
@@ -169,36 +244,203 @@ export const PostMediaViewer = ({
                   </Carousel>
 
                   {/* Counter */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full">
+                  <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full">
                     <span className="text-sm font-medium text-white">
                       {currentIndex + 1}/{mediaUrls.length}
                     </span>
                   </div>
 
                   {/* Indicators */}
-                  <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
                     {mediaUrls.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => carouselApi?.scrollTo(index)}
                         className={`w-2 h-2 rounded-full transition-all ${
-                          index === currentIndex
-                            ? "bg-white w-6"
-                            : "bg-white/50"
+                          index === currentIndex ? "bg-white w-6" : "bg-white/50"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <img
-                    src={mediaUrls[0]}
-                    alt="Post"
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
+                <img
+                  src={mediaUrls[0]}
+                  alt="Post"
+                  className="max-w-full max-h-[60vh] lg:max-h-full object-contain"
+                />
               )}
+            </div>
+
+            {/* Interactions Section */}
+            <div className="flex-1 lg:flex-[1] bg-background flex flex-col max-h-[60vh] lg:max-h-full">
+              {/* Header with author info */}
+              <div className="flex items-center gap-3 p-4 border-b border-border">
+                <button
+                  onClick={() => handleProfileClick(post.profile.username)}
+                  className="flex items-center gap-3 flex-1"
+                >
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={post.profile.avatar_url || "/placeholder.svg"} />
+                    <AvatarFallback>{post.profile.username[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold text-sm text-foreground">
+                        {post.profile.nickname || post.profile.full_name || post.profile.username}
+                      </span>
+                      {post.profile.conta_verificada && (
+                        <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
+                      )}
+                    </div>
+                    {post.profile.position && (
+                      <p className="text-xs text-muted-foreground">{post.profile.position}</p>
+                    )}
+                  </div>
+                </button>
+                <span className="text-xs text-muted-foreground">{getTimeAgo(post.created_at)}</span>
+              </div>
+
+              {/* Caption and location */}
+              <div className="p-4 border-b border-border space-y-2">
+                <p className="text-sm text-foreground">{post.content}</p>
+                {post.location_name && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">location_on</span>
+                    <span className="truncate">{post.location_name}</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Comments List */}
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-4 space-y-4">
+                  {comments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Nenhum comentário ainda. Seja o primeiro!
+                    </p>
+                  ) : (
+                    comments.map((comment: any) => (
+                      <div key={comment.id} className="flex gap-3">
+                        <button onClick={() => handleProfileClick(comment.profile.username)}>
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={comment.profile.avatar_url || "/placeholder.svg"} />
+                            <AvatarFallback>{comment.profile.username[0].toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </button>
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2">
+                            <button
+                              onClick={() => handleProfileClick(comment.profile.username)}
+                              className="font-semibold text-sm text-foreground hover:underline"
+                            >
+                              {comment.profile.nickname || comment.profile.username}
+                            </button>
+                            <span className="text-xs text-muted-foreground">
+                              {getTimeAgo(comment.created_at)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Actions bar */}
+              <div className="border-t border-border p-4 space-y-3">
+                {/* Like count and actions */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleLike}
+                      disabled={likePost.isPending}
+                      className={`flex items-center gap-1.5 transition-all active:scale-110 ${
+                        post.liked_by_user ? "text-amber-500" : "text-foreground hover:text-muted-foreground"
+                      }`}
+                    >
+                      <ClappingHandsIcon
+                        className={`w-6 h-6 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
+                        filled={post.liked_by_user}
+                      />
+                    </button>
+                    <button
+                      onClick={() => commentInputRef.current?.focus()}
+                      className="text-foreground hover:text-muted-foreground transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Like count text */}
+                {post.likes_count > 0 && (
+                  <button
+                    onClick={() => setShowLikesSheet(!showLikesSheet)}
+                    className="text-sm font-semibold text-foreground hover:underline text-left"
+                  >
+                    {formatNumber(post.likes_count)} {post.likes_count === 1 ? "aplauso" : "aplausos"}
+                  </button>
+                )}
+
+                {/* Likes list (expanded) */}
+                {showLikesSheet && likes.length > 0 && (
+                  <div className="bg-muted rounded-lg p-3 max-h-32 overflow-y-auto">
+                    <div className="space-y-2">
+                      {likes.slice(0, 10).map((like: any) => (
+                        <button
+                          key={like.user_id}
+                          onClick={() => handleProfileClick(like.username)}
+                          className="flex items-center gap-2 w-full hover:bg-background rounded-lg p-1 transition-colors"
+                        >
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={like.avatar_url || "/placeholder.svg"} />
+                            <AvatarFallback>{like.username[0].toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground truncate">
+                            {like.nickname || like.full_name || like.username}
+                          </span>
+                        </button>
+                      ))}
+                      {likes.length > 10 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          e mais {likes.length - 10} pessoas
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Comment input */}
+                <div className="flex gap-2">
+                  <Input
+                    ref={commentInputRef}
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Adicione um comentário..."
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmitComment();
+                      }
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitComment}
+                    disabled={!newComment.trim() || createComment.isPending}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">send</span>
+                  </Button>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
