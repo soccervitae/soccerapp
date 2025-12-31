@@ -572,9 +572,19 @@ export const HighlightFullscreenView = ({
                         disabled={toggleLike.isPending}
                         className="flex items-center justify-center w-10 h-10 text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
                       >
-                        <Heart 
-                          className={`w-6 h-6 transition-colors ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'}`}
-                        />
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={isLiked ? "liked" : "unliked"}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
+                          >
+                            <Heart 
+                              className={`w-6 h-6 transition-colors ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'}`}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
                       </button>
                     </div>
                   )}
