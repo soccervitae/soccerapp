@@ -306,18 +306,14 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     <p className="text-sm mt-1">Tente buscar por outro nome</p>
                   </div>
                 ) : (
-                  teams.map((team) => {
-                    const isSelected = selectedTeamIds.includes(team.id);
-                    return (
+                  teams
+                    .filter((team) => !selectedTeamIds.includes(team.id))
+                    .map((team) => (
                       <button
                         key={team.id}
                         onClick={() => handleTeamToggle(team)}
                         disabled={isPending}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
-                          isSelected
-                            ? "bg-primary/10 border border-primary"
-                            : "bg-card border border-border hover:bg-muted"
-                        } disabled:opacity-50`}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left bg-card border border-border hover:bg-muted disabled:opacity-50"
                       >
                         {/* Team Logo */}
                         <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -341,16 +337,8 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                             {[team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
                           </p>
                         </div>
-
-                        {/* Selected indicator */}
-                        {isSelected && (
-                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                            <Check className="w-4 h-4 text-primary-foreground" />
-                          </div>
-                        )}
                       </button>
-                    );
-                  })
+                    ))
                 )}
               </div>
             </ScrollArea>
