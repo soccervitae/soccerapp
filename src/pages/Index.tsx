@@ -12,12 +12,16 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { FeedSkeleton } from "@/components/skeletons/FeedSkeleton";
 import { RefetchOverlay } from "@/components/common/RefetchOverlay";
+import { OfflineCacheIndicator } from "@/components/common/OfflineCacheIndicator";
+import { getPostsCacheTimestamp } from "@/lib/offlineStorage";
+import { AnimatePresence } from "framer-motion";
 
 const Index = () => {
-  const { data: posts, isLoading, isFetching, refetch } = usePosts();
+  const { data: posts, isLoading, isFetching, isFromCache } = usePosts();
   const isRefetching = isFetching && !isLoading;
   const isMobile = useIsMobile();
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
+  const cacheTimestamp = isFromCache ? getPostsCacheTimestamp() : null;
 
   // Show onboarding for first-time users
   if (!onboardingLoading && showOnboarding) {
@@ -53,6 +57,9 @@ const Index = () => {
         <RefetchOverlay isRefetching={isRefetching} />
         <FeedHeader />
         <main className="pt-16">
+          <AnimatePresence>
+            {isFromCache && <OfflineCacheIndicator lastUpdated={cacheTimestamp} />}
+          </AnimatePresence>
           <FeedStories />
           {renderFeed()}
         </main>
@@ -69,6 +76,9 @@ const Index = () => {
         <DesktopSidebar />
         <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
           <div className="max-w-2xl mx-auto">
+            <AnimatePresence>
+              {isFromCache && <OfflineCacheIndicator lastUpdated={cacheTimestamp} />}
+            </AnimatePresence>
             <FeedStories />
             <CreatePostInline />
             {renderFeed()}

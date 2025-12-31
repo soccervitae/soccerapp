@@ -179,11 +179,21 @@ export const usePosts = () => {
   // Cache posts when they're fetched successfully
   useEffect(() => {
     if (query.data && query.data.length > 0 && isOnline()) {
-      cachePosts(query.data).catch(console.error);
+      import('@/lib/offlineStorage').then(({ setPostsCacheTimestamp }) => {
+        cachePosts(query.data).then(() => {
+          setPostsCacheTimestamp();
+        }).catch(console.error);
+      });
     }
   }, [query.data]);
 
-  return query;
+  // Determine if data is from cache (offline with data)
+  const isFromCache = !isOnline() && !!query.data && query.data.length > 0;
+
+  return {
+    ...query,
+    isFromCache,
+  };
 };
 
 export const useCreatePost = () => {
