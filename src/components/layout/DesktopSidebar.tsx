@@ -158,7 +158,7 @@ export const DesktopSidebar = () => {
         highlight={selectedHighlightToEdit}
       />
       <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
-      <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} />
-      <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} />
+      <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} userTeams={userTeams} />
+      <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} userTeams={userTeams} />
     </>;
 };

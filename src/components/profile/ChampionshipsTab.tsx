@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { useDeleteChampionship } from "@/hooks/useProfile";
+import { useUserTeams } from "@/hooks/useTeams";
+import { useAuth } from "@/contexts/AuthContext";
 import { AddChampionshipSheet } from "./AddChampionshipSheet";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
+import {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+  ResponsiveModalDescription,
+} from "@/components/ui/responsive-modal";
+import { Button } from "@/components/ui/button";
 
 interface Championship {
   id: string;
@@ -25,8 +35,20 @@ interface ChampionshipsTabProps {
 
 export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfile = false }: ChampionshipsTabProps) => {
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showNoTeamsSheet, setShowNoTeamsSheet] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  
+  const { user } = useAuth();
+  const { data: userTeams = [] } = useUserTeams(user?.id);
   const deleteChampionship = useDeleteChampionship();
+
+  const handleAddClick = () => {
+    if (userTeams.length === 0) {
+      setShowNoTeamsSheet(true);
+    } else {
+      setShowAddSheet(true);
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -58,7 +80,7 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
         {/* Add button for own profile */}
         {isOwnProfile && (
           <button
-            onClick={() => setShowAddSheet(true)}
+            onClick={handleAddClick}
             className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
             <span className="material-symbols-outlined">add</span>
@@ -147,7 +169,34 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
       </div>
 
       {/* Add Sheet */}
-      <AddChampionshipSheet open={showAddSheet} onOpenChange={setShowAddSheet} />
+      <AddChampionshipSheet 
+        open={showAddSheet} 
+        onOpenChange={setShowAddSheet} 
+        userTeams={userTeams}
+      />
+
+      {/* No Teams Warning Sheet */}
+      <ResponsiveModal open={showNoTeamsSheet} onOpenChange={setShowNoTeamsSheet}>
+        <ResponsiveModalContent className="sm:max-w-sm">
+          <ResponsiveModalHeader className="pb-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-[32px] text-muted-foreground">shield</span>
+            </div>
+            <ResponsiveModalTitle className="text-center">
+              Adicione um time primeiro
+            </ResponsiveModalTitle>
+            <ResponsiveModalDescription className="text-center">
+              Para adicionar um campeonato, você precisa ter pelo menos um time no seu perfil. Vá até a aba "Times" e adicione um time.
+            </ResponsiveModalDescription>
+          </ResponsiveModalHeader>
+          <Button 
+            className="w-full" 
+            onClick={() => setShowNoTeamsSheet(false)}
+          >
+            Entendi
+          </Button>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
 
       {/* Delete Confirmation - Responsive */}
       <ResponsiveAlertModal

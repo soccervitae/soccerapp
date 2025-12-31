@@ -16,11 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddChampionship } from "@/hooks/useProfile";
+import { useUserTeams, type Team } from "@/hooks/useTeams";
+import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AddChampionshipSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userTeams: Team[];
 }
 
 const currentYear = new Date().getFullYear();
@@ -37,7 +40,7 @@ const positions = [
   "Fase de Grupos",
 ];
 
-export const AddChampionshipSheet = ({ open, onOpenChange }: AddChampionshipSheetProps) => {
+export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChampionshipSheetProps) => {
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
   const [team, setTeam] = useState("");
@@ -55,7 +58,7 @@ export const AddChampionshipSheet = ({ open, onOpenChange }: AddChampionshipShee
     await addChampionship.mutateAsync({
       custom_championship_name: name.trim(),
       year: parseInt(year),
-      team_name: team.trim() || undefined,
+      team_name: team || undefined,
       position_achieved: position || undefined,
       games_played: games ? parseInt(games) : undefined,
       goals_scored: goals ? parseInt(goals) : undefined,
@@ -129,13 +132,26 @@ export const AddChampionshipSheet = ({ open, onOpenChange }: AddChampionshipShee
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="team">Time</Label>
-              <Input
-                id="team"
-                placeholder="Ex: Flamengo"
-                value={team}
-                onChange={(e) => setTeam(e.target.value)}
-              />
+              <Label htmlFor="team">Time *</Label>
+              <Select value={team} onValueChange={setTeam}>
+                <SelectTrigger id="team">
+                  <SelectValue placeholder="Selecione o time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {userTeams.map((t) => (
+                    <SelectItem key={t.id} value={t.nome}>
+                      <span className="flex items-center gap-2">
+                        {t.escudo_url ? (
+                          <img src={t.escudo_url} alt={t.nome} className="w-5 h-5 object-contain" />
+                        ) : (
+                          <span className="material-symbols-outlined text-[16px] text-muted-foreground">shield</span>
+                        )}
+                        {t.nome}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
