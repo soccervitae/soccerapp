@@ -9,46 +9,34 @@ export const ClappingHandsIcon = forwardRef<SVGSVGElement, ClappingHandsIconProp
     return (
       <svg
         ref={ref}
-        viewBox="0 0 64 64"
+        viewBox="0 0 24 24"
         fill={filled ? "currentColor" : "none"}
         stroke="currentColor"
-        strokeWidth="2.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
       >
-        {/* Left hand - palm and fingers */}
-        <path d="M22 52 C18 48 14 42 12 36 C10 30 12 26 16 24 L18 22 C16 18 16 14 18 12 C20 10 24 10 26 14 L28 18" />
-        <path d="M26 14 C24 10 26 6 30 6 C34 6 36 10 34 14 L32 20" />
-        <path d="M34 14 C34 10 38 8 42 10 C44 12 44 16 42 20 L38 26" />
+        {/* Left hand */}
+        <path d="M7 20c-1.5-1.5-3-4-3.5-6.5-.4-2 .3-3.5 1.8-4.2l.7-.3c-.3-1.2-.1-2.3.6-3 .8-.8 2-.8 2.8 0l1 1.2" />
+        <path d="M8.5 7c-.3-1 .1-2 1-2.5.9-.4 2-.1 2.5.8l.8 1.5" />
+        <path d="M12.5 6.5c.2-1 1-1.7 2-1.5 1 .2 1.6 1 1.4 2l-.4 1.5" />
         
-        {/* Right hand - overlapping */}
-        <path d="M42 52 C46 48 50 42 52 36 C54 30 52 26 48 24 L46 22 C48 18 48 14 46 12 C44 10 40 10 38 14" />
-        <path d="M38 14 C40 10 38 6 34 6" />
+        {/* Right hand */}
+        <path d="M17 20c1.5-1.5 3-4 3.5-6.5.4-2-.3-3.5-1.8-4.2l-.7-.3c.3-1.2.1-2.3-.6-3-.8-.8-2-.8-2.8 0l-1 1.2" />
         
-        {/* Hands meeting point */}
-        <path d="M28 28 C30 30 34 30 36 28" />
-        <path d="M24 34 C28 38 36 38 40 34" />
+        {/* Fingers connection */}
+        <path d="M9.5 12c.8.8 2.2 1 3.5.8 1.3-.2 2.3-.8 3-1.5" />
+        <path d="M8 15c1.2 1 3 1.5 4.5 1.2 1.5-.3 2.8-1.2 3.5-2.2" />
         
-        {/* Wrists/arms */}
-        <path d="M22 52 L18 58 C16 60 18 62 22 60" />
-        <path d="M42 52 L46 58 C48 60 46 62 42 60" />
-        
-        {/* Impact lines - left side */}
-        <line x1="8" y1="18" x2="14" y2="22" />
-        <line x1="4" y1="26" x2="10" y2="28" />
-        <line x1="6" y1="34" x2="12" y2="34" />
-        
-        {/* Impact lines - right side */}
-        <line x1="56" y1="18" x2="50" y2="22" />
-        <line x1="60" y1="26" x2="54" y2="28" />
-        <line x1="58" y1="34" x2="52" y2="34" />
-        
-        {/* Top impact lines */}
-        <line x1="28" y1="2" x2="30" y2="8" />
-        <line x1="36" y1="2" x2="34" y2="8" />
-        <line x1="32" y1="0" x2="32" y2="6" />
+        {/* Impact lines */}
+        <line x1="3" y1="6" x2="5" y2="7.5" />
+        <line x1="2" y1="10" x2="4.5" y2="10.5" />
+        <line x1="21" y1="6" x2="19" y2="7.5" />
+        <line x1="22" y1="10" x2="19.5" y2="10.5" />
+        <line x1="11" y1="2" x2="11.5" y2="4" />
+        <line x1="13" y1="2" x2="12.5" y2="4" />
       </svg>
     );
   }
