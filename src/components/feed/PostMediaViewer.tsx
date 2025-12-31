@@ -3,16 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikePost, type Post } from "@/hooks/usePosts";
-import { usePostComments, useCreateComment } from "@/hooks/usePosts";
-import { usePostLikes } from "@/hooks/usePostLikes";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { LikesSheet } from "@/components/feed/LikesSheet";
+import { CommentsSheet } from "@/components/feed/CommentsSheet";
 
 interface PostMediaViewerProps {
   post: Post;
@@ -37,11 +32,9 @@ export const PostMediaViewer = ({
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [newComment, setNewComment] = useState("");
   const [showLikesSheet, setShowLikesSheet] = useState(false);
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
-  const commentInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const dragY = useMotionValue(0);
@@ -51,9 +44,6 @@ export const PostMediaViewer = ({
 
   // Hooks for interactions
   const likePost = useLikePost();
-  const { data: comments = [], refetch: refetchComments } = usePostComments(post.id);
-  const createComment = useCreateComment();
-  const { data: likes = [] } = usePostLikes(post.id, showLikesSheet);
 
   useEffect(() => {
     if (isOpen) {
@@ -64,14 +54,13 @@ export const PostMediaViewer = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      refetchComments();
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, refetchComments]);
+  }, [isOpen]);
 
   const handleDragEnd = (_: any, info: { velocity: { y: number }; offset: { y: number } }) => {
     if (Math.abs(info.offset.y) > 100 || Math.abs(info.velocity.y) > 500) {
@@ -92,19 +81,6 @@ export const PostMediaViewer = ({
       postId: post.id,
       isLiked: post.liked_by_user,
     });
-  };
-
-  const handleSubmitComment = () => {
-    if (!newComment.trim() || !user) return;
-    createComment.mutate(
-      { postId: post.id, content: newComment.trim() },
-      {
-        onSuccess: () => {
-          setNewComment("");
-          refetchComments();
-        },
-      }
-    );
   };
 
   const handleProfileClick = (username: string) => {
@@ -168,70 +144,6 @@ export const PostMediaViewer = ({
   const isCarousel = mediaUrls.length > 1;
   const isVideo = mediaType === "video";
 
-  const CommentsContent = () => (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
-          {comments.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhum comentário ainda. Seja o primeiro!
-            </p>
-          ) : (
-            comments.map((comment: any) => (
-              <div key={comment.id} className="flex gap-3">
-                <button onClick={() => handleProfileClick(comment.profile.username)}>
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={comment.profile.avatar_url || "/placeholder.svg"} />
-                    <AvatarFallback>{comment.profile.username[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                </button>
-                <div className="flex-1">
-                  <div className="flex items-baseline gap-2">
-                    <button
-                      onClick={() => handleProfileClick(comment.profile.username)}
-                      className="font-semibold text-sm hover:underline"
-                    >
-                      {comment.profile.nickname || comment.profile.username}
-                    </button>
-                    <span className="text-xs text-muted-foreground">
-                      {getTimeAgo(comment.created_at)}
-                    </span>
-                  </div>
-                  <p className="text-sm">{comment.content}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </ScrollArea>
-
-      {/* Comment input */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Input
-            ref={commentInputRef}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Adicione um comentário..."
-            className="flex-1"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmitComment();
-              }
-            }}
-          />
-          <Button
-            size="sm"
-            onClick={handleSubmitComment}
-            disabled={!newComment.trim() || createComment.isPending}
-          >
-            <span className="material-symbols-outlined text-[20px]">send</span>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <>
@@ -427,28 +339,19 @@ export const PostMediaViewer = ({
         )}
       </AnimatePresence>
 
-      {/* Comments Sheet/Dialog */}
-      {isMobile ? (
-        <Drawer open={showCommentsSheet} onOpenChange={setShowCommentsSheet}>
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader>
-              <DrawerTitle>Comentários</DrawerTitle>
-            </DrawerHeader>
-            <CommentsContent />
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={showCommentsSheet} onOpenChange={setShowCommentsSheet}>
-          <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Comentários</DialogTitle>
-            </DialogHeader>
-            <div className="flex-1 min-h-0">
-              <CommentsContent />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Likes Sheet */}
+      <LikesSheet
+        postId={post.id}
+        open={showLikesSheet}
+        onOpenChange={setShowLikesSheet}
+      />
+
+      {/* Comments Sheet */}
+      <CommentsSheet
+        post={post}
+        open={showCommentsSheet}
+        onOpenChange={setShowCommentsSheet}
+      />
     </>
   );
 };
