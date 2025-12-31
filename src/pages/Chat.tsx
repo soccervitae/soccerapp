@@ -42,6 +42,7 @@ const Chat = () => {
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -69,29 +70,40 @@ const Chat = () => {
   const handleVideoCall = useCallback(() => startCall('video'), [startCall]);
   const handleVoiceCall = useCallback(() => startCall('voice'), [startCall]);
 
-  // Fetch other participant
+  // Fetch other participant and mute status
   useEffect(() => {
-    const fetchParticipant = async () => {
+    const fetchParticipantAndMuteStatus = async () => {
       if (!conversationId || !user) return;
 
-      const { data: participants } = await supabase
+      // Fetch mute status for current user
+      const { data: currentParticipation } = await supabase
+        .from("conversation_participants")
+        .select("is_muted")
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id)
+        .single();
+
+      setIsMuted(currentParticipation?.is_muted || false);
+
+      // Fetch other participant
+      const { data: otherParticipant } = await supabase
         .from("conversation_participants")
         .select("user_id")
         .eq("conversation_id", conversationId)
         .neq("user_id", user.id)
         .single();
 
-      if (participants) {
+      if (otherParticipant) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", participants.user_id)
+          .eq("id", otherParticipant.user_id)
           .single();
         setParticipant(profile);
       }
     };
 
-    fetchParticipant();
+    fetchParticipantAndMuteStatus();
   }, [conversationId, user]);
 
   // Fetch reactions when messages change
@@ -229,6 +241,28 @@ const Chat = () => {
     }
   };
 
+  const handleToggleMute = async () => {
+    if (!conversationId || !user) return;
+
+    try {
+      const newMutedState = !isMuted;
+
+      const { error } = await supabase
+        .from("conversation_participants")
+        .update({ is_muted: newMutedState })
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setIsMuted(newMutedState);
+      toast.success(newMutedState ? "Conversa silenciada" : "Notificações ativadas");
+    } catch (error) {
+      console.error("Error toggling mute:", error);
+      toast.error("Erro ao alterar configurações");
+    }
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -252,6 +286,8 @@ const Chat = () => {
         isCallActive={isCallActive}
         onArchive={handleArchiveConversation}
         onDelete={() => setShowDeleteDialog(true)}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
       />
 
       {/* Delete confirmation dialog */}

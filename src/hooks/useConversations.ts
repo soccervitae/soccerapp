@@ -17,6 +17,7 @@ export interface ConversationWithDetails extends Conversation {
   participant: Profile | null;
   lastMessage: Message | null;
   unreadCount: number;
+  isMuted?: boolean;
 }
 
 export const useConversations = () => {
@@ -67,7 +68,7 @@ export const useConversations = () => {
       // Get all conversation IDs where user is participant (excluding archived)
       const { data: participations, error: partError } = await supabase
         .from("conversation_participants")
-        .select("conversation_id")
+        .select("conversation_id, is_muted")
         .eq("user_id", user.id)
         .eq("is_archived", false);
 
@@ -80,6 +81,7 @@ export const useConversations = () => {
       }
 
       const conversationIds = participations.map((p) => p.conversation_id);
+      const muteStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_muted]));
 
       // Get conversations
       const { data: convData, error: convError } = await supabase
@@ -135,6 +137,7 @@ export const useConversations = () => {
             participant,
             lastMessage: lastMessageData,
             unreadCount: count || 0,
+            isMuted: muteStatusMap.get(conv.id) || false,
           };
         })
       );
@@ -175,6 +178,20 @@ export const useConversations = () => {
       // Check if we've already notified about this message
       const previousMessageId = previousMessagesRef.current.get(newMessage.conversation_id);
       if (previousMessageId === newMessage.id) return;
+
+      // Check if conversation is muted
+      const { data: participation } = await supabase
+        .from("conversation_participants")
+        .select("is_muted")
+        .eq("conversation_id", newMessage.conversation_id)
+        .eq("user_id", user?.id)
+        .single();
+
+      // If muted, just refresh conversations without notification
+      if (participation?.is_muted) {
+        fetchConversations();
+        return;
+      }
       
       previousMessagesRef.current.set(newMessage.conversation_id, newMessage.id);
 
