@@ -38,10 +38,12 @@ export const ProfileInfo = ({
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
   const [isCheering, setIsCheering] = useState(followStats?.isFollowing || false);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Fetch user teams
   const { data: userTeams = [] } = useUserTeams(profile.id);
@@ -104,6 +106,13 @@ export const ProfileInfo = ({
       navigate("/login");
       return;
     }
+    
+    // Trigger heart animation only when following (not unfollowing)
+    if (!isCheering) {
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 600);
+    }
+    
     followUser.mutate({
       userId: profile.id,
       isFollowing: isCheering
@@ -333,14 +342,33 @@ export const ProfileInfo = ({
                 </DropdownMenuContent>
               </DropdownMenu>}
           </> : <>
-            <button onClick={handleFollowClick} disabled={followUser.isPending} className={`flex-1 h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
-              <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${isCheering ? "scale-110" : ""}`} style={{
-            fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
-          }}>
-                favorite
-              </span>
-              {isCheering ? "Torcendo" : "Torcer"}
-            </button>
+            <div className="relative flex-1">
+              <button 
+                ref={buttonRef}
+                onClick={handleFollowClick} 
+                disabled={followUser.isPending} 
+                className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}
+              >
+                <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${showHeartAnimation ? "animate-heart-pop" : ""} ${isCheering ? "scale-110" : ""}`} style={{
+                  fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
+                }}>
+                  favorite
+                </span>
+                {isCheering ? "Torcendo" : "Torcer"}
+              </button>
+              
+              {/* Animated heart overlay */}
+              {showHeartAnimation && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span 
+                    className="material-symbols-outlined text-[32px] text-red-500 animate-heart-burst"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    favorite
+                  </span>
+                </div>
+              )}
+            </div>
             <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center gap-1.5 disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
               <span className="material-symbols-outlined text-[16px]">chat</span>
               Mensagem
