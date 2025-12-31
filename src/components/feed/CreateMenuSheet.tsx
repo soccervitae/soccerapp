@@ -5,7 +5,7 @@ import {
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
 
-type CreateOption = "post" | "times" | "championship" | "achievement";
+type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
 
 interface CreateMenuSheetProps {
   open: boolean;
@@ -20,6 +20,20 @@ const menuOptions = [
     description: "Compartilhe uma foto ou vídeo",
     icon: "add_photo_alternate",
     colorClass: "bg-blue-500/20 text-blue-500",
+  },
+  {
+    id: "replay" as CreateOption,
+    label: "Replay",
+    description: "Adicione um replay de 24h",
+    icon: "slow_motion_video",
+    colorClass: "bg-purple-500/20 text-purple-500",
+  },
+  {
+    id: "highlight" as CreateOption,
+    label: "Destaque",
+    description: "Adicione aos seus destaques",
+    icon: "auto_awesome",
+    colorClass: "bg-amber-500/20 text-amber-500",
   },
   {
     id: "times" as CreateOption,
