@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Post } from "@/hooks/usePosts";
 
 export interface SharedPost {
   id: string;
@@ -164,5 +165,114 @@ export async function fetchSharedHighlight(highlightId: string): Promise<SharedH
     display_order: data.display_order,
     images,
     profile: data.profile as SharedHighlight["profile"],
+  };
+}
+
+// Convert SharedPost to Post format for PostMediaViewer
+export function sharedPostToPost(shared: SharedPost): Post {
+  return {
+    id: shared.id,
+    user_id: shared.user_id,
+    content: shared.content,
+    media_url: shared.media_url,
+    media_type: shared.media_type,
+    likes_count: shared.likes_count,
+    comments_count: shared.comments_count,
+    shares_count: 0,
+    created_at: shared.created_at,
+    updated_at: null,
+    location_name: shared.location_name,
+    location_lat: shared.location_lat,
+    location_lng: shared.location_lng,
+    music_track_id: shared.music_track_id,
+    music_start_seconds: shared.music_start_seconds,
+    music_end_seconds: shared.music_end_seconds,
+    music_track: null,
+    profile: {
+      id: shared.profile.id,
+      username: shared.profile.username,
+      full_name: shared.profile.full_name,
+      avatar_url: shared.profile.avatar_url,
+      nickname: null,
+      position: null,
+      team: null,
+      conta_verificada: shared.profile.conta_verificada,
+    },
+    liked_by_user: false,
+    saved_by_user: false,
+    recent_likes: [],
+  };
+}
+
+// Convert SharedStory to Post format for PostMediaViewer
+export function storyToPost(story: SharedStory): Post {
+  return {
+    id: story.id,
+    user_id: story.user_id,
+    content: "",
+    media_url: story.media_url,
+    media_type: story.media_type,
+    likes_count: 0,
+    comments_count: 0,
+    shares_count: 0,
+    created_at: story.created_at,
+    updated_at: null,
+    location_name: null,
+    location_lat: null,
+    location_lng: null,
+    music_track_id: null,
+    music_start_seconds: null,
+    music_end_seconds: null,
+    music_track: null,
+    profile: {
+      id: story.profile.id,
+      username: story.profile.username,
+      full_name: story.profile.full_name,
+      avatar_url: story.profile.avatar_url,
+      nickname: null,
+      position: null,
+      team: null,
+      conta_verificada: false,
+    },
+    liked_by_user: false,
+    saved_by_user: false,
+    recent_likes: [],
+  };
+}
+
+// Convert SharedHighlight to Post format for PostMediaViewer
+export function highlightToPost(highlight: SharedHighlight): Post {
+  const firstImage = highlight.images[0];
+  return {
+    id: highlight.id,
+    user_id: highlight.user_id,
+    content: highlight.title,
+    media_url: firstImage?.image_url || highlight.image_url,
+    media_type: highlight.images.length > 1 ? "carousel" : (firstImage?.media_type || "image"),
+    likes_count: 0,
+    comments_count: 0,
+    shares_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: null,
+    location_name: null,
+    location_lat: null,
+    location_lng: null,
+    music_track_id: null,
+    music_start_seconds: null,
+    music_end_seconds: null,
+    music_track: null,
+    profile: {
+      id: highlight.profile.id,
+      username: highlight.profile.username,
+      full_name: highlight.profile.full_name,
+      avatar_url: highlight.profile.avatar_url,
+      nickname: null,
+      position: null,
+      team: null,
+      conta_verificada: false,
+    },
+    liked_by_user: false,
+    saved_by_user: false,
+    recent_likes: [],
   };
 }
