@@ -352,6 +352,11 @@ export const PostMediaViewer = ({
                         }`}
                         filled={post.liked_by_user}
                       />
+                      {post.likes_count > 0 && (
+                        <span className="text-sm font-medium text-white">
+                          {formatNumber(post.likes_count)}
+                        </span>
+                      )}
                     </button>
 
                     {/* Comment button */}
