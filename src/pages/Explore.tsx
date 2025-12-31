@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
 import { Search, CheckCircle, Loader2, TrendingUp } from "lucide-react";
@@ -137,15 +138,31 @@ const Explore = () => {
                     variant={isFollowing ? "outline" : "default"}
                     onClick={() => handleFollowClick(profile.id, isFollowing)}
                     disabled={isFollowPending}
-                    className="shrink-0 h-7 px-3 text-xs"
+                    className="shrink-0 h-7 px-3 text-xs overflow-hidden relative min-w-[72px]"
                   >
-                    {isFollowPending ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : isFollowing ? (
-                      "Torcendo"
-                    ) : (
-                      "Torcer"
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {isFollowPending ? (
+                        <motion.span
+                          key="loading"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key={isFollowing ? "following" : "follow"}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                        >
+                          {isFollowing ? "Torcendo" : "Torcer"}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </Button>
                 </div>
               );
