@@ -9,6 +9,8 @@ import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LikesSheet } from "@/components/feed/LikesSheet";
 import { CommentsSheet } from "@/components/feed/CommentsSheet";
+import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
+import { Send } from "lucide-react";
 interface PostMediaViewerProps {
   post: Post;
   mediaUrls: string[];
@@ -34,6 +36,7 @@ export const PostMediaViewer = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showLikesSheet, setShowLikesSheet] = useState(false);
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -347,6 +350,19 @@ export const PostMediaViewer = ({
                         </span>
                       )}
                     </button>
+
+                    {/* Share button */}
+                    <button
+                      onClick={() => setShowShareSheet(true)}
+                      className="flex items-center gap-1.5 text-white hover:text-white/80 transition-colors"
+                    >
+                      <Send className="w-6 h-6" />
+                      {(post.shares_count ?? 0) > 0 && (
+                        <span className="text-sm font-medium">
+                          {formatNumber(post.shares_count ?? 0)}
+                        </span>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -367,6 +383,17 @@ export const PostMediaViewer = ({
         post={post}
         open={showCommentsSheet}
         onOpenChange={setShowCommentsSheet}
+      />
+
+      {/* Share Sheet */}
+      <ShareToChatSheet
+        open={showShareSheet}
+        onOpenChange={setShowShareSheet}
+        contentType="post"
+        contentId={post.id}
+        contentUrl={`${window.location.origin}/post/${post.id}`}
+        contentPreview={mediaUrls[0]}
+        contentTitle={post.content?.substring(0, 50) || "Publicação"}
       />
     </>
   );
