@@ -190,7 +190,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-2xl flex flex-col p-0">
+        <SheetContent side="bottom" className="rounded-t-2xl flex flex-col p-0 h-[85dvh] max-h-[85dvh]">
           <SheetHeader className="px-4 pt-4 pb-2">
             <div className="flex items-center justify-between">
               {step !== "country" ? (
