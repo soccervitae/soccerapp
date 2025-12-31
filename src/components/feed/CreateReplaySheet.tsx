@@ -179,11 +179,11 @@ export const CreateReplaySheet = ({
     }
     setViewMode("text-sticker-editor");
   };
-  const handleFinalPublish = (finalMediaUrl: string) => {
+  const handleFinalPublish = (finalMediaUrl: string, caption: string) => {
     if (onReplayCreated) {
       onReplayCreated({
         image: finalMediaUrl,
-        caption: "",
+        caption: caption,
         isVideo: selectedMediaType === "video"
       });
     }

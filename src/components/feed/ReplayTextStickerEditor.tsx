@@ -18,10 +18,16 @@ interface OverlayElement {
   backgroundColor?: string | null;
 }
 
+interface DrawPath {
+  points: { x: number; y: number }[];
+  color: string;
+  size: number;
+}
+
 interface ReplayTextStickerEditorProps {
   mediaUrl: string;
   mediaType: "photo" | "video";
-  onPublish: (finalMediaUrl: string) => void;
+  onPublish: (finalMediaUrl: string, caption: string) => void;
   onCancel: () => void;
 }
 
@@ -34,6 +40,17 @@ const TEXT_COLORS = [
   "#FFCC00",
   "#FF2D92",
   "#5856D6",
+];
+
+const BRUSH_COLORS = [
+  "#FF3B30",
+  "#FF9500",
+  "#FFCC00",
+  "#34C759",
+  "#007AFF",
+  "#5856D6",
+  "#FFFFFF",
+  "#000000",
 ];
 
 const STICKER_CATEGORIES = [
@@ -77,7 +94,7 @@ const FONT_SIZES = {
   lg: 36,
 };
 
-type ToolMode = "none" | "text" | "stickers" | "colors";
+type ToolMode = "none" | "text" | "stickers" | "draw";
 type GestureMode = "none" | "drag" | "pinch-rotate";
 
 // Helpers para gestos multi-touch
@@ -110,6 +127,16 @@ export const ReplayTextStickerEditor = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [gestureMode, setGestureMode] = useState<GestureMode>("none");
+
+  // Caption state (WhatsApp style)
+  const [caption, setCaption] = useState("");
+
+  // Drawing state
+  const [paths, setPaths] = useState<DrawPath[]>([]);
+  const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
+  const [brushColor, setBrushColor] = useState("#FF3B30");
+  const [brushSize, setBrushSize] = useState(5);
+  const [isDrawingActive, setIsDrawingActive] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; elementX: number; elementY: number } | null>(null);
@@ -168,8 +195,63 @@ export const ReplayTextStickerEditor = ({
     }
   };
 
+  // Get point from event relative to container (as percentage)
+  const getPointFromEvent = (e: React.PointerEvent | React.TouchEvent): { x: number; y: number } => {
+    const container = containerRef.current;
+    if (!container) return { x: 0, y: 0 };
+    
+    const rect = container.getBoundingClientRect();
+    let clientX: number, clientY: number;
+    
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    return {
+      x: ((clientX - rect.left) / rect.width) * 100,
+      y: ((clientY - rect.top) / rect.height) * 100,
+    };
+  };
+
+  // Drawing handlers
+  const handleDrawStart = (e: React.PointerEvent) => {
+    if (toolMode !== "draw") return;
+    e.preventDefault();
+    const point = getPointFromEvent(e);
+    setCurrentPath([point]);
+    setIsDrawingActive(true);
+  };
+
+  const handleDrawMove = (e: React.PointerEvent) => {
+    if (toolMode !== "draw" || !isDrawingActive) return;
+    e.preventDefault();
+    const point = getPointFromEvent(e);
+    setCurrentPath(prev => [...prev, point]);
+  };
+
+  const handleDrawEnd = () => {
+    if (currentPath.length > 1) {
+      setPaths(prev => [...prev, {
+        points: currentPath,
+        color: brushColor,
+        size: brushSize
+      }]);
+    }
+    setCurrentPath([]);
+    setIsDrawingActive(false);
+  };
+
+  const undoLastPath = () => {
+    setPaths(prev => prev.slice(0, -1));
+  };
+
   // Touch handlers para gestos de pinça
   const handleTouchStart = (e: React.TouchEvent, elementId: string) => {
+    if (toolMode === "draw") return;
     e.stopPropagation();
     setActiveElementId(elementId);
 
@@ -206,6 +288,7 @@ export const ReplayTextStickerEditor = ({
   };
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (toolMode === "draw") return;
     if (!activeElementId || !containerRef.current) return;
 
     if (e.touches.length === 2 && initialGestureRef.current && gestureMode === "pinch-rotate") {
@@ -246,9 +329,13 @@ export const ReplayTextStickerEditor = ({
         )
       );
     }
-  }, [activeElementId, gestureMode]);
+  }, [activeElementId, gestureMode, toolMode]);
 
   const handleTouchEnd = () => {
+    if (toolMode === "draw") {
+      handleDrawEnd();
+      return;
+    }
     initialGestureRef.current = null;
     setGestureMode("none");
     setIsDragging(false);
@@ -256,6 +343,7 @@ export const ReplayTextStickerEditor = ({
   };
 
   const handlePointerDown = (e: React.PointerEvent, elementId: string) => {
+    if (toolMode === "draw") return;
     // Ignorar se for touch (será tratado pelo handleTouchStart)
     if (e.pointerType === "touch") return;
     
@@ -277,6 +365,10 @@ export const ReplayTextStickerEditor = ({
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (toolMode === "draw") {
+      handleDrawMove(e);
+      return;
+    }
     if (e.pointerType === "touch") return;
     if (!isDragging || !dragStartRef.current || !activeElementId || !containerRef.current) return;
 
@@ -294,9 +386,13 @@ export const ReplayTextStickerEditor = ({
           : el
       )
     );
-  }, [isDragging, activeElementId]);
+  }, [isDragging, activeElementId, toolMode, isDrawingActive, currentPath, brushColor, brushSize]);
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (toolMode === "draw") {
+      handleDrawEnd();
+      return;
+    }
     if (e.pointerType === "touch") return;
     setIsDragging(false);
     dragStartRef.current = null;
@@ -311,7 +407,9 @@ export const ReplayTextStickerEditor = ({
   };
 
   const handleContainerClick = () => {
-    setActiveElementId(null);
+    if (toolMode !== "draw") {
+      setActiveElementId(null);
+    }
   };
 
   const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -334,6 +432,26 @@ export const ReplayTextStickerEditor = ({
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
 
+      // Draw paths (drawings)
+      for (const path of paths) {
+        if (path.points.length < 2) continue;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = path.color;
+        ctx.lineWidth = (path.size / 100) * canvas.width * 0.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        
+        path.points.forEach((point, i) => {
+          const x = (point.x / 100) * canvas.width;
+          const y = (point.y / 100) * canvas.height;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+
+      // Draw elements (text/stickers)
       for (const element of elements) {
         const x = (element.x / 100) * canvas.width;
         const y = (element.y / 100) * canvas.height;
@@ -401,11 +519,11 @@ export const ReplayTextStickerEditor = ({
     try {
       let finalUrl = mediaUrl;
       
-      if (elements.length > 0 && mediaType === "photo") {
+      if ((elements.length > 0 || paths.length > 0) && mediaType === "photo") {
         finalUrl = await exportWithOverlays();
       }
       
-      onPublish(finalUrl);
+      onPublish(finalUrl, caption);
     } catch (error) {
       toast.error("Erro ao processar imagem");
       console.error(error);
@@ -439,11 +557,17 @@ export const ReplayTextStickerEditor = ({
       padding: element.backgroundColor ? "4px 12px" : undefined,
       borderRadius: element.backgroundColor ? "4px" : undefined,
       textShadow: element.type === "text" && !element.backgroundColor ? "2px 2px 4px rgba(0,0,0,0.5)" : undefined,
-      cursor: "move",
+      cursor: toolMode === "draw" ? "crosshair" : "move",
       userSelect: "none",
       touchAction: "none",
       whiteSpace: "nowrap",
     };
+  };
+
+  const clearAll = () => {
+    setElements([]);
+    setPaths([]);
+    setActiveElementId(null);
   };
 
   return (
@@ -475,8 +599,11 @@ export const ReplayTextStickerEditor = ({
         ref={containerRef}
         className="flex-1 relative overflow-hidden"
         onClick={handleContainerClick}
+        onPointerDown={toolMode === "draw" ? handleDrawStart : undefined}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerLeave={toolMode === "draw" ? handleDrawEnd : undefined}
+        style={{ cursor: toolMode === "draw" ? "crosshair" : "default", touchAction: toolMode === "draw" ? "none" : "auto" }}
       >
         {/* Media */}
         {mediaType === "video" ? (
@@ -495,6 +622,35 @@ export const ReplayTextStickerEditor = ({
             className="w-full h-full object-contain"
           />
         )}
+
+        {/* SVG Canvas for Drawings */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+          {/* Saved paths */}
+          {paths.map((path, i) => (
+            <polyline
+              key={i}
+              points={path.points.map(p => `${p.x}%,${p.y}%`).join(' ')}
+              fill="none"
+              stroke={path.color}
+              strokeWidth={path.size}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+          {/* Current path being drawn */}
+          {currentPath.length > 0 && (
+            <polyline
+              points={currentPath.map(p => `${p.x}%,${p.y}%`).join(' ')}
+              fill="none"
+              stroke={brushColor}
+              strokeWidth={brushSize}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+        </svg>
 
         {/* Overlay Elements */}
         {elements.map((element) => (
@@ -531,13 +687,34 @@ export const ReplayTextStickerEditor = ({
         ))}
 
         {/* Video overlay notice */}
-        {mediaType === "video" && elements.length > 0 && (
+        {mediaType === "video" && (elements.length > 0 || paths.length > 0) && (
           <div className="absolute top-4 left-4 right-4 px-3 py-2 bg-black/70 backdrop-blur-sm rounded-lg">
             <p className="text-white/80 text-xs text-center">
-              Textos e stickers serão visíveis apenas na prévia
+              Textos, stickers e desenhos serão visíveis apenas na prévia
             </p>
           </div>
         )}
+
+        {/* Drawing mode indicator */}
+        {toolMode === "draw" && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-primary/90 backdrop-blur-sm rounded-full">
+            <p className="text-primary-foreground text-xs font-medium">
+              Toque na tela para desenhar
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Caption Input (WhatsApp style) */}
+      <div className="bg-black/60 backdrop-blur-sm px-4 py-3 border-t border-white/10">
+        <input
+          type="text"
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder="Adicionar legenda..."
+          className="w-full bg-transparent text-white placeholder:text-white/50 text-sm outline-none"
+          maxLength={200}
+        />
       </div>
 
       {/* Controles de Escala e Rotação para elemento ativo */}
@@ -680,10 +857,82 @@ export const ReplayTextStickerEditor = ({
         </div>
       )}
 
+      {toolMode === "draw" && (
+        <div className="bg-card border-t border-border p-4 animate-in slide-in-from-bottom-4">
+          {/* Brush Colors */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs text-muted-foreground w-12">Cor:</span>
+            <div className="flex gap-2 flex-wrap">
+              {BRUSH_COLORS.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setBrushColor(color)}
+                  className={`w-8 h-8 rounded-full border-2 transition-transform ${
+                    brushColor === color
+                      ? "scale-110 border-primary ring-2 ring-primary/50"
+                      : "border-white/20"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Brush Size */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs text-muted-foreground w-12">Tamanho:</span>
+            <Slider
+              value={[brushSize]}
+              min={2}
+              max={20}
+              step={1}
+              onValueChange={([value]) => setBrushSize(value)}
+              className="flex-1"
+            />
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center border border-border"
+              style={{ backgroundColor: brushColor }}
+            >
+              <div
+                className="rounded-full bg-white"
+                style={{ width: brushSize, height: brushSize }}
+              />
+            </div>
+          </div>
+
+          {/* Undo Button */}
+          {paths.length > 0 && (
+            <button
+              onClick={undoLastPath}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">undo</span>
+              Desfazer último traço
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Bottom Toolbar */}
       <div className="bg-card border-t border-border px-4 py-3 flex items-center justify-center gap-6">
         <button
-          onClick={() => setToolMode(toolMode === "text" ? "none" : "text")}
+          onClick={() => {
+            setToolMode(toolMode === "draw" ? "none" : "draw");
+            setActiveElementId(null);
+          }}
+          className={`flex flex-col items-center gap-1 transition-colors ${
+            toolMode === "draw" ? "text-primary" : "text-foreground"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[24px]">edit</span>
+          <span className="text-xs">Desenhar</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setToolMode(toolMode === "text" ? "none" : "text");
+            setActiveElementId(null);
+          }}
           className={`flex flex-col items-center gap-1 transition-colors ${
             toolMode === "text" ? "text-primary" : "text-foreground"
           }`}
@@ -693,7 +942,10 @@ export const ReplayTextStickerEditor = ({
         </button>
 
         <button
-          onClick={() => setToolMode(toolMode === "stickers" ? "none" : "stickers")}
+          onClick={() => {
+            setToolMode(toolMode === "stickers" ? "none" : "stickers");
+            setActiveElementId(null);
+          }}
           className={`flex flex-col items-center gap-1 transition-colors ${
             toolMode === "stickers" ? "text-primary" : "text-foreground"
           }`}
@@ -702,9 +954,9 @@ export const ReplayTextStickerEditor = ({
           <span className="text-xs">Stickers</span>
         </button>
 
-        {elements.length > 0 && (
+        {(elements.length > 0 || paths.length > 0) && (
           <button
-            onClick={() => setElements([])}
+            onClick={clearAll}
             className="flex flex-col items-center gap-1 text-destructive"
           >
             <span className="material-symbols-outlined text-[24px]">delete</span>
