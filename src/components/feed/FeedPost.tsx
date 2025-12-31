@@ -305,7 +305,7 @@ export const FeedPost = ({
 
           {/* Applause animation overlay */}
           {showApplauseAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <ClappingHandsIcon className="w-24 h-24 text-white animate-applause-burst drop-shadow-lg" filled />
+              <ClappingHandsIcon className="w-24 h-24 animate-applause-burst drop-shadow-lg" filled />
             </div>}
 
           {/* Tags toggle button */}
@@ -360,7 +360,7 @@ export const FeedPost = ({
       {/* Actions */}
       <div className="px-4 pt-3 py-[4px]">
         <div className="grid grid-cols-4">
-          <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${post.liked_by_user ? 'text-amber-500' : 'text-foreground hover:text-muted-foreground'}`}>
+          <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
             <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} />
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
           </button>

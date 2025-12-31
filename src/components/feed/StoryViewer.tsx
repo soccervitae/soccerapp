@@ -357,7 +357,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                     {/* Applause animation */}
                     {showLikeAnimation && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                        <ClappingHandsIcon className="w-20 h-20 text-amber-500 animate-ping" filled />
+                        <ClappingHandsIcon className="w-20 h-20 animate-ping" filled />
                       </div>
                     )}
                   </div>
@@ -428,7 +428,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                         />
                         <button 
                           onClick={handleLike}
-                          className={`w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors ${isLiked ? 'text-amber-500' : 'text-white'}`}
+                          className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"
                         >
                           <ClappingHandsIcon className="w-6 h-6" filled={isLiked} />
                         </button>

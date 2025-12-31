@@ -29,7 +29,7 @@ interface NotificationsSheetProps {
 const NotificationIcon = ({ type }: { type: string }) => {
   switch (type) {
     case "like":
-      return <ClappingHandsIcon className="w-4 h-4 text-amber-500" filled />;
+      return <ClappingHandsIcon className="w-4 h-4" filled />;
     case "comment":
       return <MessageCircle className="w-4 h-4 text-blue-500" />;
     case "follow":
