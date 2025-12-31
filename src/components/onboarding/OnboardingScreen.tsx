@@ -32,7 +32,7 @@ const slides: OnboardingSlide[] = [
   {
     icon: <Bell className="w-16 h-16" />,
     title: "Fique por dentro",
-    description: "Receba notificações de novos seguidores, aplausos e mensagens. Nunca perca uma oportunidade.",
+    description: "Receba notificações de novos torcedores, aplausos e mensagens. Nunca perca uma oportunidade.",
     color: "from-purple-500/20 to-purple-500/5",
   },
 ];

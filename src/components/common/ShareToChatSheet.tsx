@@ -179,7 +179,7 @@ export const ShareToChatSheet = ({
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar seguindo..."
+            placeholder="Buscar torcendo..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -196,7 +196,7 @@ export const ShareToChatSheet = ({
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <MessageCircle className="w-12 h-12 text-muted-foreground mb-2" />
               <p className="text-muted-foreground">
-                {searchQuery ? "Nenhum resultado encontrado" : "Você ainda não segue ninguém"}
+                {searchQuery ? "Nenhum resultado encontrado" : "Você ainda não torce por ninguém"}
               </p>
             </div>
           ) : (

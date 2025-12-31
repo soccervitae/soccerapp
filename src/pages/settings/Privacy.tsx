@@ -83,7 +83,7 @@ const Privacy = () => {
 
   const visibilityLabels = {
     everyone: "Todos",
-    followers: "Apenas seguidores",
+    followers: "Apenas torcedores",
     nobody: "Ninguém",
   };
 
@@ -120,7 +120,7 @@ const Privacy = () => {
                   <div>
                     <p className="font-medium text-foreground">Conta privada</p>
                     <p className="text-xs text-muted-foreground">
-                      Apenas seguidores aprovados podem ver seu conteúdo
+                      Apenas torcedores aprovados podem ver seu conteúdo
                     </p>
                   </div>
                 </div>

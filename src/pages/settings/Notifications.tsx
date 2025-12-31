@@ -266,8 +266,8 @@ const Notifications = () => {
             <SettingItem
               icon={<UserPlus className="h-4 w-4 text-purple-500" />}
               iconBg="bg-purple-500/10"
-              title="Novos seguidores"
-              description="Quando alguém começar a seguir você"
+              title="Novos torcedores"
+              description="Quando alguém começar a torcer por você"
               checked={preferences.notify_follows}
               onCheckedChange={(v) => updatePreference("notify_follows", v)}
               disabled={!isGranted}

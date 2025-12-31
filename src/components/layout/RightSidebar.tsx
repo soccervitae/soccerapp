@@ -99,7 +99,7 @@ export const RightSidebar = () => {
                   onClick={() => handleFollow(profile.id)}
                   disabled={followUser.isPending}
                 >
-                  Seguir
+                  Torcer
                 </Button>
               </div>
             ))

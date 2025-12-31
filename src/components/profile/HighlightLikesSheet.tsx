@@ -184,7 +184,7 @@ export const HighlightLikesSheet = ({ highlightId, isOpen, onClose }: HighlightL
                         disabled={followMutation.isPending}
                         className="text-xs h-8"
                       >
-                        {isFollowing ? "Seguindo" : "Seguir"}
+                        {isFollowing ? "Torcendo" : "Torcer"}
                       </Button>
                     )}
                   </div>

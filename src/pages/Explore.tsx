@@ -139,9 +139,9 @@ const Explore = () => {
                     {isFollowPending ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : isFollowing ? (
-                      "Seguindo"
+                      "Torcendo"
                     ) : (
-                      "Seguir"
+                      "Torcer"
                     )}
                   </Button>
                 </button>
