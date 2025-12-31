@@ -130,7 +130,7 @@ export const PostMediaViewer = ({
 
   const getInitialPosition = () => {
     if (!originRect) {
-      return { opacity: 0, scale: 0.8, borderRadius: "50%" };
+      return { opacity: 0, scale: 0.9, borderRadius: "16px" };
     }
 
     const centerX = window.innerWidth / 2;
@@ -140,10 +140,10 @@ export const PostMediaViewer = ({
 
     return {
       opacity: 0,
-      scale: Math.min(originRect.width / window.innerWidth, 0.15),
+      scale: Math.min(originRect.width / window.innerWidth, 0.2),
       x: originCenterX - centerX,
       y: originCenterY - centerY,
-      borderRadius: "50%",
+      borderRadius: "16px",
     };
   };
 
