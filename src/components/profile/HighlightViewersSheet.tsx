@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useHighlightViewers, useMarkViewsSeen } from "@/hooks/useHighlightInteractions";
 import { formatDistanceToNow } from "date-fns";
@@ -23,15 +28,15 @@ export const HighlightViewersSheet = ({ highlightId, isOpen, onClose }: Highligh
   }, [isOpen, highlightId]);
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl bg-background z-[70]">
-        <SheetHeader className="pb-4 border-b border-border">
-          <SheetTitle className="text-center">
+    <ResponsiveModal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col z-[70]" overlayClassName="z-[70]">
+        <ResponsiveModalHeader className="pb-4 border-b border-border">
+          <ResponsiveModalTitle className="text-center">
             Visualizações ({viewers.length})
-          </SheetTitle>
-        </SheetHeader>
+          </ResponsiveModalTitle>
+        </ResponsiveModalHeader>
         
-        <div className="py-4 overflow-y-auto max-h-[calc(70vh-100px)]">
+        <div className="py-4 overflow-y-auto flex-1">
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -70,7 +75,7 @@ export const HighlightViewersSheet = ({ highlightId, isOpen, onClose }: Highligh
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };

@@ -5,11 +5,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/components/ui/responsive-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
@@ -80,13 +80,13 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-xl z-[70]" overlayClassName="z-[70]">
-        <SheetHeader className="border-b border-border pb-3">
-          <SheetTitle className="text-center">Aplausos</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col z-[70]" overlayClassName="z-[70]">
+        <ResponsiveModalHeader className="border-b border-border pb-3">
+          <ResponsiveModalTitle className="text-center">Aplausos</ResponsiveModalTitle>
+        </ResponsiveModalHeader>
 
-        <div className="overflow-y-auto h-[calc(100%-60px)] pt-2">
+        <div className="overflow-y-auto flex-1 pt-2">
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -160,7 +160,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 };
