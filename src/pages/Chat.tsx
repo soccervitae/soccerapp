@@ -44,6 +44,7 @@ const Chat = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -76,16 +77,17 @@ const Chat = () => {
     const fetchParticipantAndStatus = async () => {
       if (!conversationId || !user) return;
 
-      // Fetch mute and pin status for current user
+      // Fetch mute, pin and archive status for current user
       const { data: currentParticipation } = await supabase
         .from("conversation_participants")
-        .select("is_muted, is_pinned")
+        .select("is_muted, is_pinned, is_archived")
         .eq("conversation_id", conversationId)
         .eq("user_id", user.id)
         .single();
 
       setIsMuted(currentParticipation?.is_muted || false);
       setIsPinned(currentParticipation?.is_pinned || false);
+      setIsArchived(currentParticipation?.is_archived || false);
 
       // Fetch other participant
       const { data: otherParticipant } = await supabase
@@ -195,23 +197,30 @@ const Chat = () => {
     toast.success("Mensagem apagada para todos");
   };
 
-  const handleArchiveConversation = async () => {
+  const handleToggleArchiveConversation = async () => {
     if (!conversationId || !user) return;
     
     try {
+      const newArchivedState = !isArchived;
+      
       const { error } = await supabase
         .from("conversation_participants")
-        .update({ is_archived: true })
+        .update({ is_archived: newArchivedState })
         .eq("conversation_id", conversationId)
         .eq("user_id", user.id);
       
       if (error) throw error;
       
-      toast.success("Conversa arquivada");
-      navigate("/messages");
+      if (newArchivedState) {
+        toast.success("Conversa arquivada");
+        navigate("/messages");
+      } else {
+        toast.success("Conversa desarquivada");
+        setIsArchived(false);
+      }
     } catch (error) {
-      console.error("Error archiving conversation:", error);
-      toast.error("Erro ao arquivar conversa");
+      console.error("Error toggling archive:", error);
+      toast.error(isArchived ? "Erro ao desarquivar conversa" : "Erro ao arquivar conversa");
     }
   };
 
@@ -308,12 +317,13 @@ const Chat = () => {
         onVideoCall={handleVideoCall}
         onVoiceCall={handleVoiceCall}
         isCallActive={isCallActive}
-        onArchive={handleArchiveConversation}
+        onArchive={handleToggleArchiveConversation}
         onDelete={() => setShowDeleteDialog(true)}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         isPinned={isPinned}
         onTogglePin={handleTogglePin}
+        isArchived={isArchived}
       />
 
       {/* Delete confirmation dialog */}

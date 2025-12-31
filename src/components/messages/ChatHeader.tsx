@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, BellOff, BellRing, Pin, PinOff } from "lucide-react";
+import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, ArchiveRestore, BellOff, BellRing, Pin, PinOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,9 +28,10 @@ interface ChatHeaderProps {
   onToggleMute?: () => void;
   isPinned?: boolean;
   onTogglePin?: () => void;
+  isArchived?: boolean;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin, isArchived }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -149,8 +150,17 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
-              <Archive className="h-4 w-4" />
-              Arquivar conversa
+              {isArchived ? (
+                <>
+                  <ArchiveRestore className="h-4 w-4" />
+                  Desarquivar conversa
+                </>
+              ) : (
+                <>
+                  <Archive className="h-4 w-4" />
+                  Arquivar conversa
+                </>
+              )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onDelete} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
