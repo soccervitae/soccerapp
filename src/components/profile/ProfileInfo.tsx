@@ -174,16 +174,16 @@ export const ProfileInfo = ({
     };
     return footMap[foot.toLowerCase()] || foot;
   };
-  return <section className="flex flex-col items-center gap-4">
+return <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
       <div className="w-full h-32 relative overflow-hidden">
         {profile.cover_url ? (
           <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-1">
-            <span className="material-symbols-outlined text-3xl text-muted-foreground">add_photo_alternate</span>
+          <div className="w-full h-full bg-muted/30 flex flex-col items-center justify-center gap-1">
+            <span className="material-symbols-outlined text-3xl text-muted-foreground/50">add_photo_alternate</span>
             {isOwnProfile && (
-              <span className="text-xs text-muted-foreground">Adicionar foto de capa</span>
+              <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>
             )}
           </div>
         )}
