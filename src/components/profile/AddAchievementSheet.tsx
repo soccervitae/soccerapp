@@ -90,10 +90,7 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
                 <SelectContent>
                   {achievementTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
-                      <span className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px]">{type.icon}</span>
-                        {type.name}
-                      </span>
+                      {type.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
