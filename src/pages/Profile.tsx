@@ -18,6 +18,7 @@ import {
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
+import { RefetchOverlay } from "@/components/common/RefetchOverlay";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -37,15 +38,15 @@ const Profile = () => {
   }, [location.state]);
   
   // If username in URL, fetch by username; otherwise show current user's profile
-  const { data: profileByUsername, isLoading: usernameLoading } = useProfileByUsername(username || "");
-  const { data: profileById, isLoading: idLoading } = useProfile(!username ? user?.id : undefined);
+  const { data: profileByUsername, isLoading: usernameLoading, isFetching: usernameFetching } = useProfileByUsername(username || "");
+  const { data: profileById, isLoading: idLoading, isFetching: idFetching } = useProfile(!username ? user?.id : undefined);
   
   // Use the appropriate profile based on route
   const profile = username ? profileByUsername : profileById;
   const profileLoading = username ? usernameLoading : idLoading;
   const targetUserId = profile?.id;
   
-  const { data: followStats, isLoading: statsLoading } = useFollowStats(targetUserId);
+  const { data: followStats, isLoading: statsLoading, isFetching: statsFetching } = useFollowStats(targetUserId);
   const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId);
   const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
   const { data: achievements, isLoading: achievementsLoading } = useUserAchievements(targetUserId);
@@ -62,6 +63,10 @@ const Profile = () => {
 
   const isOwnProfile = user?.id === targetUserId;
   const isLoading = profileLoading || statsLoading;
+  
+  // Refetching state for overlay
+  const profileFetching = username ? usernameFetching : idFetching;
+  const isRefetching = (profileFetching || statsFetching) && !isLoading;
 
   if (isLoading) {
     return (
@@ -147,6 +152,7 @@ const Profile = () => {
 
   return (
     <main className="bg-background min-h-screen relative pb-24">
+      <RefetchOverlay isRefetching={isRefetching} />
       {fromOnboarding ? (
         <motion.div
           variants={containerVariants}

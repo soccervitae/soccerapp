@@ -23,6 +23,7 @@ export const useConversations = () => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [isOffline, setIsOffline] = useState(!isOnline());
   const { showNotification, isGranted } = usePushNotifications();
@@ -42,8 +43,12 @@ export const useConversations = () => {
     };
   }, []);
 
-  const fetchConversations = async () => {
+  const fetchConversations = async (isRefetch = false) => {
     if (!user) return;
+    
+    if (isRefetch) {
+      setIsFetching(true);
+    }
 
     // If offline, load from cache
     if (!isOnline()) {
@@ -155,6 +160,7 @@ export const useConversations = () => {
       }
     } finally {
       setIsLoading(false);
+      setIsFetching(false);
     }
   };
 
@@ -258,8 +264,9 @@ export const useConversations = () => {
   return {
     conversations,
     isLoading,
+    isFetching,
     isOffline,
     totalUnread,
-    refetch: fetchConversations,
+    refetch: () => fetchConversations(true),
   };
 };
