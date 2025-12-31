@@ -146,7 +146,7 @@ export const LikesSheet = ({ postId, open, onOpenChange }: LikesSheetProps) => {
                         disabled={followMutation.isPending}
                         className="text-xs h-8"
                       >
-                        {isFollowing ? "Seguindo" : "Seguir"}
+                        {isFollowing ? "Torcendo" : "Torcer"}
                       </Button>
                     )}
                   </div>
