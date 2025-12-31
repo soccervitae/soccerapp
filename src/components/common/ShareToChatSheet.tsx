@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -283,21 +284,47 @@ export const ShareToChatSheet = ({
                       </span>
                     </div>
 
-                    {wasSent ? (
-                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    ) : (
-                      <div
-                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                          isSelected
-                            ? "bg-primary border-primary"
-                            : "border-muted-foreground/40"
-                        }`}
-                      >
-                        {isSelected && <Check className="w-4 h-4 text-primary-foreground" />}
-                      </div>
-                    )}
+                    <AnimatePresence mode="wait">
+                      {wasSent ? (
+                        <motion.div
+                          key="sent"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                          className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
+                        >
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1, type: "spring", stiffness: 500, damping: 15 }}
+                          >
+                            <Check className="w-4 h-4 text-white" />
+                          </motion.div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="checkbox"
+                          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? "bg-primary border-primary"
+                              : "border-muted-foreground/40"
+                          }`}
+                        >
+                          <AnimatePresence>
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                              >
+                                <Check className="w-4 h-4 text-primary-foreground" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </button>
                 );
               })}
