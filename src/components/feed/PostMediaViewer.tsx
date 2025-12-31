@@ -241,7 +241,7 @@ export const PostMediaViewer = ({
                       exit={{ opacity: 0 }}
                     >
                       <ClappingHandsIcon 
-                        className="w-24 h-24 text-amber-500 animate-applause-burst drop-shadow-lg" 
+                        className="w-24 h-24 animate-applause-burst drop-shadow-lg" 
                         filled={true}
                       />
                     </motion.div>
@@ -383,9 +383,7 @@ export const PostMediaViewer = ({
                       className="flex items-center gap-1.5 transition-all active:scale-110"
                     >
                       <ClappingHandsIcon
-                        className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""} ${
-                          post.liked_by_user ? "text-amber-500" : "text-white"
-                        }`}
+                        className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
                         filled={post.liked_by_user}
                       />
                       {post.likes_count > 0 && (
