@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +14,6 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
 import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
-import SplashScreen from "@/components/SplashScreen";
 import OrientationLock from "@/components/OrientationLock";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -135,18 +134,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-// Check if running as installed PWA
-const isPWA = () => {
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true ||
-    document.referrer.includes('android-app://')
-  );
-};
-
 const App = () => {
-  const [showSplash, setShowSplash] = useState(isPWA());
-
   useEffect(() => {
     // Lock screen orientation to portrait on supported browsers
     const lockOrientation = async () => {
@@ -160,25 +148,13 @@ const App = () => {
       }
     };
     lockOrientation();
-
-    // Hide splash screen after 2.5 seconds (only if showing)
-    if (showSplash) {
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-      }, 2500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [showSplash]);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
           <PresenceProvider>
-            <AnimatePresence mode="wait">
-              {showSplash && <SplashScreen key="splash" />}
-            </AnimatePresence>
             <Toaster />
             <Sonner />
             <OrientationLock />
