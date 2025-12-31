@@ -219,7 +219,7 @@ export const ShareToChatSheet = ({
 
   return (
     <ResponsiveModal open={open} onOpenChange={handleOpenChange}>
-      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col" overlayClassName="z-[70]">
+      <ResponsiveModalContent className="h-[70vh] sm:max-w-lg flex flex-col z-[70]" overlayClassName="z-[60]">
         <ResponsiveModalHeader className="border-b border-border pb-3">
           <ResponsiveModalTitle className="text-center">Compartilhar com...</ResponsiveModalTitle>
         </ResponsiveModalHeader>
