@@ -116,7 +116,7 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
         ) : (
           achievements.map((achievement) => {
             const achievementName = achievement.achievement_type?.name || achievement.custom_achievement_name || "Conquista";
-            const colorClasses = getColorClasses(achievement.achievement_type?.color);
+            const teamData = userTeams.find(t => t.nome === achievement.team_name);
             
             return (
               <div 
@@ -124,11 +124,17 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                 className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors group"
               >
                 <div className="flex gap-3">
-                  {/* Icon */}
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border ${colorClasses}`}>
-                    <span className="material-symbols-outlined text-[24px]">
-                      {achievement.achievement_type?.icon || "emoji_events"}
-                    </span>
+                  {/* Team Logo */}
+                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {teamData?.escudo_url ? (
+                      <img 
+                        src={teamData.escudo_url} 
+                        alt={achievement.team_name || "Time"}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-[24px] text-muted-foreground">shield</span>
+                    )}
                   </div>
                   
                   {/* Info */}
@@ -143,17 +149,17 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                     </div>
                     
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      {achievement.team_name && (
+                        <>
+                          <span className="truncate">{achievement.team_name}</span>
+                          <span>•</span>
+                        </>
+                      )}
                       <span>{achievement.year}</span>
                       {achievement.championship_name && (
                         <>
                           <span>•</span>
                           <span className="truncate">{achievement.championship_name}</span>
-                        </>
-                      )}
-                      {achievement.team_name && (
-                        <>
-                          <span>•</span>
-                          <span className="truncate">{achievement.team_name}</span>
                         </>
                       )}
                     </div>
