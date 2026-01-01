@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Play } from "lucide-react";
+import { Play, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import type { Post } from "@/hooks/usePosts";
@@ -32,6 +32,7 @@ const preloadImage = (src: string) => {
 
 export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Preload preview image and author avatar on mount
   useEffect(() => {
@@ -42,6 +43,13 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
       preloadImage(data.author.avatar_url);
     }
   }, [data.preview, data.author?.avatar_url]);
+
+  // Reset loading state when viewer closes
+  useEffect(() => {
+    if (!viewerOpen) {
+      setIsLoading(false);
+    }
+  }, [viewerOpen]);
 
   // Create Post object from available data - no fetch needed!
   const postData = useMemo<Post>(() => {
@@ -94,6 +102,7 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   }, [data.contentType, data.preview]);
 
   const handleClick = () => {
+    setIsLoading(true);
     setViewerOpen(true);
   };
 
@@ -145,8 +154,15 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
             </div>
           )}
           
+          {/* Loading overlay */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
+            </div>
+          )}
+          
           {/* Play overlay for video content */}
-          {isVideoContent && data.preview && (
+          {isVideoContent && data.preview && !isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
                 <Play className="w-7 h-7 text-white fill-white ml-1" />
