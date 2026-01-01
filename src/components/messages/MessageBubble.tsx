@@ -393,7 +393,8 @@ export const MessageBubble = ({
             isOpen={showReactionPicker}
             onSelect={(emoji) => onAddReaction?.(message.id, emoji)}
             onClose={() => setShowReactionPicker(false)}
-            position={isOwn ? "top" : "top"}
+            position="top"
+            isOwn={isOwn}
           />
         </div>
 
