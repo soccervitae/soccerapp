@@ -1004,6 +1004,7 @@ export type Database = {
           two_factor_enabled: boolean | null
           updated_at: string
           username: string
+          visitors_seen_at: string | null
           weight: number | null
         }
         Insert: {
@@ -1044,6 +1045,7 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string
           username: string
+          visitors_seen_at?: string | null
           weight?: number | null
         }
         Update: {
@@ -1084,6 +1086,7 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string
           username?: string
+          visitors_seen_at?: string | null
           weight?: number | null
         }
         Relationships: [

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { ProfileSettingsSheet } from "./ProfileSettingsSheet";
@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useNewVisitorsCount, useMarkVisitorsSeen } from "@/hooks/useProfileVisitors";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +61,17 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
   const qrRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
+
+  // New visitors tracking
+  const { data: newVisitorsCount = 0 } = useNewVisitorsCount();
+  const { mutate: markVisitorsSeen } = useMarkVisitorsSeen();
+
+  // Mark visitors as seen when sheet opens
+  useEffect(() => {
+    if (visitorsSheetOpen && newVisitorsCount > 0) {
+      markVisitorsSeen();
+    }
+  }, [visitorsSheetOpen, newVisitorsCount, markVisitorsSeen]);
 
   const useSheet = isMobile || isPWA;
   const profileUrl = `${window.location.origin}/${username}`;
@@ -175,9 +187,12 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
             <>
               <button 
                 onClick={() => setVisitorsSheetOpen(true)}
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
+                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
               >
                 <Eye className="h-5 w-5" />
+                {newVisitorsCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full" />
+                )}
               </button>
               <button 
                 onClick={() => setSettingsOpen(true)}
