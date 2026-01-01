@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye } from "lucide-react";
 import { ProfileSettingsSheet } from "./ProfileSettingsSheet";
+import { ProfileVisitorsSheet } from "./ProfileVisitorsSheet";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -48,6 +50,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
   const navigate = useNavigate();
   const { user } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [visitorsSheetOpen, setVisitorsSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [reportSheetOpen, setReportSheetOpen] = useState(false);
@@ -169,12 +172,20 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
         <h1 className="text-base font-bold text-foreground tracking-wide">{username}</h1>
         <div className="flex items-center gap-1">
           {isOwnProfile ? (
-            <button 
-              onClick={() => setSettingsOpen(true)}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-            >
-              <span className="material-symbols-outlined text-[24px]">more_horiz</span>
-            </button>
+            <>
+              <button 
+                onClick={() => setVisitorsSheetOpen(true)}
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
+              >
+                <Eye className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={() => setSettingsOpen(true)}
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
+              >
+                <span className="material-symbols-outlined text-[24px]">more_horiz</span>
+              </button>
+            </>
           ) : (
             // Menu para perfis de outros usuários - opções de compartilhar e denunciar
             useSheet ? (
@@ -222,7 +233,10 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
 
       {/* Settings Sheet for own profile */}
       {isOwnProfile && (
-        <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
+        <>
+          <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
+          <ProfileVisitorsSheet isOpen={visitorsSheetOpen} onClose={() => setVisitorsSheetOpen(false)} />
+        </>
       )}
 
       {/* Options Sheet for other profiles (mobile/PWA) */}
