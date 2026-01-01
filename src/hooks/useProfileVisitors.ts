@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -82,5 +82,86 @@ export const useProfileVisitorsCount = () => {
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useNewVisitorsCount = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["new-visitors-count", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+
+      // Buscar o visitors_seen_at do perfil do usuário
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("visitors_seen_at")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const visitorsSeenAt = profile?.visitors_seen_at;
+
+      // Buscar visitantes únicos
+      let query = supabase
+        .from("profile_views")
+        .select("visitor_id, viewed_at")
+        .eq("profile_id", user.id)
+        .neq("visitor_id", user.id)
+        .order("viewed_at", { ascending: false });
+
+      const { data: visits, error: visitsError } = await query;
+
+      if (visitsError) throw visitsError;
+
+      // Agrupar por visitor_id (mantendo apenas a visita mais recente de cada)
+      const uniqueVisitors = new Map<string, string>();
+      (visits || []).forEach((visit) => {
+        if (!uniqueVisitors.has(visit.visitor_id)) {
+          uniqueVisitors.set(visit.visitor_id, visit.viewed_at);
+        }
+      });
+
+      // Contar quantos visitantes únicos vieram depois de visitors_seen_at
+      if (!visitorsSeenAt) {
+        // Se nunca viu, todos são novos
+        return uniqueVisitors.size;
+      }
+
+      let newCount = 0;
+      uniqueVisitors.forEach((viewedAt) => {
+        if (new Date(viewedAt) > new Date(visitorsSeenAt)) {
+          newCount++;
+        }
+      });
+
+      return newCount;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2, // 2 minutos
+  });
+};
+
+export const useMarkVisitorsSeen = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user?.id) return;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ visitors_seen_at: new Date().toISOString() })
+        .eq("id", user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidar a contagem de novos visitantes
+      queryClient.invalidateQueries({ queryKey: ["new-visitors-count", user?.id] });
+    },
   });
 };
