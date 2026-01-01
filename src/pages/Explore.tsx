@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
-import { Search, CheckCircle, Loader2, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, CheckCircle, TrendingUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSearchProfiles, useFollowingIds, usePopularProfiles } from "@/hooks/useSearchProfiles";
-import { useFollowUser } from "@/hooks/useProfile";
+import { useSearchProfiles, usePopularProfiles } from "@/hooks/useSearchProfiles";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { ExploreSkeleton } from "@/components/skeletons/ExploreSkeleton";
 
@@ -29,22 +26,11 @@ const Explore = () => {
 
   const { data: popularProfiles, isLoading: isPopularLoading } = usePopularProfiles(user?.id);
 
-  const { data: followingIds } = useFollowingIds(user?.id);
-  const { mutate: toggleFollow, isPending: isFollowPending } = useFollowUser();
-
   const profiles = isSearchActive ? searchResults : popularProfiles;
   const isLoading = isSearchActive ? isSearchLoading : isPopularLoading;
 
   const handleProfileClick = (username: string) => {
     navigate(`/${username}`);
-  };
-
-  const handleFollowClick = (userId: string, isFollowing: boolean) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    toggleFollow({ userId, isFollowing });
   };
 
   return (
@@ -99,74 +85,35 @@ const Explore = () => {
           {isLoading ? (
             <ExploreSkeleton />
           ) : profiles && profiles.length > 0 ? (
-            profiles.map((profile) => {
-              const isFollowing = followingIds?.has(profile.id) || false;
-
-              return (
-                <div
-                  key={profile.id}
-                  className="bg-card border border-border rounded-xl p-3 hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3"
-                >
-                  <div 
-                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-                    onClick={() => handleProfileClick(profile.username)}
-                  >
-                    <div className="relative shrink-0">
-                      <img
-                        src={profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`}
-                        alt={profile.full_name || profile.username}
-                        className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
-                      />
-                      {profile.conta_verificada && (
-                        <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground text-sm truncate">
-                        {profile.full_name || profile.username}
-                      </h3>
-                      {profile.position && (
-                        <span className="text-xs text-primary font-medium">
-                          {profile.position}
-                          {profile.team && ` • ${profile.team}`}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={isFollowing ? "outline" : "default"}
-                    onClick={() => handleFollowClick(profile.id, isFollowing)}
-                    disabled={isFollowPending}
-                    className="shrink-0 h-7 px-3 text-xs overflow-hidden relative min-w-[72px]"
-                  >
-                    <AnimatePresence mode="wait" initial={false}>
-                      {isFollowPending ? (
-                        <motion.span
-                          key="loading"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key={isFollowing ? "following" : "follow"}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
-                        >
-                          {isFollowing ? "Torcendo" : "Torcer"}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </Button>
+            profiles.map((profile) => (
+              <div
+                key={profile.id}
+                onClick={() => handleProfileClick(profile.username)}
+                className="bg-card border border-border rounded-xl p-3 hover:bg-muted/50 hover:border-primary/30 transition-all group flex items-center gap-3 cursor-pointer"
+              >
+                <div className="relative shrink-0">
+                  <img
+                    src={profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`}
+                    alt={profile.full_name || profile.username}
+                    className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
+                  />
+                  {profile.conta_verificada && (
+                    <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
+                  )}
                 </div>
-              );
-            })
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground text-sm truncate">
+                    {profile.full_name || profile.username}
+                  </h3>
+                  {profile.position && (
+                    <span className="text-xs text-primary font-medium">
+                      {profile.position}
+                      {profile.team && ` • ${profile.team}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
