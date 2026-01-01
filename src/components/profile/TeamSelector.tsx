@@ -51,7 +51,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
     }
   }, [open, selectedTeamIds]);
 
-  // Reset to first step when sheet closes
+  // Reset to first step and clear local selections when sheet closes
   useEffect(() => {
     if (!open) {
       setStep("country");
@@ -59,6 +59,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
       setEstadoId(null);
       setSearchInput("");
       setCountrySearch("");
+      setLocalSelectedIds([]);
     }
   }, [open]);
 
@@ -147,6 +148,8 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
         ...toRemove.map(id => removeUserFromTeam.mutateAsync(id))
       ]);
 
+      // Reset local state to match the new saved state
+      setLocalSelectedIds([]);
       
       onOpenChange(false);
     } catch (error) {
