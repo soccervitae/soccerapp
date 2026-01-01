@@ -98,7 +98,9 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "messages" ? "fill-1" : ""}`}>chat</span>
             {totalUnread > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+              <span className="absolute -top-0.5 right-0 min-w-5 h-5 px-1.5 bg-destructive rounded-full flex items-center justify-center text-[10px] font-bold text-destructive-foreground border-2 border-background">
+                {totalUnread > 99 ? "99+" : totalUnread}
+              </span>
             )}
           </button>
           <button 
