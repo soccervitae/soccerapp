@@ -216,7 +216,7 @@ const Chat = () => {
         navigate("/messages");
       } else {
         toast.success("Conversa desarquivada");
-        setIsArchived(false);
+        navigate("/messages/archived");
       }
     } catch (error) {
       console.error("Error toggling archive:", error);
