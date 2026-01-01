@@ -40,7 +40,6 @@ export const NotificationPermissionButton = () => {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <BellOff className="h-4 w-4" />
-        <span>Notificações bloqueadas</span>
       </div>
     );
   }
