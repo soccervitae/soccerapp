@@ -40,6 +40,7 @@ export const PostMediaViewer = ({
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [showDoubleTapAnimation, setShowDoubleTapAnimation] = useState(false);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
 
@@ -50,8 +51,14 @@ export const PostMediaViewer = ({
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(initialIndex);
+      setMediaLoaded(false);
     }
   }, [isOpen, initialIndex]);
+
+  // Reset loaded state when changing media in carousel
+  useEffect(() => {
+    setMediaLoaded(false);
+  }, [currentIndex]);
 
   useEffect(() => {
     if (isOpen) {
@@ -218,16 +225,22 @@ export const PostMediaViewer = ({
                   <video
                     ref={videoRef}
                     src={mediaUrls[0]}
-                    className="w-full h-full object-contain"
+                    className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
+                      mediaLoaded ? "blur-0" : "blur-md"
+                    }`}
                     controls
                     autoPlay
                     playsInline
+                    onLoadedData={() => setMediaLoaded(true)}
                   />
                 ) : (
                   <img
                     src={mediaUrls[currentIndex]}
                     alt={`Foto ${currentIndex + 1}`}
-                    className="w-full h-full object-contain"
+                    className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
+                      mediaLoaded ? "blur-0" : "blur-md"
+                    }`}
+                    onLoad={() => setMediaLoaded(true)}
                   />
                 )}
 
