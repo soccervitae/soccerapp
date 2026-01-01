@@ -172,20 +172,20 @@ const ArchivedConversations = () => {
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-foreground">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-foreground truncate">
                             {conversation.participant?.full_name ||
                               conversation.participant?.username ||
                               "Usuário"}
                           </span>
                           {conversation.lastMessage && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                               {formatTime(conversation.lastMessage.created_at)}
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-sm text-muted-foreground truncate max-w-full">
                           {conversation.lastMessage 
                             ? (getSharedContentLabel(conversation.lastMessage.content) || conversation.lastMessage.content || "Sem mensagens")
                             : "Sem mensagens"}
