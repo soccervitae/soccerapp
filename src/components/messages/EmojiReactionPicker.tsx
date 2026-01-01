@@ -12,6 +12,7 @@ interface EmojiReactionPickerProps {
   onSelect: (emoji: string) => void;
   onClose: () => void;
   position?: "top" | "bottom";
+  isOwn?: boolean;
 }
 
 export const EmojiReactionPicker = ({
@@ -19,6 +20,7 @@ export const EmojiReactionPicker = ({
   onSelect,
   onClose,
   position = "top",
+  isOwn = false,
 }: EmojiReactionPickerProps) => {
   const [showRedCardAnimation, setShowRedCardAnimation] = useState(false);
   const [showGoalAnimation, setShowGoalAnimation] = useState(false);
@@ -92,9 +94,9 @@ export const EmojiReactionPicker = ({
               transition={{ duration: 0.15 }}
               className={`absolute ${
                 position === "top" ? "bottom-full mb-2" : "top-full mt-2"
-              } left-1/2 -translate-x-1/2 z-50`}
+              } ${isOwn ? "right-0" : "left-0"} z-50`}
             >
-              <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-full px-2 py-1.5 shadow-lg">
+              <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-full px-2 py-1.5 shadow-lg max-w-[calc(100vw-2rem)]">
                 {REACTION_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
