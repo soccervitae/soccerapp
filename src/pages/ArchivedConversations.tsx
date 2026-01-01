@@ -147,8 +147,8 @@ const ArchivedConversations = () => {
           </div>
         ) : (
           <ScrollArea className="h-[calc(100vh-56px)]">
-            <div className="px-3 py-2">
-              <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+            <div className="px-4 py-2">
+              <div className="bg-muted/30 rounded-xl overflow-hidden divide-y divide-border">
                 {conversations.map((conversation) => (
                   <div
                     key={conversation.id}
