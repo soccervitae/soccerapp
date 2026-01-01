@@ -10,43 +10,70 @@ import { NotificationPermissionButton } from "@/components/notifications/Notific
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { Input } from "@/components/ui/input";
-import { Search, UserPlus, Circle, Archive } from "lucide-react";
+import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, MessageCircleOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { MessagesSkeleton, OnlineUsersSkeleton } from "@/components/skeletons/MessagesSkeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { Database } from "@/integrations/supabase/types";
+import type { ConversationWithDetails } from "@/hooks/useConversations";
+
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
 const Messages = () => {
   const navigate = useNavigate();
-  const {
-    user
-  } = useAuth();
-  const {
-    conversations,
-    isLoading,
-    isFetching
-  } = useConversations();
-  const {
-    createConversation
-  } = useCreateConversation();
-  const {
-    data: followingUsers,
-    isLoading: isLoadingFollowing,
-    isFetching: isFetchingFollowing
-  } = useFollowing(user?.id || "");
+  const { user } = useAuth();
+  const { conversations, isLoading, isFetching, refetch } = useConversations();
+  const { createConversation } = useCreateConversation();
+  const { data: followingUsers, isLoading: isLoadingFollowing, isFetching: isFetchingFollowing } = useFollowing(user?.id || "");
   
   const isRefetching = (isFetching || isFetchingFollowing) && !isLoading && !isLoadingFollowing;
-  const {
-    isUserOnline
-  } = usePresenceContext();
+  const { isUserOnline } = usePresenceContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   // Set de IDs de usuários com conversas existentes
   const existingConversationUserIds = useMemo(() => {
     return new Set(conversations.filter(c => c.participant).map(c => c.participant!.id));
+  }, [conversations]);
+
+  // Filter conversations by tab
+  const allConversations = useMemo(() => {
+    return conversations.filter(c => !c.isArchived);
+  }, [conversations]);
+
+  const unreadConversations = useMemo(() => {
+    return conversations.filter(c => !c.isArchived && c.unreadCount > 0);
+  }, [conversations]);
+
+  const archivedConversations = useMemo(() => {
+    return conversations.filter(c => c.isArchived);
   }, [conversations]);
 
   // Filtrar usuários baseado na busca
@@ -62,6 +89,7 @@ const Messages = () => {
   const onlineUsers = useMemo(() => {
     return filteredUsers.filter(user => isUserOnline(user.id));
   }, [filteredUsers, isUserOnline]);
+
   const handleStartConversation = async (userId: string) => {
     setCreatingUserId(userId);
     try {
@@ -69,7 +97,6 @@ const Messages = () => {
       if (conversationId) {
         navigate(`/messages/${conversationId}`);
       } else {
-        // Toast já é mostrado no hook, mas garantir feedback
         console.log("No conversation ID returned");
       }
     } catch (error) {
@@ -79,13 +106,159 @@ const Messages = () => {
       setCreatingUserId(null);
     }
   };
-  return <div className="min-h-screen bg-background pb-20">
+
+  const handleUnarchive = async (conversationId: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("conversation_participants")
+        .update({ is_archived: false })
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+      
+      toast.success("Conversa desarquivada");
+      refetch();
+    } catch (error) {
+      console.error("Error unarchiving conversation:", error);
+      toast.error("Erro ao desarquivar conversa");
+    }
+  };
+
+  const handleDeleteClick = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!user || !selectedConversationId) return;
+
+    try {
+      // Delete user's messages in this conversation
+      await supabase
+        .from("messages")
+        .delete()
+        .eq("conversation_id", selectedConversationId)
+        .eq("sender_id", user.id);
+
+      // Remove user's participation
+      const { error } = await supabase
+        .from("conversation_participants")
+        .delete()
+        .eq("conversation_id", selectedConversationId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      toast.success("Conversa apagada");
+      refetch();
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast.error("Erro ao apagar conversa");
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedConversationId(null);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const formatTime = (date: string) => {
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
+  };
+
+  const getSharedContentLabel = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.type === "shared_post") return "📷 Publicação compartilhada";
+      if (parsed.type === "shared_story") return "📱 Story compartilhado";
+      if (parsed.type === "shared_highlight") return "✨ Destaque compartilhado";
+      if (parsed.type === "shared_profile") return "👤 Perfil compartilhado";
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const renderArchivedItem = (conversation: ConversationWithDetails) => (
+    <div
+      key={conversation.id}
+      className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors"
+    >
+      <Avatar 
+        className="h-12 w-12 cursor-pointer" 
+        onClick={() => navigate(`/messages/${conversation.id}`)}
+      >
+        <AvatarImage src={conversation.participant?.avatar_url || undefined} />
+        <AvatarFallback className="bg-muted text-muted-foreground">
+          {getInitials(
+            conversation.participant?.full_name ||
+              conversation.participant?.username ||
+              "U"
+          )}
+        </AvatarFallback>
+      </Avatar>
+
+      <div 
+        className="flex-1 min-w-0 overflow-hidden cursor-pointer"
+        onClick={() => navigate(`/messages/${conversation.id}`)}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-medium text-foreground truncate">
+            {conversation.participant?.full_name ||
+              conversation.participant?.username ||
+              "Usuário"}
+          </span>
+          {conversation.lastMessage && (
+            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+              {formatTime(conversation.lastMessage.created_at)}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground truncate max-w-full">
+          {conversation.lastMessage 
+            ? (getSharedContentLabel(conversation.lastMessage.content) || conversation.lastMessage.content || "Sem mensagens")
+            : "Sem mensagens"}
+        </p>
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleUnarchive(conversation.id)}>
+            <ArchiveRestore className="h-4 w-4 mr-2" />
+            Desarquivar
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleDeleteClick(conversation.id)}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Apagar conversa
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <h1 className="text-lg font-semibold">Mensagens</h1>
-        <Button variant="ghost" size="icon" onClick={() => navigate("/messages/archived")}>
-          <Archive className="h-5 w-5" />
-        </Button>
       </div>
 
       {/* Content */}
@@ -108,70 +281,198 @@ const Messages = () => {
           </div>
         </div>
 
-        {/* Loading state */}
-        {isLoadingFollowing && (
-          <div className="px-3">
-            <OnlineUsersSkeleton />
-            <div className="mt-4">
-              <MessagesSkeleton />
-            </div>
-          </div>
-        )}
+        {/* Tabs */}
+        <div className="px-3 pb-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all" className="gap-1.5">
+                <MessageCircle className="h-4 w-4" />
+                Todas
+              </TabsTrigger>
+              <TabsTrigger value="unread" className="gap-1.5">
+                <MessageCircleOff className="h-4 w-4" />
+                Não lidas
+                {unreadConversations.length > 0 && (
+                  <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
+                    {unreadConversations.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="archived" className="gap-1.5">
+                <Archive className="h-4 w-4" />
+                Arquivadas
+                {archivedConversations.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
+                    {archivedConversations.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Empty state - não segue ninguém */}
-        {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-            <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
-            <h2 className="text-lg font-medium mb-1">Você ainda não segue ninguém</h2>
-            <p className="text-muted-foreground text-sm">
-              Siga pessoas para iniciar conversas
-            </p>
-          </div>}
-
-        {/* Empty state - busca sem resultados */}
-        {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length >= 2 && <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-            <Search className="h-12 w-12 text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">
-              Nenhum usuário encontrado para "{searchQuery}"
-            </p>
-          </div>}
-
-        {/* Lista de usuários seguidos */}
-        {!isLoadingFollowing && filteredUsers.length > 0 && <ScrollArea className="h-[calc(100vh-280px)]">
-            {/* Seção Online - Horizontal scroll */}
-            {onlineUsers.length > 0 && <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2 px-3">
-                  <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Online agora ({onlineUsers.length})
-                  </h3>
+            {/* Loading state */}
+            {isLoadingFollowing && (
+              <div className="mt-4">
+                <OnlineUsersSkeleton />
+                <div className="mt-4">
+                  <MessagesSkeleton />
                 </div>
-                <div className="flex overflow-x-auto no-scrollbar gap-2 px-3 pb-2">
-                  {onlineUsers.map(userProfile => <OnlineUserAvatar key={userProfile.id} user={userProfile} onClick={() => handleStartConversation(userProfile.id)} disabled={creatingUserId !== null} isLoading={creatingUserId === userProfile.id} />)}
-                </div>
-              </div>}
+              </div>
+            )}
 
-            {/* Seção de conversas recentes */}
-            {conversations.length > 0 && <div className="px-3 mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Conversas recentes ({conversations.length})
-                  </h3>
-                </div>
-                <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                  {conversations.map(conversation => <ConversationItem key={conversation.id} conversation={conversation} onClick={() => navigate(`/messages/${conversation.id}`)} />)}
-                </div>
-              </div>}
-          </ScrollArea>}
+            {/* Empty state - não segue ninguém */}
+            {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
+                <h2 className="text-lg font-medium mb-1">Você ainda não segue ninguém</h2>
+                <p className="text-muted-foreground text-sm">
+                  Siga pessoas para iniciar conversas
+                </p>
+              </div>
+            )}
 
-        {/* Empty conversations state quando há usuários mas nenhuma conversa */}
-        {!isLoadingFollowing && !isLoading && filteredUsers.length > 0 && conversations.length === 0 && <div className="px-3 py-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Clique em alguém acima para iniciar uma conversa
-            </p>
-          </div>}
+            {/* Empty state - busca sem resultados */}
+            {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length >= 2 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                <Search className="h-12 w-12 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">
+                  Nenhum usuário encontrado para "{searchQuery}"
+                </p>
+              </div>
+            )}
+
+            {/* Tab Content - Todas */}
+            <TabsContent value="all" className="mt-0">
+              {!isLoadingFollowing && filteredUsers.length > 0 && (
+                <ScrollArea className="h-[calc(100vh-320px)]">
+                  {/* Seção Online - Horizontal scroll */}
+                  {onlineUsers.length > 0 && (
+                    <div className="mb-4 mt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Online agora ({onlineUsers.length})
+                        </h3>
+                      </div>
+                      <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                        {onlineUsers.map(userProfile => (
+                          <OnlineUserAvatar 
+                            key={userProfile.id} 
+                            user={userProfile} 
+                            onClick={() => handleStartConversation(userProfile.id)} 
+                            disabled={creatingUserId !== null} 
+                            isLoading={creatingUserId === userProfile.id} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção de conversas recentes */}
+                  {allConversations.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Conversas recentes ({allConversations.length})
+                        </h3>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                        {allConversations.map(conversation => (
+                          <ConversationItem 
+                            key={conversation.id} 
+                            conversation={conversation} 
+                            onClick={() => navigate(`/messages/${conversation.id}`)} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty conversations state */}
+                  {allConversations.length === 0 && !isLoading && (
+                    <div className="py-8 text-center">
+                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        Nenhuma conversa ainda. Clique em alguém online para iniciar!
+                      </p>
+                    </div>
+                  )}
+                </ScrollArea>
+              )}
+            </TabsContent>
+
+            {/* Tab Content - Não lidas */}
+            <TabsContent value="unread" className="mt-0">
+              <ScrollArea className="h-[calc(100vh-320px)]">
+                {unreadConversations.length > 0 ? (
+                  <div className="mb-4 mt-4">
+                    <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                      {unreadConversations.map(conversation => (
+                        <ConversationItem 
+                          key={conversation.id} 
+                          conversation={conversation} 
+                          onClick={() => navigate(`/messages/${conversation.id}`)} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <MessageCircleOff className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma mensagem não lida
+                    </p>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+
+            {/* Tab Content - Arquivadas */}
+            <TabsContent value="archived" className="mt-0">
+              <ScrollArea className="h-[calc(100vh-320px)]">
+                {archivedConversations.length > 0 ? (
+                  <div className="mb-4 mt-4">
+                    <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                      {archivedConversations.map(renderArchivedItem)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma conversa arquivada
+                    </p>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar conversa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Todas as suas mensagens nesta conversa serão apagadas permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNavigation />
-    </div>;
+    </div>
+  );
 };
+
 export default Messages;

@@ -28,7 +28,7 @@ import Security from "./pages/settings/Security";
 import Notifications from "./pages/settings/Notifications";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
-import ArchivedConversations from "./pages/ArchivedConversations";
+
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
@@ -129,11 +129,6 @@ const AnimatedRoutes = () => {
         <Route path="/messages/:conversationId" element={
           <ProtectedRoute>
             <PageTransition><Chat /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/messages/archived" element={
-          <ProtectedRoute>
-            <PageTransition><ArchivedConversations /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
