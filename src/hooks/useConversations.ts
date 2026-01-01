@@ -19,6 +19,7 @@ export interface ConversationWithDetails extends Conversation {
   unreadCount: number;
   isMuted?: boolean;
   isPinned?: boolean;
+  isArchived?: boolean;
 }
 
 export const useConversations = () => {
@@ -66,12 +67,11 @@ export const useConversations = () => {
     }
 
     try {
-      // Get all conversation IDs where user is participant (excluding archived)
+      // Get all conversation IDs where user is participant (including archived)
       const { data: participations, error: partError } = await supabase
         .from("conversation_participants")
-        .select("conversation_id, is_muted, is_pinned")
-        .eq("user_id", user.id)
-        .eq("is_archived", false);
+        .select("conversation_id, is_muted, is_pinned, is_archived")
+        .eq("user_id", user.id);
 
       if (partError) throw partError;
 
@@ -84,6 +84,7 @@ export const useConversations = () => {
       const conversationIds = participations.map((p) => p.conversation_id);
       const muteStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_muted]));
       const pinStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_pinned]));
+      const archivedStatusMap = new Map(participations.map((p) => [p.conversation_id, p.is_archived]));
 
       // Get conversations
       const { data: convData, error: convError } = await supabase
@@ -141,6 +142,7 @@ export const useConversations = () => {
             unreadCount: count || 0,
             isMuted: muteStatusMap.get(conv.id) || false,
             isPinned: pinStatusMap.get(conv.id) || false,
+            isArchived: archivedStatusMap.get(conv.id) || false,
           };
         })
       );
