@@ -6,6 +6,7 @@ import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { useStories } from "@/hooks/useStories";
+import { useProfileVisitorsCount } from "@/hooks/useProfileVisitors";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,6 +17,7 @@ import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, Respons
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
+import { ProfileVisitorsSheet } from "@/components/profile/ProfileVisitorsSheet";
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
@@ -51,6 +53,10 @@ export const ProfileInfo = ({
   // Story viewer state
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
+  
+  // Profile visitors state
+  const [visitorsSheetOpen, setVisitorsSheetOpen] = useState(false);
+  const { data: visitorsCount = 0 } = useProfileVisitorsCount();
   
   // Fetch stories to check if user has active replays
   const { data: groupedStories } = useStories();
@@ -241,6 +247,12 @@ return <section className="flex flex-col items-center gap-4">
             <span className="text-foreground font-bold">{followStats.following}</span>
             <span className="text-muted-foreground text-xs">Torcendo</span>
           </button>
+          {isOwnProfile && (
+            <button onClick={() => setVisitorsSheetOpen(true)} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+              <span className="text-foreground font-bold">{visitorsCount}</span>
+              <span className="text-muted-foreground text-xs">Visitantes</span>
+            </button>
+          )}
         </div>}
 
       {/* Physical Stats - Only for athletes (no role means athlete) */}
@@ -415,5 +427,11 @@ return <section className="flex flex-col items-center gap-4">
           originRect={clickOrigin}
         />
       )}
+
+      {/* Profile Visitors Sheet */}
+      <ProfileVisitorsSheet 
+        isOpen={visitorsSheetOpen} 
+        onClose={() => setVisitorsSheetOpen(false)} 
+      />
     </section>;
 };
