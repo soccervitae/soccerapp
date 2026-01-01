@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
 import { useCreateConversation } from "@/hooks/useMessages";
@@ -340,111 +341,141 @@ const Messages = () => {
               </div>
             )}
 
-            {/* Tab Content - Todas */}
-            <TabsContent value="all" className="mt-0">
-              {!isLoadingFollowing && filteredUsers.length > 0 && (
-                <ScrollArea className="h-[calc(100vh-320px)]">
-                  {/* Seção Online - Horizontal scroll */}
-                  {onlineUsers.length > 0 && (
-                    <div className="mb-4 mt-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                        <h3 className="text-sm font-medium text-muted-foreground">
-                          Online agora ({onlineUsers.length})
-                        </h3>
-                      </div>
-                      <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                        {onlineUsers.map(userProfile => (
-                          <OnlineUserAvatar 
-                            key={userProfile.id} 
-                            user={userProfile} 
-                            onClick={() => handleStartConversation(userProfile.id)} 
-                            disabled={creatingUserId !== null} 
-                            isLoading={creatingUserId === userProfile.id} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+            {/* Tab Content with Animation */}
+            <AnimatePresence mode="wait">
+              {activeTab === "all" && (
+                <TabsContent value="all" className="mt-0" forceMount asChild>
+                  <motion.div
+                    key="all"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    {!isLoadingFollowing && filteredUsers.length > 0 && (
+                      <ScrollArea className="h-[calc(100vh-320px)]">
+                        {/* Seção Online - Horizontal scroll */}
+                        {onlineUsers.length > 0 && (
+                          <div className="mb-4 mt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                              <h3 className="text-sm font-medium text-muted-foreground">
+                                Online agora ({onlineUsers.length})
+                              </h3>
+                            </div>
+                            <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                              {onlineUsers.map(userProfile => (
+                                <OnlineUserAvatar 
+                                  key={userProfile.id} 
+                                  user={userProfile} 
+                                  onClick={() => handleStartConversation(userProfile.id)} 
+                                  disabled={creatingUserId !== null} 
+                                  isLoading={creatingUserId === userProfile.id} 
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                  {/* Seção de conversas recentes */}
-                  {allConversations.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-sm font-medium text-muted-foreground">
-                          Conversas recentes ({allConversations.length})
-                        </h3>
-                      </div>
-                      <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                        {allConversations.map(conversation => (
-                          <ConversationItem 
-                            key={conversation.id} 
-                            conversation={conversation} 
-                            onClick={() => navigate(`/messages/${conversation.id}`)} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        {/* Seção de conversas recentes */}
+                        {allConversations.length > 0 && (
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-sm font-medium text-muted-foreground">
+                                Conversas recentes ({allConversations.length})
+                              </h3>
+                            </div>
+                            <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                              {allConversations.map(conversation => (
+                                <ConversationItem 
+                                  key={conversation.id} 
+                                  conversation={conversation} 
+                                  onClick={() => navigate(`/messages/${conversation.id}`)} 
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                  {/* Empty conversations state */}
-                  {allConversations.length === 0 && !isLoading && (
-                    <div className="py-8 text-center">
-                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        Nenhuma conversa ainda. Clique em alguém online para iniciar!
-                      </p>
-                    </div>
-                  )}
-                </ScrollArea>
+                        {/* Empty conversations state */}
+                        {allConversations.length === 0 && !isLoading && (
+                          <div className="py-8 text-center">
+                            <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                            <p className="text-sm text-muted-foreground">
+                              Nenhuma conversa ainda. Clique em alguém online para iniciar!
+                            </p>
+                          </div>
+                        )}
+                      </ScrollArea>
+                    )}
+                  </motion.div>
+                </TabsContent>
               )}
-            </TabsContent>
 
-            {/* Tab Content - Não lidas */}
-            <TabsContent value="unread" className="mt-0">
-              <ScrollArea className="h-[calc(100vh-320px)]">
-                {unreadConversations.length > 0 ? (
-                  <div className="mb-4 mt-4">
-                    <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                      {unreadConversations.map(conversation => (
-                        <ConversationItem 
-                          key={conversation.id} 
-                          conversation={conversation} 
-                          onClick={() => navigate(`/messages/${conversation.id}`)} 
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <MessageCircleOff className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">
-                      Nenhuma mensagem não lida
-                    </p>
-                  </div>
-                )}
-              </ScrollArea>
-            </TabsContent>
+              {activeTab === "unread" && (
+                <TabsContent value="unread" className="mt-0" forceMount asChild>
+                  <motion.div
+                    key="unread"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <ScrollArea className="h-[calc(100vh-320px)]">
+                      {unreadConversations.length > 0 ? (
+                        <div className="mb-4 mt-4">
+                          <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                            {unreadConversations.map(conversation => (
+                              <ConversationItem 
+                                key={conversation.id} 
+                                conversation={conversation} 
+                                onClick={() => navigate(`/messages/${conversation.id}`)} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <MessageCircleOff className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm text-muted-foreground">
+                            Nenhuma mensagem não lida
+                          </p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </motion.div>
+                </TabsContent>
+              )}
 
-            {/* Tab Content - Arquivadas */}
-            <TabsContent value="archived" className="mt-0">
-              <ScrollArea className="h-[calc(100vh-320px)]">
-                {archivedConversations.length > 0 ? (
-                  <div className="mb-4 mt-4">
-                    <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                      {archivedConversations.map(renderArchivedItem)}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">
-                      Nenhuma conversa arquivada
-                    </p>
-                  </div>
-                )}
-              </ScrollArea>
-            </TabsContent>
+              {activeTab === "archived" && (
+                <TabsContent value="archived" className="mt-0" forceMount asChild>
+                  <motion.div
+                    key="archived"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <ScrollArea className="h-[calc(100vh-320px)]">
+                      {archivedConversations.length > 0 ? (
+                        <div className="mb-4 mt-4">
+                          <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                            {archivedConversations.map(renderArchivedItem)}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm text-muted-foreground">
+                            Nenhuma conversa arquivada
+                          </p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </motion.div>
+                </TabsContent>
+              )}
+            </AnimatePresence>
           </Tabs>
         </div>
       </div>
