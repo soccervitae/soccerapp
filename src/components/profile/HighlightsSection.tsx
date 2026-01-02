@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
+import { getVideoDuration, formatDuration } from "@/hooks/useVideoDuration";
 
 
 interface HighlightsSectionProps {
@@ -84,15 +85,23 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
   const [imageError, setImageError] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isLoadingThumbnail, setIsLoadingThumbnail] = useState(false);
+  const [duration, setDuration] = useState<string>("");
   const hasError = imageError || isUnsupportedFormat(coverImage);
 
-  // Generate thumbnail for video covers
+  // Generate thumbnail and get duration for video covers
   useEffect(() => {
     if (isVideo && coverImage && !hasError) {
       setIsLoadingThumbnail(true);
-      generateVideoThumbnail(coverImage, 1).then((thumbnail) => {
+      
+      Promise.all([
+        generateVideoThumbnail(coverImage, 1),
+        getVideoDuration(coverImage)
+      ]).then(([thumbnail, dur]) => {
         if (thumbnail) {
           setThumbnailUrl(thumbnail);
+        }
+        if (dur) {
+          setDuration(formatDuration(dur));
         }
         setIsLoadingThumbnail(false);
       });
@@ -134,10 +143,15 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
               className="w-full h-full rounded-full border-2 border-background object-cover"
               onError={() => setImageError(true)}
             />
-            {/* Video indicator */}
+            {/* Video indicator with duration */}
             {isVideo && (
-              <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
+              <div className="absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/20">
                 <Play className="w-4 h-4 text-white fill-white" />
+                {duration && (
+                  <span className="text-white text-[8px] font-medium mt-0.5 drop-shadow-md">
+                    {duration}
+                  </span>
+                )}
               </div>
             )}
           </div>
