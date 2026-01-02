@@ -64,6 +64,7 @@ export const FeedPost = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -281,8 +282,18 @@ export const FeedPost = ({
       {/* Caption */}
       {post.content && <div className="pb-3">
         <p className="text-sm text-foreground">
-          {post.content}
+          {post.content.length > 150 && !isContentExpanded 
+            ? post.content.slice(0, 150).trim() + "..." 
+            : post.content}
         </p>
+        {post.content.length > 150 && (
+          <button 
+            onClick={() => setIsContentExpanded(!isContentExpanded)}
+            className="text-sm text-muted-foreground hover:text-foreground mt-1 transition-colors"
+          >
+            {isContentExpanded ? "Ver menos" : "Ver mais"}
+          </button>
+        )}
       </div>}
 
       {/* Media */}
