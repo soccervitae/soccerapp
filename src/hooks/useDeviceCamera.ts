@@ -8,6 +8,11 @@ export interface CameraImage {
   blob?: Blob;
 }
 
+export interface CameraVideo {
+  webPath: string;
+  blob: Blob;
+}
+
 // Helper to convert base64 to Blob
 const base64ToBlob = (base64: string, mimeType: string = 'image/jpeg'): Blob => {
   const byteCharacters = atob(base64);
@@ -165,10 +170,30 @@ export const useDeviceCamera = () => {
     }
   }, [isNative]);
 
+  const pickVideoFromGallery = useCallback(async (): Promise<CameraVideo | null> => {
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'video/*';
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file && file.type.startsWith('video/')) {
+          const webPath = URL.createObjectURL(file);
+          resolve({ webPath, blob: file });
+        } else {
+          resolve(null);
+        }
+      };
+      input.oncancel = () => resolve(null);
+      input.click();
+    });
+  }, []);
+
   return {
     takePhoto,
     pickFromGallery,
     pickMultipleFromGallery,
+    pickVideoFromGallery,
     isLoading,
     error,
     isNative,

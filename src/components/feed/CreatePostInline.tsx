@@ -84,7 +84,7 @@ export const CreatePostInline = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Hooks
-  const { takePhoto, pickMultipleFromGallery, isLoading } = useDeviceCamera();
+  const { takePhoto, pickMultipleFromGallery, pickVideoFromGallery, isLoading } = useDeviceCamera();
   const { uploadMedia, isUploading, progress } = useUploadMedia();
   const { compressImage, isCompressing } = useImageCompression();
   const createPost = useCreatePost();
@@ -161,6 +161,16 @@ export const CreatePostInline = () => {
     toast.success("Vídeo gravado!");
   };
 
+  const handlePickVideoFromGallery = async () => {
+    const video = await pickVideoFromGallery();
+    if (video) {
+      setSelectedMediaList([{ url: video.webPath, blob: video.blob, isLocal: true }]);
+      setSelectedMediaType("video");
+      setIsExpanded(true);
+      toast.success("Vídeo selecionado!");
+    }
+  };
+
   const uploadAllMedia = async (): Promise<string[]> => {
     const uploadedUrls: string[] = [];
     
@@ -168,7 +178,9 @@ export const CreatePostInline = () => {
       let uploadedUrl: string | null = null;
       
       if (media.blob && selectedMediaType === "video") {
-        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.webm`);
+        // Detectar extensão do vídeo original
+        const videoExt = media.blob.type.split('/')[1] || 'mp4';
+        uploadedUrl = await uploadMedia(media.blob, "post-media", `${Date.now()}.${videoExt}`);
       } else if (media.isLocal && (media.blob || media.url)) {
         try {
           let blob: Blob;
@@ -757,6 +769,16 @@ export const CreatePostInline = () => {
               <span className="hidden sm:inline">Galeria</span>
             </button>
             <button
+              onClick={handlePickVideoFromGallery}
+              disabled={isPublishing}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[20px] text-purple-500">
+                video_library
+              </span>
+              <span className="hidden sm:inline">Vídeo</span>
+            </button>
+            <button
               onClick={() => setViewMode("video-recorder")}
               disabled={isPublishing}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
@@ -764,7 +786,7 @@ export const CreatePostInline = () => {
               <span className="material-symbols-outlined text-[20px] text-blue-500">
                 videocam
               </span>
-              <span className="hidden sm:inline">Vídeo</span>
+              <span className="hidden sm:inline">Gravar</span>
             </button>
             <button
               onClick={() => setIsReplayOpen(true)}

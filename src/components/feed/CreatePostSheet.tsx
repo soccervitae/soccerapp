@@ -84,7 +84,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [isPublishing, setIsPublishing] = useState(false);
   const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
 
-  const { takePhoto, pickMultipleFromGallery, isLoading, error } = useDeviceCamera();
+  const { takePhoto, pickMultipleFromGallery, pickVideoFromGallery, isLoading, error } = useDeviceCamera();
   const { 
     media: deviceGallery, 
     loadGallery, 
@@ -205,6 +205,15 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     toast.success("Vídeo gravado!");
   };
 
+  const handlePickVideoFromGallery = async () => {
+    const video = await pickVideoFromGallery();
+    if (video) {
+      setSelectedMediaList([{ url: video.webPath, blob: video.blob, isLocal: true }]);
+      setSelectedMediaType("video");
+      toast.success("Vídeo selecionado!");
+    }
+  };
+
   const uploadAllMedia = async (): Promise<string[]> => {
     const uploadedUrls: string[] = [];
     
@@ -216,7 +225,9 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       const uniqueFileName = `${Date.now()}_${index}_${Math.random().toString(36).substring(7)}`;
       
       if (media.blob && selectedMediaType === "video") {
-        uploadedUrl = await uploadMedia(media.blob, "post-media", `${uniqueFileName}.webm`);
+        // Detectar extensão do vídeo original
+        const videoExt = media.blob.type.split('/')[1] || 'mp4';
+        uploadedUrl = await uploadMedia(media.blob, "post-media", `${uniqueFileName}.${videoExt}`);
       } else if (media.isLocal && (media.blob || media.croppedBlob || media.url)) {
         try {
           let blob: Blob;
@@ -723,6 +734,10 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                   <button onClick={handleTakePhoto} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">photo_camera</span></div>
                     <span className="text-xs font-medium text-foreground">Tirar Foto</span>
+                  </button>
+                  <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">video_library</span></div>
+                    <span className="text-xs font-medium text-foreground">Vídeo Galeria</span>
                   </button>
                   <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">videocam</span></div>
