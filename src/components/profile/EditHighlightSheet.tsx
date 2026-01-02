@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2, X, GripVertical, Play, Film, Pencil, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useImageCompression } from "@/hooks/useImageCompression";
 import {
   DndContext,
   closestCenter,
@@ -115,6 +116,7 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
   const deleteHighlightImage = useDeleteHighlightImage();
   const reorderHighlightImages = useReorderHighlightImages();
   const updateHighlight = useUpdateHighlight();
+  const { compressImage } = useImageCompression();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [localImages, setLocalImages] = useState<HighlightImage[]>([]);
@@ -168,12 +170,18 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
         try {
           const isVideo = file.type.startsWith('video/');
           const mediaType = isVideo ? 'video' : 'image';
-          const fileExt = file.name.split('.').pop();
+          const fileExt = isVideo ? file.name.split('.').pop() : 'jpg';
           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+          
+          // Compress images before upload
+          let fileToUpload: Blob = file;
+          if (!isVideo) {
+            fileToUpload = await compressImage(file);
+          }
           
           const { error: uploadError } = await supabase.storage
             .from("post-media")
-            .upload(fileName, file);
+            .upload(fileName, fileToUpload);
 
           if (uploadError) throw uploadError;
 

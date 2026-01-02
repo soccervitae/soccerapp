@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2, ImagePlus, X, GripVertical, Play, Film } from "lucide-react";
+import { useImageCompression } from "@/hooks/useImageCompression";
 import {
   DndContext,
   closestCenter,
@@ -110,6 +111,7 @@ const SortableMedia = ({
 export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps) => {
   const { user } = useAuth();
   const addHighlight = useAddHighlight();
+  const { compressImage } = useImageCompression();
   const [title, setTitle] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -213,12 +215,18 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
       const uploadedItems: Array<{ url: string; type: 'image' | 'video' }> = [];
       
       for (const item of mediaItems) {
-        const fileExt = item.file.name.split('.').pop();
+        const fileExt = item.type === 'image' ? 'jpg' : item.file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        // Compress images before upload
+        let fileToUpload: Blob = item.file;
+        if (item.type === 'image') {
+          fileToUpload = await compressImage(item.file);
+        }
         
         const { error: uploadError } = await supabase.storage
           .from("post-media")
-          .upload(fileName, item.file);
+          .upload(fileName, fileToUpload);
 
         if (uploadError) throw uploadError;
 
