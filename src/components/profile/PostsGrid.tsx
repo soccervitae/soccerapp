@@ -4,7 +4,7 @@ import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -18,6 +18,11 @@ interface Post {
   comments_count?: number;
   shares_count?: number;
   location_name?: string | null;
+  location_lat?: number | null;
+  location_lng?: number | null;
+  music_track_id?: string | null;
+  music_start_seconds?: number | null;
+  music_end_seconds?: number | null;
 }
 
 interface Championship {
@@ -95,8 +100,8 @@ export const PostsGrid = ({
 }: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
-  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number>(-1);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -129,58 +134,9 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (post: Post) => {
-    if (!post.media_url) return;
-    setSelectedPost(post);
-    setMediaViewerOpen(true);
-  };
-
-  const getMediaUrls = (post: Post): string[] => {
-    if (!post.media_url) return [];
-    if (post.media_type === "carousel") {
-      try {
-        return JSON.parse(post.media_url);
-      } catch {
-        return [post.media_url];
-      }
-    }
-    return [post.media_url];
-  };
-
-  const transformPostForViewer = (post: Post) => {
-    if (!profile) return null;
-    return {
-      id: post.id,
-      content: post.content,
-      media_url: post.media_url,
-      media_type: post.media_type,
-      created_at: post.created_at || new Date().toISOString(),
-      updated_at: null,
-      user_id: post.user_id || profile.id,
-      likes_count: post.likes_count || 0,
-      comments_count: post.comments_count || 0,
-      shares_count: post.shares_count || 0,
-      location_name: post.location_name || null,
-      location_lat: null,
-      location_lng: null,
-      music_track_id: null,
-      music_start_seconds: null,
-      music_end_seconds: null,
-      music_track: null,
-      profile: {
-        id: profile.id,
-        username: profile.username,
-        full_name: profile.full_name,
-        nickname: null,
-        avatar_url: profile.avatar_url,
-        position: null,
-        team: null,
-        conta_verificada: profile.conta_verificada || false,
-      },
-      liked_by_user: false,
-      saved_by_user: false,
-      recent_likes: [],
-    };
+  const handlePostClick = (filteredPosts: Post[], index: number) => {
+    setSelectedPostIndex(index);
+    setFeedSheetOpen(true);
   };
 
   // Component to render video with thumbnail
@@ -248,11 +204,11 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post) => (
+        {filteredPosts.map((post, index) => (
           <div 
             key={post.id} 
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onClick={() => handlePostClick(post)}
+            onClick={() => handlePostClick(filteredPosts, index)}
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -321,7 +277,7 @@ export const PostsGrid = ({
     );
   }
 
-  const viewerPost = selectedPost ? transformPostForViewer(selectedPost) : null;
+  const currentFilteredPosts = getFilteredPosts(activeTab);
 
   return (
     <section>
@@ -387,18 +343,17 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Post Media Viewer - Fullscreen */}
-      {selectedPost && viewerPost && (
-        <PostMediaViewer
-          post={viewerPost}
-          mediaUrls={getMediaUrls(selectedPost)}
-          mediaType={selectedPost.media_type || "image"}
-          initialIndex={0}
-          isOpen={mediaViewerOpen}
+      {/* Profile Feed Sheet */}
+      {profile && (
+        <ProfileFeedSheet
+          posts={currentFilteredPosts}
+          initialPostIndex={selectedPostIndex}
+          isOpen={feedSheetOpen}
           onClose={() => {
-            setMediaViewerOpen(false);
-            setSelectedPost(null);
+            setFeedSheetOpen(false);
+            setSelectedPostIndex(-1);
           }}
+          profile={profile}
         />
       )}
     </section>
