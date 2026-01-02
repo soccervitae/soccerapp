@@ -175,12 +175,12 @@ const Install = () => {
             transition={{ delay: 0.3 }}
             className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-5"
           >
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-3">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
-                className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0"
               >
                 <CheckCircle className="w-6 h-6 text-emerald-500" />
               </motion.div>
@@ -190,9 +190,14 @@ const Install = () => {
                 </p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground pl-13">
-              Instale o app e faça login para começar sua jornada no Soccer Vitae.
-            </p>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Siga os passos abaixo para instalar o app e depois <span className="font-semibold text-foreground">faça login novamente</span> dentro do aplicativo instalado.
+              </p>
+              <p className="text-xs opacity-80">
+                Por segurança, sua sessão não é transferida automaticamente para o app.
+              </p>
+            </div>
           </motion.div>
         )}
 
