@@ -255,7 +255,7 @@ export const FeedPost = ({
       </div>
 
       {/* Media */}
-      {post.media_url && <div className="relative aspect-square bg-muted max-h-[70vh] overflow-hidden">
+      {post.media_url && <div className="relative aspect-[4/5] bg-muted max-h-[75vh] overflow-hidden">
           {post.media_type === "video" ? <div className="w-full h-full cursor-pointer" onClick={e => {
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setClickOrigin(rect);
