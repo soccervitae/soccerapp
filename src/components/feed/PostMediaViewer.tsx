@@ -295,33 +295,8 @@ export const PostMediaViewer = ({
               {/* Top gradient */}
               <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
 
-              {/* Header - overlaid */}
-              <div className="absolute top-4 left-0 right-0 z-20 px-4 flex items-center justify-between">
-                <button
-                  onClick={() => handleProfileClick(post.profile.username)}
-                  className="flex items-center gap-3"
-                >
-                  {/* Avatar with gradient border like replay */}
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 p-[2px]" />
-                    <Avatar className="w-10 h-10 relative border-2 border-black">
-                      <AvatarImage src={post.profile.avatar_url || "/placeholder.svg"} />
-                      <AvatarFallback>{post.profile.username[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="text-left">
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-sm text-white drop-shadow-lg">
-                        {post.profile.nickname || post.profile.full_name || post.profile.username}
-                      </span>
-                      {post.profile.conta_verificada && (
-                        <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-white/80 drop-shadow-lg">{getTimeAgo(post.created_at)}</p>
-                  </div>
-                </button>
-
+              {/* Header - overlaid (close button only) */}
+              <div className="absolute top-4 right-4 z-20">
                 <button
                   onClick={onClose}
                   className="w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-colors"
@@ -354,6 +329,32 @@ export const PostMediaViewer = ({
                     <span className="truncate">{post.location_name}</span>
                   </a>
                 )}
+
+                {/* Profile info section */}
+                <button
+                  onClick={() => handleProfileClick(post.profile.username)}
+                  className="flex items-center gap-3"
+                >
+                  {/* Avatar with gradient border */}
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 p-[2px]" />
+                    <Avatar className="w-10 h-10 relative border-2 border-black">
+                      <AvatarImage src={post.profile.avatar_url || "/placeholder.svg"} />
+                      <AvatarFallback>{post.profile.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold text-sm text-white drop-shadow-lg">
+                        {post.profile.nickname || post.profile.full_name || post.profile.username}
+                      </span>
+                      {post.profile.conta_verificada && (
+                        <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-white/80 drop-shadow-lg">{getTimeAgo(post.created_at)}</p>
+                  </div>
+                </button>
 
                 {/* Applauded by section */}
                 {post.likes_count > 0 && (
