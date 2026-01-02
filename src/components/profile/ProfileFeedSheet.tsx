@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { FeedPost } from "@/components/feed/FeedPost";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Post {
   id: string;
@@ -35,6 +34,7 @@ interface ProfileFeedSheetProps {
   isOpen: boolean;
   onClose: () => void;
   profile: Profile;
+  originRect?: DOMRect | null;
 }
 
 export const ProfileFeedSheet = ({
@@ -43,10 +43,24 @@ export const ProfileFeedSheet = ({
   isOpen,
   onClose,
   profile,
+  originRect,
 }: ProfileFeedSheetProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Block body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Scroll to selected post
   useEffect(() => {
     if (isOpen && initialPostIndex >= 0 && postRefs.current[initialPostIndex]) {
       setTimeout(() => {
@@ -54,6 +68,25 @@ export const ProfileFeedSheet = ({
       }, 100);
     }
   }, [isOpen, initialPostIndex]);
+
+  const getInitialPosition = () => {
+    if (!originRect) {
+      return { opacity: 0, scale: 0.9, borderRadius: "16px" };
+    }
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const originCenterX = originRect.left + originRect.width / 2;
+    const originCenterY = originRect.top + originRect.height / 2;
+
+    return {
+      opacity: 0,
+      scale: Math.min(originRect.width / window.innerWidth, 0.2),
+      x: originCenterX - centerX,
+      y: originCenterY - centerY,
+      borderRadius: "16px",
+    };
+  };
 
   const transformPostForFeed = (post: Post) => ({
     id: post.id,
@@ -96,54 +129,64 @@ export const ProfileFeedSheet = ({
   });
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-full p-0 border-0">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="h-full flex flex-col"
-        >
-          {/* Header */}
-          <motion.div 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="sticky top-0 z-10 bg-background border-b border-border flex items-center px-4 h-14"
-          >
-            <button 
-              onClick={() => onClose()}
-              className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
-            >
-              <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-            </button>
-            <span className="font-semibold ml-2">Posts</span>
-          </motion.div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[60]">
+          {/* Overlay */}
+          <motion.div
+            className="absolute inset-0 bg-background"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          />
 
-          {/* Feed */}
-          <div 
-            ref={scrollContainerRef}
-            className="flex-1 overflow-y-auto"
+          {/* Main container with expansion animation */}
+          <motion.div
+            className="relative w-full h-full flex flex-col bg-background overflow-hidden"
+            initial={getInitialPosition()}
+            animate={{ 
+              opacity: 1, 
+              scale: 1, 
+              x: 0, 
+              y: 0, 
+              borderRadius: "0px" 
+            }}
+            exit={getInitialPosition()}
+            transition={{ 
+              type: "spring", 
+              stiffness: 200, 
+              damping: 25 
+            }}
           >
-            {posts.map((post, index) => (
-              <motion.div 
-                key={post.id} 
-                ref={(el) => { postRefs.current[index] = el; }}
-                initial={{ opacity: 0, y: 30, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ 
-                  duration: 0.4, 
-                  delay: 0.15 + Math.min(index * 0.06, 0.3),
-                  ease: [0.25, 0.46, 0.45, 0.94]
-                }}
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-background border-b border-border flex items-center px-4 h-14">
+              <button 
+                onClick={onClose}
+                className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
               >
-                <FeedPost post={transformPostForFeed(post)} />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </SheetContent>
-    </Sheet>
+                <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+              </button>
+              <span className="font-semibold ml-2">Posts</span>
+            </div>
+
+            {/* Feed */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 overflow-y-auto"
+            >
+              {posts.map((post, index) => (
+                <div 
+                  key={post.id} 
+                  ref={(el) => { postRefs.current[index] = el; }}
+                >
+                  <FeedPost post={transformPostForFeed(post)} />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };

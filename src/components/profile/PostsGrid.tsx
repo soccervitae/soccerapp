@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, MouseEvent } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
@@ -102,6 +102,7 @@ export const PostsGrid = ({
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number>(-1);
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -134,7 +135,9 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (filteredPosts: Post[], index: number) => {
+  const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setOriginRect(rect);
     setSelectedPostIndex(index);
     setFeedSheetOpen(true);
   };
@@ -208,7 +211,7 @@ export const PostsGrid = ({
           <div 
             key={post.id} 
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onClick={() => handlePostClick(filteredPosts, index)}
+            onClick={(e) => handlePostClick(e, filteredPosts, index)}
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -352,8 +355,10 @@ export const PostsGrid = ({
           onClose={() => {
             setFeedSheetOpen(false);
             setSelectedPostIndex(-1);
+            setOriginRect(null);
           }}
           profile={profile}
+          originRect={originRect}
         />
       )}
     </section>
