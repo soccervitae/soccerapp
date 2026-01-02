@@ -64,7 +64,8 @@ export const FeedPost = ({
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
-  const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
+  const [isMediaViewerOpen, setIsMediaViewerOpen] = useState(false);
+  const [mediaViewerIndex, setMediaViewerIndex] = useState(0);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const lastTapRef = useRef<number>(0);
@@ -143,10 +144,11 @@ export const FeedPost = ({
       isLiked: post.liked_by_user
     });
   };
-  const handleDoubleTap = () => {
+  const handleDoubleTap = (e: React.MouseEvent, imageIndex: number = 0) => {
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
       // Double tap detected - toggle applause
+      e.preventDefault();
       if (post.liked_by_user) {
         // Already applauded - remove applause (no animation)
         handleLike();
@@ -156,8 +158,20 @@ export const FeedPost = ({
         setShowApplauseAnimation(true);
         setTimeout(() => setShowApplauseAnimation(false), 1000);
       }
+      lastTapRef.current = 0; // Reset to prevent immediate viewer open
+    } else {
+      lastTapRef.current = now;
+      // Set timeout to open viewer on single tap (if no double tap occurs)
+      if (!disableVideoViewer) {
+        setTimeout(() => {
+          if (lastTapRef.current === now) {
+            // No double tap occurred, open viewer
+            setMediaViewerIndex(imageIndex);
+            setIsMediaViewerOpen(true);
+          }
+        }, 300);
+      }
     }
-    lastTapRef.current = now;
   };
   const handleSave = () => {
     if (!user) {
@@ -334,7 +348,8 @@ export const FeedPost = ({
               videoRef.current.pause();
               setIsVideoPlaying(false);
             }
-            setIsVideoViewerOpen(true);
+            setMediaViewerIndex(0);
+            setIsMediaViewerOpen(true);
           }
         }}>
               <video 
@@ -382,9 +397,9 @@ export const FeedPost = ({
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
                   {mediaUrls.map((url, index) => <CarouselItem key={index} className="h-full relative">
-                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => handleDoubleTap()} />
+                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleDoubleTap(e, index)} />
                       {/* Tags overlay for this image */}
-                      {showTags && postTags.filter(tag => tag.photo_index === index).map(tag => <button key={tag.id} onClick={() => navigate(`/${tag.profile.username}`)} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
+                      {showTags && postTags.filter(tag => tag.photo_index === index).map(tag => <button key={tag.id} onClick={(e) => { e.stopPropagation(); navigate(`/${tag.profile.username}`); }} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
                 left: `${tag.x_position}%`,
                 top: `${tag.y_position}%`
               }}>
@@ -404,9 +419,9 @@ export const FeedPost = ({
                 {mediaUrls.map((_, index) => <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />)}
               </div>
             </> : <>
-              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={() => handleDoubleTap()} />
+              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleDoubleTap(e, 0)} />
               {/* Tags overlay for single image */}
-              {showTags && postTags.filter(tag => tag.photo_index === 0).map(tag => <button key={tag.id} onClick={() => navigate(`/${tag.profile.username}`)} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
+              {showTags && postTags.filter(tag => tag.photo_index === 0).map(tag => <button key={tag.id} onClick={(e) => { e.stopPropagation(); navigate(`/${tag.profile.username}`); }} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
           left: `${tag.x_position}%`,
           top: `${tag.y_position}%`
         }}>
@@ -591,13 +606,14 @@ export const FeedPost = ({
         contentTitle={post.content.substring(0, 50)}
       />
 
-      {/* Video Fullscreen Viewer */}
+      {/* Media Fullscreen Viewer */}
       <PostMediaViewer
         post={post}
         mediaUrls={mediaUrls}
         mediaType={post.media_type}
-        isOpen={isVideoViewerOpen}
-        onClose={() => setIsVideoViewerOpen(false)}
+        initialIndex={mediaViewerIndex}
+        isOpen={isMediaViewerOpen}
+        onClose={() => setIsMediaViewerOpen(false)}
       />
     </article>;
 };
