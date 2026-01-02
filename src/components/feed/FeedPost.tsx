@@ -637,17 +637,23 @@ export const FeedPost = ({
         <FullscreenVideoViewer
           videoUrl={post.media_url}
           isOpen={isVideoViewerOpen}
-          onClose={(currentTime) => {
+          onClose={(currentTime, mutedState) => {
             setIsVideoViewerOpen(false);
+            // Sync muted state from fullscreen
+            if (typeof mutedState === "boolean") {
+              setIsMuted(mutedState);
+            }
             // Resume feed video from fullscreen position
             if (videoRef.current && typeof currentTime === "number") {
               videoRef.current.currentTime = currentTime;
+              videoRef.current.muted = mutedState ?? isMuted;
               videoRef.current.play().catch(() => {});
               setIsVideoPlaying(true);
             }
           }}
           originRect={videoOriginRect}
           initialTime={videoTimeOnOpen}
+          initialMuted={isMuted}
         />
       )}
 
