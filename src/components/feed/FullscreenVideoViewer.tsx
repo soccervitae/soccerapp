@@ -43,12 +43,18 @@ export const FullscreenVideoViewer = ({
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
     setIsExiting(true);
-    setTimeout(() => {
+  }, []);
+
+  const handleExitComplete = useCallback(() => {
+    if (isExiting) {
       onClose();
       setIsExiting(false);
-    }, 250);
-  }, [onClose]);
+    }
+  }, [isExiting, onClose]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -93,14 +99,14 @@ export const FullscreenVideoViewer = ({
   const initialStyles = getInitialStyles();
 
   return (
-    <AnimatePresence mode="wait">
-      {isOpen && (
+    <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+      {isOpen && !isExiting && (
         <motion.div
           className="fixed inset-0 z-[60] bg-black flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.3 }}
         >
           {/* Close button */}
           <motion.button
@@ -127,22 +133,22 @@ export const FullscreenVideoViewer = ({
               y: 0, 
               scale: 1 
             }}
-            exit={isExiting ? initialStyles : { opacity: 0 }}
+            exit={initialStyles}
             transition={{ 
               type: "spring",
-              stiffness: 300,
-              damping: 30,
-              duration: 0.3
+              stiffness: 260,
+              damping: 25,
             }}
           >
             <motion.video
               ref={videoRef}
               src={videoUrl}
-              className="w-full h-full object-contain blur-md"
+              className="w-full h-full object-contain"
               playsInline
               autoPlay
               onClick={() => setShowControls(true)}
               onLoadedData={() => setVideoLoaded(true)}
+              initial={{ filter: "blur(8px)" }}
               animate={{
                 filter: videoLoaded ? "blur(0px)" : "blur(8px)",
               }}
