@@ -1,14 +1,17 @@
-import { useEffect } from "react";
-import { Download, Share, MoreVertical, Plus, Smartphone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
+import logoText from "@/assets/soccervitae-logo-text.png";
 
 const Install = () => {
   const navigate = useNavigate();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
-  const { isPWA, isMobile } = useRequirePwa();
+  const { isPWA } = useRequirePwa();
+  const [activeStep, setActiveStep] = useState(0);
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
@@ -17,222 +20,309 @@ const Install = () => {
     }
   }, [isPWA, navigate]);
 
+  // Animate through steps
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 4);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleInstall = async () => {
     await promptInstall();
   };
 
+  const benefits = [
+    { icon: Zap, text: "Acesso instantâneo" },
+    { icon: Bell, text: "Notificações push" },
+    { icon: Wifi, text: "Funciona offline" },
+    { icon: Rocket, text: "Experiência nativa" },
+  ];
+
+  const iosSteps = [
+    { title: "Abra no Safari", desc: "Use o navegador Safari" },
+    { title: "Toque em Compartilhar", desc: "Ícone na barra inferior", icon: Share },
+    { title: "Adicionar à Tela", desc: "Role e selecione a opção", icon: Plus },
+    { title: "Confirme", desc: "Toque em 'Adicionar'" },
+  ];
+
+  const androidSteps = [
+    { title: "Abra no Chrome", desc: "Use o Google Chrome" },
+    { title: "Toque no menu", desc: "Três pontos (⋮)", icon: MoreVertical },
+    { title: "Instalar app", desc: "Ou 'Adicionar à tela'" },
+    { title: "Confirme", desc: "Toque em 'Instalar'" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header - No back button, mandatory gate */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-        <div className="flex items-center justify-center px-4 py-3">
-          <h1 className="text-lg font-semibold">Instalar App</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background flex flex-col overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute top-1/3 -left-20 w-48 h-48 rounded-full bg-primary/10 blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
 
-      <div className="flex-1 px-4 py-6 max-w-lg mx-auto space-y-8">
-        {/* Hero - More prominent messaging */}
-        <div className="text-center space-y-4">
-          <div className="w-24 h-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Smartphone className="w-12 h-12 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">SOCCER VITAE</h2>
-            <p className="text-muted-foreground mt-2 text-base">
-              Para uma melhor experiência, é necessário instalar o app no seu dispositivo
-            </p>
-          </div>
-        </div>
-
-        {/* Mandatory message */}
-        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
-          <p className="font-medium text-primary">
-            📲 Instalação obrigatória
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Siga as instruções abaixo para instalar e acessar o app
-          </p>
-        </div>
-
-        {/* Direct Install Button (Android/Desktop) */}
-        {isInstallable && !isInstalled && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Download className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Instalação rápida disponível</p>
-                <p className="text-sm text-muted-foreground">Clique para instalar agora</p>
-              </div>
+      <div className="flex-1 px-4 py-8 max-w-lg mx-auto space-y-6 relative z-10">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4"
+        >
+          {/* Animated Phone Icon */}
+          <motion.div
+            className="relative w-28 h-28 mx-auto"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+          >
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-primary-dark shadow-lg shadow-primary/30" />
+            <motion.div
+              className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-primary-dark"
+              animate={{
+                boxShadow: [
+                  "0 0 0 0 hsl(var(--primary) / 0.4)",
+                  "0 0 0 15px hsl(var(--primary) / 0)",
+                ],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Smartphone className="w-14 h-14 text-primary-foreground" />
             </div>
-            <Button onClick={handleInstall} className="w-full" size="lg">
-              <Download className="w-4 h-4 mr-2" />
-              Instalar Agora
-            </Button>
-          </div>
-        )}
+          </motion.div>
+
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <img 
+              src={logoText} 
+              alt="Soccer Vitae" 
+              className="h-8 mx-auto dark:invert"
+            />
+          </motion.div>
+
+          {/* Main Message */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Instale o App
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Para continuar, adicione à sua tela inicial
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Benefits Carousel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="flex justify-center gap-3 flex-wrap"
+        >
+          {benefits.map((benefit, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7 + index * 0.1 }}
+              className="flex items-center gap-2 bg-card border rounded-full px-3 py-1.5 text-sm"
+            >
+              <benefit.icon className="w-4 h-4 text-primary" />
+              <span className="text-foreground/80">{benefit.text}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Direct Install Button */}
+        <AnimatePresence>
+          {isInstallable && !isInstalled && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-5 text-primary-foreground shadow-lg shadow-primary/20"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                  className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"
+                >
+                  <Download className="w-6 h-6" />
+                </motion.div>
+                <div>
+                  <p className="font-semibold">Instalação rápida</p>
+                  <p className="text-sm opacity-90">Um toque para instalar</p>
+                </div>
+              </div>
+              <Button
+                onClick={handleInstall}
+                className="w-full bg-white text-primary hover:bg-white/90 font-semibold"
+                size="lg"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Instalar Agora
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {isInstalled && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center space-y-3">
-            <p className="font-medium text-primary">✓ App instalado!</p>
-            <p className="text-sm text-muted-foreground">
-              Abra o SOCCER VITAE pela sua tela inicial para continuar
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-primary/10 border-2 border-primary rounded-2xl p-5 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center"
+            >
+              <span className="text-3xl">✓</span>
+            </motion.div>
+            <p className="font-semibold text-primary text-lg">App instalado!</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Abra pela sua tela inicial para continuar
             </p>
-          </div>
+          </motion.div>
         )}
 
-        {/* iOS Instructions */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-lg">
-              🍎
-            </div>
-            <h3 className="font-semibold text-lg">iPhone / iPad</h3>
-          </div>
-
-          <div className="space-y-4 pl-2">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                1
+        {/* Instructions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="space-y-4"
+        >
+          {/* iOS Section */}
+          <div className="bg-card border rounded-2xl p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-xl">
+                🍎
               </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Abra no Safari</p>
-                <p className="text-sm text-muted-foreground">
-                  Certifique-se de estar usando o navegador Safari
-                </p>
+              <div>
+                <h3 className="font-semibold">iPhone / iPad</h3>
+                <p className="text-xs text-muted-foreground">Instruções para Safari</p>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                2
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Toque no botão Compartilhar</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <Share className="w-4 h-4" />
+            <div className="grid grid-cols-4 gap-2">
+              {iosSteps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
+                    activeStep === index
+                      ? "bg-primary/10 border-2 border-primary"
+                      : "bg-muted/50 border-2 border-transparent"
+                  }`}
+                  animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
+                    activeStep === index
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted-foreground/20 text-muted-foreground"
+                  }`}>
+                    {index + 1}
                   </div>
-                  <span>Na barra inferior do Safari</span>
-                </div>
+                  {step.icon && (
+                    <step.icon className={`w-4 h-4 mx-auto mb-1 ${
+                      activeStep === index ? "text-primary" : "text-muted-foreground"
+                    }`} />
+                  )}
+                  <p className="text-[10px] font-medium leading-tight">{step.title}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Android Section */}
+          <div className="bg-card border rounded-2xl p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-xl">
+                🤖
+              </div>
+              <div>
+                <h3 className="font-semibold">Android</h3>
+                <p className="text-xs text-muted-foreground">Instruções para Chrome</p>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                3
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Selecione "Adicionar à Tela Inicial"</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <Plus className="w-4 h-4" />
+            <div className="grid grid-cols-4 gap-2">
+              {androidSteps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
+                    activeStep === index
+                      ? "bg-primary/10 border-2 border-primary"
+                      : "bg-muted/50 border-2 border-transparent"
+                  }`}
+                  animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
+                    activeStep === index
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted-foreground/20 text-muted-foreground"
+                  }`}>
+                    {index + 1}
                   </div>
-                  <span>Role para baixo se necessário</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                4
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Confirme tocando "Adicionar"</p>
-                <p className="text-sm text-muted-foreground">
-                  O ícone do app aparecerá na sua tela inicial
-                </p>
-              </div>
+                  {step.icon && (
+                    <step.icon className={`w-4 h-4 mx-auto mb-1 ${
+                      activeStep === index ? "text-primary" : "text-muted-foreground"
+                    }`} />
+                  )}
+                  <p className="text-[10px] font-medium leading-tight">{step.title}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Android Instructions */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-lg">
-              🤖
-            </div>
-            <h3 className="font-semibold text-lg">Android</h3>
-          </div>
-
-          <div className="space-y-4 pl-2">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                1
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Abra no Chrome</p>
-                <p className="text-sm text-muted-foreground">
-                  Use o navegador Google Chrome
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                2
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Toque no menu (⋮)</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <MoreVertical className="w-4 h-4" />
-                  </div>
-                  <span>Três pontos no canto superior direito</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                3
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Selecione "Instalar app" ou "Adicionar à tela inicial"</p>
-                <p className="text-sm text-muted-foreground">
-                  A opção pode variar conforme a versão do Chrome
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                4
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="font-medium">Confirme a instalação</p>
-                <p className="text-sm text-muted-foreground">
-                  O app será instalado e aparecerá na sua gaveta de apps
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Benefits */}
-        <div className="bg-muted/50 rounded-xl p-4 space-y-3">
-          <h3 className="font-semibold">Vantagens do app instalado</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              Acesso rápido pela tela inicial
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              Experiência em tela cheia
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              Notificações push
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              Funciona offline (recursos básicos)
-            </li>
-          </ul>
-        </div>
+        {/* Footer Message */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="text-center text-xs text-muted-foreground pb-4"
+        >
+          Após instalar, abra o app pela tela inicial
+        </motion.p>
       </div>
     </div>
   );
