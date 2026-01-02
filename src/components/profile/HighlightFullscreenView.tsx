@@ -54,6 +54,7 @@ interface HighlightFullscreenViewProps {
   setSelectedImageToDelete: (image: HighlightImage) => void;
   setDeleteImageDialogOpen: (open: boolean) => void;
   profileUsername?: string;
+  authorAvatarUrl?: string;
 }
 
 export const HighlightFullscreenView = ({
@@ -82,6 +83,7 @@ export const HighlightFullscreenView = ({
   setSelectedImageToDelete,
   setDeleteImageDialogOpen,
   profileUsername,
+  authorAvatarUrl,
 }: HighlightFullscreenViewProps) => {
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -342,7 +344,7 @@ export const HighlightFullscreenView = ({
                     <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-400">
                       <div 
                         className="w-full h-full rounded-full border-2 border-black bg-cover bg-center"
-                        style={{ backgroundImage: `url('${selectedHighlight?.image_url}')` }}
+                        style={{ backgroundImage: `url('${authorAvatarUrl || "/placeholder.svg"}')` }}
                       />
                     </div>
                     <div>
