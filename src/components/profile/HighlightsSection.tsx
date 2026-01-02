@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2, Eye } from "lucide-react";
+import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2, Eye, ImageOff } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { AddHighlightSheet } from "./AddHighlightSheet";
 import { SelectHighlightSheet } from "./SelectHighlightSheet";
@@ -45,6 +45,13 @@ interface SortableHighlightItemProps {
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
+// Helper function to check unsupported formats
+const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
+const isUnsupportedFormat = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return UNSUPPORTED_FORMATS.some(ext => lowerUrl.endsWith(ext));
+};
+
 const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }: SortableHighlightItemProps) => {
   const {
     attributes,
@@ -61,6 +68,8 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
   };
 
   const coverImage = highlight.images?.[0]?.image_url || highlight.image_url;
+  const [imageError, setImageError] = useState(false);
+  const hasError = imageError || isUnsupportedFormat(coverImage);
 
   return (
     <div
@@ -76,11 +85,21 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
           }`}
         onClick={(e) => onClick(e)}
       >
-        <div 
-          className="w-full h-full rounded-full bg-cover bg-center border-2 border-background"
-          style={{ backgroundImage: `url('${coverImage}')` }}
-          aria-label={highlight.title}
-        />
+        {hasError ? (
+          <div 
+            className="w-full h-full rounded-full border-2 border-background bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center"
+            aria-label={highlight.title}
+          >
+            <ImageOff className="w-5 h-5 text-muted-foreground/60" />
+          </div>
+        ) : (
+          <img
+            src={coverImage}
+            alt={highlight.title}
+            className="w-full h-full rounded-full border-2 border-background object-cover"
+            onError={() => setImageError(true)}
+          />
+        )}
         {/* New views indicator */}
         {hasNewViews && isOwnProfile && (
           <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-lg">

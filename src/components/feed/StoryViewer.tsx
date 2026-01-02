@@ -9,7 +9,14 @@ import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
-import { Send } from "lucide-react";
+import { Send, ImageOff } from "lucide-react";
+
+// Helper function to check unsupported formats
+const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
+const isUnsupportedFormat = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return UNSUPPORTED_FORMATS.some(ext => lowerUrl.endsWith(ext));
+};
 
 interface StoryViewerProps {
   groupedStories: GroupedStories[];
@@ -66,6 +73,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
@@ -105,7 +113,13 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     setCurrentGroupIndex(initialGroupIndex);
     setCurrentStoryIndex(0);
     setProgress(0);
+    setMediaError(false);
   }, [initialGroupIndex]);
+
+  // Reset media error when story changes
+  useEffect(() => {
+    setMediaError(false);
+  }, [currentStory?.id]);
 
   const handlePauseStart = () => setIsPaused(true);
   const handlePauseEnd = () => setIsPaused(false);
@@ -338,19 +352,26 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
 
                   {/* Story Media */}
                   <div className="flex-1 flex items-center justify-center bg-black relative">
-                    {currentStory.media_type === "video" ? (
+                    {mediaError || isUnsupportedFormat(currentStory.media_url) ? (
+                      <div className="flex flex-col items-center justify-center gap-4 text-white/60">
+                        <ImageOff className="w-16 h-16" />
+                        <p className="text-sm">Mídia indisponível</p>
+                      </div>
+                    ) : currentStory.media_type === "video" ? (
                       <video
                         src={currentStory.media_url}
                         className={`w-full h-full object-contain transition-all duration-300 ease-out ${getTransitionClasses()}`}
                         autoPlay
                         muted
                         playsInline
+                        onError={() => setMediaError(true)}
                       />
                     ) : (
                       <img
                         src={currentStory.media_url}
                         alt={currentGroup.username}
                         className={`w-full h-full object-contain transition-all duration-300 ease-out ${getTransitionClasses()}`}
+                        onError={() => setMediaError(true)}
                       />
                     )}
 
