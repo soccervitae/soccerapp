@@ -310,16 +310,11 @@ export const FeedPost = ({
       }`}>
           {post.media_type === "video" ? <div 
         ref={videoContainerRef}
-        className="relative w-full cursor-pointer flex items-center justify-center bg-black"
+        className="relative w-full cursor-pointer"
         style={{
-          // Vertical videos (9:16) get more height like Instagram Reels
-          // Horizontal videos maintain their aspect ratio
-          aspectRatio: videoAspectRatio 
-            ? videoAspectRatio < 1 
-              ? Math.max(videoAspectRatio, 9/16).toString() // Vertical: cap at 9:16
-              : videoAspectRatio.toString() // Horizontal: keep original
-            : '4/5',
-          maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '70vh' : '60vh'
+          // Use 4:5 aspect ratio for all videos to fill full width
+          aspectRatio: '4/5',
+          maxHeight: '75vh'
         }}
         onClick={() => {
           if (disableVideoViewer) {
@@ -345,7 +340,7 @@ export const FeedPost = ({
               <video 
                 ref={videoRef}
                 src={post.media_url} 
-                className="w-full h-full object-contain pointer-events-none" 
+                className="w-full h-full object-cover pointer-events-none" 
                 playsInline 
                 muted={isMuted}
                 loop
