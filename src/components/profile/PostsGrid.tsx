@@ -185,12 +185,6 @@ export const PostsGrid = ({
         <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
           <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
         </div>
-        {/* Video duration badge */}
-        {duration && (
-          <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-medium px-1 py-0.5 rounded">
-            {duration}
-          </div>
-        )}
       </>
     );
   };
