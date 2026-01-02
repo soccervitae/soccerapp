@@ -136,12 +136,13 @@ const Profile = () => {
           isOwnProfile={isOwnProfile}
         />
         <div className="px-4 flex flex-col gap-6">
-          <HighlightsSection 
-            highlights={highlights || []} 
-            isLoading={highlightsLoading}
-            isOwnProfile={isOwnProfile}
-            profileUsername={profile.username}
-          />
+              <HighlightsSection 
+                highlights={highlights || []} 
+                isLoading={highlightsLoading}
+                isOwnProfile={isOwnProfile}
+                profileUsername={profile.username}
+                profileAvatarUrl={profile.avatar_url}
+              />
           <PostsGrid 
             posts={posts || []} 
             taggedPosts={taggedPosts || []}
@@ -190,6 +191,7 @@ const Profile = () => {
                   isLoading={highlightsLoading}
                   isOwnProfile={isOwnProfile}
                   profileUsername={profile.username}
+                  profileAvatarUrl={profile.avatar_url}
                 />
               </motion.div>
               <motion.div variants={itemVariants}>
