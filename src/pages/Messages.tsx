@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/hooks/useConversations";
@@ -58,6 +58,18 @@ const Messages = () => {
   const handleRefresh = async () => {
     await refetch();
   };
+
+  // Listen for messages tab press to refresh
+  useEffect(() => {
+    const handleMessagesTabPressed = () => {
+      handleRefresh();
+    };
+    
+    window.addEventListener('messages-tab-pressed', handleMessagesTabPressed);
+    return () => {
+      window.removeEventListener('messages-tab-pressed', handleMessagesTabPressed);
+    };
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");

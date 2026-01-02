@@ -48,6 +48,33 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
     }
   };
 
+  const handleExploreClick = () => {
+    if (location.pathname === "/explore") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.dispatchEvent(new CustomEvent('explore-tab-pressed'));
+    } else {
+      navigate("/explore");
+    }
+  };
+
+  const handleMessagesClick = () => {
+    if (location.pathname === "/messages") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.dispatchEvent(new CustomEvent('messages-tab-pressed'));
+    } else {
+      navigate("/messages");
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (location.pathname === "/profile") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.dispatchEvent(new CustomEvent('profile-tab-pressed'));
+    } else {
+      navigate("/profile");
+    }
+  };
+
   const handleSelectOption = (option: "post" | "replay" | "highlight" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
@@ -88,7 +115,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
           </button>
           <button 
-            onClick={() => navigate("/explore")}
+            onClick={handleExploreClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "search" ? "fill-1" : ""}`}>search</span>
@@ -102,7 +129,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             </div>
           </button>
           <button 
-            onClick={() => navigate("/messages")}
+            onClick={handleMessagesClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors relative ${currentTab === "messages" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "messages" ? "fill-1" : ""}`}>chat</span>
@@ -113,7 +140,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             )}
           </button>
           <button 
-            onClick={() => navigate("/profile")}
+            onClick={handleProfileClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "profile" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "profile" ? "fill-1" : ""}`}>person</span>
