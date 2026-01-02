@@ -1,40 +1,57 @@
-import { ArrowLeft, Download, Share, MoreVertical, Plus } from "lucide-react";
+import { useEffect } from "react";
+import { Download, Share, MoreVertical, Plus, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
+import { useRequirePwa } from "@/hooks/useRequirePwa";
 
 const Install = () => {
   const navigate = useNavigate();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
+  const { isPWA, isMobile } = useRequirePwa();
+
+  // Auto-redirect to home when PWA is detected
+  useEffect(() => {
+    if (isPWA) {
+      navigate("/", { replace: true });
+    }
+  }, [isPWA, navigate]);
 
   const handleInstall = async () => {
     await promptInstall();
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header - No back button, mandatory gate */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <button onClick={() => navigate(-1)} className="p-1">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+        <div className="flex items-center justify-center px-4 py-3">
           <h1 className="text-lg font-semibold">Instalar App</h1>
         </div>
       </header>
 
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-8">
-        {/* Hero */}
+      <div className="flex-1 px-4 py-6 max-w-lg mx-auto space-y-8">
+        {/* Hero - More prominent messaging */}
         <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Download className="w-10 h-10 text-primary" />
+          <div className="w-24 h-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Smartphone className="w-12 h-12 text-primary" />
           </div>
           <div>
             <h2 className="text-2xl font-bold">SOCCER VITAE</h2>
-            <p className="text-muted-foreground mt-1">
-              Instale o app para uma experiência completa
+            <p className="text-muted-foreground mt-2 text-base">
+              Para uma melhor experiência, é necessário instalar o app no seu dispositivo
             </p>
           </div>
+        </div>
+
+        {/* Mandatory message */}
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
+          <p className="font-medium text-primary">
+            📲 Instalação obrigatória
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Siga as instruções abaixo para instalar e acessar o app
+          </p>
         </div>
 
         {/* Direct Install Button (Android/Desktop) */}
@@ -49,7 +66,7 @@ const Install = () => {
                 <p className="text-sm text-muted-foreground">Clique para instalar agora</p>
               </div>
             </div>
-            <Button onClick={handleInstall} className="w-full">
+            <Button onClick={handleInstall} className="w-full" size="lg">
               <Download className="w-4 h-4 mr-2" />
               Instalar Agora
             </Button>
@@ -57,10 +74,10 @@ const Install = () => {
         )}
 
         {isInstalled && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
-            <p className="font-medium text-primary">✓ App já instalado!</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Você pode acessar o SOCCER VITAE pela sua tela inicial
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center space-y-3">
+            <p className="font-medium text-primary">✓ App instalado!</p>
+            <p className="text-sm text-muted-foreground">
+              Abra o SOCCER VITAE pela sua tela inicial para continuar
             </p>
           </div>
         )}
