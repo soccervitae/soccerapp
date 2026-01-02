@@ -191,7 +191,7 @@ export const PostMediaViewer = ({
           <div className="fixed inset-0 z-[60] flex items-center justify-center">
             {/* Overlay */}
             <motion.div
-              className="absolute inset-0 bg-black"
+              className="absolute inset-0 bg-white"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -219,13 +219,13 @@ export const PostMediaViewer = ({
             >
               {/* Media - fullscreen */}
               <div 
-                className="absolute inset-0 bg-black flex items-center justify-center"
+                className="absolute inset-0 bg-white flex items-center justify-center"
                 onClick={handleTapNavigation}
               >
                 {/* Skeleton placeholder while loading */}
                 {!mediaLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Skeleton className="w-full h-full bg-white/10" />
+                    <Skeleton className="w-full h-full bg-gray-200" />
                   </div>
                 )}
                 
@@ -283,10 +283,10 @@ export const PostMediaViewer = ({
                   {mediaUrls.map((_, index) => (
                     <div
                       key={index}
-                      className="flex-1 h-0.5 rounded-full overflow-hidden bg-white/30"
+                      className="flex-1 h-0.5 rounded-full overflow-hidden bg-gray-300"
                     >
                       <div
-                        className={`h-full bg-white transition-all duration-300 ${
+                        className={`h-full bg-emerald-500 transition-all duration-300 ${
                           index < currentIndex
                             ? "w-full"
                             : index === currentIndex
@@ -300,7 +300,7 @@ export const PostMediaViewer = ({
               )}
 
               {/* Top gradient */}
-              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/90 via-white/50 to-transparent z-10 pointer-events-none" />
 
               {/* Header - overlaid with profile info and close button */}
               <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
@@ -312,41 +312,41 @@ export const PostMediaViewer = ({
                   {/* Avatar with gradient border */}
                   <div className="relative">
                     <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 p-[2px]" />
-                    <Avatar className="w-10 h-10 relative border-2 border-black">
+                    <Avatar className="w-10 h-10 relative border-2 border-white">
                       <AvatarImage src={post.profile.avatar_url || "/placeholder.svg"} />
                       <AvatarFallback>{post.profile.username[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-sm text-white drop-shadow-lg">
+                      <span className="font-semibold text-sm text-gray-900">
                         {post.profile.nickname || post.profile.full_name || post.profile.username}
                       </span>
                       {post.profile.conta_verificada && (
                         <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
                       )}
                     </div>
-                    <p className="text-xs text-white/80 drop-shadow-lg">{getTimeAgo(post.created_at)}</p>
+                    <p className="text-xs text-gray-600">{getTimeAgo(post.created_at)}</p>
                   </div>
                 </button>
 
                 {/* Close button */}
                 <button
                   onClick={onClose}
-                  className="w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+                  className="w-10 h-10 bg-gray-100 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-gray-200 transition-colors"
                 >
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
 
               {/* Bottom gradient */}
-              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white/95 via-white/70 to-transparent z-10 pointer-events-none" />
 
               {/* Footer - overlaid */}
               <div className="absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3">
                 {/* Caption */}
                 {post.content && (
-                  <p className="text-sm text-white drop-shadow-lg line-clamp-2">
+                  <p className="text-sm text-gray-900 line-clamp-2">
                     {post.content}
                   </p>
                 )}
@@ -357,7 +357,7 @@ export const PostMediaViewer = ({
                     href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-white/80 hover:text-white transition-colors"
+                    className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     <span className="material-symbols-outlined text-[14px]">location_on</span>
                     <span className="truncate">{post.location_name}</span>
@@ -377,7 +377,7 @@ export const PostMediaViewer = ({
                         {likers.slice(0, 3).map((liker, index) => (
                           <Avatar 
                             key={liker.user_id} 
-                            className="w-5 h-5 border border-black"
+                            className="w-5 h-5 border border-gray-100"
                             style={{ zIndex: 3 - index }}
                           >
                             <AvatarImage src={liker.avatar_url || "/placeholder.svg"} />
@@ -388,7 +388,7 @@ export const PostMediaViewer = ({
                         ))}
                       </div>
                     )}
-                    <span className="text-xs text-white/90 drop-shadow-lg">
+                    <span className="text-xs text-gray-700">
                       {likers.length > 0 ? (
                         <>
                           Aplaudido por{" "}
@@ -424,12 +424,11 @@ export const PostMediaViewer = ({
                           <ClappingHandsIcon
                             className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
                             filled={post.liked_by_user}
-                            variant="white"
                           />
                         </motion.div>
                       </AnimatePresence>
                       {post.likes_count > 0 && (
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-medium text-gray-900">
                           {formatNumber(post.likes_count)}
                         </span>
                       )}
@@ -438,7 +437,7 @@ export const PostMediaViewer = ({
                     {/* Comment button */}
                     <button
                       onClick={() => setShowCommentsSheet(true)}
-                      className="flex items-center gap-1.5 text-white hover:text-white/80 transition-colors"
+                      className="flex items-center gap-1.5 text-gray-900 hover:text-gray-600 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[26px]">chat_bubble_outline</span>
                       {post.comments_count > 0 && (
@@ -451,7 +450,7 @@ export const PostMediaViewer = ({
                     {/* Share button */}
                     <button
                       onClick={() => setShowShareSheet(true)}
-                      className="flex items-center gap-1.5 text-white hover:text-white/80 transition-colors"
+                      className="flex items-center gap-1.5 text-gray-900 hover:text-gray-600 transition-colors"
                     >
                       <Send className="w-6 h-6" />
                       {(post.shares_count ?? 0) > 0 && (
