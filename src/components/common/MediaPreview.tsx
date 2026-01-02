@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Play, ImageOff } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
 
 interface MediaPreviewProps {
   src: string;
@@ -36,9 +37,25 @@ export const MediaPreview = ({
 }: MediaPreviewProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   
   const isVideo = isVideoUrl(src);
   const isUnsupported = isUnsupportedFormat(src);
+
+  // Generate thumbnail for videos
+  useEffect(() => {
+    if (isVideo && src && !isUnsupported) {
+      setIsLoading(true);
+      setThumbnailUrl(null);
+      
+      generateVideoThumbnail(src, 1).then((thumbnail) => {
+        if (thumbnail) {
+          setThumbnailUrl(thumbnail);
+        }
+        setIsLoading(false);
+      });
+    }
+  }, [src, isVideo, isUnsupported]);
   
   // If the format is unsupported, show fallback immediately
   if (isUnsupported || hasError) {
@@ -50,6 +67,45 @@ export const MediaPreview = ({
             <Play className="w-4 h-4 text-muted-foreground/60 fill-muted-foreground/60" />
           )}
         </div>
+      </div>
+    );
+  }
+
+  // For videos, show generated thumbnail
+  if (isVideo) {
+    return (
+      <div className={`relative ${className}`}>
+        {/* Loading skeleton */}
+        {isLoading && (
+          <Skeleton className="absolute inset-0 w-full h-full" />
+        )}
+        
+        {/* Video thumbnail */}
+        {thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={alt}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+          />
+        ) : !isLoading && (
+          <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+            <Play className="w-8 h-8 text-muted-foreground/60 fill-muted-foreground/60" />
+          </div>
+        )}
+        
+        {/* Play icon overlay for videos */}
+        {showPlayIcon && !isLoading && thumbnailUrl && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -72,15 +128,6 @@ export const MediaPreview = ({
           setHasError(true);
         }}
       />
-      
-      {/* Play icon overlay for videos */}
-      {isVideo && showPlayIcon && !isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
-            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

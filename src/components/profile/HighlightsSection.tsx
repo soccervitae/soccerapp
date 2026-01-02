@@ -29,6 +29,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
 
 
 interface HighlightsSectionProps {
@@ -52,6 +53,15 @@ const isUnsupportedFormat = (url: string): boolean => {
   return UNSUPPORTED_FORMATS.some(ext => lowerUrl.endsWith(ext));
 };
 
+const isVideoUrl = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('.mp4') || 
+         lowerUrl.includes('.mov') || 
+         lowerUrl.includes('.webm') || 
+         lowerUrl.includes('.avi') ||
+         lowerUrl.includes('video');
+};
+
 const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }: SortableHighlightItemProps) => {
   const {
     attributes,
@@ -68,8 +78,28 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
   };
 
   const coverImage = highlight.images?.[0]?.image_url || highlight.image_url;
+  const coverMediaType = highlight.images?.[0]?.media_type || 'image';
+  const isVideo = coverMediaType === 'video' || isVideoUrl(coverImage);
+  
   const [imageError, setImageError] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [isLoadingThumbnail, setIsLoadingThumbnail] = useState(false);
   const hasError = imageError || isUnsupportedFormat(coverImage);
+
+  // Generate thumbnail for video covers
+  useEffect(() => {
+    if (isVideo && coverImage && !hasError) {
+      setIsLoadingThumbnail(true);
+      generateVideoThumbnail(coverImage, 1).then((thumbnail) => {
+        if (thumbnail) {
+          setThumbnailUrl(thumbnail);
+        }
+        setIsLoadingThumbnail(false);
+      });
+    }
+  }, [isVideo, coverImage, hasError]);
+
+  const displayImage = isVideo ? (thumbnailUrl || null) : coverImage;
 
   return (
     <div
@@ -92,13 +122,29 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
           >
             <ImageOff className="w-5 h-5 text-muted-foreground/60" />
           </div>
+        ) : isLoadingThumbnail ? (
+          <div className="w-full h-full rounded-full border-2 border-background bg-muted flex items-center justify-center">
+            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+          </div>
+        ) : displayImage ? (
+          <div className="relative w-full h-full">
+            <img
+              src={displayImage}
+              alt={highlight.title}
+              className="w-full h-full rounded-full border-2 border-background object-cover"
+              onError={() => setImageError(true)}
+            />
+            {/* Video indicator */}
+            {isVideo && (
+              <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
+                <Play className="w-4 h-4 text-white fill-white" />
+              </div>
+            )}
+          </div>
         ) : (
-          <img
-            src={coverImage}
-            alt={highlight.title}
-            className="w-full h-full rounded-full border-2 border-background object-cover"
-            onError={() => setImageError(true)}
-          />
+          <div className="w-full h-full rounded-full border-2 border-background bg-muted flex items-center justify-center">
+            <Play className="w-5 h-5 text-muted-foreground/60 fill-muted-foreground/60" />
+          </div>
         )}
         {/* New views indicator */}
         {hasNewViews && isOwnProfile && (

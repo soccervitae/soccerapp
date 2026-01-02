@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
 
 interface Post {
   id: string;
@@ -181,6 +183,47 @@ export const PostsGrid = ({
     };
   };
 
+  // Component to render video with thumbnail
+  const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
+    const [thumbnail, setThumbnail] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      if (src) {
+        setIsLoading(true);
+        generateVideoThumbnail(src, 1).then((thumb) => {
+          if (thumb) {
+            setThumbnail(thumb);
+          }
+          setIsLoading(false);
+        });
+      }
+    }, [src]);
+
+    return (
+      <>
+        {isLoading ? (
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+          </div>
+        ) : thumbnail ? (
+          <img 
+            src={thumbnail}
+            alt={alt}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <Play className="w-8 h-8 text-muted-foreground/60 fill-muted-foreground/60" />
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
+          <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
+        </div>
+      </>
+    );
+  };
+
   const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
     if (filteredPosts.length === 0) {
       return (
@@ -201,17 +244,7 @@ export const PostsGrid = ({
           >
             {post.media_url ? (
               post.media_type === "video" ? (
-                <>
-                  <video 
-                    src={post.media_url}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
-                    <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
-                  </div>
-                </>
+                <VideoThumbnail src={post.media_url} alt={post.content} />
               ) : post.media_type === "carousel" ? (
                 (() => {
                   try {
