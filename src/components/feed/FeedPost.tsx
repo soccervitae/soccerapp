@@ -72,6 +72,7 @@ export const FeedPost = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageOriginRect, setImageOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [videoOriginRect, setVideoOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [videoTimeOnOpen, setVideoTimeOnOpen] = useState(0);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -360,6 +361,7 @@ export const FeedPost = ({
           } else {
             // Open fullscreen video viewer
             if (videoRef.current) {
+              setVideoTimeOnOpen(videoRef.current.currentTime);
               videoRef.current.pause();
               setIsVideoPlaying(false);
             }
@@ -635,8 +637,17 @@ export const FeedPost = ({
         <FullscreenVideoViewer
           videoUrl={post.media_url}
           isOpen={isVideoViewerOpen}
-          onClose={() => setIsVideoViewerOpen(false)}
+          onClose={(currentTime) => {
+            setIsVideoViewerOpen(false);
+            // Resume feed video from fullscreen position
+            if (videoRef.current && typeof currentTime === "number") {
+              videoRef.current.currentTime = currentTime;
+              videoRef.current.play().catch(() => {});
+              setIsVideoPlaying(true);
+            }
+          }}
           originRect={videoOriginRect}
+          initialTime={videoTimeOnOpen}
         />
       )}
 

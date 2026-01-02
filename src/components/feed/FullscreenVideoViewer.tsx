@@ -13,8 +13,9 @@ interface OriginRect {
 interface FullscreenVideoViewerProps {
   videoUrl: string;
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (currentTime?: number) => void;
   originRect?: OriginRect | null;
+  initialTime?: number;
 }
 
 export const FullscreenVideoViewer = ({
@@ -22,6 +23,7 @@ export const FullscreenVideoViewer = ({
   isOpen,
   onClose,
   originRect,
+  initialTime = 0,
 }: FullscreenVideoViewerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showControls, setShowControls] = useState(true);
@@ -33,17 +35,23 @@ export const FullscreenVideoViewer = ({
       document.body.style.overflow = "hidden";
       setVideoLoaded(false);
       setIsExiting(false);
-      videoRef.current?.play();
+      if (videoRef.current) {
+        videoRef.current.currentTime = initialTime;
+        videoRef.current.play();
+      }
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, initialTime]);
+
+  const currentTimeRef = useRef<number>(initialTime);
 
   const handleClose = useCallback(() => {
     if (videoRef.current) {
+      currentTimeRef.current = videoRef.current.currentTime;
       videoRef.current.pause();
     }
     setIsExiting(true);
@@ -51,7 +59,7 @@ export const FullscreenVideoViewer = ({
 
   const handleExitComplete = useCallback(() => {
     if (isExiting) {
-      onClose();
+      onClose(currentTimeRef.current);
       setIsExiting(false);
     }
   }, [isExiting, onClose]);
