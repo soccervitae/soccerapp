@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
@@ -24,10 +24,22 @@ const Explore = () => {
     user?.id
   );
 
-  const { data: popularProfiles, isLoading: isPopularLoading } = usePopularProfiles(user?.id);
+  const { data: popularProfiles, isLoading: isPopularLoading, refetch: refetchPopular } = usePopularProfiles(user?.id);
 
   const profiles = isSearchActive ? searchResults : popularProfiles;
   const isLoading = isSearchActive ? isSearchLoading : isPopularLoading;
+
+  // Listen for explore tab press to refresh
+  useEffect(() => {
+    const handleExploreTabPressed = () => {
+      refetchPopular();
+    };
+    
+    window.addEventListener('explore-tab-pressed', handleExploreTabPressed);
+    return () => {
+      window.removeEventListener('explore-tab-pressed', handleExploreTabPressed);
+    };
+  }, []);
 
   const handleProfileClick = (username: string) => {
     navigate(`/${username}`);

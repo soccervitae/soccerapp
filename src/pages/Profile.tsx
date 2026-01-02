@@ -77,6 +77,18 @@ const Profile = () => {
     ]);
   };
 
+  // Listen for profile tab press to refresh
+  useEffect(() => {
+    const handleProfileTabPressed = () => {
+      handleRefresh();
+    };
+    
+    window.addEventListener('profile-tab-pressed', handleProfileTabPressed);
+    return () => {
+      window.removeEventListener('profile-tab-pressed', handleProfileTabPressed);
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <main className="bg-background min-h-screen relative pb-24">
