@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, ReactNode } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { RefreshCw, ArrowDown } from "lucide-react";
 
 interface RefreshableContainerProps {
   children: ReactNode;
@@ -21,11 +22,13 @@ export const RefreshableContainer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
+  const hasVibrated = useRef(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (containerRef.current?.scrollTop === 0) {
       startY.current = e.touches[0].clientY;
       setIsPulling(true);
+      hasVibrated.current = false;
     }
   }, []);
 
@@ -38,6 +41,12 @@ export const RefreshableContainer = ({
     // Apply resistance to pull
     const resistedDistance = Math.min(distance * 0.5, threshold * 1.5);
     setPullDistance(resistedDistance);
+
+    // Vibrate when threshold is reached (once per pull)
+    if (resistedDistance >= threshold && !hasVibrated.current && navigator.vibrate) {
+      navigator.vibrate(10);
+      hasVibrated.current = true;
+    }
   }, [isPulling, threshold]);
 
   const handleTouchEnd = useCallback(async () => {
@@ -49,10 +58,10 @@ export const RefreshableContainer = ({
     setPullDistance(0);
     startY.current = 0;
     currentY.current = 0;
+    hasVibrated.current = false;
   }, [pullDistance, threshold, isRefreshing, onRefresh]);
 
   const progress = Math.min(pullDistance / threshold, 1);
-  const rotation = progress * 360;
 
   return (
     <div
@@ -75,24 +84,17 @@ export const RefreshableContainer = ({
             transition={{ duration: 0.2 }}
             className="flex items-center justify-center overflow-hidden"
           >
-            <motion.div
-              animate={{ rotate: isRefreshing ? 360 : rotation }}
-              transition={isRefreshing ? { 
-                repeat: Infinity, 
-                duration: 1, 
-                ease: "linear" 
-              } : { duration: 0 }}
-            >
-              <span 
-                className="material-symbols-outlined text-primary"
+            {isRefreshing ? (
+              <RefreshCw className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <ArrowDown 
+                className="h-5 w-5 text-primary transition-transform"
                 style={{ 
                   opacity: Math.min(progress, 1),
-                  transform: `scale(${0.5 + progress * 0.5})`,
+                  transform: `scale(${0.5 + progress * 0.5}) rotate(${progress >= 1 ? 180 : 0}deg)`,
                 }}
-              >
-                {isRefreshing ? "progress_activity" : "arrow_downward"}
-              </span>
-            </motion.div>
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -32,6 +32,8 @@ export const useStories = () => {
 
   return useQuery({
     queryKey: ["stories"],
+    refetchOnMount: "always",
+    staleTime: 0,
     queryFn: async (): Promise<GroupedStories[]> => {
       const { data: stories, error } = await supabase
         .from("stories")
