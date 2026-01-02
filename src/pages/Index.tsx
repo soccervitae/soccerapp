@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FeedHeader } from "@/components/feed/FeedHeader";
 import { FeedStories } from "@/components/feed/FeedStories";
 import { FeedPost } from "@/components/feed/FeedPost";
@@ -28,6 +29,18 @@ const Index = () => {
   const handleRefresh = async () => {
     await Promise.all([refetch(), refetchStories()]);
   };
+
+  // Listen for home tab press to refresh feed
+  useEffect(() => {
+    const handleHomeTabPressed = () => {
+      handleRefresh();
+    };
+    
+    window.addEventListener('home-tab-pressed', handleHomeTabPressed);
+    return () => {
+      window.removeEventListener('home-tab-pressed', handleHomeTabPressed);
+    };
+  }, []);
 
   // Show onboarding for first-time users
   if (!onboardingLoading && showOnboarding) {

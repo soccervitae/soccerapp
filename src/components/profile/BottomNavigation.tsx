@@ -39,6 +39,15 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   
   const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
 
+  const handleHomeClick = () => {
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.dispatchEvent(new CustomEvent('home-tab-pressed'));
+    } else {
+      navigate("/");
+    }
+  };
+
   const handleSelectOption = (option: "post" | "replay" | "highlight" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
@@ -73,7 +82,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
       <nav ref={ref} className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
         <div className="flex justify-around items-center">
           <button 
-            onClick={() => navigate("/")}
+            onClick={handleHomeClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
