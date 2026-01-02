@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,11 +7,30 @@ import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
 import logoText from "@/assets/soccervitae-logo-text.png";
 
+type DeviceType = "ios" | "android" | "unknown";
+
+const useDeviceType = (): DeviceType => {
+  return useMemo(() => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      return "ios";
+    }
+    
+    if (/android/.test(userAgent)) {
+      return "android";
+    }
+    
+    return "unknown";
+  }, []);
+};
+
 const Install = () => {
   const navigate = useNavigate();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const { isPWA } = useRequirePwa();
   const [activeStep, setActiveStep] = useState(0);
+  const deviceType = useDeviceType();
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
@@ -229,89 +248,101 @@ const Install = () => {
           transition={{ delay: 0.8 }}
           className="space-y-4"
         >
-          {/* iOS Section */}
-          <div className="bg-card border rounded-2xl p-4 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-xl">
-                🍎
+          {/* iOS Section - Show for iOS or unknown devices */}
+          {(deviceType === "ios" || deviceType === "unknown") && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-card border rounded-2xl p-4 space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-xl">
+                  🍎
+                </div>
+                <div>
+                  <h3 className="font-semibold">iPhone / iPad</h3>
+                  <p className="text-xs text-muted-foreground">Instruções para Safari</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">iPhone / iPad</h3>
-                <p className="text-xs text-muted-foreground">Instruções para Safari</p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              {iosSteps.map((step, index) => (
-                <motion.div
-                  key={index}
-                  className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
-                    activeStep === index
-                      ? "bg-primary/10 border-2 border-primary"
-                      : "bg-muted/50 border-2 border-transparent"
-                  }`}
-                  animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
-                    activeStep === index
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted-foreground/20 text-muted-foreground"
-                  }`}>
-                    {index + 1}
-                  </div>
-                  {step.icon && (
-                    <step.icon className={`w-4 h-4 mx-auto mb-1 ${
-                      activeStep === index ? "text-primary" : "text-muted-foreground"
-                    }`} />
-                  )}
-                  <p className="text-[10px] font-medium leading-tight">{step.title}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Android Section */}
-          <div className="bg-card border rounded-2xl p-4 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-xl">
-                🤖
+              <div className="grid grid-cols-4 gap-2">
+                {iosSteps.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
+                      activeStep === index
+                        ? "bg-primary/10 border-2 border-primary"
+                        : "bg-muted/50 border-2 border-transparent"
+                    }`}
+                    animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
+                      activeStep === index
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted-foreground/20 text-muted-foreground"
+                    }`}>
+                      {index + 1}
+                    </div>
+                    {step.icon && (
+                      <step.icon className={`w-4 h-4 mx-auto mb-1 ${
+                        activeStep === index ? "text-primary" : "text-muted-foreground"
+                      }`} />
+                    )}
+                    <p className="text-[10px] font-medium leading-tight">{step.title}</p>
+                  </motion.div>
+                ))}
               </div>
-              <div>
-                <h3 className="font-semibold">Android</h3>
-                <p className="text-xs text-muted-foreground">Instruções para Chrome</p>
-              </div>
-            </div>
+            </motion.div>
+          )}
 
-            <div className="grid grid-cols-4 gap-2">
-              {androidSteps.map((step, index) => (
-                <motion.div
-                  key={index}
-                  className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
-                    activeStep === index
-                      ? "bg-primary/10 border-2 border-primary"
-                      : "bg-muted/50 border-2 border-transparent"
-                  }`}
-                  animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
-                    activeStep === index
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted-foreground/20 text-muted-foreground"
-                  }`}>
-                    {index + 1}
-                  </div>
-                  {step.icon && (
-                    <step.icon className={`w-4 h-4 mx-auto mb-1 ${
-                      activeStep === index ? "text-primary" : "text-muted-foreground"
-                    }`} />
-                  )}
-                  <p className="text-[10px] font-medium leading-tight">{step.title}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+          {/* Android Section - Show for Android or unknown devices */}
+          {(deviceType === "android" || deviceType === "unknown") && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-card border rounded-2xl p-4 space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-xl">
+                  🤖
+                </div>
+                <div>
+                  <h3 className="font-semibold">Android</h3>
+                  <p className="text-xs text-muted-foreground">Instruções para Chrome</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                {androidSteps.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    className={`relative p-3 rounded-xl text-center transition-all duration-300 ${
+                      activeStep === index
+                        ? "bg-primary/10 border-2 border-primary"
+                        : "bg-muted/50 border-2 border-transparent"
+                    }`}
+                    animate={activeStep === index ? { scale: [1, 1.02, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className={`w-6 h-6 mx-auto mb-2 rounded-full flex items-center justify-center text-xs font-bold ${
+                      activeStep === index
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted-foreground/20 text-muted-foreground"
+                    }`}>
+                      {index + 1}
+                    </div>
+                    {step.icon && (
+                      <step.icon className={`w-4 h-4 mx-auto mb-1 ${
+                        activeStep === index ? "text-primary" : "text-muted-foreground"
+                      }`} />
+                    )}
+                    <p className="text-[10px] font-medium leading-tight">{step.title}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Footer Message */}
