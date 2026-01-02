@@ -24,12 +24,3 @@ verify_jwt = false
 
 [functions.verify-signup-code]
 verify_jwt = false
-
-[functions.create-session-token]
-verify_jwt = true
-
-[functions.redeem-session-token]
-verify_jwt = false
-
-[functions.cleanup-expired-tokens]
-verify_jwt = false
