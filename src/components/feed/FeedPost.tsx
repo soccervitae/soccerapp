@@ -21,6 +21,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/com
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 interface FeedPostProps {
   post: Post;
+  disableVideoViewer?: boolean;
 }
 const REPORT_REASONS = [{
   value: "spam",
@@ -39,7 +40,8 @@ const REPORT_REASONS = [{
   label: "Outro motivo"
 }];
 export const FeedPost = ({
-  post
+  post,
+  disableVideoViewer = false
 }: FeedPostProps) => {
   const navigate = useNavigate();
   const {
@@ -296,12 +298,25 @@ export const FeedPost = ({
           maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '90vh' : '70vh'
         }}
         onClick={() => {
-          // Open fullscreen viewer for videos
-          if (videoRef.current) {
-            videoRef.current.pause();
-            setIsVideoPlaying(false);
+          if (disableVideoViewer) {
+            // Toggle play/pause inline
+            if (videoRef.current) {
+              if (isVideoPlaying) {
+                videoRef.current.pause();
+                setIsVideoPlaying(false);
+              } else {
+                videoRef.current.play().catch(() => {});
+                setIsVideoPlaying(true);
+              }
+            }
+          } else {
+            // Open fullscreen viewer for videos
+            if (videoRef.current) {
+              videoRef.current.pause();
+              setIsVideoPlaying(false);
+            }
+            setIsVideoViewerOpen(true);
           }
-          setIsVideoViewerOpen(true);
         }}>
               <video 
                 ref={videoRef}
