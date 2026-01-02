@@ -13,9 +13,10 @@ interface OriginRect {
 interface FullscreenVideoViewerProps {
   videoUrl: string;
   isOpen: boolean;
-  onClose: (currentTime?: number) => void;
+  onClose: (currentTime?: number, isMuted?: boolean) => void;
   originRect?: OriginRect | null;
   initialTime?: number;
+  initialMuted?: boolean;
 }
 
 export const FullscreenVideoViewer = ({
@@ -24,6 +25,7 @@ export const FullscreenVideoViewer = ({
   onClose,
   originRect,
   initialTime = 0,
+  initialMuted = true,
 }: FullscreenVideoViewerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showControls, setShowControls] = useState(true);
@@ -37,6 +39,7 @@ export const FullscreenVideoViewer = ({
       setIsExiting(false);
       if (videoRef.current) {
         videoRef.current.currentTime = initialTime;
+        videoRef.current.muted = initialMuted;
         videoRef.current.play();
       }
     } else {
@@ -45,13 +48,15 @@ export const FullscreenVideoViewer = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, initialTime]);
+  }, [isOpen, initialTime, initialMuted]);
 
   const currentTimeRef = useRef<number>(initialTime);
+  const isMutedRef = useRef<boolean>(initialMuted);
 
   const handleClose = useCallback(() => {
     if (videoRef.current) {
       currentTimeRef.current = videoRef.current.currentTime;
+      isMutedRef.current = videoRef.current.muted;
       videoRef.current.pause();
     }
     setIsExiting(true);
@@ -59,7 +64,7 @@ export const FullscreenVideoViewer = ({
 
   const handleExitComplete = useCallback(() => {
     if (isExiting) {
-      onClose(currentTimeRef.current);
+      onClose(currentTimeRef.current, isMutedRef.current);
       setIsExiting(false);
     }
   }, [isExiting, onClose]);
