@@ -11,6 +11,7 @@ import { LikesSheet } from "@/components/feed/LikesSheet";
 import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VideoControls } from "@/components/feed/VideoControls";
 import { Send } from "lucide-react";
 
 interface PostMediaViewerProps {
@@ -42,6 +43,7 @@ export const PostMediaViewer = ({
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [showDoubleTapAnimation, setShowDoubleTapAnimation] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [showVideoControls, setShowVideoControls] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
 
@@ -230,17 +232,27 @@ export const PostMediaViewer = ({
                 )}
                 
                 {isVideo ? (
-                  <video
-                    ref={videoRef}
-                    src={mediaUrls[0]}
-                    className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
-                      mediaLoaded ? "blur-0 opacity-100" : "blur-md opacity-0"
-                    }`}
-                    controls
-                    autoPlay
-                    playsInline
-                    onLoadedData={() => setMediaLoaded(true)}
-                  />
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={mediaUrls[0]}
+                      className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
+                        mediaLoaded ? "blur-0 opacity-100" : "blur-md opacity-0"
+                      }`}
+                      autoPlay
+                      playsInline
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowVideoControls(true);
+                      }}
+                      onLoadedData={() => setMediaLoaded(true)}
+                    />
+                    <VideoControls
+                      videoRef={videoRef}
+                      isVisible={showVideoControls}
+                      onVisibilityChange={setShowVideoControls}
+                    />
+                  </>
                 ) : (
                   <AnimatePresence mode="wait">
                     <motion.img
