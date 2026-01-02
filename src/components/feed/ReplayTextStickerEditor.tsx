@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
+import { useImageCompression } from "@/hooks/useImageCompression";
 
 interface OverlayElement {
   id: string;
@@ -132,6 +133,7 @@ export const ReplayTextStickerEditor = ({
   const [gestureMode, setGestureMode] = useState<GestureMode>("none");
   
   const { uploadMedia, isUploading } = useUploadMedia();
+  const { compressImage } = useImageCompression();
 
   // Caption state (WhatsApp style)
   const [caption, setCaption] = useState("");
@@ -541,7 +543,12 @@ export const ReplayTextStickerEditor = ({
       
       // Upload to Supabase Storage if we have a blob
       if (blobToUpload) {
-        const ext = mediaType === "video" ? "mp4" : "png";
+        // Compress images before upload
+        if (mediaType === "photo") {
+          blobToUpload = await compressImage(blobToUpload);
+        }
+        
+        const ext = mediaType === "video" ? "mp4" : "jpg";
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-replay.${ext}`;
         const uploadedUrl = await uploadMedia(blobToUpload, "story-media", fileName);
         
