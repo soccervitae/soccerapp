@@ -141,21 +141,10 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
               className="w-full h-full rounded-full border-2 border-background object-cover"
               onError={() => setImageError(true)}
             />
-            {/* Video indicator with duration */}
-            {isVideo && (
-              <div className="absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/20">
-                <Play className="w-4 h-4 text-white fill-white" />
-                {duration && (
-                  <span className="text-white text-[8px] font-medium mt-0.5 drop-shadow-md">
-                    {duration}
-                  </span>
-                )}
-              </div>
-            )}
           </div>
         ) : (
           <div className="w-full h-full rounded-full border-2 border-background bg-muted flex items-center justify-center">
-            <Play className="w-5 h-5 text-muted-foreground/60 fill-muted-foreground/60" />
+            <Film className="w-5 h-5 text-muted-foreground/60" />
           </div>
         )}
         {/* New views indicator */}
