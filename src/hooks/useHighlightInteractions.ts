@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserHighlight } from "@/hooks/useProfile";
-import { toast } from "sonner";
 
 interface HighlightViewer {
   id: string;
@@ -320,10 +319,6 @@ export const useSendHighlightReply = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["highlight-replies", variables.highlightId] });
       queryClient.invalidateQueries({ queryKey: ["highlight-reply-count", variables.highlightId] });
-      toast.success("Mensagem enviada!");
-    },
-    onError: () => {
-      toast.error("Erro ao enviar mensagem");
     },
   });
 };

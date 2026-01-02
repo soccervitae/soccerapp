@@ -18,7 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
 interface TeamSelectorProps {
   open: boolean;
@@ -153,7 +152,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
       
       onOpenChange(false);
     } catch (error) {
-      toast.error("Erro ao salvar times");
+      console.error("Error saving teams:", error);
     } finally {
       setIsSaving(false);
     }

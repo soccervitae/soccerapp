@@ -2,7 +2,6 @@ import { useUserTeams, useRemoveUserFromTeam } from "@/hooks/useTeams";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { X } from "lucide-react";
-import { toast } from "sonner";
 
 interface TeamsTabProps {
   userId?: string;
@@ -19,9 +18,8 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
   const handleRemoveTeam = async (teamId: string, teamName: string) => {
     try {
       await removeUserFromTeam.mutateAsync(teamId);
-      toast.success(`${teamName} removido`);
     } catch (error) {
-      toast.error("Erro ao remover time");
+      console.error("Error removing team:", error);
     }
   };
 

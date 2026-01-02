@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 interface StoryViewer {
   id: string;
@@ -115,10 +114,6 @@ export const useSendStoryReply = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["story-replies", variables.storyId] });
-      toast.success("Mensagem enviada!");
-    },
-    onError: () => {
-      toast.error("Erro ao enviar mensagem");
     },
   });
 };

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { ProfileSettingsSheet } from "./ProfileSettingsSheet";
 import { ProfileVisitorsSheet } from "./ProfileVisitorsSheet";
-import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
@@ -79,7 +78,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
   const handleShareProfile = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
-      toast.success("Link do perfil copiado!");
     } catch {
       const textArea = document.createElement("textarea");
       textArea.value = profileUrl;
@@ -87,7 +85,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
-      toast.success("Link do perfil copiado!");
     }
   };
 
@@ -127,7 +124,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
       link.download = `qrcode-${username}.png`;
       link.href = pngUrl;
       link.click();
-      toast.success("QR Code salvo!");
     };
 
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
@@ -156,13 +152,11 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
 
       if (error) throw error;
 
-      toast.success("Denúncia enviada com sucesso");
       setReportSheetOpen(false);
       setSelectedReason(null);
       setReportDescription("");
     } catch (error) {
       console.error("Error submitting report:", error);
-      toast.error("Erro ao enviar denúncia");
     } finally {
       setIsSubmittingReport(false);
     }

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Lock, ArrowLeft, ArrowRight, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -12,7 +11,6 @@ type Stage = "request" | "verify" | "success";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const [stage, setStage] = useState<Stage>("request");
   const [email, setEmail] = useState("");
@@ -28,7 +26,6 @@ const ForgotPassword = () => {
     e.preventDefault();
     
     if (!email) {
-      toast({ title: "Digite seu email", variant: "destructive" });
       return;
     }
 
@@ -42,14 +39,8 @@ const ForgotPassword = () => {
 
       setMaskedEmail(data.maskedEmail || email);
       setStage("verify");
-      toast({ title: "Código enviado!", description: "Verifique sua caixa de entrada" });
     } catch (error: any) {
       console.error("Erro ao solicitar reset:", error);
-      toast({
-        title: "Erro ao enviar código",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -59,17 +50,14 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     if (code.length !== 6) {
-      toast({ title: "Digite o código de 6 dígitos", variant: "destructive" });
       return;
     }
 
     if (newPassword.length < 6) {
-      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({ title: "As senhas não coincidem", variant: "destructive" });
       return;
     }
 
@@ -82,19 +70,12 @@ const ForgotPassword = () => {
       if (error) throw error;
 
       if (data.error) {
-        toast({ title: data.error, variant: "destructive" });
         return;
       }
 
       setStage("success");
-      toast({ title: "Senha alterada com sucesso!" });
     } catch (error: any) {
       console.error("Erro ao redefinir senha:", error);
-      toast({
-        title: "Erro ao redefinir senha",
-        description: error.message || "Verifique o código e tente novamente",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -103,19 +84,13 @@ const ForgotPassword = () => {
   const handleResendCode = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-password-reset", {
+      const { error } = await supabase.functions.invoke("send-password-reset", {
         body: { email },
       });
 
       if (error) throw error;
-
-      toast({ title: "Código reenviado!", description: "Verifique sua caixa de entrada" });
     } catch (error: any) {
-      toast({
-        title: "Erro ao reenviar código",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
+      console.error("Erro ao reenviar código:", error);
     } finally {
       setLoading(false);
     }

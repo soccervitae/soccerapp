@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import TwoFactorInput from "@/components/auth/TwoFactorInput";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
@@ -17,7 +16,6 @@ interface LocationState {
 const TwoFactorVerify = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
@@ -50,22 +48,12 @@ const TwoFactorVerify = () => {
 
       // Check if code is expired
       if (profile.codigo_expira_em && new Date(profile.codigo_expira_em) < new Date()) {
-        toast({
-          variant: "destructive",
-          title: "Código expirado",
-          description: "Solicite um novo código de verificação.",
-        });
         setIsVerifying(false);
         return;
       }
 
       // Check if code matches
       if (profile.codigo !== code) {
-        toast({
-          variant: "destructive",
-          title: "Código inválido",
-          description: "O código informado não está correto.",
-        });
         setIsVerifying(false);
         return;
       }
@@ -81,20 +69,10 @@ const TwoFactorVerify = () => {
         await trustCurrentDevice(state.userId);
       }
 
-      toast({
-        title: "Verificação concluída!",
-        description: "Login realizado com sucesso.",
-      });
-
       // Navigate to home
       navigate("/", { replace: true });
     } catch (error: any) {
       console.error("Error verifying 2FA code:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro na verificação",
-        description: "Ocorreu um erro ao verificar o código. Tente novamente.",
-      });
     }
 
     setIsVerifying(false);
@@ -112,18 +90,8 @@ const TwoFactorVerify = () => {
       });
 
       if (error) throw error;
-
-      toast({
-        title: "Código reenviado!",
-        description: "Verifique sua caixa de entrada.",
-      });
     } catch (error: any) {
       console.error("Error resending 2FA code:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao reenviar",
-        description: "Não foi possível reenviar o código. Tente novamente.",
-      });
     }
 
     setIsResending(false);

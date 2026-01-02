@@ -1,9 +1,8 @@
-import React, { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { toast } from "sonner";
 
 export const useMessageNotifications = () => {
   const { user } = useAuth();
@@ -63,30 +62,6 @@ export const useMessageNotifications = () => {
         newMessage.conversation_id
       );
     }
-    
-    // Criar ícone para o toast
-    const iconElement = sender?.avatar_url 
-      ? React.createElement("img", {
-          src: sender.avatar_url,
-          alt: senderName,
-          className: "h-8 w-8 rounded-full object-cover"
-        })
-      : React.createElement("div", {
-          className: "h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium"
-        }, senderName.charAt(0).toUpperCase());
-
-    // Mostrar toast in-app (clicável)
-    toast(senderName, {
-      description: messagePreview,
-      icon: iconElement,
-      action: {
-        label: "Ver",
-        onClick: () => {
-          window.location.href = `/messages/${newMessage.conversation_id}`;
-        },
-      },
-      duration: 5000,
-    });
   }, [user, location.pathname, isGranted, showNotification]);
 
   useEffect(() => {

@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
@@ -195,8 +193,6 @@ const App = () => {
             <AnimatePresence mode="wait">
               {showSplash && <SplashScreen key="splash" />}
             </AnimatePresence>
-            <Toaster />
-            <Sonner />
             <OrientationLock />
             {/* PWA auto-update hook */}
             <PwaAutoUpdate />
