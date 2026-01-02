@@ -167,7 +167,7 @@ const Install = () => {
           </motion.div>
         </motion.div>
 
-        {/* Success Message from Signup */}
+        {/* Interactive Checklist for Signup Flow */}
         {fromSignup && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -175,7 +175,7 @@ const Install = () => {
             transition={{ delay: 0.3 }}
             className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-5"
           >
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -188,16 +188,46 @@ const Install = () => {
                 <p className="font-semibold text-emerald-600 dark:text-emerald-400">
                   Conta criada com sucesso!
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  Siga os passos para começar
+                </p>
               </div>
             </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>
-                Siga os passos abaixo para instalar o app e depois <span className="font-semibold text-foreground">faça login novamente</span> dentro do aplicativo instalado.
-              </p>
-              <p className="text-xs opacity-80">
-                Por segurança, sua sessão não é transferida automaticamente para o app.
-              </p>
+
+            {/* Interactive Checklist */}
+            <div className="space-y-3">
+              {[
+                { step: 1, label: "Instalar o app", desc: "Adicione à tela inicial" },
+                { step: 2, label: "Abrir o app", desc: "Pela tela inicial" },
+                { step: 3, label: "Fazer login", desc: "Use seu e-mail e senha" },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 + index * 0.15 }}
+                  className="flex items-center gap-3 bg-background/50 rounded-xl p-3 border border-border/50"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-bold text-primary">{item.step}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-sm">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  </div>
+                  <div className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 flex-shrink-0" />
+                </motion.div>
+              ))}
             </div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.1 }}
+              className="text-xs text-muted-foreground mt-4 text-center"
+            >
+              Por segurança, sua sessão não é transferida para o app
+            </motion.p>
           </motion.div>
         )}
 
