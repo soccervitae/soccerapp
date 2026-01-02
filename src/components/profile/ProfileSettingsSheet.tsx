@@ -10,6 +10,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { clearVideoMetadataCache } from "@/lib/videoMetadataCache";
+import { clearCache } from "@/lib/offlineStorage";
 
 interface ProfileSettingsSheetProps {
   open: boolean;
@@ -145,6 +147,26 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
                   )}
                 </>
               )}
+            </div>
+
+            <Separator className="my-2" />
+
+            {/* Dados */}
+            <div>
+              <SectionHeader title="Dados" />
+              <SettingsItem
+                icon="delete_sweep"
+                label="Limpar cache do app"
+                onClick={async () => {
+                  try {
+                    await clearVideoMetadataCache();
+                    await clearCache();
+                    toast.success("Cache limpo com sucesso!");
+                  } catch {
+                    toast.error("Erro ao limpar cache");
+                  }
+                }}
+              />
             </div>
 
             <Separator className="my-2" />

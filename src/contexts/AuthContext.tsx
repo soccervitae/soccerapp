@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { clearVideoMetadataCache } from "@/lib/videoMetadataCache";
 
 interface SignUpData {
   email: string;
@@ -83,6 +84,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
+    // Clear video metadata cache on logout
+    await clearVideoMetadataCache();
     await supabase.auth.signOut();
   };
 
