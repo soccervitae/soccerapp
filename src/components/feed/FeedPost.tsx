@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, Send, Bookmark } from "lucide-react";
 import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
@@ -486,7 +487,7 @@ export const FeedPost = ({
           <div className="flex items-center justify-center relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
             <button onClick={() => setIsCommentsSheetOpen(true)} className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors">
-              <span className="material-symbols-outlined text-[24px]">chat_bubble_outline</span>
+              <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
               {(post.comments_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>}
             </button>
           </div>
@@ -496,16 +497,14 @@ export const FeedPost = ({
               onClick={() => setShareSheetOpen(true)}
               className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
             >
-              <span className="material-symbols-outlined text-[24px]">send</span>
+              <Send className="w-6 h-6" strokeWidth={1.5} />
               {(post.shares_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.shares_count)}</span>}
             </button>
           </div>
           <div className="flex items-center justify-center relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
             <button onClick={handleSave} disabled={savePost.isPending} className={`flex items-center justify-center p-3 transition-colors ${post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'}`}>
-              <span className={`material-symbols-outlined text-[24px] ${post.saved_by_user ? 'fill-1' : ''}`}>
-                {post.saved_by_user ? 'bookmark' : 'bookmark_border'}
-              </span>
+              <Bookmark className="w-6 h-6" strokeWidth={1.5} fill={post.saved_by_user ? 'currentColor' : 'none'} />
             </button>
           </div>
         </div>
