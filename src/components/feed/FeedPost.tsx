@@ -59,6 +59,7 @@ export const FeedPost = ({
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -274,10 +275,17 @@ export const FeedPost = ({
       </div>
 
       {/* Media */}
-      {post.media_url && <div className="relative aspect-[4/5] bg-muted max-h-[75vh] overflow-hidden">
+      {post.media_url && <div className={`relative bg-muted overflow-hidden ${
+        post.media_type === "video" 
+          ? "max-h-[85vh]" 
+          : "aspect-[4/5] max-h-[75vh]"
+      }`}>
           {post.media_type === "video" ? <div 
         ref={videoContainerRef}
-        className="w-full h-full cursor-pointer" 
+        className="relative w-full cursor-pointer flex items-center justify-center bg-black"
+        style={{
+          aspectRatio: videoAspectRatio ? videoAspectRatio.toString() : '4/5'
+        }}
         onClick={() => {
           if (videoRef.current) {
             if (videoRef.current.paused) {
@@ -292,10 +300,16 @@ export const FeedPost = ({
               <video 
                 ref={videoRef}
                 src={post.media_url} 
-                className="w-full h-full object-cover pointer-events-none" 
+                className="w-full h-full object-contain pointer-events-none" 
                 playsInline 
                 muted 
                 loop
+                onLoadedMetadata={(e) => {
+                  const video = e.currentTarget;
+                  if (video.videoWidth && video.videoHeight) {
+                    setVideoAspectRatio(video.videoWidth / video.videoHeight);
+                  }
+                }}
               />
               <AnimatePresence>
                 {!isVideoPlaying && (
