@@ -1,0 +1,1 @@
+UPDATE times SET escudo_url = 'https://escudosfc.com.br/images/primeirodemaio_pe.png' WHERE id = 'a56216b3-a7ee-40ff-901e-1e991f1bd905';
