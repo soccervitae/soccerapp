@@ -59,18 +59,40 @@ const Teams = () => {
     },
   });
 
-  // Fetch states filtered by country
+  // Fetch states filtered by country with team counts
   const { data: estados, isLoading: estadosLoading } = useQuery({
-    queryKey: ["estados", selectedPaisId],
+    queryKey: ["estados-with-counts", selectedPaisId],
     queryFn: async () => {
       if (!selectedPaisId) return [];
-      const { data, error } = await supabase
+      
+      // Fetch states
+      const { data: estadosData, error: estadosError } = await supabase
         .from("estados")
         .select("*")
         .eq("pais_id", selectedPaisId)
         .order("nome");
-      if (error) throw error;
-      return data;
+      if (estadosError) throw estadosError;
+      
+      // Fetch teams to count per state
+      const { data: teamsData, error: teamsError } = await supabase
+        .from("times")
+        .select("estado_id")
+        .eq("pais_id", selectedPaisId);
+      if (teamsError) throw teamsError;
+      
+      // Count teams per state
+      const teamCounts = teamsData?.reduce((acc, team) => {
+        if (team.estado_id) {
+          acc[team.estado_id] = (acc[team.estado_id] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<number, number>) || {};
+      
+      // Add count to each state
+      return estadosData?.map(estado => ({
+        ...estado,
+        teamCount: teamCounts[estado.id] || 0
+      })) || [];
     },
     enabled: !!selectedPaisId,
   });
@@ -167,7 +189,7 @@ const Teams = () => {
               ) : estados && estados.length > 0 ? (
                 estados.map((estado) => (
                   <SelectItem key={estado.id} value={estado.id.toString()}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full">
                       {estado.bandeira_url && (
                         <img
                           src={estado.bandeira_url}
@@ -175,7 +197,10 @@ const Teams = () => {
                           className="w-5 h-4 object-cover rounded-sm"
                         />
                       )}
-                      {estado.nome}
+                      <span className="flex-1">{estado.nome}</span>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {estado.teamCount} {estado.teamCount === 1 ? 'time' : 'times'}
+                      </span>
                     </div>
                   </SelectItem>
                 ))
