@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Heart, Send } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Heart, Send, ImageOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
+
+// Helper function to check unsupported formats
+const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
+const isUnsupportedFormat = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return UNSUPPORTED_FORMATS.some(ext => lowerUrl.endsWith(ext));
+};
 
 import { toast } from "sonner";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
@@ -86,6 +93,7 @@ export const HighlightFullscreenView = ({
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const replyInputRef = useRef<HTMLInputElement | null>(null);
+  const [mediaErrors, setMediaErrors] = useState<Record<string, boolean>>({});
   
   const { user } = useAuth();
   const markViewed = useMarkHighlightViewed();
@@ -400,27 +408,37 @@ export const HighlightFullscreenView = ({
                 <div className="flex-1 flex items-center justify-center bg-black relative overflow-hidden">
                   <div ref={imageEmblaRef} className="w-full h-full overflow-hidden">
                     <div className="flex h-full">
-                      {currentImages.map((media, index) => (
-                        <div key={media.id} className="flex-none w-full h-full flex items-center justify-center">
-                          {media.media_type === 'video' ? (
-                            <video
-                              ref={index === currentImageIndex ? videoRef : undefined}
-                              src={media.image_url}
-                              className="w-full h-full object-contain"
-                              autoPlay={index === currentImageIndex}
-                              playsInline
-                              muted={index !== currentImageIndex}
-                              onEnded={handleVideoEnded}
-                            />
-                          ) : (
-                            <img
-                              src={media.image_url}
-                              alt={selectedHighlight?.title || 'Destaque'}
-                              className="w-full h-full object-contain"
-                            />
-                          )}
-                        </div>
-                      ))}
+                      {currentImages.map((media, index) => {
+                        const hasError = mediaErrors[media.id] || isUnsupportedFormat(media.image_url);
+                        return (
+                          <div key={media.id} className="flex-none w-full h-full flex items-center justify-center">
+                            {hasError ? (
+                              <div className="flex flex-col items-center justify-center gap-4 text-white/60">
+                                <ImageOff className="w-16 h-16" />
+                                <p className="text-sm">Mídia indisponível</p>
+                              </div>
+                            ) : media.media_type === 'video' ? (
+                              <video
+                                ref={index === currentImageIndex ? videoRef : undefined}
+                                src={media.image_url}
+                                className="w-full h-full object-contain"
+                                autoPlay={index === currentImageIndex}
+                                playsInline
+                                muted={index !== currentImageIndex}
+                                onEnded={handleVideoEnded}
+                                onError={() => setMediaErrors(prev => ({ ...prev, [media.id]: true }))}
+                              />
+                            ) : (
+                              <img
+                                src={media.image_url}
+                                alt={selectedHighlight?.title || 'Destaque'}
+                                className="w-full h-full object-contain"
+                                onError={() => setMediaErrors(prev => ({ ...prev, [media.id]: true }))}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 

@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { MediaPreview } from "@/components/common/MediaPreview";
 
 export const FeedStories = () => {
   const navigate = useNavigate();
@@ -83,10 +84,11 @@ export const FeedStories = () => {
                     setViewerOpen(true);
                   } : undefined}
                 >
-                  <img
+                  <MediaPreview
                     src={hasOwnStories ? (userStoryGroup.stories[0]?.media_url || profile?.avatar_url || "/placeholder.svg") : (profile?.avatar_url || "/placeholder.svg")}
                     alt="Seu replay"
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    showPlayIcon={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
                   
@@ -133,7 +135,7 @@ export const FeedStories = () => {
                 onClick={(e) => handleStoryClick(originalIndex, e)}
               >
                 <div className="relative h-44 rounded-lg overflow-hidden border border-border/50">
-                  <img
+                  <MediaPreview
                     src={group.stories[0]?.media_url || "/placeholder.svg"}
                     alt={group.username}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
