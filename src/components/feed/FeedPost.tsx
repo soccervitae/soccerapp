@@ -8,6 +8,7 @@ import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
+import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
 
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -65,6 +66,7 @@ export const FeedPost = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -346,12 +348,12 @@ export const FeedPost = ({
               }
             }
           } else {
-            // Open fullscreen for videos
+            // Open fullscreen video viewer
             if (videoRef.current) {
               videoRef.current.pause();
               setIsVideoPlaying(false);
-              videoRef.current.requestFullscreen?.();
             }
+            setIsVideoViewerOpen(true);
           }
         }}>
               <video 
@@ -607,6 +609,15 @@ export const FeedPost = ({
         contentPreview={mediaUrls[0]}
         contentTitle={post.content.substring(0, 50)}
       />
+
+      {/* Fullscreen Video Viewer */}
+      {post.media_type === "video" && post.media_url && (
+        <FullscreenVideoViewer
+          videoUrl={post.media_url}
+          isOpen={isVideoViewerOpen}
+          onClose={() => setIsVideoViewerOpen(false)}
+        />
+      )}
 
     </article>;
 };
