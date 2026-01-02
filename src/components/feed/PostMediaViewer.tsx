@@ -10,6 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LikesSheet } from "@/components/feed/LikesSheet";
 import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Send } from "lucide-react";
 
 interface PostMediaViewerProps {
@@ -221,12 +222,19 @@ export const PostMediaViewer = ({
                 className="absolute inset-0 bg-black flex items-center justify-center"
                 onClick={handleTapNavigation}
               >
+                {/* Skeleton placeholder while loading */}
+                {!mediaLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Skeleton className="w-full h-full bg-white/10" />
+                  </div>
+                )}
+                
                 {isVideo ? (
                   <video
                     ref={videoRef}
                     src={mediaUrls[0]}
                     className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
-                      mediaLoaded ? "blur-0" : "blur-md"
+                      mediaLoaded ? "blur-0 opacity-100" : "blur-md opacity-0"
                     }`}
                     controls
                     autoPlay
@@ -237,8 +245,8 @@ export const PostMediaViewer = ({
                   <img
                     src={mediaUrls[currentIndex]}
                     alt={`Foto ${currentIndex + 1}`}
-                    className={`w-full h-full object-contain transition-[filter] duration-500 ease-out ${
-                      mediaLoaded ? "blur-0" : "blur-md"
+                    className={`w-full h-full object-contain transition-all duration-500 ease-out ${
+                      mediaLoaded ? "blur-0 opacity-100" : "blur-md opacity-0"
                     }`}
                     onLoad={() => setMediaLoaded(true)}
                   />
