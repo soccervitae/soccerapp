@@ -279,14 +279,14 @@ export const FeedPost = ({
       </div>
 
       {/* Media */}
-      {post.media_url && <div className={`relative bg-muted overflow-hidden ${
+      {post.media_url && <div className={`relative ${
         post.media_type === "video" 
           ? "" 
-          : "aspect-[4/5] max-h-[75vh]"
+          : "bg-muted overflow-hidden aspect-[4/5] max-h-[75vh]"
       }`}>
           {post.media_type === "video" ? <div 
         ref={videoContainerRef}
-        className="relative w-full cursor-pointer flex items-center justify-center bg-black"
+        className="relative w-full cursor-pointer flex items-center justify-center bg-black -mx-4"
         style={{
           // Vertical videos (9:16) get more height like Instagram Reels
           // Horizontal videos maintain their aspect ratio
