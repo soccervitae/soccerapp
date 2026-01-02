@@ -292,7 +292,7 @@ export const FeedPost = ({
                 <span className="material-symbols-outlined text-[18px] mr-2">edit</span>
                 Editar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="cursor-pointer text-primary focus:text-primary">
                 <span className="material-symbols-outlined text-[18px] mr-2">delete</span>
                 Excluir
               </DropdownMenuItem>
