@@ -69,7 +69,7 @@ export const FeedPost = ({
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
-  const [selectedImageUrl, setSelectedImageUrl] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -166,13 +166,13 @@ export const FeedPost = ({
     }
   };
   
-  const handleMediaClick = (e: React.MouseEvent, mediaUrl: string) => {
+  const handleMediaClick = (e: React.MouseEvent, imageIndex: number) => {
     // Wait to check for double tap
     const now = Date.now();
     setTimeout(() => {
       if (lastTapRef.current === now) {
         // Single tap - open fullscreen image viewer
-        setSelectedImageUrl(mediaUrl);
+        setSelectedImageIndex(imageIndex);
         setIsImageViewerOpen(true);
       }
     }, 300);
@@ -401,7 +401,7 @@ export const FeedPost = ({
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
                   {mediaUrls.map((url, index) => <CarouselItem key={index} className="h-full relative">
-                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleMediaClick(e, url)} />
+                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleMediaClick(e, index)} />
                       {/* Tags overlay for this image */}
                       {showTags && postTags.filter(tag => tag.photo_index === index).map(tag => <button key={tag.id} onClick={(e) => { e.stopPropagation(); navigate(`/${tag.profile.username}`); }} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
                 left: `${tag.x_position}%`,
@@ -423,7 +423,7 @@ export const FeedPost = ({
                 {mediaUrls.map((_, index) => <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />)}
               </div>
             </> : <>
-              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleMediaClick(e, mediaUrls[0])} />
+              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleMediaClick(e, 0)} />
               {/* Tags overlay for single image */}
               {showTags && postTags.filter(tag => tag.photo_index === 0).map(tag => <button key={tag.id} onClick={(e) => { e.stopPropagation(); navigate(`/${tag.profile.username}`); }} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
           left: `${tag.x_position}%`,
@@ -621,7 +621,8 @@ export const FeedPost = ({
 
       {/* Fullscreen Image Viewer */}
       <FullscreenImageViewer
-        imageUrl={selectedImageUrl}
+        images={mediaUrls}
+        initialIndex={selectedImageIndex}
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
       />
