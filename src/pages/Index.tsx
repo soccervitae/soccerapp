@@ -62,7 +62,7 @@ const Index = () => {
       <RefreshableContainer
         onRefresh={handleRefresh}
         isRefreshing={isRefetching}
-        className="min-h-screen bg-background pb-24"
+        className="min-h-screen bg-background pb-24 overflow-x-hidden"
       >
         <FeedHeader />
         <main className="pt-16">
