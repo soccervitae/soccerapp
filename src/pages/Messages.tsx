@@ -10,6 +10,7 @@ import { OnlineUserAvatar } from "@/components/messages/OnlineUserAvatar";
 import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
+import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { Input } from "@/components/ui/input";
 import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, MessageCircleOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,10 @@ const Messages = () => {
   
   const isRefetching = (isFetching || isFetchingFollowing) && !isLoading && !isLoadingFollowing;
   const { isUserOnline } = usePresenceContext();
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -256,7 +261,11 @@ const Messages = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <RefreshableContainer
+      onRefresh={handleRefresh}
+      isRefreshing={isRefetching}
+      className="min-h-screen bg-background pb-20"
+    >
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <h1 className="text-lg font-semibold">Mensagens</h1>
@@ -502,7 +511,7 @@ const Messages = () => {
       </AlertDialog>
 
       <BottomNavigation />
-    </div>
+    </RefreshableContainer>
   );
 };
 

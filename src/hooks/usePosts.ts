@@ -58,6 +58,8 @@ export const usePosts = () => {
 
   const query = useQuery({
     queryKey: ["posts"],
+    refetchOnMount: "always",
+    staleTime: 0,
     queryFn: async (): Promise<Post[]> => {
       // If offline, return cached data
       if (!isOnline()) {

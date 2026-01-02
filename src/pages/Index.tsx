@@ -8,19 +8,26 @@ import { RightSidebar } from "@/components/layout/RightSidebar";
 import { CreatePostInline } from "@/components/feed/CreatePostInline";
 import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen";
 import { usePosts } from "@/hooks/usePosts";
+import { useStories } from "@/hooks/useStories";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { FeedSkeleton } from "@/components/skeletons/FeedSkeleton";
 import { OfflineCacheIndicator } from "@/components/common/OfflineCacheIndicator";
+import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { getPostsCacheTimestamp } from "@/lib/offlineStorage";
 import { AnimatePresence } from "framer-motion";
 
 const Index = () => {
-  const { data: posts, isLoading, isFetching, isFromCache } = usePosts();
+  const { data: posts, isLoading, isFetching, isFromCache, refetch } = usePosts();
+  const { refetch: refetchStories } = useStories();
   const isRefetching = isFetching && !isLoading;
   const isMobile = useIsMobile();
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
   const cacheTimestamp = isFromCache ? getPostsCacheTimestamp() : null;
+
+  const handleRefresh = async () => {
+    await Promise.all([refetch(), refetchStories()]);
+  };
 
   // Show onboarding for first-time users
   if (!onboardingLoading && showOnboarding) {
@@ -52,7 +59,11 @@ const Index = () => {
   // Mobile Layout
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <RefreshableContainer
+        onRefresh={handleRefresh}
+        isRefreshing={isRefetching}
+        className="min-h-screen bg-background pb-24"
+      >
         <FeedHeader />
         <main className="pt-16">
           <AnimatePresence>
@@ -62,7 +73,7 @@ const Index = () => {
           {renderFeed()}
         </main>
         <BottomNavigation activeTab="home" />
-      </div>
+      </RefreshableContainer>
     );
   }
 
