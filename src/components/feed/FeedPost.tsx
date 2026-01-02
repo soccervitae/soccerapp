@@ -70,6 +70,7 @@ export const FeedPost = ({
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageOriginRect, setImageOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -166,12 +167,20 @@ export const FeedPost = ({
     }
   };
   
-  const handleMediaClick = (e: React.MouseEvent, imageIndex: number) => {
+  const handleMediaClick = (e: React.MouseEvent<HTMLImageElement>, imageIndex: number) => {
     // Wait to check for double tap
     const now = Date.now();
+    const target = e.currentTarget;
     setTimeout(() => {
       if (lastTapRef.current === now) {
-        // Single tap - open fullscreen image viewer
+        // Single tap - open fullscreen image viewer with origin rect
+        const rect = target.getBoundingClientRect();
+        setImageOriginRect({
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+        });
         setSelectedImageIndex(imageIndex);
         setIsImageViewerOpen(true);
       }
@@ -625,6 +634,7 @@ export const FeedPost = ({
         initialIndex={selectedImageIndex}
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
+        originRect={imageOriginRect}
       />
 
     </article>;
