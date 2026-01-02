@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { clearVideoMetadataCache } from "@/lib/videoMetadataCache";
+import { getSessionFromIndexedDB, saveSessionToIndexedDB, clearSessionFromIndexedDB } from "@/lib/sessionStorage";
 
 interface SignUpData {
   email: string;
@@ -33,25 +34,97 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Check if running as PWA
+const isPWA = (): boolean => {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true ||
+    document.referrer.includes('android-app://')
+  );
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const sessionRestoredRef = useRef(false);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const initializeAuth = async () => {
+      // First, check for existing session
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      
+      if (existingSession) {
+        // Already has session, use it
+        setSession(existingSession);
+        setUser(existingSession.user);
+        setLoading(false);
+        
+        // Save to IndexedDB for future PWA transfer (if in browser)
+        if (!isPWA() && existingSession.access_token && existingSession.refresh_token) {
+          saveSessionToIndexedDB(
+            existingSession.access_token,
+            existingSession.refresh_token,
+            existingSession.expires_at
+          );
+        }
+        return;
+      }
+
+      // No existing session - try to restore from IndexedDB (especially for PWA)
+      if (!sessionRestoredRef.current) {
+        sessionRestoredRef.current = true;
+        
+        try {
+          const storedSession = await getSessionFromIndexedDB();
+          
+          if (storedSession) {
+            console.log('[Auth] Found stored session, attempting to restore...');
+            
+            const { data, error } = await supabase.auth.setSession({
+              access_token: storedSession.access_token,
+              refresh_token: storedSession.refresh_token,
+            });
+            
+            if (data.session && !error) {
+              console.log('[Auth] Session restored successfully');
+              setSession(data.session);
+              setUser(data.session.user);
+              
+              // Clear transfer session after successful restoration in PWA
+              if (isPWA()) {
+                await clearSessionFromIndexedDB();
+              }
+            } else {
+              console.log('[Auth] Session restoration failed:', error?.message);
+              await clearSessionFromIndexedDB();
+            }
+          }
+        } catch (error) {
+          console.error('[Auth] Error restoring session:', error);
+        }
+      }
+      
       setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (_event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
         setLoading(false);
+        
+        // Save session to IndexedDB when authenticated (for PWA transfer)
+        if (currentSession && !isPWA()) {
+          saveSessionToIndexedDB(
+            currentSession.access_token,
+            currentSession.refresh_token,
+            currentSession.expires_at
+          );
+        }
       }
     );
 
