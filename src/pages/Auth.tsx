@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
@@ -19,9 +19,8 @@ import {
 } from "@/components/ui/select";
 
 // Social Login Buttons Component
-const SocialLoginButtons = () => {
+const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }) => {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -36,11 +35,7 @@ const SocialLoginButtons = () => {
       if (error) throw error;
     } catch (error: any) {
       console.error("Erro no login com Google:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: error.message || "Não foi possível fazer login com Google",
-      });
+      onError?.(error.message || "Não foi possível fazer login com Google");
       setLoading(false);
     }
   };
@@ -102,6 +97,7 @@ const SocialLoginButtons = () => {
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [socialError, setSocialError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -127,7 +123,10 @@ const Auth = () => {
       {/* Auth Card */}
       <div className="flex-1 bg-white px-6 pt-2 pb-8">
         <div className="max-w-sm mx-auto">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
+          <Tabs value={activeTab} onValueChange={(v) => {
+            setActiveTab(v as "login" | "signup");
+            setSocialError(null);
+          }}>
             <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl h-12">
               <TabsTrigger 
                 value="login" 
@@ -153,7 +152,17 @@ const Auth = () => {
           </Tabs>
 
           {/* Social Login - only show on login tab */}
-          {activeTab === "login" && <SocialLoginButtons />}
+          {activeTab === "login" && (
+            <>
+              <SocialLoginButtons onError={setSocialError} />
+              {socialError && (
+                <div className="mt-4 flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <X className="h-4 w-4 text-destructive flex-shrink-0" />
+                  <p className="text-sm text-destructive">{socialError}</p>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Toggle text */}
           <div className="mt-8 text-center">
@@ -496,6 +505,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -507,7 +517,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   });
   
   const { signUp } = useAuth();
-  const { toast } = useToast();
   
   // Validações individuais
   const isFirstNameValid = firstName.trim().length >= 2;
@@ -536,25 +545,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         }
       });
 
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro ao reenviar",
-          description: error.message,
-        });
-      } else {
-        toast({
-          title: "Email reenviado!",
-          description: "Verifique sua caixa de entrada e spam.",
-        });
+      if (!error) {
         setResendCooldown(60);
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível reenviar o email.",
-      });
+      // Error handled silently
     } finally {
       setResendingEmail(false);
     }
@@ -636,49 +631,30 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
     if (firstName.trim().length < 2) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "O nome deve ter pelo menos 2 caracteres",
-      });
+      setErrorMessage("O nome deve ter pelo menos 2 caracteres");
       return;
     }
 
     if (lastName.trim().length < 2) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "O sobrenome deve ter pelo menos 2 caracteres",
-      });
+      setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
       return;
     }
 
     if (!validateEmail(email)) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Por favor, insira um email válido",
-      });
+      setErrorMessage("Por favor, insira um email válido");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "As senhas não coincidem",
-      });
+      setErrorMessage("As senhas não coincidem");
       return;
     }
 
     if (!isPasswordValid) {
-      toast({
-        variant: "destructive",
-        title: "Senha fraca",
-        description: "A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, número e caractere especial",
-      });
+      setErrorMessage("A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, número e caractere especial");
       return;
     }
 
@@ -692,11 +668,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     });
 
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao criar conta",
-        description: translateError(error.message),
-      });
+      setErrorMessage(translateError(error.message));
       setLoading(false);
     } else {
       setSignupSuccess(true);
@@ -772,6 +744,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Mensagem de erro */}
+      {errorMessage && (
+        <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <X className="h-4 w-4 text-destructive flex-shrink-0" />
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        </div>
+      )}
+
       {/* Nome e Sobrenome em linha */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
@@ -785,7 +765,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
               type="text"
               placeholder="João"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                setErrorMessage(null);
+              }}
               onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
               className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
                 touched.firstName 
@@ -822,7 +805,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
               type="text"
               placeholder="Silva"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                setLastName(e.target.value);
+                setErrorMessage(null);
+              }}
               onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
               className={`pr-10 h-12 bg-muted/50 transition-colors ${
                 touched.lastName 
@@ -862,7 +848,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             type="email"
             placeholder="seu@email.com"
             value={email}
-            onChange={(e) => handleEmailChange(e.target.value)}
+            onChange={(e) => {
+              handleEmailChange(e.target.value);
+              setErrorMessage(null);
+            }}
             onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
             className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
               touched.email && email.length > 0
@@ -899,7 +888,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setErrorMessage(null);
+            }}
             onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
             className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
               touched.password && password.length > 0
@@ -975,7 +967,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setErrorMessage(null);
+            }}
             onBlur={() => setTouched(prev => ({ ...prev, confirmPassword: true }))}
             className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
               touched.confirmPassword && confirmPassword.length > 0
