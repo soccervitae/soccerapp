@@ -145,12 +145,16 @@ export const FeedPost = ({
   const handleDoubleTap = () => {
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
-      // Double tap detected - applaud
-      if (!post.liked_by_user) {
+      // Double tap detected - toggle applause
+      if (post.liked_by_user) {
+        // Already applauded - remove applause (no animation)
         handleLike();
+      } else {
+        // Not applauded yet - add applause with animation
+        handleLike();
+        setShowApplauseAnimation(true);
+        setTimeout(() => setShowApplauseAnimation(false), 1000);
       }
-      setShowApplauseAnimation(true);
-      setTimeout(() => setShowApplauseAnimation(false), 1000);
     }
     lastTapRef.current = now;
   };
