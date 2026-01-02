@@ -180,7 +180,7 @@ export const ProfileFeedSheet = ({
                   key={post.id} 
                   ref={(el) => { postRefs.current[index] = el; }}
                 >
-                  <FeedPost post={transformPostForFeed(post)} disableVideoViewer />
+                  <FeedPost post={transformPostForFeed(post)} />
                 </div>
               ))}
             </div>
