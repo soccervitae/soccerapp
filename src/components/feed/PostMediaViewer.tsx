@@ -44,7 +44,7 @@ export const PostMediaViewer = ({
   const [showDoubleTapAnimation, setShowDoubleTapAnimation] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [showVideoControls, setShowVideoControls] = useState(true);
-  const [showInfo, setShowInfo] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,7 +63,7 @@ export const PostMediaViewer = ({
     if (isOpen) {
       setCurrentIndex(initialIndex);
       setMediaLoaded(false);
-      setShowInfo(true);
+      setShowInfo(false);
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
