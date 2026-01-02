@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket, CheckCircle } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
@@ -27,10 +27,12 @@ const useDeviceType = (): DeviceType => {
 
 const Install = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const { isPWA } = useRequirePwa();
   const [activeStep, setActiveStep] = useState(0);
   const deviceType = useDeviceType();
+  const fromSignup = searchParams.get("from") === "signup";
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
@@ -164,6 +166,35 @@ const Install = () => {
             </p>
           </motion.div>
         </motion.div>
+
+        {/* Success Message from Signup */}
+        {fromSignup && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-5"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
+                className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"
+              >
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
+              </motion.div>
+              <div>
+                <p className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  Conta criada com sucesso!
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground pl-13">
+              Instale o app e faça login para começar sua jornada no Soccer Vitae.
+            </p>
+          </motion.div>
+        )}
 
         {/* Benefits Carousel */}
         <motion.div

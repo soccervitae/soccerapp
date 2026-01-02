@@ -675,9 +675,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     setLoading(false);
   };
 
-  const handleVerificationComplete = () => {
-    toast.success("Conta criada com sucesso!");
-    onSuccess();
+  const handleVerificationComplete = async () => {
+    // Sign out user from browser - they need to login again in PWA
+    await supabase.auth.signOut();
+    // Redirect to install page with signup flag
+    window.location.href = "/install?from=signup";
   };
 
   const handleBackToSignup = () => {
