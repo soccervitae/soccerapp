@@ -65,6 +65,7 @@ export const FeedPost = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -341,7 +342,7 @@ export const FeedPost = ({
                 src={post.media_url} 
                 className="w-full h-full object-contain pointer-events-none" 
                 playsInline 
-                muted 
+                muted={isMuted}
                 loop
                 onLoadedMetadata={(e) => {
                   const video = e.currentTarget;
@@ -365,6 +366,18 @@ export const FeedPost = ({
                   </motion.div>
                 )}
               </AnimatePresence>
+              {/* Mute/Unmute button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMuted(!isMuted);
+                }}
+                className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-95"
+              >
+                <span className="material-symbols-outlined text-white text-lg">
+                  {isMuted ? "volume_off" : "volume_up"}
+                </span>
+              </button>
             </div> : isCarousel ? <>
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
