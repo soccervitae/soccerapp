@@ -1,25 +1,73 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useTeams } from "@/hooks/useTeams";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ArrowLeft, Shield } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, ArrowLeft, Shield, Globe, MapPin } from "lucide-react";
 
 const Teams = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const estadoId = searchParams.get("estado") ? parseInt(searchParams.get("estado")!) : 17; // Default Pernambuco
-  const paisId = searchParams.get("pais") ? parseInt(searchParams.get("pais")!) : 26; // Default Brasil
-  
+  const [selectedPaisId, setSelectedPaisId] = useState<number | null>(26); // Default Brasil
+  const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(17); // Default Pernambuco
   const [search, setSearch] = useState("");
-  
-  const { data: teams, isLoading } = useTeams({
-    estadoId,
-    paisId,
+
+  // Fetch countries
+  const { data: paises, isLoading: paisesLoading } = useQuery({
+    queryKey: ["paises"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paises")
+        .select("*")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch states filtered by country
+  const { data: estados, isLoading: estadosLoading } = useQuery({
+    queryKey: ["estados", selectedPaisId],
+    queryFn: async () => {
+      if (!selectedPaisId) return [];
+      const { data, error } = await supabase
+        .from("estados")
+        .select("*")
+        .eq("pais_id", selectedPaisId)
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPaisId,
+  });
+
+  // Fetch teams
+  const { data: teams, isLoading: teamsLoading } = useTeams({
+    estadoId: selectedEstadoId || undefined,
+    paisId: selectedPaisId || undefined,
     search: search.trim() || undefined,
   });
 
-  const estadoName = teams?.[0]?.estado?.nome || "Pernambuco";
+  const selectedPais = paises?.find((p) => p.id === selectedPaisId);
+  const selectedEstado = estados?.find((e) => e.id === selectedEstadoId);
+
+  const handlePaisChange = (value: string) => {
+    const paisId = parseInt(value);
+    setSelectedPaisId(paisId);
+    setSelectedEstadoId(null); // Reset state when country changes
+  };
+
+  const handleEstadoChange = (value: string) => {
+    setSelectedEstadoId(parseInt(value));
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,15 +81,87 @@ const Teams = () => {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold">Times de {estadoName}</h1>
+            <h1 className="text-lg font-semibold">Times</h1>
             <p className="text-xs text-muted-foreground">
-              {isLoading ? "Carregando..." : `${teams?.length || 0} times`}
+              {teamsLoading ? "Carregando..." : `${teams?.length || 0} times`}
             </p>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="px-4 pb-3">
+        {/* Filters */}
+        <div className="px-4 pb-3 space-y-3">
+          {/* Country Selector */}
+          <Select
+            value={selectedPaisId?.toString() || ""}
+            onValueChange={handlePaisChange}
+          >
+            <SelectTrigger className="w-full bg-muted/50 border-0">
+              <Globe className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Selecione o país" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border z-50">
+              {paisesLoading ? (
+                <div className="p-2">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : (
+                paises?.map((pais) => (
+                  <SelectItem key={pais.id} value={pais.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      {pais.bandeira_url && (
+                        <img
+                          src={pais.bandeira_url}
+                          alt={pais.nome}
+                          className="w-5 h-4 object-cover rounded-sm"
+                        />
+                      )}
+                      {pais.nome}
+                    </div>
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+
+          {/* State Selector */}
+          <Select
+            value={selectedEstadoId?.toString() || ""}
+            onValueChange={handleEstadoChange}
+            disabled={!selectedPaisId}
+          >
+            <SelectTrigger className="w-full bg-muted/50 border-0">
+              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Selecione o estado" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border z-50 max-h-60">
+              {estadosLoading ? (
+                <div className="p-2">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : estados && estados.length > 0 ? (
+                estados.map((estado) => (
+                  <SelectItem key={estado.id} value={estado.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      {estado.bandeira_url && (
+                        <img
+                          src={estado.bandeira_url}
+                          alt={estado.nome}
+                          className="w-5 h-4 object-cover rounded-sm"
+                        />
+                      )}
+                      {estado.nome}
+                    </div>
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-2 text-sm text-muted-foreground text-center">
+                  Nenhum estado encontrado
+                </div>
+              )}
+            </SelectContent>
+          </Select>
+
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -57,7 +177,7 @@ const Teams = () => {
 
       {/* Teams Grid */}
       <main className="p-4">
-        {isLoading ? (
+        {teamsLoading ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
             {Array.from({ length: 18 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2">
@@ -97,7 +217,7 @@ const Teams = () => {
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Shield className="w-16 h-16 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground">
-              {search ? "Nenhum time encontrado" : "Nenhum time cadastrado"}
+              {search ? "Nenhum time encontrado" : "Selecione um país e estado para ver os times"}
             </p>
           </div>
         )}
