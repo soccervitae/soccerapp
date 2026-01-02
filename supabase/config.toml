@@ -30,3 +30,6 @@ verify_jwt = true
 
 [functions.redeem-session-token]
 verify_jwt = false
+
+[functions.cleanup-expired-tokens]
+verify_jwt = false
