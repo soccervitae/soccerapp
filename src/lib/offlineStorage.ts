@@ -304,6 +304,32 @@ export const getCachedUserPosts = async (userId: string): Promise<unknown[]> => 
   });
 };
 
+// Remove a post from cache (used when deleting posts)
+export const removePostFromCache = async (postId: string): Promise<void> => {
+  const database = await openDB();
+  
+  // Remove from POSTS_STORE
+  const tx1 = database.transaction(POSTS_STORE, 'readwrite');
+  const store1 = tx1.objectStore(POSTS_STORE);
+  store1.delete(postId);
+  
+  // Remove from USER_POSTS_STORE
+  const tx2 = database.transaction(USER_POSTS_STORE, 'readwrite');
+  const store2 = tx2.objectStore(USER_POSTS_STORE);
+  store2.delete(postId);
+  
+  await Promise.all([
+    new Promise<void>((resolve, reject) => {
+      tx1.oncomplete = () => resolve();
+      tx1.onerror = () => reject(tx1.error);
+    }),
+    new Promise<void>((resolve, reject) => {
+      tx2.oncomplete = () => resolve();
+      tx2.onerror = () => reject(tx2.error);
+    })
+  ]);
+};
+
 // Cache timestamp functions
 const POSTS_CACHE_TIMESTAMP_KEY = 'posts_cached_at';
 

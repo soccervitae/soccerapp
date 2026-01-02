@@ -400,9 +400,32 @@ export const useDeletePost = () => {
         .eq("user_id", user.id);
 
       if (error) throw error;
+      return postId;
     },
-    onSuccess: () => {
+    // Optimistic update - remove immediately from UI
+    onMutate: async (postId) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      
+      const previousPosts = queryClient.getQueryData<Post[]>(["posts"]);
+      
+      queryClient.setQueryData<Post[]>(["posts"], (old) => 
+        old?.filter(post => post.id !== postId) || []
+      );
+      
+      return { previousPosts };
+    },
+    onSuccess: async (postId) => {
+      // Remove from offline cache
+      const { removePostFromCache } = await import('@/lib/offlineStorage');
+      await removePostFromCache(postId);
+      
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (_err, _postId, context) => {
+      // Revert on error
+      if (context?.previousPosts) {
+        queryClient.setQueryData(["posts"], context.previousPosts);
+      }
     },
   });
 };
