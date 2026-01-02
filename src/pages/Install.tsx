@@ -1,13 +1,10 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket, CheckCircle, Copy, RefreshCw, Loader2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import logoText from "@/assets/soccervitae-logo-text.png";
 
 type DeviceType = "ios" | "android" | "unknown";
@@ -32,63 +29,8 @@ const Install = () => {
   const navigate = useNavigate();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const { isPWA } = useRequirePwa();
-  const { session, user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
-  const [transferToken, setTransferToken] = useState<string | null>(null);
-  const [tokenExpiry, setTokenExpiry] = useState<Date | null>(null);
-  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
-  const [copied, setCopied] = useState(false);
   const deviceType = useDeviceType();
-
-  // Generate transfer token when user is authenticated
-  const generateTransferToken = useCallback(async () => {
-    if (!session?.refresh_token || !user) return;
-    
-    setIsGeneratingToken(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-session-token', {
-        body: { refresh_token: session.refresh_token }
-      });
-
-      if (error) {
-        console.error('[Install] Failed to create transfer token:', error);
-        return;
-      }
-
-      if (data?.token) {
-        setTransferToken(data.token);
-        setTokenExpiry(new Date(data.expires_at));
-        console.log('[Install] Transfer token generated:', data.token);
-      }
-    } catch (error) {
-      console.error('[Install] Error generating transfer token:', error);
-    } finally {
-      setIsGeneratingToken(false);
-    }
-  }, [session, user]);
-
-  // Generate token on mount if user is authenticated
-  useEffect(() => {
-    if (session && user && !transferToken && !isGeneratingToken) {
-      generateTransferToken();
-    }
-  }, [session, user, transferToken, isGeneratingToken, generateTransferToken]);
-
-  // Auto-refresh token before expiry
-  useEffect(() => {
-    if (!tokenExpiry) return;
-
-    const timeUntilExpiry = tokenExpiry.getTime() - Date.now();
-    const refreshTime = timeUntilExpiry - 60000; // Refresh 1 minute before expiry
-
-    if (refreshTime > 0) {
-      const timeout = setTimeout(() => {
-        generateTransferToken();
-      }, refreshTime);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [tokenExpiry, generateTransferToken]);
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
@@ -107,26 +49,6 @@ const Install = () => {
 
   const handleInstall = async () => {
     await promptInstall();
-  };
-
-  const getTransferUrl = () => {
-    if (!transferToken) return '';
-    return `${window.location.origin}/?transfer_token=${transferToken}`;
-  };
-
-  const handleCopyLink = async () => {
-    const url = getTransferUrl();
-    if (!url) return;
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      toast.success('Link copiado!');
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy:', error);
-      toast.error('Erro ao copiar link');
-    }
   };
 
   const benefits = [
@@ -422,103 +344,6 @@ const Install = () => {
             </motion.div>
           )}
         </motion.div>
-
-        {/* Session Transfer Section - Show when user is logged in */}
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="bg-card border rounded-2xl p-4 space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm">Transferir sua conta</h3>
-                <p className="text-xs text-muted-foreground">
-                  Mantenha-se conectado ao abrir o app
-                </p>
-              </div>
-            </div>
-
-            {isGeneratingToken ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-muted-foreground">Gerando código...</span>
-              </div>
-            ) : transferToken ? (
-              <div className="space-y-3">
-                {/* Token Display */}
-                <div className="bg-muted/50 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-2">Código de transferência</p>
-                  <p className="text-2xl font-mono font-bold tracking-widest text-primary">
-                    {transferToken}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Válido por 5 minutos
-                  </p>
-                </div>
-
-                {/* Copy Link Button */}
-                <Button
-                  onClick={handleCopyLink}
-                  variant="outline"
-                  className="w-full"
-                  disabled={copied}
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Link copiado!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copiar link de acesso
-                    </>
-                  )}
-                </Button>
-
-                {/* Refresh Token Button */}
-                <Button
-                  onClick={generateTransferToken}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-muted-foreground"
-                  disabled={isGeneratingToken}
-                >
-                  <RefreshCw className="w-3 h-3 mr-2" />
-                  Gerar novo código
-                </Button>
-
-                {/* Instructions */}
-                <div className="text-xs text-muted-foreground text-center space-y-1 pt-2 border-t">
-                  <p className="font-medium">Como usar:</p>
-                  <p>1. Instale o app seguindo as instruções acima</p>
-                  <p>2. Abra o app instalado</p>
-                  <p>3. Cole o link copiado no navegador do app</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">
-                  Não foi possível gerar o código de transferência
-                </p>
-                <Button
-                  onClick={generateTransferToken}
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2"
-                >
-                  <RefreshCw className="w-3 h-3 mr-2" />
-                  Tentar novamente
-                </Button>
-              </div>
-            )}
-          </motion.div>
-        )}
 
         {/* Footer Message */}
         <motion.p
