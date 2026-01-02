@@ -278,6 +278,13 @@ export const FeedPost = ({
         </div>
       </div>
 
+      {/* Caption */}
+      {post.content && <div className="pb-3">
+        <p className="text-sm text-foreground">
+          {post.content}
+        </p>
+      </div>}
+
       {/* Media */}
       {post.media_url && <div className={`relative -mx-4 ${
         post.media_type === "video" 
@@ -401,12 +408,6 @@ export const FeedPost = ({
         </a>}
 
 
-      {/* Caption */}
-      <div className="pt-3">
-        <p className="text-sm text-foreground">
-          {post.content}
-        </p>
-      </div>
 
       {/* Liked by section */}
       {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
