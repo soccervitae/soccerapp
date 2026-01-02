@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { getCachedVideoMetadata, cacheVideoMetadata } from "@/lib/videoMetadataCache";
 
 interface ThumbnailResult {
   thumbnailUrl: string;
@@ -141,11 +142,118 @@ export const useVideoThumbnail = () => {
   };
 };
 
-// Utility function for one-off thumbnail generation
+/**
+ * Generate thumbnail and get duration with caching support
+ */
+export const generateVideoThumbnailWithCache = async (
+  videoUrl: string,
+  seekTime: number = 1
+): Promise<{ thumbnail: string | null; duration: number | null }> => {
+  // Check cache first
+  const cached = await getCachedVideoMetadata(videoUrl);
+  if (cached) {
+    return { thumbnail: cached.thumbnail, duration: cached.duration };
+  }
+
+  // Generate new thumbnail and get duration
+  return new Promise((resolve) => {
+    try {
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.preload = "metadata";
+      video.muted = true;
+      video.playsInline = true;
+
+      let duration: number | null = null;
+
+      const cleanup = () => {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      };
+
+      video.onerror = () => {
+        cleanup();
+        resolve({ thumbnail: null, duration: null });
+      };
+
+      video.onloadedmetadata = () => {
+        duration = video.duration && isFinite(video.duration) ? video.duration : null;
+        const targetTime = Math.min(seekTime, video.duration * 0.25);
+        video.currentTime = Math.max(0.1, targetTime);
+      };
+
+      video.onseeked = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            cleanup();
+            // Cache the result even if thumbnail failed
+            cacheVideoMetadata(videoUrl, null, duration);
+            resolve({ thumbnail: null, duration });
+            return;
+          }
+
+          const maxSize = 320;
+          const aspectRatio = video.videoWidth / video.videoHeight;
+          
+          let width = video.videoWidth;
+          let height = video.videoHeight;
+          
+          if (width > maxSize || height > maxSize) {
+            if (aspectRatio > 1) {
+              width = maxSize;
+              height = Math.round(maxSize / aspectRatio);
+            } else {
+              height = maxSize;
+              width = Math.round(maxSize * aspectRatio);
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(video, 0, 0, width, height);
+
+          const thumbnailUrl = canvas.toDataURL("image/jpeg", 0.8);
+          cleanup();
+
+          // Cache the result
+          cacheVideoMetadata(videoUrl, thumbnailUrl, duration);
+          resolve({ thumbnail: thumbnailUrl, duration });
+        } catch {
+          cleanup();
+          resolve({ thumbnail: null, duration });
+        }
+      };
+
+      video.src = videoUrl;
+      video.load();
+
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        cleanup();
+        resolve({ thumbnail: null, duration: null });
+      }, 10000);
+    } catch {
+      resolve({ thumbnail: null, duration: null });
+    }
+  });
+};
+
+// Utility function for one-off thumbnail generation (without caching - for blobs)
 export const generateVideoThumbnail = async (
   videoSource: string | Blob,
   seekTime: number = 1
 ): Promise<string | null> => {
+  // If it's a URL string, use cached version
+  if (typeof videoSource === 'string') {
+    const result = await generateVideoThumbnailWithCache(videoSource, seekTime);
+    return result.thumbnail;
+  }
+
+  // For blobs, generate without caching
   return new Promise((resolve) => {
     try {
       const video = document.createElement("video");
@@ -158,9 +266,7 @@ export const generateVideoThumbnail = async (
         video.pause();
         video.removeAttribute("src");
         video.load();
-        if (videoSource instanceof Blob) {
-          URL.revokeObjectURL(video.src);
-        }
+        URL.revokeObjectURL(video.src);
       };
 
       video.onerror = () => {
@@ -213,12 +319,7 @@ export const generateVideoThumbnail = async (
         }
       };
 
-      if (videoSource instanceof Blob) {
-        video.src = URL.createObjectURL(videoSource);
-      } else {
-        video.src = videoSource;
-      }
-
+      video.src = URL.createObjectURL(videoSource);
       video.load();
     } catch {
       resolve(null);

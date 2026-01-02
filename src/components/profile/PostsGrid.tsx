@@ -5,8 +5,8 @@ import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
-import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
-import { getVideoDuration, formatDuration } from "@/hooks/useVideoDuration";
+import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
+import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
   id: string;
   media_url: string | null;
@@ -193,16 +193,13 @@ export const PostsGrid = ({
       if (src) {
         setIsLoading(true);
         
-        // Fetch thumbnail and duration in parallel
-        Promise.all([
-          generateVideoThumbnail(src, 1),
-          getVideoDuration(src)
-        ]).then(([thumb, dur]) => {
-          if (thumb) {
-            setThumbnail(thumb);
+        // Use cached function that fetches both at once
+        generateVideoThumbnailWithCache(src, 1).then((result) => {
+          if (result.thumbnail) {
+            setThumbnail(result.thumbnail);
           }
-          if (dur) {
-            setDuration(formatDuration(dur));
+          if (result.duration) {
+            setDuration(formatDuration(result.duration));
           }
           setIsLoading(false);
         });

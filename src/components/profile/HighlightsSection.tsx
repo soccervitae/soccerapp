@@ -29,8 +29,8 @@ import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
-import { getVideoDuration, formatDuration } from "@/hooks/useVideoDuration";
+import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
+import { formatDuration } from "@/hooks/useVideoDuration";
 
 
 interface HighlightsSectionProps {
@@ -88,20 +88,18 @@ const SortableHighlightItem = ({ highlight, isOwnProfile, hasNewViews, onClick }
   const [duration, setDuration] = useState<string>("");
   const hasError = imageError || isUnsupportedFormat(coverImage);
 
-  // Generate thumbnail and get duration for video covers
+  // Generate thumbnail and get duration for video covers (with caching)
   useEffect(() => {
     if (isVideo && coverImage && !hasError) {
       setIsLoadingThumbnail(true);
       
-      Promise.all([
-        generateVideoThumbnail(coverImage, 1),
-        getVideoDuration(coverImage)
-      ]).then(([thumbnail, dur]) => {
-        if (thumbnail) {
-          setThumbnailUrl(thumbnail);
+      // Use cached function that fetches both at once
+      generateVideoThumbnailWithCache(coverImage, 1).then((result) => {
+        if (result.thumbnail) {
+          setThumbnailUrl(result.thumbnail);
         }
-        if (dur) {
-          setDuration(formatDuration(dur));
+        if (result.duration) {
+          setDuration(formatDuration(result.duration));
         }
         setIsLoadingThumbnail(false);
       });
