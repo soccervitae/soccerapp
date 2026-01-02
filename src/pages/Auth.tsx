@@ -10,6 +10,8 @@ import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
 import { Checkbox } from "@/components/ui/checkbox";
+import SignupVerification from "@/components/auth/SignupVerification";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -502,9 +504,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
-  const [signupSuccess, setSignupSuccess] = useState(false);
-  const [resendingEmail, setResendingEmail] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  const [showVerification, setShowVerification] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Estados "touched" para feedback visual após interação
@@ -524,36 +525,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
 
-  // Countdown timer effect
-  useEffect(() => {
-    if (resendCooldown > 0) {
-      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendCooldown]);
-
-  const handleResendConfirmation = async () => {
-    if (!email || resendCooldown > 0) return;
-    
-    setResendingEmail(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
-        }
-      });
-
-      if (!error) {
-        setResendCooldown(60);
-      }
-    } catch (error: any) {
-      // Error handled silently
-    } finally {
-      setResendingEmail(false);
-    }
-  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -670,70 +641,63 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     if (error) {
       setErrorMessage(translateError(error.message));
       setLoading(false);
-    } else {
-      setSignupSuccess(true);
-      setLoading(false);
+      return;
     }
+
+    // Get the newly created user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setErrorMessage("Erro ao criar conta. Tente novamente.");
+      setLoading(false);
+      return;
+    }
+
+    // Send verification code
+    const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
+      body: {
+        email: email,
+        user_id: user.id,
+        first_name: firstName.trim(),
+      },
+    });
+
+    if (sendError) {
+      console.error("Error sending verification code:", sendError);
+      toast.error("Erro ao enviar código de verificação");
+      setLoading(false);
+      return;
+    }
+
+    // Show verification screen
+    setUserId(user.id);
+    setShowVerification(true);
+    setLoading(false);
   };
 
-  // Signup success state - show email confirmation screen
-  if (signupSuccess) {
+  const handleVerificationComplete = () => {
+    toast.success("Conta criada com sucesso!");
+    onSuccess();
+  };
+
+  const handleBackToSignup = () => {
+    setShowVerification(false);
+    setUserId(null);
+  };
+
+  // Show verification screen
+  if (showVerification && userId) {
     return (
-      <div className="text-center py-6 space-y-6">
-        <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center animate-in zoom-in-50 duration-300">
-          <Mail className="h-10 w-10 text-emerald-600" />
-        </div>
-        
-        <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
-          <h3 className="text-xl font-semibold text-foreground">
-            Verifique seu email!
-          </h3>
-          <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-            Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>. 
-            Clique no link para ativar sua conta.
-          </p>
-        </div>
-
-        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-          <Button
-            onClick={handleResendConfirmation}
-            variant="outline"
-            className="w-full h-12"
-            disabled={resendingEmail || resendCooldown > 0}
-          >
-            {resendingEmail ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Reenviando...
-              </>
-            ) : resendCooldown > 0 ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Aguarde {resendCooldown}s
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Reenviar email de confirmação
-              </>
-            )}
-          </Button>
-          
-          <Button
-            onClick={onSuccess}
-            className="w-full h-12"
-          >
-            Ir para o login
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Não recebeu o email? Verifique a pasta de spam ou lixo eletrônico.
-        </p>
-      </div>
+      <SignupVerification
+        email={email}
+        userId={userId}
+        firstName={firstName}
+        onVerified={handleVerificationComplete}
+        onBack={handleBackToSignup}
+      />
     );
   }
+
 
   const isFormValid = 
     firstName.trim().length >= 2 && 
