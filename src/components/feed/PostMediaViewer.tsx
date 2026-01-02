@@ -242,14 +242,21 @@ export const PostMediaViewer = ({
                     onLoadedData={() => setMediaLoaded(true)}
                   />
                 ) : (
-                  <img
-                    src={mediaUrls[currentIndex]}
-                    alt={`Foto ${currentIndex + 1}`}
-                    className={`w-full h-full object-contain transition-all duration-500 ease-out ${
-                      mediaLoaded ? "blur-0 opacity-100" : "blur-md opacity-0"
-                    }`}
-                    onLoad={() => setMediaLoaded(true)}
-                  />
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={currentIndex}
+                      src={mediaUrls[currentIndex]}
+                      alt={`Foto ${currentIndex + 1}`}
+                      className={`w-full h-full object-contain ${
+                        mediaLoaded ? "blur-0" : "blur-md"
+                      }`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: mediaLoaded ? 1 : 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      onLoad={() => setMediaLoaded(true)}
+                    />
+                  </AnimatePresence>
                 )}
 
                 {/* Double tap applause animation */}
