@@ -1004,6 +1004,8 @@ export type Database = {
           two_factor_enabled: boolean | null
           updated_at: string
           username: string
+          verification_attempts: number | null
+          verification_locked_until: string | null
           visitors_seen_at: string | null
           weight: number | null
         }
@@ -1045,6 +1047,8 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string
           username: string
+          verification_attempts?: number | null
+          verification_locked_until?: string | null
           visitors_seen_at?: string | null
           weight?: number | null
         }
@@ -1086,6 +1090,8 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string
           username?: string
+          verification_attempts?: number | null
+          verification_locked_until?: string | null
           visitors_seen_at?: string | null
           weight?: number | null
         }
