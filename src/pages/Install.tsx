@@ -1,10 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
-import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket } from "lucide-react";
+import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveSessionToIndexedDB } from "@/lib/sessionStorage";
 import logoText from "@/assets/soccervitae-logo-text.png";
 
 type DeviceType = "ios" | "android" | "unknown";
@@ -29,8 +31,31 @@ const Install = () => {
   const navigate = useNavigate();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const { isPWA } = useRequirePwa();
+  const { session, user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
+  const [sessionSaved, setSessionSaved] = useState(false);
   const deviceType = useDeviceType();
+
+  // Save session to IndexedDB for PWA transfer when user is authenticated
+  useEffect(() => {
+    const saveSession = async () => {
+      if (session?.access_token && session?.refresh_token && !sessionSaved) {
+        try {
+          await saveSessionToIndexedDB(
+            session.access_token,
+            session.refresh_token,
+            session.expires_at
+          );
+          setSessionSaved(true);
+          console.log('[Install] Session saved for PWA transfer');
+        } catch (error) {
+          console.error('[Install] Failed to save session:', error);
+        }
+      }
+    };
+    
+    saveSession();
+  }, [session, sessionSaved]);
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
@@ -344,6 +369,21 @@ const Install = () => {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Session Transfer Message */}
+        {user && sessionSaved && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+            className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3"
+          >
+            <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+            <p className="text-sm text-foreground/80">
+              Sua conta permanecerá conectada após instalar o app
+            </p>
+          </motion.div>
+        )}
 
         {/* Footer Message */}
         <motion.p
