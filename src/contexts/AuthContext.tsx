@@ -43,15 +43,73 @@ const isPWA = (): boolean => {
   );
 };
 
+// Get transfer token from URL
+const getTransferTokenFromUrl = (): string | null => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('transfer_token');
+};
+
+// Remove transfer token from URL without reload
+const removeTransferTokenFromUrl = () => {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('transfer_token');
+  window.history.replaceState({}, '', url.toString());
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const sessionRestoredRef = useRef(false);
+  const tokenRedemptionRef = useRef(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // First, check for existing session
+      // First, check for transfer token in URL (highest priority for PWA)
+      const transferToken = getTransferTokenFromUrl();
+      
+      if (transferToken && !tokenRedemptionRef.current) {
+        tokenRedemptionRef.current = true;
+        console.log('[Auth] Found transfer token in URL, attempting to redeem...');
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('redeem-session-token', {
+            body: { token: transferToken }
+          });
+
+          if (error) {
+            console.error('[Auth] Failed to redeem transfer token:', error);
+          } else if (data?.refresh_token) {
+            console.log('[Auth] Transfer token redeemed, restoring session...');
+            
+            // Use the refresh token to get a new session
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
+              refresh_token: data.refresh_token
+            });
+            
+            if (refreshData.session && !refreshError) {
+              console.log('[Auth] Session restored from transfer token');
+              setSession(refreshData.session);
+              setUser(refreshData.session.user);
+              
+              // Remove token from URL
+              removeTransferTokenFromUrl();
+              setLoading(false);
+              return;
+            } else {
+              console.error('[Auth] Failed to refresh session:', refreshError);
+            }
+          }
+          
+          // Remove invalid token from URL
+          removeTransferTokenFromUrl();
+        } catch (error) {
+          console.error('[Auth] Error redeeming transfer token:', error);
+          removeTransferTokenFromUrl();
+        }
+      }
+
+      // Check for existing session
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       
       if (existingSession) {
