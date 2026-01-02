@@ -218,9 +218,9 @@ export const FeedPost = ({
       month: "short"
     });
   };
-  return <article className="border-b border-border bg-background">
+  return <article className="border-b border-border bg-background px-4">
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3 cursor-pointer" onClick={handleProfileClick}>
           <div className="relative">
             <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-600">
@@ -395,21 +395,21 @@ export const FeedPost = ({
         </div>}
 
       {/* Location */}
-      {post.location_name && <a href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 pt-2 text-xs text-muted-foreground hover:text-primary transition-colors">
+      {post.location_name && <a href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 pt-2 text-xs text-muted-foreground hover:text-primary transition-colors">
           <span className="material-symbols-outlined text-[16px]">location_on</span>
           <span className="truncate">{post.location_name}</span>
         </a>}
 
 
       {/* Caption */}
-      <div className="px-4 pt-3">
+      <div className="pt-3">
         <p className="text-sm text-foreground">
           {post.content}
         </p>
       </div>
 
       {/* Liked by section */}
-      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="px-4 pt-2 pb-1">
+      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
           <button onClick={() => setIsLikesSheetOpen(true)} className="flex items-center gap-2 group text-left">
             {/* Stacked avatars */}
             <div className="flex -space-x-2">
@@ -438,7 +438,7 @@ export const FeedPost = ({
         </div>}
 
       {/* Actions */}
-      <div className="px-4 pt-3 py-[4px]">
+      <div className="pt-3 py-[4px] -mx-4">
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
             <AnimatePresence mode="wait" initial={false}>
