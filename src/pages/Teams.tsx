@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, ArrowLeft, Shield, Globe, MapPin } from "lucide-react";
+import type { Team } from "@/hooks/useTeams";
+
+// Componente separado para o card do time com estado próprio para controlar erro de imagem
+const TeamCard = memo(({ team }: { team: Team }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer">
+      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden border border-border shadow-sm">
+        {team.escudo_url && !imageError ? (
+          <img
+            src={team.escudo_url}
+            alt={team.nome}
+            className="w-12 h-12 object-contain"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <Shield className="w-8 h-8 text-muted-foreground" />
+        )}
+      </div>
+      <span className="text-xs text-center font-medium line-clamp-2 leading-tight">
+        {team.nome}
+      </span>
+    </div>
+  );
+});
 
 const Teams = () => {
   const navigate = useNavigate();
@@ -189,28 +215,7 @@ const Teams = () => {
         ) : teams && teams.length > 0 ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
             {teams.map((team) => (
-              <div
-                key={team.id}
-                className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
-              >
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border border-border">
-                  {team.escudo_url ? (
-                    <img
-                      src={team.escudo_url}
-                      alt={team.nome}
-                      className="w-12 h-12 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement?.querySelector(".fallback-icon")?.classList.remove("hidden");
-                      }}
-                    />
-                  ) : null}
-                  <Shield className={`w-8 h-8 text-muted-foreground fallback-icon ${team.escudo_url ? "hidden" : ""}`} />
-                </div>
-                <span className="text-xs text-center font-medium line-clamp-2 leading-tight">
-                  {team.nome}
-                </span>
-              </div>
+              <TeamCard key={team.id} team={team} />
             ))}
           </div>
         ) : (
