@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import {
   ResponsiveModalHeader,
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { Separator } from "@/components/ui/separator";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -51,6 +53,8 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleNavigation = (path: string) => {
     onOpenChange(false);
@@ -70,120 +74,139 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
   };
 
   const handleLogout = async () => {
-    onOpenChange(false);
-    await signOut();
-    navigate("/login");
+    setIsLoggingOut(true);
+    try {
+      onOpenChange(false);
+      setShowLogoutConfirm(false);
+      await signOut();
+      navigate("/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
-    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
-      <ResponsiveModalContent className="sm:max-w-md">
-        <ResponsiveModalHeader className="px-4 pb-2">
-          <ResponsiveModalTitle className="text-center">Configurações</ResponsiveModalTitle>
-        </ResponsiveModalHeader>
+    <>
+      <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+        <ResponsiveModalContent className="sm:max-w-md">
+          <ResponsiveModalHeader className="px-4 pb-2">
+            <ResponsiveModalTitle className="text-center">Configurações</ResponsiveModalTitle>
+          </ResponsiveModalHeader>
 
-        <ScrollArea className="h-[calc(80vh-80px)] max-h-[500px]">
-          <div className="mt-4 space-y-2 pb-6 px-1">
-            {/* Conta */}
-            <div>
-              <SectionHeader title="Conta" />
-              <SettingsItem
-                icon="person"
-                label="Editar perfil"
-                onClick={() => handleNavigation("/settings/profile")}
-              />
-              <SettingsItem
-                icon="lock"
-                label="Privacidade"
-                onClick={() => handleNavigation("/settings/privacy")}
-              />
-              <SettingsItem
-                icon="shield"
-                label="Segurança"
-                onClick={() => handleNavigation("/settings/security")}
-              />
-              <SettingsItem
-                icon="notifications"
-                label="Notificações"
-                onClick={() => handleNavigation("/settings/notifications")}
-              />
+          <ScrollArea className="h-[calc(80vh-80px)] max-h-[500px]">
+            <div className="mt-4 space-y-2 pb-6 px-1">
+              {/* Conta */}
+              <div>
+                <SectionHeader title="Conta" />
+                <SettingsItem
+                  icon="person"
+                  label="Editar perfil"
+                  onClick={() => handleNavigation("/settings/profile")}
+                />
+                <SettingsItem
+                  icon="lock"
+                  label="Privacidade"
+                  onClick={() => handleNavigation("/settings/privacy")}
+                />
+                <SettingsItem
+                  icon="shield"
+                  label="Segurança"
+                  onClick={() => handleNavigation("/settings/security")}
+                />
+                <SettingsItem
+                  icon="notifications"
+                  label="Notificações"
+                  onClick={() => handleNavigation("/settings/notifications")}
+                />
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Preferências */}
+              <div>
+                <SectionHeader title="Preferências" />
+                <SettingsItem
+                  icon="language"
+                  label="Idioma"
+                  onClick={() => handleComingSoon("Idioma")}
+                />
+                <SettingsItem
+                  icon="dark_mode"
+                  label="Tema"
+                  onClick={() => handleComingSoon("Tema")}
+                />
+                <SettingsItem
+                  icon="info"
+                  label="Sobre"
+                  onClick={() => handleComingSoon("Sobre")}
+                />
+                {!isInstalled && (
+                  <>
+                    {isInstallable ? (
+                      <SettingsItem
+                        icon="download"
+                        label="Instalar App"
+                        onClick={handleInstallApp}
+                        variant="primary"
+                      />
+                    ) : (
+                      <SettingsItem
+                        icon="phone_android"
+                        label="Como instalar o app"
+                        onClick={() => handleNavigation("/install")}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Dados */}
+              <div>
+                <SectionHeader title="Dados" />
+                <SettingsItem
+                  icon="delete_sweep"
+                  label="Limpar cache do app"
+                  onClick={async () => {
+                    try {
+                      await clearVideoMetadataCache();
+                      await clearCache();
+                      toast.success("Cache limpo com sucesso!");
+                    } catch {
+                      toast.error("Erro ao limpar cache");
+                    }
+                  }}
+                />
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Sessão */}
+              <div>
+                <SectionHeader title="Sessão" />
+                <SettingsItem
+                  icon="logout"
+                  label="Sair da conta"
+                  onClick={() => setShowLogoutConfirm(true)}
+                  variant="danger"
+                />
+              </div>
             </div>
+          </ScrollArea>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
 
-            <Separator className="my-2" />
-
-            {/* Preferências */}
-            <div>
-              <SectionHeader title="Preferências" />
-              <SettingsItem
-                icon="language"
-                label="Idioma"
-                onClick={() => handleComingSoon("Idioma")}
-              />
-              <SettingsItem
-                icon="dark_mode"
-                label="Tema"
-                onClick={() => handleComingSoon("Tema")}
-              />
-              <SettingsItem
-                icon="info"
-                label="Sobre"
-                onClick={() => handleComingSoon("Sobre")}
-              />
-              {!isInstalled && (
-                <>
-                  {isInstallable ? (
-                    <SettingsItem
-                      icon="download"
-                      label="Instalar App"
-                      onClick={handleInstallApp}
-                      variant="primary"
-                    />
-                  ) : (
-                    <SettingsItem
-                      icon="phone_android"
-                      label="Como instalar o app"
-                      onClick={() => handleNavigation("/install")}
-                    />
-                  )}
-                </>
-              )}
-            </div>
-
-            <Separator className="my-2" />
-
-            {/* Dados */}
-            <div>
-              <SectionHeader title="Dados" />
-              <SettingsItem
-                icon="delete_sweep"
-                label="Limpar cache do app"
-                onClick={async () => {
-                  try {
-                    await clearVideoMetadataCache();
-                    await clearCache();
-                    toast.success("Cache limpo com sucesso!");
-                  } catch {
-                    toast.error("Erro ao limpar cache");
-                  }
-                }}
-              />
-            </div>
-
-            <Separator className="my-2" />
-
-            {/* Sessão */}
-            <div>
-              <SectionHeader title="Sessão" />
-              <SettingsItem
-                icon="logout"
-                label="Sair da conta"
-                onClick={handleLogout}
-                variant="danger"
-              />
-            </div>
-          </div>
-        </ScrollArea>
-      </ResponsiveModalContent>
-    </ResponsiveModal>
+      <ResponsiveAlertModal
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Sair da conta?"
+        description="Você será desconectado e precisará fazer login novamente para acessar sua conta."
+        cancelText="Cancelar"
+        confirmText={isLoggingOut ? "Saindo..." : "Sair"}
+        onConfirm={handleLogout}
+        confirmVariant="destructive"
+      />
+    </>
   );
 };
