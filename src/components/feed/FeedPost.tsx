@@ -71,6 +71,7 @@ export const FeedPost = ({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageOriginRect, setImageOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [videoOriginRect, setVideoOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -362,6 +363,16 @@ export const FeedPost = ({
               videoRef.current.pause();
               setIsVideoPlaying(false);
             }
+            // Capture origin rect from video container
+            if (videoContainerRef.current) {
+              const rect = videoContainerRef.current.getBoundingClientRect();
+              setVideoOriginRect({
+                x: rect.left,
+                y: rect.top,
+                width: rect.width,
+                height: rect.height,
+              });
+            }
             setIsVideoViewerOpen(true);
           }
         }}>
@@ -625,7 +636,8 @@ export const FeedPost = ({
           videoUrl={post.media_url}
           isOpen={isVideoViewerOpen}
           onClose={() => setIsVideoViewerOpen(false)}
-      />
+          originRect={videoOriginRect}
+        />
       )}
 
       {/* Fullscreen Image Viewer */}
