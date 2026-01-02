@@ -116,7 +116,15 @@ const CompleteProfile = () => {
   
   const isGenderValid = !!gender;
   const isProfileTypeValid = !!profileType;
-  const isBirthDateValid = !!birthDate;
+  // Minimum age: 16 years
+  const getMaxBirthDate = () => {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 16);
+    return today.toISOString().split("T")[0];
+  };
+  const maxBirthDate = getMaxBirthDate();
+  
+  const isBirthDateValid = !!birthDate && birthDate <= maxBirthDate;
   const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
   const isStaffFunctionValid = isStaff ? !!staffFunction : true; // Only required for staff
   const isNationalityValid = !!nationality;
@@ -368,10 +376,15 @@ const CompleteProfile = () => {
             onChange={(e) => setBirthDate(e.target.value)}
             onBlur={() => handleBlur("birthDate")}
             className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
-            max={new Date().toISOString().split("T")[0]}
+            max={maxBirthDate}
           />
+          <p className="text-xs text-muted-foreground">
+            Você deve ter no mínimo 16 anos.
+          </p>
           {touched.birthDate && !isBirthDateValid && (
-            <p className="text-xs text-destructive">Selecione sua data de nascimento.</p>
+            <p className="text-xs text-destructive">
+              {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+            </p>
           )}
         </div>
 
