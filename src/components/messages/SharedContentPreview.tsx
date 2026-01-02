@@ -1,8 +1,17 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Play, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import type { Post } from "@/hooks/usePosts";
+import {
+  fetchSharedPost,
+  fetchSharedStory,
+  fetchSharedHighlight,
+  sharedPostToPost,
+  storyToPost,
+  highlightToPost,
+  type SharedHighlight,
+} from "@/hooks/useSharedContentData";
 
 interface SharedContentAuthor {
   username: string;
@@ -33,6 +42,9 @@ const preloadImage = (src: string) => {
 export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchedPost, setFetchedPost] = useState<Post | null>(null);
+  const [fetchedMediaUrls, setFetchedMediaUrls] = useState<string[]>([]);
+  const [highlightData, setHighlightData] = useState<SharedHighlight | null>(null);
 
   // Preload preview image and author avatar on mount
   useEffect(() => {
@@ -51,59 +63,56 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
     }
   }, [viewerOpen]);
 
-  // Create Post object from available data - no fetch needed!
-  const postData = useMemo<Post>(() => {
-    const mediaUrl = data.preview || "";
-    const isVideo = data.contentType === "story" || mediaUrl.endsWith(".webm") || mediaUrl.endsWith(".mp4");
-    
-    return {
-      id: data.contentId,
-      user_id: "",
-      content: data.title || "",
-      media_url: mediaUrl,
-      media_type: isVideo ? "video" : "image",
-      likes_count: 0,
-      comments_count: 0,
-      shares_count: 0,
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      location_name: null,
-      location_lat: null,
-      location_lng: null,
-      music_track_id: null,
-      music_start_seconds: null,
-      music_end_seconds: null,
-      music_track: null,
-      profile: {
-        id: "",
-        username: data.author?.username || "Usuário",
-        full_name: data.author?.username || null,
-        avatar_url: data.author?.avatar_url || null,
-        nickname: null,
-        position: null,
-        team: null,
-        conta_verificada: false,
-      },
-      liked_by_user: false,
-      saved_by_user: false,
-      recent_likes: [],
-    };
-  }, [data]);
-
-  const mediaUrls = useMemo(() => {
-    if (!data.preview) return [];
-    return [data.preview];
-  }, [data.preview]);
-
-  const mediaType = useMemo(() => {
-    const isVideo = data.contentType === "story" || 
-      (data.preview && (data.preview.endsWith(".webm") || data.preview.endsWith(".mp4")));
-    return isVideo ? "video" : "image";
-  }, [data.contentType, data.preview]);
-
-  const handleClick = () => {
+  const handleClick = async () => {
     setIsLoading(true);
-    setViewerOpen(true);
+
+    try {
+      let realPost: Post | null = null;
+      let mediaUrls: string[] = [];
+
+      if (data.contentType === "post") {
+        const sharedPost = await fetchSharedPost(data.contentId);
+        if (sharedPost) {
+          realPost = sharedPostToPost(sharedPost);
+          // Handle carousel posts (multiple URLs in media_url)
+          if (sharedPost.media_url) {
+            if (sharedPost.media_type === "carousel") {
+              try {
+                mediaUrls = JSON.parse(sharedPost.media_url);
+              } catch {
+                mediaUrls = sharedPost.media_url.split(",").map((u) => u.trim());
+              }
+            } else {
+              mediaUrls = [sharedPost.media_url];
+            }
+          }
+        }
+      } else if (data.contentType === "story") {
+        const sharedStory = await fetchSharedStory(data.contentId);
+        if (sharedStory) {
+          realPost = storyToPost(sharedStory);
+          mediaUrls = [sharedStory.media_url];
+        }
+      } else if (data.contentType === "highlight") {
+        const sharedHighlight = await fetchSharedHighlight(data.contentId);
+        if (sharedHighlight) {
+          realPost = highlightToPost(sharedHighlight);
+          setHighlightData(sharedHighlight);
+          mediaUrls = sharedHighlight.images.map((img) => img.image_url);
+        }
+      }
+
+      if (realPost) {
+        setFetchedPost(realPost);
+        setFetchedMediaUrls(mediaUrls);
+        setViewerOpen(true);
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching shared content:", error);
+      setIsLoading(false);
+    }
   };
 
   const handleCloseViewer = () => {
@@ -120,6 +129,14 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
       ? data.title.substring(0, 80) + "..."
       : data.title
     : null;
+
+  // Determine media type for the viewer
+  const viewerMediaType =
+    fetchedPost?.media_type === "carousel"
+      ? "image"
+      : fetchedPost?.media_type === "video"
+      ? "video"
+      : "image";
 
   return (
     <>
@@ -182,11 +199,11 @@ export const SharedContentPreview = ({ data }: SharedContentPreviewProps) => {
       </button>
 
       {/* Unified Post Media Viewer */}
-      {postData && (
+      {fetchedPost && (
         <PostMediaViewer
-          post={postData}
-          mediaUrls={mediaUrls}
-          mediaType={mediaType}
+          post={fetchedPost}
+          mediaUrls={fetchedMediaUrls}
+          mediaType={viewerMediaType}
           isOpen={viewerOpen}
           onClose={handleCloseViewer}
         />
