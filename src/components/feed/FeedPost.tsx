@@ -7,6 +7,7 @@ import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
+import { PostMediaViewer } from "./PostMediaViewer";
 
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -60,6 +61,7 @@ export const FeedPost = ({
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
+  const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -294,15 +296,12 @@ export const FeedPost = ({
           maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '90vh' : '70vh'
         }}
         onClick={() => {
+          // Open fullscreen viewer for videos
           if (videoRef.current) {
-            if (videoRef.current.paused) {
-              videoRef.current.play();
-              setIsVideoPlaying(true);
-            } else {
-              videoRef.current.pause();
-              setIsVideoPlaying(false);
-            }
+            videoRef.current.pause();
+            setIsVideoPlaying(false);
           }
+          setIsVideoViewerOpen(true);
         }}>
               <video 
                 ref={videoRef}
@@ -552,6 +551,15 @@ export const FeedPost = ({
         contentUrl={`${window.location.origin}/post/${post.id}`}
         contentPreview={mediaUrls[0]}
         contentTitle={post.content.substring(0, 50)}
+      />
+
+      {/* Video Fullscreen Viewer */}
+      <PostMediaViewer
+        post={post}
+        mediaUrls={mediaUrls}
+        mediaType={post.media_type}
+        isOpen={isVideoViewerOpen}
+        onClose={() => setIsVideoViewerOpen(false)}
       />
     </article>;
 };
