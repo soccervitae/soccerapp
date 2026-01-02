@@ -195,9 +195,9 @@ const LoginForm = () => {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [rememberDevice, setRememberDevice] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Countdown timer effect
   useEffect(() => {
@@ -220,25 +220,11 @@ const LoginForm = () => {
         }
       });
 
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro ao reenviar",
-          description: error.message,
-        });
-      } else {
-        toast({
-          title: "Email reenviado!",
-          description: "Verifique sua caixa de entrada e spam.",
-        });
+      if (!error) {
         setResendCooldown(60);
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível reenviar o email.",
-      });
+      // Error handled silently
     } finally {
       setResendingEmail(false);
     }
@@ -259,13 +245,11 @@ const LoginForm = () => {
         return;
       }
 
-      toast({
-        variant: "destructive",
-        title: "Erro ao entrar",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou senha incorretos" 
-          : error.message,
-      });
+      setErrorMessage(
+        error.message === "Invalid login credentials" 
+          ? "Email ou senha incorretos. Verifique seus dados e tente novamente." 
+          : error.message
+      );
       setLoading(false);
       return;
     }
@@ -310,11 +294,7 @@ const LoginForm = () => {
 
         if (sendError) {
           console.error("Error sending 2FA code:", sendError);
-          toast({
-            variant: "destructive",
-            title: "Erro ao enviar código",
-            description: "Não foi possível enviar o código de verificação.",
-          });
+          setErrorMessage("Não foi possível enviar o código de verificação.");
           await supabase.auth.signOut();
           setLoading(false);
           return;
@@ -411,7 +391,10 @@ const LoginForm = () => {
             type="email"
             placeholder="seu@email.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setErrorMessage(null);
+            }}
             className="pl-10 h-12 bg-muted/50 border-0"
             required
           />
@@ -429,7 +412,10 @@ const LoginForm = () => {
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setErrorMessage(null);
+            }}
             className="pl-10 pr-10 h-12 bg-muted/50 border-0"
             required
           />
@@ -463,6 +449,14 @@ const LoginForm = () => {
           </Link>
         </div>
       </div>
+
+      {/* Mensagem de erro */}
+      {errorMessage && (
+        <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <X className="h-4 w-4 text-destructive flex-shrink-0" />
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        </div>
+      )}
 
       <Button
         type="submit"
