@@ -313,7 +313,7 @@ export const FeedPost = ({
               ? Math.max(videoAspectRatio, 9/16).toString() // Vertical: cap at 9:16
               : videoAspectRatio.toString() // Horizontal: keep original
             : '4/5',
-          maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '90vh' : '70vh'
+          maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '70vh' : '60vh'
         }}
         onClick={() => {
           if (disableVideoViewer) {
