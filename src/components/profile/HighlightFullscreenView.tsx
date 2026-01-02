@@ -250,9 +250,8 @@ export const HighlightFullscreenView = ({
         imageEmblaApi?.scrollNext();
       } else if (currentHighlightIndex < displayHighlights.length - 1) {
         handleNextHighlight();
-      } else {
-        onClose();
       }
+      // On last media of last highlight, do nothing - let timer finish
     }
   };
 
