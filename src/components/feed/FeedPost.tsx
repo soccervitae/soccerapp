@@ -7,7 +7,7 @@ import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
-import { PostMediaViewer } from "./PostMediaViewer";
+
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -57,9 +57,6 @@ export const FeedPost = ({
   const [showTags, setShowTags] = useState(false);
   const [showApplauseAnimation, setShowApplauseAnimation] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
-  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
-  const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
-  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const lastTapRef = useRef<number>(0);
   const {
@@ -110,21 +107,15 @@ export const FeedPost = ({
       isLiked: post.liked_by_user
     });
   };
-  const handleDoubleTap = (event: React.MouseEvent, index: number = 0) => {
+  const handleDoubleTap = () => {
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
-      // Double tap detected
+      // Double tap detected - applaud
       if (!post.liked_by_user) {
         handleLike();
       }
       setShowApplauseAnimation(true);
       setTimeout(() => setShowApplauseAnimation(false), 1000);
-    } else {
-      // Single tap - open media viewer
-      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-      setClickOrigin(rect);
-      setSelectedMediaIndex(index);
-      setMediaViewerOpen(true);
     }
     lastTapRef.current = now;
   };
@@ -256,11 +247,15 @@ export const FeedPost = ({
 
       {/* Media */}
       {post.media_url && <div className="relative aspect-[4/5] bg-muted max-h-[75vh] overflow-hidden">
-          {post.media_type === "video" ? <div className="w-full h-full cursor-pointer" onClick={e => {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        setClickOrigin(rect);
-        setSelectedMediaIndex(0);
-        setMediaViewerOpen(true);
+          {post.media_type === "video" ? <div className="w-full h-full cursor-pointer" onClick={(e) => {
+        const video = e.currentTarget.querySelector('video');
+        if (video) {
+          if (video.paused) {
+            video.play();
+          } else {
+            video.pause();
+          }
+        }
       }}>
               <video src={post.media_url} className="w-full h-full object-cover pointer-events-none" playsInline muted />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -272,7 +267,7 @@ export const FeedPost = ({
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
                   {mediaUrls.map((url, index) => <CarouselItem key={index} className="h-full relative">
-                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={e => handleDoubleTap(e, index)} />
+                      <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover cursor-pointer" onClick={() => handleDoubleTap()} />
                       {/* Tags overlay for this image */}
                       {showTags && postTags.filter(tag => tag.photo_index === index).map(tag => <button key={tag.id} onClick={() => navigate(`/${tag.profile.username}`)} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
                 left: `${tag.x_position}%`,
@@ -294,7 +289,7 @@ export const FeedPost = ({
                 {mediaUrls.map((_, index) => <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />)}
               </div>
             </> : <>
-              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={e => handleDoubleTap(e, 0)} />
+              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={() => handleDoubleTap()} />
               {/* Tags overlay for single image */}
               {showTags && postTags.filter(tag => tag.photo_index === 0).map(tag => <button key={tag.id} onClick={() => navigate(`/${tag.profile.username}`)} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
           left: `${tag.x_position}%`,
@@ -477,8 +472,6 @@ export const FeedPost = ({
       {/* Likes Sheet */}
       <LikesSheet postId={post.id} open={isLikesSheetOpen} onOpenChange={setIsLikesSheetOpen} />
 
-      {/* Media Viewer */}
-      <PostMediaViewer post={post} mediaUrls={mediaUrls} mediaType={post.media_type} initialIndex={selectedMediaIndex} isOpen={mediaViewerOpen} onClose={() => setMediaViewerOpen(false)} originRect={clickOrigin} />
 
       {/* Share to Chat Sheet */}
       <ShareToChatSheet
