@@ -6,7 +6,7 @@ import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import { generateVideoThumbnail } from "@/hooks/useVideoThumbnail";
-
+import { getVideoDuration, formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
   id: string;
   media_url: string | null;
@@ -187,13 +187,22 @@ export const PostsGrid = ({
   const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
     const [thumbnail, setThumbnail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [duration, setDuration] = useState<string>("");
 
     useEffect(() => {
       if (src) {
         setIsLoading(true);
-        generateVideoThumbnail(src, 1).then((thumb) => {
+        
+        // Fetch thumbnail and duration in parallel
+        Promise.all([
+          generateVideoThumbnail(src, 1),
+          getVideoDuration(src)
+        ]).then(([thumb, dur]) => {
           if (thumb) {
             setThumbnail(thumb);
+          }
+          if (dur) {
+            setDuration(formatDuration(dur));
           }
           setIsLoading(false);
         });
@@ -220,6 +229,12 @@ export const PostsGrid = ({
         <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
           <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
         </div>
+        {/* Video duration badge */}
+        {duration && (
+          <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] font-medium px-1 py-0.5 rounded">
+            {duration}
+          </div>
+        )}
       </>
     );
   };
