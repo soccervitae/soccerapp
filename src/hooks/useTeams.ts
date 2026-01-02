@@ -59,7 +59,7 @@ export const useTeams = (options: UseTeamsOptions = {}) => {
         query = query.ilike("nome", `%${search.trim()}%`);
       }
 
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Team[];
