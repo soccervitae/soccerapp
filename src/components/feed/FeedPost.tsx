@@ -9,6 +9,7 @@ import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
+import { FullscreenImageViewer } from "./FullscreenImageViewer";
 
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -67,6 +68,8 @@ export const FeedPost = ({
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -168,12 +171,9 @@ export const FeedPost = ({
     const now = Date.now();
     setTimeout(() => {
       if (lastTapRef.current === now) {
-        // Single tap - open fullscreen
-        const img = document.createElement('img');
-        img.src = mediaUrl;
-        img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:black;z-index:9999;cursor:zoom-out;';
-        img.onclick = () => img.remove();
-        document.body.appendChild(img);
+        // Single tap - open fullscreen image viewer
+        setSelectedImageUrl(mediaUrl);
+        setIsImageViewerOpen(true);
       }
     }, 300);
     handleDoubleTap(e);
@@ -616,8 +616,15 @@ export const FeedPost = ({
           videoUrl={post.media_url}
           isOpen={isVideoViewerOpen}
           onClose={() => setIsVideoViewerOpen(false)}
-        />
+      />
       )}
+
+      {/* Fullscreen Image Viewer */}
+      <FullscreenImageViewer
+        imageUrl={selectedImageUrl}
+        isOpen={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+      />
 
     </article>;
 };
