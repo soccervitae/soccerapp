@@ -33,6 +33,7 @@ import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
 import Welcome from "./pages/Welcome";
+import Teams from "./pages/Teams";
 
 import NotFound from "./pages/NotFound";
 
@@ -129,6 +130,11 @@ const AnimatedRoutes = () => {
         <Route path="/messages/:conversationId" element={
           <ProtectedRoute>
             <PageTransition><Chat /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/teams" element={
+          <ProtectedRoute>
+            <PageTransition><Teams /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
