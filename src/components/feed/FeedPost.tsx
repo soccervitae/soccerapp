@@ -277,14 +277,21 @@ export const FeedPost = ({
       {/* Media */}
       {post.media_url && <div className={`relative bg-muted overflow-hidden ${
         post.media_type === "video" 
-          ? "max-h-[85vh]" 
+          ? "" 
           : "aspect-[4/5] max-h-[75vh]"
       }`}>
           {post.media_type === "video" ? <div 
         ref={videoContainerRef}
         className="relative w-full cursor-pointer flex items-center justify-center bg-black"
         style={{
-          aspectRatio: videoAspectRatio ? videoAspectRatio.toString() : '4/5'
+          // Vertical videos (9:16) get more height like Instagram Reels
+          // Horizontal videos maintain their aspect ratio
+          aspectRatio: videoAspectRatio 
+            ? videoAspectRatio < 1 
+              ? Math.max(videoAspectRatio, 9/16).toString() // Vertical: cap at 9:16
+              : videoAspectRatio.toString() // Horizontal: keep original
+            : '4/5',
+          maxHeight: videoAspectRatio && videoAspectRatio < 1 ? '90vh' : '70vh'
         }}
         onClick={() => {
           if (videoRef.current) {
