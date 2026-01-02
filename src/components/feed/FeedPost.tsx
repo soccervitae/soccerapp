@@ -58,7 +58,10 @@ export const FeedPost = ({
   const [showApplauseAnimation, setShowApplauseAnimation] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const lastTapRef = useRef<number>(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const {
     data: postTags = []
   } = usePostTags(post.id);
@@ -78,6 +81,31 @@ export const FeedPost = ({
       carouselApi.off("select", onSelect);
     };
   }, [carouselApi]);
+
+  // Video autoplay on viewport intersection
+  useEffect(() => {
+    if (post.media_type !== "video" || !videoContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (videoRef.current) {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              videoRef.current.play().catch(() => {});
+              setIsVideoPlaying(true);
+            } else {
+              videoRef.current.pause();
+              setIsVideoPlaying(false);
+            }
+          }
+        });
+      },
+      { threshold: [0, 0.6, 1] }
+    );
+
+    observer.observe(videoContainerRef.current);
+    return () => observer.disconnect();
+  }, [post.media_type]);
 
   // Helper to parse media URLs
   const getMediaUrls = (): string[] => {
@@ -247,22 +275,43 @@ export const FeedPost = ({
 
       {/* Media */}
       {post.media_url && <div className="relative aspect-[4/5] bg-muted max-h-[75vh] overflow-hidden">
-          {post.media_type === "video" ? <div className="w-full h-full cursor-pointer" onClick={(e) => {
-        const video = e.currentTarget.querySelector('video');
-        if (video) {
-          if (video.paused) {
-            video.play();
-          } else {
-            video.pause();
+          {post.media_type === "video" ? <div 
+        ref={videoContainerRef}
+        className="w-full h-full cursor-pointer" 
+        onClick={() => {
+          if (videoRef.current) {
+            if (videoRef.current.paused) {
+              videoRef.current.play();
+              setIsVideoPlaying(true);
+            } else {
+              videoRef.current.pause();
+              setIsVideoPlaying(false);
+            }
           }
-        }
-      }}>
-              <video src={post.media_url} className="w-full h-full object-cover pointer-events-none" playsInline muted />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-3xl">play_arrow</span>
-                </div>
-              </div>
+        }}>
+              <video 
+                ref={videoRef}
+                src={post.media_url} 
+                className="w-full h-full object-cover pointer-events-none" 
+                playsInline 
+                muted 
+                loop
+              />
+              <AnimatePresence>
+                {!isVideoPlaying && (
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="w-16 h-16 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="material-symbols-outlined text-white text-3xl">play_arrow</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div> : isCarousel ? <>
               <Carousel setApi={setCarouselApi} className="w-full h-full">
                 <CarouselContent className="h-full">
