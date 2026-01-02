@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 type BucketName = "post-media" | "story-media" | "avatars" | "covers" | "message-media";
 
@@ -33,7 +32,6 @@ export const useUploadMedia = () => {
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
-        toast.error("Erro ao fazer upload da imagem");
         throw uploadError;
       }
 

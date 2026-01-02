@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { cachePosts, getCachedPosts, isOnline } from "@/lib/offlineStorage";
 
 export interface RecentLike {
@@ -246,10 +245,6 @@ export const useCreatePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post publicado!");
-    },
-    onError: () => {
-      toast.error("Erro ao publicar post");
     },
   });
 };
@@ -384,10 +379,6 @@ export const useUpdatePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post atualizado!");
-    },
-    onError: () => {
-      toast.error("Erro ao atualizar post");
     },
   });
 };
@@ -410,10 +401,6 @@ export const useDeletePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post excluído!");
-    },
-    onError: () => {
-      toast.error("Erro ao excluir post");
     },
   });
 };
@@ -440,12 +427,6 @@ export const useReportPost = () => {
         }
         throw error;
       }
-    },
-    onSuccess: () => {
-      toast.success("Denúncia enviada. Obrigado pelo feedback!");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Erro ao enviar denúncia");
     },
   });
 };

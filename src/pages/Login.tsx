@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
@@ -16,7 +15,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,13 +23,6 @@ const Login = () => {
     const { error } = await signIn(email, password);
 
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao entrar",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou senha incorretos" 
-          : error.message,
-      });
       setLoading(false);
       return;
     }
@@ -71,11 +62,6 @@ const Login = () => {
 
         if (sendError) {
           console.error("Error sending 2FA code:", sendError);
-          toast({
-            variant: "destructive",
-            title: "Erro ao enviar código",
-            description: "Não foi possível enviar o código de verificação.",
-          });
           await supabase.auth.signOut();
           setLoading(false);
           return;
