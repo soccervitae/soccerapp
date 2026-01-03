@@ -5,7 +5,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserTeams, useRemoveUserFromTeam } from "@/hooks/useTeams";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,10 +18,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronsUpDown, Plus } from "lucide-react";
+import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronsUpDown } from "lucide-react";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
-import { TeamSelector } from "@/components/profile/TeamSelector";
+
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -31,10 +31,6 @@ const EditProfile = () => {
   const uploadMedia = useUploadMedia();
   const { takePhoto, pickFromGallery, isNative } = useDeviceCamera();
   
-  // Teams
-  const { data: userTeams = [] } = useUserTeams(user?.id);
-  const removeUserFromTeam = useRemoveUserFromTeam();
-  const [teamSelectorOpen, setTeamSelectorOpen] = useState(false);
 
   // Fetch countries for nationality selector
   const { data: countries = [] } = useQuery({
@@ -842,87 +838,9 @@ const EditProfile = () => {
             )}
           </div>
 
-          {/* Teams Section */}
-          <div className="space-y-3 pt-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <Label>Meus Times</Label>
-              <button
-                type="button"
-                onClick={() => setTeamSelectorOpen(true)}
-                className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar
-              </button>
-            </div>
-
-            {userTeams.length === 0 ? (
-              <button
-                type="button"
-                onClick={() => setTeamSelectorOpen(true)}
-                className="w-full p-4 rounded-xl border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors flex flex-col items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-2xl text-muted-foreground">
-                  shield
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Adicionar time
-                </span>
-              </button>
-            ) : (
-              <div className="space-y-2">
-                {userTeams.map((team) => (
-                  <div
-                    key={team.id}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
-                  >
-                    {/* Team Logo */}
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {team.escudo_url ? (
-                        <img
-                          src={team.escudo_url}
-                          alt={team.nome}
-                          className="w-full h-full object-contain p-1"
-                        />
-                      ) : (
-                        <span className="material-symbols-outlined text-xl text-muted-foreground">
-                          shield
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Team Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{team.nome}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {[team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
-                      </p>
-                    </div>
-
-                    {/* Remove button */}
-                    <button
-                      type="button"
-                      onClick={() => removeUserFromTeam.mutate(team.id)}
-                      disabled={removeUserFromTeam.isPending}
-                      className="p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
         </div>
       </form>
-
-      {/* Team Selector Sheet */}
-      <TeamSelector
-        open={teamSelectorOpen}
-        onOpenChange={setTeamSelectorOpen}
-        selectedTeamIds={userTeams.map((t) => t.id)}
-      />
 
       {/* Cover Photo Menu Sheet */}
       <Sheet open={coverMenuOpen} onOpenChange={setCoverMenuOpen}>
