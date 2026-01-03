@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLikePost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, type Post } from "@/hooks/usePosts";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
@@ -12,7 +12,7 @@ import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoControls } from "@/components/feed/VideoControls";
-import { Send } from "lucide-react";
+import { Send, Bookmark } from "lucide-react";
 
 interface PostMediaViewerProps {
   post: Post;
@@ -57,6 +57,7 @@ export const PostMediaViewer = ({
 
   // Hooks for interactions
   const likePost = useLikePost();
+  const savePost = useSavePost();
   const { data: likers = [] } = usePostLikes(post.id, isOpen && post.likes_count > 0);
 
   useEffect(() => {
@@ -191,6 +192,17 @@ export const PostMediaViewer = ({
       });
     }
   }, [user, navigate, likePost, post.id, post.liked_by_user]);
+
+  const handleSave = useCallback(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    savePost.mutate({
+      postId: post.id,
+      isSaved: post.saved_by_user,
+    });
+  }, [user, navigate, savePost, post.id, post.saved_by_user]);
 
   const handleProfileClick = (username: string) => {
     onClose();
@@ -641,6 +653,23 @@ export const PostMediaViewer = ({
                               {formatNumber(post.shares_count ?? 0)}
                             </span>
                           )}
+                        </button>
+
+                        {/* Save button */}
+                        <button
+                          onClick={handleSave}
+                          disabled={savePost.isPending}
+                          className={`flex items-center gap-1.5 transition-colors ${
+                            post.saved_by_user 
+                              ? 'text-emerald-500' 
+                              : 'text-gray-900 hover:text-gray-600'
+                          }`}
+                        >
+                          <Bookmark 
+                            className="w-6 h-6" 
+                            strokeWidth={1.5} 
+                            fill={post.saved_by_user ? 'currentColor' : 'none'} 
+                          />
                         </button>
                       </div>
                     </div>
