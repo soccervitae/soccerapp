@@ -468,17 +468,6 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                         >
                           <span className="material-symbols-outlined text-[24px]">send</span>
                         </button>
-                        <button 
-                          onClick={() => setShowRepliesSheet(true)}
-                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors relative"
-                        >
-                          <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
-                          {replyCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-medium min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-                              {replyCount}
-                            </span>
-                          )}
-                        </button>
                       </div>
                     )}
                   </div>
