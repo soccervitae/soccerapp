@@ -104,15 +104,13 @@ export const HighlightFullscreenView = ({
     isOwnProfile ? selectedHighlight?.id : undefined
   );
   
-  // Likes and replies hooks (for visitors)
+  // Likes and replies hooks
   const { data: isLiked = false } = useHighlightLikeStatus(
     !isOwnProfile ? selectedHighlight?.id : undefined
   );
   const toggleLike = useToggleHighlightLike();
   const sendReply = useSendHighlightReply();
-  const { data: replyCount = 0 } = useHighlightReplyCount(
-    isOwnProfile ? selectedHighlight?.id : undefined
-  );
+  const { data: replyCount = 0 } = useHighlightReplyCount(selectedHighlight?.id);
   const { data: likeCount = 0 } = useHighlightLikeCount(
     isOwnProfile ? selectedHighlight?.id : undefined
   );
@@ -532,8 +530,8 @@ export const HighlightFullscreenView = ({
                       </div>
                     </div>
                   ) : (
-                    // Visitor footer: reply input and like button
-                    <div className="flex items-center gap-3">
+                    // Visitor footer: reply input and action icons like replay
+                    <div className="flex items-center gap-2">
                       <div className="flex-1 relative">
                         <Input
                           ref={replyInputRef}
@@ -555,7 +553,7 @@ export const HighlightFullscreenView = ({
                             disabled={sendReply.isPending}
                             className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-colors"
                           >
-                            <Send className="w-5 h-5" />
+                            <span className="material-symbols-outlined text-[20px]">send</span>
                           </button>
                         )}
                       </div>
@@ -586,6 +584,23 @@ export const HighlightFullscreenView = ({
                             />
                           </motion.div>
                         </AnimatePresence>
+                      </button>
+                      <button
+                        onClick={handleShare}
+                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                      >
+                        <Send className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => setRepliesSheetOpen(true)}
+                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors relative"
+                      >
+                        <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
+                        {replyCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-medium min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                            {replyCount}
+                          </span>
+                        )}
                       </button>
                     </div>
                   )}
@@ -635,7 +650,7 @@ export const HighlightFullscreenView = ({
       )}
 
       {/* Highlight Replies Sheet */}
-      {isOwnProfile && selectedHighlight && (
+      {selectedHighlight && (
         <HighlightRepliesSheet
           highlightId={selectedHighlight.id}
           isOpen={repliesSheetOpen}
