@@ -567,10 +567,17 @@ export const HighlightFullscreenView = ({
                         <AnimatePresence mode="wait" initial={false}>
                           <motion.div
                             key={isLiked ? "liked" : "unliked"}
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.8, opacity: 0 }}
-                            transition={{ duration: 0.15, ease: "easeOut" }}
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ 
+                              scale: isLiked ? [1, 1.3, 1] : 1, 
+                              opacity: 1 
+                            }}
+                            exit={{ scale: 0.5, opacity: 0 }}
+                            transition={{ 
+                              duration: isLiked ? 0.4 : 0.15, 
+                              ease: "easeOut",
+                              scale: isLiked ? { times: [0, 0.5, 1] } : undefined
+                            }}
                           >
                             <ClappingHandsIcon 
                               filled={isLiked}
