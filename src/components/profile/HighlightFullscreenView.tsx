@@ -579,12 +579,6 @@ export const HighlightFullscreenView = ({
                           </motion.div>
                         </AnimatePresence>
                       </button>
-                      <button
-                        onClick={handleShare}
-                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
-                      >
-                        <Send className="w-5 h-5" />
-                      </button>
                       <button 
                         onClick={() => setRepliesSheetOpen(true)}
                         className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
