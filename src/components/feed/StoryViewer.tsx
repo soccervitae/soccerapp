@@ -8,8 +8,8 @@ import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
-import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
-import { Send, ImageOff } from "lucide-react";
+
+import { MessageCircle, ImageOff } from "lucide-react";
 
 // Helper function to check unsupported formats
 const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
@@ -72,7 +72,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showViewersSheet, setShowViewersSheet] = useState(false);
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  
   const [mediaError, setMediaError] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
@@ -82,7 +82,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   // Story interactions
   const { data: isLiked = false } = useStoryLikeStatus(currentStory?.id);
   const { data: viewerCount = 0 } = useStoryViewerCount(isOwner ? currentStory?.id : undefined);
-  const { data: replyCount = 0 } = useStoryReplyCount(isOwner ? currentStory?.id : undefined);
+  const { data: replyCount = 0 } = useStoryReplyCount(currentStory?.id);
 
   useEffect(() => {
     if (isOpen && currentStory && user) {
@@ -471,10 +471,15 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                           <span className="material-symbols-outlined text-[24px]">send</span>
                         </button>
                         <button 
-                          onClick={() => setShareSheetOpen(true)}
-                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                          onClick={() => setShowRepliesSheet(true)}
+                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors relative"
                         >
-                          <Send className="w-5 h-5" />
+                          <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
+                          {replyCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-medium min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                              {replyCount}
+                            </span>
+                          )}
                         </button>
                       </div>
                     )}
@@ -515,17 +520,6 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
         zIndex={70}
       />
 
-      {/* Share to Chat Sheet */}
-      {currentStory && (
-        <ShareToChatSheet
-          open={shareSheetOpen}
-          onOpenChange={setShareSheetOpen}
-          contentType="story"
-          contentId={currentStory.id}
-          contentUrl={`${window.location.origin}/story/${currentStory.id}`}
-          contentPreview={currentStory.media_url}
-        />
-      )}
     </>
   );
 };
