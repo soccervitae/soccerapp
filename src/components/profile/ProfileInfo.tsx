@@ -341,13 +341,8 @@ return <section className="flex flex-col items-center gap-4">
                 ref={buttonRef}
                 onClick={handleFollowClick} 
                 disabled={followUser.isPending} 
-                className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}
+                className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}
               >
-                <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${showHeartAnimation ? "animate-heart-pop" : ""} ${isCheering ? "scale-110" : ""}`} style={{
-                  fontVariationSettings: isCheering ? "'FILL' 1" : "'FILL' 0"
-                }}>
-                  favorite
-                </span>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.span
                     key={isCheering ? "cheering" : "cheer"}
@@ -373,8 +368,7 @@ return <section className="flex flex-col items-center gap-4">
                 </div>
               )}
             </div>
-            <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center gap-1.5 disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
-              <span className="material-symbols-outlined text-[16px]">chat</span>
+            <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
               Mensagem
             </button>
           </>}
