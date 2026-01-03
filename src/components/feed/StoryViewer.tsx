@@ -8,7 +8,8 @@ import { StoryViewersSheet } from "./StoryViewersSheet";
 import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
-import { MessageCircle, ImageOff } from "lucide-react";
+import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
+import { MessageCircle, ImageOff, Send } from "lucide-react";
 
 // Helper function to check unsupported formats
 const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
@@ -71,6 +72,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showViewersSheet, setShowViewersSheet] = useState(false);
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   const [mediaError, setMediaError] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
@@ -461,6 +463,12 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                             </motion.div>
                           </AnimatePresence>
                         </button>
+                        <button
+                          onClick={() => setShowShareSheet(true)}
+                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                        >
+                          <Send className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
                         <button 
                           onClick={handleSendMessage}
                           disabled={!messageText.trim() || sendReply.isPending}
@@ -506,6 +514,19 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
         confirmVariant="destructive"
         zIndex={70}
       />
+
+      {/* Share sheet */}
+      {currentStory && (
+        <ShareToChatSheet
+          open={showShareSheet}
+          onOpenChange={setShowShareSheet}
+          contentType="story"
+          contentId={currentStory.id}
+          contentUrl={currentStory.media_url}
+          contentPreview={currentStory.media_type === 'image' ? currentStory.media_url : undefined}
+          contentTitle={`Replay de ${currentGroup?.username || 'usuário'}`}
+        />
+      )}
     </>
   );
 };
