@@ -392,6 +392,7 @@ export const PostMediaViewer = ({
                       <ClappingHandsIcon 
                         className="w-24 h-24 animate-applause-burst drop-shadow-lg" 
                         filled={true}
+                        variant="highlight"
                       />
                     </motion.div>
                   )}
@@ -605,6 +606,7 @@ export const PostMediaViewer = ({
                               <ClappingHandsIcon
                                 className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
                                 filled={post.liked_by_user}
+                                variant="highlight"
                               />
                             </motion.div>
                           </AnimatePresence>
