@@ -24,3 +24,6 @@ verify_jwt = false
 
 [functions.verify-signup-code]
 verify_jwt = false
+
+[functions.download-team-emblems]
+verify_jwt = false
