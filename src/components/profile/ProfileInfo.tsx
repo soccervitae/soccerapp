@@ -42,7 +42,6 @@ export const ProfileInfo = ({
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
   const [isCheering, setIsCheering] = useState(followStats?.isFollowing || false);
-  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isStartingChat, setIsStartingChat] = useState(false);
@@ -123,12 +122,6 @@ export const ProfileInfo = ({
     if (!user) {
       navigate("/login");
       return;
-    }
-    
-    // Trigger heart animation only when following (not unfollowing)
-    if (!isCheering) {
-      setShowHeartAnimation(true);
-      setTimeout(() => setShowHeartAnimation(false), 600);
     }
     
     followUser.mutate({
@@ -355,18 +348,6 @@ return <section className="flex flex-col items-center gap-4">
                   </motion.span>
                 </AnimatePresence>
               </button>
-              
-              {/* Animated heart overlay */}
-              {showHeartAnimation && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span 
-                    className="material-symbols-outlined text-[32px] text-red-500 animate-heart-burst"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    favorite
-                  </span>
-                </div>
-              )}
             </div>
             <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
               Mensagem
