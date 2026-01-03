@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Heart, Send, ImageOff } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Send, ImageOff } from "lucide-react";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
@@ -471,7 +472,7 @@ export const HighlightFullscreenView = ({
                         exit={{ scale: 1.5, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <Heart className="w-24 h-24 text-red-500 fill-red-500" />
+                        <ClappingHandsIcon filled className="w-24 h-24" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -503,7 +504,7 @@ export const HighlightFullscreenView = ({
                           onClick={() => setLikesSheetOpen(true)}
                           className="flex items-center gap-1.5 text-white hover:bg-white/10 px-2.5 py-2 rounded-full transition-colors"
                         >
-                          <Heart className="w-5 h-5" />
+                          <ClappingHandsIcon variant="white" className="w-5 h-5" />
                           <span className="text-sm font-medium">{likeCount}</span>
                         </button>
                         <button 
@@ -571,8 +572,10 @@ export const HighlightFullscreenView = ({
                             exit={{ scale: 0.8, opacity: 0 }}
                             transition={{ duration: 0.15, ease: "easeOut" }}
                           >
-                            <Heart 
-                              className={`w-6 h-6 transition-colors ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'}`}
+                            <ClappingHandsIcon 
+                              filled={isLiked}
+                              variant={isLiked ? 'default' : 'white'}
+                              className="w-6 h-6"
                             />
                           </motion.div>
                         </AnimatePresence>
