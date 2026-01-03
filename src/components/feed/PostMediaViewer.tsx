@@ -46,6 +46,18 @@ export const PostMediaViewer = ({
   const [showVideoControls, setShowVideoControls] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [scale, setScale] = useState(1);
+  
+  // Local optimistic state for like/save
+  const [isLikedLocal, setIsLikedLocal] = useState(post.liked_by_user);
+  const [isSavedLocal, setIsSavedLocal] = useState(post.saved_by_user);
+  const [likesCountLocal, setLikesCountLocal] = useState(post.likes_count);
+  
+  // Sync with prop changes
+  useEffect(() => {
+    setIsLikedLocal(post.liked_by_user);
+    setIsSavedLocal(post.saved_by_user);
+    setLikesCountLocal(post.likes_count);
+  }, [post.liked_by_user, post.saved_by_user, post.likes_count]);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
@@ -169,11 +181,17 @@ export const PostMediaViewer = ({
     }
     setIsLikeAnimating(true);
     setTimeout(() => setIsLikeAnimating(false), 300);
+    
+    // Optimistic update
+    const wasLiked = isLikedLocal;
+    setIsLikedLocal(!wasLiked);
+    setLikesCountLocal(prev => wasLiked ? prev - 1 : prev + 1);
+    
     likePost.mutate({
       postId: post.id,
-      isLiked: post.liked_by_user,
+      isLiked: wasLiked,
     });
-  }, [user, navigate, likePost, post.id, post.liked_by_user]);
+  }, [user, navigate, likePost, post.id, isLikedLocal]);
 
   const handleDoubleTapLike = useCallback(() => {
     if (!user) {
@@ -185,24 +203,29 @@ export const PostMediaViewer = ({
     setTimeout(() => setShowDoubleTapAnimation(false), 1000);
     
     // Only like if not already liked
-    if (!post.liked_by_user) {
+    if (!isLikedLocal) {
+      setIsLikedLocal(true);
+      setLikesCountLocal(prev => prev + 1);
       likePost.mutate({
         postId: post.id,
         isLiked: false,
       });
     }
-  }, [user, navigate, likePost, post.id, post.liked_by_user]);
+  }, [user, navigate, likePost, post.id, isLikedLocal]);
 
   const handleSave = useCallback(() => {
     if (!user) {
       navigate("/login");
       return;
     }
+    // Optimistic update
+    setIsSavedLocal(!isSavedLocal);
+    
     savePost.mutate({
       postId: post.id,
-      isSaved: post.saved_by_user,
+      isSaved: isSavedLocal,
     });
-  }, [user, navigate, savePost, post.id, post.saved_by_user]);
+  }, [user, navigate, savePost, post.id, isSavedLocal]);
 
   const handleProfileClick = (username: string) => {
     onClose();
@@ -609,7 +632,7 @@ export const PostMediaViewer = ({
                         >
                           <AnimatePresence mode="wait" initial={false}>
                             <motion.div
-                              key={post.liked_by_user ? "liked" : "unliked"}
+                              key={isLikedLocal ? "liked" : "unliked"}
                               initial={{ scale: 0.8, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
                               exit={{ scale: 0.8, opacity: 0 }}
@@ -617,14 +640,14 @@ export const PostMediaViewer = ({
                             >
                               <ClappingHandsIcon
                                 className={`w-7 h-7 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
-                                filled={post.liked_by_user}
+                                filled={isLikedLocal}
                                 variant="highlight"
                               />
                             </motion.div>
                           </AnimatePresence>
-                          {post.likes_count > 0 && (
+                          {likesCountLocal > 0 && (
                             <span className="text-sm font-medium text-gray-900">
-                              {formatNumber(post.likes_count)}
+                              {formatNumber(likesCountLocal)}
                             </span>
                           )}
                         </button>
@@ -660,7 +683,7 @@ export const PostMediaViewer = ({
                           onClick={handleSave}
                           disabled={savePost.isPending}
                           className={`flex items-center gap-1.5 transition-colors ${
-                            post.saved_by_user 
+                            isSavedLocal 
                               ? 'text-emerald-500' 
                               : 'text-gray-900 hover:text-gray-600'
                           }`}
@@ -668,7 +691,7 @@ export const PostMediaViewer = ({
                           <Bookmark 
                             className="w-6 h-6" 
                             strokeWidth={1.5} 
-                            fill={post.saved_by_user ? 'currentColor' : 'none'} 
+                            fill={isSavedLocal ? 'currentColor' : 'none'} 
                           />
                         </button>
                       </div>
