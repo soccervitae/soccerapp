@@ -472,7 +472,7 @@ export const HighlightFullscreenView = ({
                         exit={{ scale: 1.5, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <ClappingHandsIcon filled className="w-24 h-24" />
+                        <ClappingHandsIcon filled variant="highlight" className="w-24 h-24" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -581,7 +581,7 @@ export const HighlightFullscreenView = ({
                           >
                             <ClappingHandsIcon 
                               filled={isLiked}
-                              variant={isLiked ? 'default' : 'white'}
+                              variant="highlight"
                               className="w-6 h-6"
                             />
                           </motion.div>

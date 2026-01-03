@@ -378,7 +378,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                     {/* Applause animation */}
                     {showLikeAnimation && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                        <ClappingHandsIcon className="w-20 h-20 animate-ping" filled />
+                        <ClappingHandsIcon className="w-20 h-20 animate-ping" filled variant="highlight" />
                       </div>
                     )}
                   </div>
@@ -459,7 +459,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                               exit={{ scale: 0.8, opacity: 0 }}
                               transition={{ duration: 0.15, ease: "easeOut" }}
                             >
-                              <ClappingHandsIcon className="w-6 h-6" filled={isLiked} />
+                              <ClappingHandsIcon className="w-6 h-6" filled={isLiked} variant="highlight" />
                             </motion.div>
                           </AnimatePresence>
                         </button>
