@@ -457,7 +457,7 @@ export const FeedPost = ({
 
           {/* Applause animation overlay */}
           {showApplauseAnimation && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <ClappingHandsIcon className="w-24 h-24 animate-applause-burst drop-shadow-lg" filled />
+              <ClappingHandsIcon className="w-24 h-24 animate-applause-burst drop-shadow-lg" filled variant="green" />
             </div>}
 
           {/* Tags toggle button */}
@@ -515,7 +515,7 @@ export const FeedPost = ({
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
               >
-                <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} />
+                <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} variant="green" />
               </motion.div>
             </AnimatePresence>
             {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
