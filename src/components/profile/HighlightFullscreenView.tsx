@@ -581,7 +581,7 @@ export const HighlightFullscreenView = ({
                           >
                             <ClappingHandsIcon 
                               filled={isLiked}
-                              variant="green"
+                              variant={isLiked ? 'default' : 'white'}
                               className="w-6 h-6"
                             />
                           </motion.div>
