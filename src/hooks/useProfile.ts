@@ -58,20 +58,40 @@ export const useProfile = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          posicao:posicao_masculina!profiles_position_fkey (
-            name
-          )
-        `)
+        .select("*")
         .eq("id", targetUserId)
         .single();
 
       if (error) throw error;
       
+      // Fetch position name based on gender and role
+      let position_name: string | null = null;
+      if (data.position) {
+        const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+        const isFemale = data.gender === 'mulher';
+        
+        let posData: { name: string } | null = null;
+        
+        if (isStaff && isFemale) {
+          const { data: result } = await supabase.from('funcao_feminina').select('name').eq('id', data.position).single();
+          posData = result;
+        } else if (isStaff) {
+          const { data: result } = await supabase.from('funcao').select('name').eq('id', data.position).single();
+          posData = result;
+        } else if (isFemale) {
+          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
+          posData = result;
+        } else {
+          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.position).single();
+          posData = result;
+        }
+        
+        position_name = posData?.name || null;
+      }
+      
       return {
         ...data,
-        position_name: (data as any)?.posicao?.name || null,
+        position_name,
       };
     },
     enabled: !!targetUserId,
@@ -108,20 +128,40 @@ export const useProfileByUsername = (username: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          posicao:posicao_masculina!profiles_position_fkey (
-            name
-          )
-        `)
+        .select("*")
         .eq("username", username)
         .single();
 
       if (error) throw error;
       
+      // Fetch position name based on gender and role
+      let position_name: string | null = null;
+      if (data.position) {
+        const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+        const isFemale = data.gender === 'mulher';
+        
+        let posData: { name: string } | null = null;
+        
+        if (isStaff && isFemale) {
+          const { data: result } = await supabase.from('funcao_feminina').select('name').eq('id', data.position).single();
+          posData = result;
+        } else if (isStaff) {
+          const { data: result } = await supabase.from('funcao').select('name').eq('id', data.position).single();
+          posData = result;
+        } else if (isFemale) {
+          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
+          posData = result;
+        } else {
+          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.position).single();
+          posData = result;
+        }
+        
+        position_name = posData?.name || null;
+      }
+      
       return {
         ...data,
-        position_name: (data as any)?.posicao?.name || null,
+        position_name,
       };
     },
     enabled: !!username,
