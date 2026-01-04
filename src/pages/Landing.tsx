@@ -51,7 +51,7 @@ const Landing = () => {
     {
       icon: MessageCircle,
       title: "Mensagens Diretas",
-      description: "Converse em tempo real com atletas e treinadores. Envie textos, fotos, áudios e vídeos."
+      description: "Converse em tempo real com atletas, técnicos e olheiros. Envie textos, fotos, áudios e vídeos."
     },
     {
       icon: Shield,
