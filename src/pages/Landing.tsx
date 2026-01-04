@@ -9,7 +9,7 @@ const Landing = () => {
   const features = [{
     icon: User,
     title: "Perfil Profissional",
-    description: "Crie seu currículo esportivo completo com foto, posição, altura, peso, pé preferido e histórico de clubes."
+    description: "Crie seu perfil completo com ano, posição, altura, peso, perna predominante e histórico de clubes."
   }, {
     icon: Newspaper,
     title: "Feed de Publicações",
