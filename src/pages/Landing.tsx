@@ -85,9 +85,9 @@ const Landing = () => {
           }}>
               <div className="flex flex-col gap-4 text-center z-10 max-w-[600px]">
                 <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
-                  Conecte-se.
+                  Jogue.
                   <br />
-                  Compita.
+                  Brilhe.
                   <br />
                   Conquiste.
                 </h1>
