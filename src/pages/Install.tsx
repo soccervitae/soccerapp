@@ -145,8 +145,8 @@ const Install = () => {
             repeat: Infinity,
             ease: "easeOut"
           }} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Smartphone className="w-14 h-14 text-primary-foreground" />
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+              <img src={logoText} alt="SOCCER VITAE" className="w-full h-auto brightness-0 invert" />
             </div>
           </motion.div>
 
