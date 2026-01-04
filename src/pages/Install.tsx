@@ -189,9 +189,6 @@ const Install = () => {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Baixe o App
             </h1>
-            <p className="text-muted-foreground mt-2 text-base">
-                 Siga as instruções abaixo para fazer seu cadastro   
-            </p>
           </motion.div>
 
         </motion.div>}
@@ -355,6 +352,9 @@ const Install = () => {
           </motion.div>}
 
         {/* Instructions */}
+        {!isPWA && <p className="text-muted-foreground text-base text-center">
+          Siga as instruções abaixo para fazer seu cadastro
+        </p>}
         <motion.div initial={{
         opacity: 0,
         y: 20
