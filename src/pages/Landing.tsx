@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-
+import { motion } from "framer-motion";
 import logoText from "@/assets/soccervitae-logo-text.png";
 
 const Landing = () => {
@@ -163,18 +163,31 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {features.map((feature, index) => (
-              <div 
+              <motion.div 
                 key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.05,
+                  ease: [0.25, 0.1, 0.25, 1]
+                }}
+                whileHover={{ scale: 1.02, y: -4 }}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
               >
-                <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
+                <motion.div 
+                  className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center"
+                  whileHover={{ rotate: 10, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <feature.icon className="w-6 h-6 text-[#1cb15c]" />
-                </div>
+                </motion.div>
                 <h3 className="text-white text-lg font-bold">{feature.title}</h3>
                 <p className="text-white/60 text-sm">
                   {feature.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
