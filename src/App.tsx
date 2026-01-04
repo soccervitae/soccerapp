@@ -3,8 +3,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { HelmetProvider } from "react-helmet-async";
 import { PageTransition } from "@/components/PageTransition";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -33,6 +34,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Welcome from "./pages/Welcome";
 import Teams from "./pages/Teams";
 import Install from "./pages/Install";
+import Landing from "./pages/Landing";
 
 import NotFound from "./pages/NotFound";
 
@@ -43,12 +45,34 @@ const CallNotificationHandler = () => {
   return null;
 };
 
+// Component to handle landing vs authenticated index
+const LandingOrIndex = () => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return null;
+  }
+  
+  if (!user) {
+    return <PageTransition><Landing /></PageTransition>;
+  }
+  
+  return (
+    <ProtectedRoute>
+      <PageTransition><Index /></PageTransition>
+    </ProtectedRoute>
+  );
+};
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Landing page for unauthenticated users, feed for authenticated */}
+        <Route path="/" element={<LandingOrIndex />} />
+        
         {/* Public auth routes */}
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
@@ -78,11 +102,6 @@ const AnimatedRoutes = () => {
         } />
         
         {/* Protected routes - require login and complete profile */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <PageTransition><Index /></PageTransition>
-          </ProtectedRoute>
-        } />
         <Route path="/profile" element={
           <ProtectedRoute>
             <PageTransition><Profile /></PageTransition>
@@ -194,28 +213,30 @@ const App = () => {
   }, [showSplash]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <PresenceProvider>
-            <AnimatePresence mode="wait">
-              {showSplash && <SplashScreen key="splash" />}
-            </AnimatePresence>
-            <OrientationLock />
-            {/* PWA auto-update hook */}
-            <PwaAutoUpdate />
-            <BrowserRouter>
-              <MessageNotificationProvider>
-                <CallNotificationHandler />
-                <ScrollToTop />
-                <GlobalOfflineBanner />
-                <AnimatedRoutes />
-              </MessageNotificationProvider>
-            </BrowserRouter>
-          </PresenceProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <PresenceProvider>
+              <AnimatePresence mode="wait">
+                {showSplash && <SplashScreen key="splash" />}
+              </AnimatePresence>
+              <OrientationLock />
+              {/* PWA auto-update hook */}
+              <PwaAutoUpdate />
+              <BrowserRouter>
+                <MessageNotificationProvider>
+                  <CallNotificationHandler />
+                  <ScrollToTop />
+                  <GlobalOfflineBanner />
+                  <AnimatedRoutes />
+                </MessageNotificationProvider>
+              </BrowserRouter>
+            </PresenceProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
