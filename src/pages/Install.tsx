@@ -172,7 +172,7 @@ const Install = () => {
           delay: 0.5
         }}>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Baixe o App para Continuar
+              Baixe o App
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
               O SOCCER VITAE funciona como um aplicativo instalado no seu celular. Siga as instruções abaixo para adicionar à sua tela inicial.
