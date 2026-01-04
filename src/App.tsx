@@ -80,12 +80,8 @@ const AnimatedRoutes = () => {
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
         
-        {/* Install page - requires login but no PWA check (this is the gate itself) */}
-        <Route path="/install" element={
-          <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false} requirePwa={false}>
-            <PageTransition><Install /></PageTransition>
-          </ProtectedRoute>
-        } />
+        {/* Install page - public, no login required */}
+        <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
         
         {/* Complete profile route - requires login but not complete profile or onboarding */}
         <Route path="/complete-profile" element={
