@@ -25,7 +25,7 @@ const Landing = () => {
   }, {
     icon: MessageCircle,
     title: "Mensagens Diretas",
-    description: "Converse em tempo real com atletas, técnicos e olheiros. Envie textos, fotos, áudios e vídeos."
+    description: "Crie álbuns permanentes com seus melhores momentos, gols e jogadas para mostrar seu talento."
   }, {
     icon: Shield,
     title: "Histórico de Times",
