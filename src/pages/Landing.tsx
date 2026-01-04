@@ -47,10 +47,6 @@ const Landing = () => {
     title: "Explorar",
     description: "Descubra novos atletas, busque por posição, região ou habilidades específicas."
   }, {
-    icon: Eye,
-    title: "Conecte-se com Olheiros",
-    description: "Seu perfil pode ser visto por recrutadores de clubes profissionais em busca de talentos."
-  }, {
     icon: Bell,
     title: "Notificações",
     description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
