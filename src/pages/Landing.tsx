@@ -71,7 +71,7 @@ const Landing = () => {
   }];
   return <>
       <Helmet>
-        <title>Soccer Vitae - A Rede Social do Atleta Profissional</title>
+        <title>SOCCER VITAE - A Rede Social do Atleta Profissional</title>
         <meta name="description" content="A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal." />
       </Helmet>
       
@@ -172,7 +172,7 @@ const Landing = () => {
         <footer className="border-t border-white/10 py-8 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={logoText} alt="Soccer Vitae" className="h-6" />
+              <img src={logoText} alt="SOCCER VITAE" className="h-6" />
             </div>
             <div className="flex gap-6 text-white/60 text-sm">
               <a href="#" className="hover:text-white transition-colors">Termos</a>
@@ -180,7 +180,7 @@ const Landing = () => {
               <a href="#" className="hover:text-white transition-colors">Suporte</a>
             </div>
             <p className="text-white/40 text-xs">
-              © {new Date().getFullYear()} Soccer Vitae. Todos os direitos reservados.
+              © {new Date().getFullYear()} SOCCER VITAE. Todos os direitos reservados.
             </p>
           </div>
         </footer>

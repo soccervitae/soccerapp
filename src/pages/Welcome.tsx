@@ -167,7 +167,7 @@ export default function Welcome() {
               Bem-vindo, {firstName}!
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Seu perfil está completo e você faz parte da comunidade Soccer Vitae.
+              Seu perfil está completo e você faz parte da comunidade SOCCER VITAE.
             </p>
           </motion.div>
 

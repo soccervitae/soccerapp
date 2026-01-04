@@ -158,7 +158,7 @@ const Install = () => {
         }} transition={{
           delay: 0.4
         }}>
-            <img src={logoText} alt="Soccer Vitae" className="h-8 mx-auto dark:invert" />
+            <img src={logoText} alt="SOCCER VITAE" className="h-8 mx-auto dark:invert" />
           </motion.div>
 
           {/* Main Message */}
@@ -175,7 +175,7 @@ const Install = () => {
               Baixe o App para Continuar
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
-              O Soccer Vitae funciona como um aplicativo instalado no seu celular. Siga as instruções abaixo para adicionar à sua tela inicial.
+              O SOCCER VITAE funciona como um aplicativo instalado no seu celular. Siga as instruções abaixo para adicionar à sua tela inicial.
             </p>
           </motion.div>
 
