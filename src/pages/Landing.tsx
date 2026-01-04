@@ -13,7 +13,7 @@ const Landing = () => {
     description: "Crie seu perfil completo com ano, posição, altura, peso, perna predominante e histórico de clubes."
   }, {
     icon: Newspaper,
-    title: "Feed de Publicações",
+    title: "Feed",
     description: "Compartilhe fotos e vídeos da sua carreira, treinos conquistas e as resenhas."
   }, {
     icon: Camera,
