@@ -92,7 +92,7 @@ const Landing = () => {
                   Conquiste.
                 </h1>
                 <p className="text-white/80 text-base md:text-lg">
-                  A rede social definitiva para atletas mostrarem seu talento e encontrarem o time ideal.
+                  Mostre seu talento e conecte-se com o mundo do futebol.
                 </p>
               </div>
             </div>
