@@ -12,11 +12,10 @@ export const useRequirePwa = () => {
     );
     setIsMobile(checkMobile);
 
-    // Detect PWA mode
+    // Detect PWA mode (reliable signals only)
     const checkPWA =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true ||
-      document.referrer.includes("android-app://");
+      (window.navigator as any).standalone === true;
     setIsPWA(checkPWA);
 
     setIsLoading(false);
