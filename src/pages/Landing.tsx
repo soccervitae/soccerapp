@@ -174,7 +174,7 @@ const Landing = () => {
                   ease: [0.25, 0.1, 0.25, 1]
                 }}
                 whileHover={{ scale: 1.02, y: -4 }}
-                className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
               >
                 <motion.div 
                   className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center"
