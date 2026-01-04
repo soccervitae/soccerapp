@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface SearchFilters {
   query: string;
-  position?: string;
+  position?: number;
 }
 
 export interface SearchProfile {
@@ -11,7 +11,7 @@ export interface SearchProfile {
   username: string;
   full_name: string | null;
   avatar_url: string | null;
-  position: string | null;
+  position: number | null;
   team: string | null;
   conta_verificada: boolean;
   followers_count?: number;
@@ -33,8 +33,8 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
         );
       }
 
-      // Filtro por posição
-      if (filters.position && filters.position !== "Todos") {
+      // Filtro por posição (agora é ID numérico)
+      if (filters.position) {
         query = query.eq("position", filters.position);
       }
 

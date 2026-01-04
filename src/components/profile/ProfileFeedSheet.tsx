@@ -119,7 +119,7 @@ export const ProfileFeedSheet = ({
       full_name: profile.full_name,
       nickname: profile.full_name || "",
       avatar_url: profile.avatar_url,
-      position: "",
+      position: null,
       team: "",
       conta_verificada: profile.conta_verificada || false,
     },
