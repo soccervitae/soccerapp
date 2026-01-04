@@ -404,9 +404,6 @@ const Install = () => {
           x: 0
         }} className="bg-card border rounded-2xl p-4 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-xl">
-                  🤖
-                </div>
                 <div>
                   <h3 className="font-semibold">Android</h3>
                   <p className="text-xs text-muted-foreground">Instruções para Chrome</p>
