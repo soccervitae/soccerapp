@@ -204,7 +204,7 @@ const Landing = () => {
                 className="flex gap-3 z-10"
               >
                 <Button
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate("/install")}
                   className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-6 h-12 rounded-full"
                 >
                   Criar Perfil Grátis
