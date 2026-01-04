@@ -1,11 +1,113 @@
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight } from "lucide-react";
+import { 
+  Search, 
+  Play, 
+  Eye, 
+  ChevronRight, 
+  User, 
+  MessageCircle, 
+  Film, 
+  Shield, 
+  Users, 
+  Trophy, 
+  Medal, 
+  Newspaper, 
+  Bell, 
+  Lock, 
+  Camera, 
+  Heart,
+  Share2,
+  MapPin
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import logoText from "@/assets/soccervitae-logo-text.png";
 
 const Landing = () => {
   const navigate = useNavigate();
+
+  const features = [
+    {
+      icon: User,
+      title: "Perfil Profissional",
+      description: "Crie seu currículo esportivo completo com foto, posição, altura, peso, pé preferido e histórico de clubes."
+    },
+    {
+      icon: Newspaper,
+      title: "Feed de Publicações",
+      description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas com toda a comunidade."
+    },
+    {
+      icon: Camera,
+      title: "Replays (Stories)",
+      description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas para seus torcedores."
+    },
+    {
+      icon: Film,
+      title: "Destaques",
+      description: "Crie álbuns permanentes com seus melhores momentos, gols e jogadas para mostrar seu talento."
+    },
+    {
+      icon: MessageCircle,
+      title: "Mensagens Diretas",
+      description: "Converse em tempo real com atletas, técnicos e olheiros. Envie textos, fotos, áudios e vídeos."
+    },
+    {
+      icon: Shield,
+      title: "Histórico de Times",
+      description: "Adicione todos os clubes por onde passou e construa sua trajetória profissional completa."
+    },
+    {
+      icon: Trophy,
+      title: "Campeonatos",
+      description: "Registre os campeonatos disputados, gols marcados, jogos e colocação alcançada."
+    },
+    {
+      icon: Medal,
+      title: "Conquistas",
+      description: "Exiba suas medalhas, títulos e prêmios individuais conquistados ao longo da carreira."
+    },
+    {
+      icon: Users,
+      title: "Torcedores",
+      description: "Construa sua base de fãs. Acompanhe quem torce por você e quem você está torcendo."
+    },
+    {
+      icon: Search,
+      title: "Explorar",
+      description: "Descubra novos atletas, busque por posição, região ou habilidades específicas."
+    },
+    {
+      icon: Eye,
+      title: "Conecte-se com Olheiros",
+      description: "Seu perfil pode ser visto por recrutadores de clubes profissionais em busca de talentos."
+    },
+    {
+      icon: Bell,
+      title: "Notificações",
+      description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
+    },
+    {
+      icon: Heart,
+      title: "Curtidas e Aplausos",
+      description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
+    },
+    {
+      icon: Share2,
+      title: "Compartilhamento",
+      description: "Envie posts, perfis e destaques diretamente para conversas ou redes sociais externas."
+    },
+    {
+      icon: MapPin,
+      title: "Localização",
+      description: "Adicione localização às suas publicações para mostrar onde você está jogando."
+    },
+    {
+      icon: Lock,
+      title: "Privacidade",
+      description: "Controle quem pode ver seu perfil, status de atividade e configure autenticação em duas etapas."
+    }
+  ];
 
   return (
     <>
@@ -98,39 +200,21 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Feature Card 1 */}
-            <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
-                <Search className="w-6 h-6 text-[#1cb15c]" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
+                  <feature.icon className="w-6 h-6 text-[#1cb15c]" />
+                </div>
+                <h3 className="text-white text-lg font-bold">{feature.title}</h3>
+                <p className="text-white/60 text-sm">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-white text-lg font-bold">Encontre Times</h3>
-              <p className="text-white/60 text-sm">
-                Busque equipes na sua região que precisam da sua posição e habilidades específicas para completar o elenco.
-              </p>
-            </div>
-
-            {/* Feature Card 2 */}
-            <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
-                <Play className="w-6 h-6 text-[#1cb15c]" />
-              </div>
-              <h3 className="text-white text-lg font-bold">Compartilhe Destaques</h3>
-              <p className="text-white/60 text-sm">
-                Publique seus melhores vídeos, gols e lances defensivos para ganhar visibilidade na comunidade.
-              </p>
-            </div>
-
-            {/* Feature Card 3 */}
-            <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6">
-              <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
-                <Eye className="w-6 h-6 text-[#1cb15c]" />
-              </div>
-              <h3 className="text-white text-lg font-bold">Conecte-se com Olheiros</h3>
-              <p className="text-white/60 text-sm">
-                Seu perfil pode ser visto por recrutadores e olheiros de clubes profissionais em busca de novos talentos.
-              </p>
-            </div>
+            ))}
           </div>
         </section>
 
