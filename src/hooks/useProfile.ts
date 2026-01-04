@@ -20,6 +20,7 @@ export interface Profile {
   cover_url: string | null;
   bio: string | null;
   position: number | null;
+  position_name: string | null;
   team: string | null;
   height: number | null;
   weight: number | null;
@@ -57,12 +58,21 @@ export const useProfile = (userId?: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          *,
+          posicao:posicao_masculina!profiles_position_fkey (
+            name
+          )
+        `)
         .eq("id", targetUserId)
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        ...data,
+        position_name: (data as any)?.posicao?.name || null,
+      };
     },
     enabled: !!targetUserId,
     retry: (failureCount) => {
@@ -98,12 +108,21 @@ export const useProfileByUsername = (username: string) => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          *,
+          posicao:posicao_masculina!profiles_position_fkey (
+            name
+          )
+        `)
         .eq("username", username)
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        ...data,
+        position_name: (data as any)?.posicao?.name || null,
+      };
     },
     enabled: !!username,
     retry: (failureCount) => {
