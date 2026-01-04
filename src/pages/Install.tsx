@@ -36,12 +36,16 @@ const Install = () => {
   const deviceType = useDeviceType();
   const fromSignup = searchParams.get("from") === "signup";
 
-  // Redirect desktop users to landing page
+  // Redirect desktop users to landing page (using real device detection, not viewport)
+  const isRealMobileDevice = useMemo(() => {
+    return /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }, []);
+
   useEffect(() => {
-    if (isMobile === false) {
+    if (isRealMobileDevice === false) {
       navigate("/", { replace: true });
     }
-  }, [isMobile, navigate]);
+  }, [isRealMobileDevice, navigate]);
 
   // Auto-redirect to home when PWA is detected
   useEffect(() => {
