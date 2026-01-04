@@ -35,7 +35,7 @@ const Landing = () => {
     },
     {
       icon: Newspaper,
-      title: "Feed de Publicações",
+      title: "Feed",
       description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas com toda a comunidade."
     },
     {
