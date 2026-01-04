@@ -25,7 +25,7 @@ const Landing = () => {
   }, {
     icon: MessageCircle,
     title: "Mensagens Diretas",
-    description: "Crie álbuns permanentes com seus melhores momentos, gols e jogadas para mostrar seu talento."
+    description: "Converse no chat com jogadores e treinadores que fazem parte da SOCCER VITAE e aumente sua rede de contatos."
   }, {
     icon: Shield,
     title: "Histórico de Times",
