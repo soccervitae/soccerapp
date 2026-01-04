@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Lock, ArrowLeft, ArrowRight, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Mail, Lock, ArrowLeft, ArrowRight, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Stage = "request" | "verify" | "success";
 
@@ -21,26 +23,59 @@ const ForgotPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
     if (!email) {
+      setError("Por favor, insira seu email");
       return;
     }
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-password-reset", {
+      const { data, error: invokeError } = await supabase.functions.invoke("send-password-reset", {
         body: { email },
       });
 
-      if (error) throw error;
+      if (invokeError) {
+        console.error("Erro ao invocar função:", invokeError);
+        setError("Erro ao conectar com o servidor. Tente novamente.");
+        toast({
+          title: "Erro",
+          description: "Não foi possível enviar o código. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.error) {
+        console.error("Erro retornado pela função:", data.error);
+        setError(data.error);
+        toast({
+          title: "Erro",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
 
       setMaskedEmail(data.maskedEmail || email);
       setStage("verify");
+      toast({
+        title: "Código enviado!",
+        description: `Verifique sua caixa de entrada em ${data.maskedEmail || email}`,
+      });
     } catch (error: any) {
       console.error("Erro ao solicitar reset:", error);
+      setError("Erro inesperado. Por favor, tente novamente.");
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -48,49 +83,100 @@ const ForgotPassword = () => {
 
   const handleVerifyAndReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (code.length !== 6) {
+      setError("Digite o código de 6 dígitos");
       return;
     }
 
     if (newPassword.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
       return;
     }
 
     if (newPassword !== confirmPassword) {
+      setError("As senhas não coincidem");
       return;
     }
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("verify-password-reset", {
+      const { data, error: invokeError } = await supabase.functions.invoke("verify-password-reset", {
         body: { email, code, newPassword },
       });
 
-      if (error) throw error;
+      if (invokeError) {
+        console.error("Erro ao verificar código:", invokeError);
+        setError("Erro ao conectar com o servidor. Tente novamente.");
+        toast({
+          title: "Erro",
+          description: "Não foi possível verificar o código. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      if (data.error) {
+      if (data?.error) {
+        console.error("Erro retornado:", data.error);
+        setError(data.error);
+        toast({
+          title: "Erro",
+          description: data.error,
+          variant: "destructive",
+        });
         return;
       }
 
       setStage("success");
+      toast({
+        title: "Senha alterada!",
+        description: "Sua senha foi redefinida com sucesso.",
+      });
     } catch (error: any) {
       console.error("Erro ao redefinir senha:", error);
+      setError("Erro inesperado. Por favor, tente novamente.");
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendCode = async () => {
+    setError("");
     setLoading(true);
     try {
-      const { error } = await supabase.functions.invoke("send-password-reset", {
+      const { data, error: invokeError } = await supabase.functions.invoke("send-password-reset", {
         body: { email },
       });
 
-      if (error) throw error;
+      if (invokeError || data?.error) {
+        const errorMsg = data?.error || "Erro ao reenviar código";
+        setError(errorMsg);
+        toast({
+          title: "Erro",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Código reenviado!",
+        description: `Verifique sua caixa de entrada em ${maskedEmail}`,
+      });
     } catch (error: any) {
       console.error("Erro ao reenviar código:", error);
+      setError("Erro ao reenviar código. Tente novamente.");
+      toast({
+        title: "Erro",
+        description: "Não foi possível reenviar o código.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -118,6 +204,14 @@ const ForgotPassword = () => {
 
       {/* Conteúdo */}
       <div className="flex-1 px-6 py-8">
+        {/* Alerta de erro */}
+        {error && (
+          <Alert variant="destructive" className="max-w-md mx-auto mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {stage === "request" && (
           <form onSubmit={handleRequestReset} className="space-y-6 max-w-md mx-auto">
             <div className="space-y-2">

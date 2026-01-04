@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,9 +19,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verificar se a API key do Resend está configurada
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY não está configurada");
+      return new Response(
+        JSON.stringify({ error: "Serviço de email não configurado" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
+
     const { email }: PasswordResetRequest = await req.json();
 
     if (!email) {
+      console.error("Email não fornecido na requisição");
       return new Response(
         JSON.stringify({ error: "Email é obrigatório" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -94,11 +106,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     const userName = profile?.full_name || profile?.username || "Atleta";
 
+    console.log("Tentando enviar email para:", email);
+
     // Enviar email
     const emailResponse = await resend.emails.send({
-      from: "SoccerApp <noreply@resend.dev>",
+      from: "SOCCER VITAE <onboarding@resend.dev>",
       to: [email],
-      subject: "Código de Recuperação de Senha",
+      subject: "Código de Recuperação de Senha - SOCCER VITAE",
       html: `
         <!DOCTYPE html>
         <html>
@@ -148,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 20px 30px; border-top: 1px solid #27272a; text-align: center;">
                       <p style="color: #52525b; font-size: 11px; margin: 0;">
-                        © ${new Date().getFullYear()} SoccerApp - A rede social dos atletas
+                        © ${new Date().getFullYear()} SOCCER VITAE - A rede social dos atletas
                       </p>
                     </td>
                   </tr>
@@ -161,7 +175,21 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email enviado com sucesso:", emailResponse);
+    console.log("Resposta do Resend:", JSON.stringify(emailResponse));
+
+    // Verificar se houve erro no envio
+    if (emailResponse.error) {
+      console.error("Erro ao enviar email via Resend:", emailResponse.error);
+      return new Response(
+        JSON.stringify({ 
+          error: "Erro ao enviar email. Verifique se o domínio está verificado no Resend.",
+          details: emailResponse.error.message || "Erro desconhecido"
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Email enviado com sucesso! ID:", emailResponse.data?.id);
 
     return new Response(
       JSON.stringify({ 
@@ -174,7 +202,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Erro na função send-password-reset:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Erro interno do servidor" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
