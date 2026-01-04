@@ -22,8 +22,14 @@ const useDeviceType = (): DeviceType => {
 const Install = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
-  const { isPWA } = useRequirePwa();
+  const {
+    isInstallable,
+    isInstalled,
+    promptInstall
+  } = usePwaInstall();
+  const {
+    isPWA
+  } = useRequirePwa();
   const [activeStep, setActiveStep] = useState(0);
   const deviceType = useDeviceType();
   const fromSignup = searchParams.get("from") === "signup";
@@ -107,18 +113,21 @@ const Install = () => {
 
       <div className="flex-1 px-4 py-8 max-w-lg mx-auto space-y-6 relative z-10">
         {/* Already Installed Notice - Show when PWA is detected */}
-        {isPWA && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-6 text-center"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center"
-            >
+        {isPWA && <motion.div initial={{
+        opacity: 0,
+        scale: 0.95
+      }} animate={{
+        opacity: 1,
+        scale: 1
+      }} className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-6 text-center">
+            <motion.div initial={{
+          scale: 0
+        }} animate={{
+          scale: 1
+        }} transition={{
+          type: "spring",
+          stiffness: 200
+        }} className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
               <CheckCircle className="w-8 h-8 text-emerald-500" />
             </motion.div>
             <h2 className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
@@ -127,19 +136,14 @@ const Install = () => {
             <p className="text-muted-foreground text-sm mb-4">
               O SOCCER VITAE está instalado e você está acessando pela tela inicial.
             </p>
-            <Button
-              onClick={() => navigate("/")}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
-            >
+            <Button onClick={() => navigate("/")} className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold">
               Ir para o início
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
-          </motion.div>
-        )}
+          </motion.div>}
 
         {/* Hero Section - Only show if not in PWA */}
-        {!isPWA && (
-          <motion.div initial={{
+        {!isPWA && <motion.div initial={{
         opacity: 0,
         y: 20
       }} animate={{
@@ -186,23 +190,25 @@ const Install = () => {
               Baixe o App
             </h1>
             <p className="text-muted-foreground mt-2 text-base">
-              O SOCCER VITAE funciona como um aplicativo instalado no seu celular. Siga as instruções abaixo para adicionar à sua tela inicial.
+                 Siga as instruções abaixo para fazer seu cadastro   
             </p>
           </motion.div>
 
           {/* Alert Box */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6 }}
-            className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          scale: 0.95
+        }} animate={{
+          opacity: 1,
+          scale: 1
+        }} transition={{
+          delay: 0.6
+        }} className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4">
             <p className="text-amber-600 dark:text-amber-400 text-sm font-medium text-center">
               ⚠️ O login só está disponível dentro do aplicativo instalado
             </p>
           </motion.div>
-        </motion.div>
-        )}
+        </motion.div>}
 
         {/* Interactive Checklist for Signup Flow */}
         {fromSignup && !isPWA && <motion.div initial={{
