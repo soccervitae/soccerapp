@@ -143,33 +143,6 @@ const Landing = () => {
                   A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal.
                 </p>
               </div>
-              
-              <div className="flex gap-3 z-10 mt-4">
-                <Button
-                  onClick={() => navigate("/auth")}
-                  className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-6 h-12 rounded-full"
-                >
-                  Criar Perfil Grátis
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="py-8 px-4">
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            <div className="flex flex-col items-center">
-              <span className="text-[#1cb15c] text-4xl font-black">50k+</span>
-              <span className="text-white/60 text-sm">Atletas</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[#1cb15c] text-4xl font-black">2k+</span>
-              <span className="text-white/60 text-sm">Clubes</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[#1cb15c] text-4xl font-black">500+</span>
-              <span className="text-white/60 text-sm">Olheiros</span>
             </div>
           </div>
         </section>
