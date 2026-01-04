@@ -63,7 +63,7 @@ const Landing = () => {
   }, {
     icon: MapPin,
     title: "Localização",
-    description: "Adicione localização às suas publicações para mostrar onde você está jogando."
+    description: "Adicione localização às suas publicações para mostrar onde você está jogando, treinando ou resenhando."
   }, {
     icon: Lock,
     title: "Privacidade",
