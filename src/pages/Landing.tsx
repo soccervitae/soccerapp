@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Heart, Share2, MapPin } from "lucide-react";
+import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Share2, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import logoText from "@/assets/soccervitae-logo-text.png";
+import clappingFilledGreen from "@/assets/clapping-filled-green.png";
 const Landing = () => {
   const navigate = useNavigate();
   const features = [{
@@ -51,7 +52,8 @@ const Landing = () => {
     title: "Notificações",
     description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
   }, {
-    icon: Heart,
+    icon: null,
+    customIcon: clappingFilledGreen,
     title: "Aplausos",
     description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
   }, {
@@ -136,7 +138,11 @@ const Landing = () => {
               type: "spring",
               stiffness: 300
             }}>
-                  <feature.icon className="w-6 h-6 text-[#1cb15c]" />
+                  {feature.customIcon ? (
+                    <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
+                  ) : (
+                    <feature.icon className="w-6 h-6 text-[#1cb15c]" />
+                  )}
                 </motion.div>
                 <h3 className="text-white text-lg font-bold">{feature.title}</h3>
                 <p className="text-white/60 text-sm">
