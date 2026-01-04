@@ -85,6 +85,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
       let query = supabase
         .from("profiles")
         .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
+        .eq("profile_completed", true)
         .order("full_name");
 
       // Search by name or username
@@ -121,6 +122,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
+        .eq("profile_completed", true)
         .neq("id", currentUserId || "")
         .order("conta_verificada", { ascending: false })
         .limit(20);
