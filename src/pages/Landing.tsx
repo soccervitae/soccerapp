@@ -40,7 +40,7 @@ const Landing = () => {
     },
     {
       icon: Camera,
-      title: "Replays",
+      title: "Replays (Stories)",
       description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas para seus torcedores."
     },
     {
