@@ -216,7 +216,7 @@ return <section className="flex flex-col items-center gap-4">
         <p className="text-muted-foreground font-medium text-sm">
           {(() => {
             // For technical staff, show position (function), for athletes also show position
-            const displayRole = profile.position;
+            const displayRole = profile.position_name;
             if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
             return displayRole || profile.team || `@${profile.username}`;
           })()}
