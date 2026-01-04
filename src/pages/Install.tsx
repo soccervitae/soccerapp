@@ -281,64 +281,8 @@ const Install = () => {
             </motion.div>)}
         </motion.div>
 
-        {/* Login Notice - Show when not from signup */}
-        {!fromSignup && <motion.div initial={{
-        opacity: 0,
-        y: 10
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        delay: 0.65
-      }} className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Smartphone className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="font-medium text-amber-700 dark:text-amber-300 text-sm">
-                Login apenas no app instalado
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Para sua segurança, o login só funciona após instalar o aplicativo na sua tela inicial.
-              </p>
-            </div>
-          </div>
-        </motion.div>}
-
         {/* Direct Install Button - Only show for Android/Chrome, not iOS */}
-        <AnimatePresence>
-          {isInstallable && !isInstalled && deviceType !== "ios" && <motion.div initial={{
-          opacity: 0,
-          scale: 0.9
-        }} animate={{
-          opacity: 1,
-          scale: 1
-        }} exit={{
-          opacity: 0,
-          scale: 0.9
-        }} className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-5 text-primary-foreground shadow-lg shadow-primary/20">
-              <div className="flex items-center gap-4 mb-4">
-                <motion.div animate={{
-              rotate: [0, 10, -10, 0]
-            }} transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              repeatDelay: 2
-            }} className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Download className="w-6 h-6" />
-                </motion.div>
-                <div>
-                  <p className="font-semibold">Instalação rápida</p>
-                  <p className="text-sm opacity-90">Um toque para instalar</p>
-                </div>
-              </div>
-              <Button onClick={handleInstall} className="w-full bg-white text-primary hover:bg-white/90 font-semibold" size="lg">
-                <Download className="w-4 h-4 mr-2" />
-                Instalar Agora
-              </Button>
-            </motion.div>}
-        </AnimatePresence>
+        
 
         {isInstalled && <motion.div initial={{
         opacity: 0,
