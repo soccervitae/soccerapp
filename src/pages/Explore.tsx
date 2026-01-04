@@ -95,10 +95,11 @@ const Explore = () => {
                   <h3 className="font-semibold text-foreground text-sm truncate">
                     {profile.full_name || profile.username}
                   </h3>
-                  {profile.position && (
+                  {(profile.position_name || profile.team) && (
                     <span className="text-xs text-primary font-medium">
-                      {profile.position}
-                      {profile.team && ` • ${profile.team}`}
+                      {profile.position_name}
+                      {profile.position_name && profile.team && ` • `}
+                      {profile.team}
                     </span>
                   )}
                 </div>
