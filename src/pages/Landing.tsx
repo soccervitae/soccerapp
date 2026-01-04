@@ -3,10 +3,13 @@ import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Use
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
+
 const Landing = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const features = [{
     icon: User,
     title: "Perfil",
@@ -161,10 +164,17 @@ const Landing = () => {
             <p className="text-white/60 mb-8">
               Junte-se a milhares de jogadores e comece sua jornada profissional hoje.
             </p>
-            <Button onClick={() => navigate("/install")} className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full">
-              Baixar App
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </Button>
+            {isMobile ? (
+              <Button onClick={() => navigate("/install")} className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full">
+                Baixar App
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            ) : (
+              <Button onClick={() => navigate("/auth")} className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full">
+                Cadastrar
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            )}
           </div>
         </section>
 
