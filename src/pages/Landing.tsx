@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Share2, MapPin } from "lucide-react";
+import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -57,7 +57,7 @@ const Landing = () => {
     title: "Aplausos",
     description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
   }, {
-    icon: Share2,
+    icon: Send,
     title: "Compartilhamento",
     description: "Envie posts, perfis e destaques diretamente para conversas ou redes sociais externas."
   }, {
