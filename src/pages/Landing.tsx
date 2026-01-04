@@ -52,7 +52,7 @@ const Landing = () => {
     description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
   }, {
     icon: Heart,
-    title: "Curtidas e Aplausos",
+    title: "Aplausos",
     description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
   }, {
     icon: Share2,
