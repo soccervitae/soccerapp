@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import logoText from "@/assets/soccervitae-logo-text.png";
-import clappingFilledGreen from "@/assets/clapping-filled-green.png";
+import clappingLanding from "@/assets/clapping-landing.png";
 const Landing = () => {
   const navigate = useNavigate();
   const features = [{
@@ -53,7 +53,7 @@ const Landing = () => {
     description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
   }, {
     icon: null,
-    customIcon: clappingFilledGreen,
+    customIcon: clappingLanding,
     title: "Aplausos",
     description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
   }, {
