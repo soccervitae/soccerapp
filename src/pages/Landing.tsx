@@ -59,7 +59,7 @@ const Landing = () => {
   }, {
     icon: Send,
     title: "Compartilhamento",
-    description: "Envie posts, perfis e destaques diretamente para conversas ou redes sociais externas."
+    description: "Envie posts, perfis e destaques diretamente para conversas."
   }, {
     icon: MapPin,
     title: "Localização",
