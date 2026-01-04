@@ -1,8 +1,9 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
@@ -10,6 +11,11 @@ import clappingLanding from "@/assets/clapping-landing.png";
 const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const heroRef = useRef<HTMLElement>(null);
+  
+  const { scrollY } = useScroll();
+  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
+  const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
   const features = [{
     icon: User,
     title: "Perfil",
@@ -80,26 +86,38 @@ const Landing = () => {
       
       <div className="min-h-screen bg-[#102216] text-white font-sans">
 
-        {/* Hero Section */}
-        <section className="w-full">
-          <div>
-            <div className="relative flex min-h-[320px] flex-col gap-6 md:gap-8 items-center justify-center p-4 overflow-hidden bg-cover bg-center bg-no-repeat" style={{
-            backgroundImage: `linear-gradient(to top, rgba(16, 34, 22, 1) 0%, rgba(16, 34, 22, 0.6) 40%, rgba(16, 34, 22, 0.2) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDT2pTn64tn7UxRaCLdSIqqE1y1Z0AYtCLNTzIggqae4i-MIj4O3l7tX9caZtZ7ZqPJ9QY47044d0PP8IK4sV2NLRz7RxAWknfxoUNw7M8eVGGAGOW7fPI0iPg6KxJ71fbDC5TH4Qt0Q4T-BEbTrHCkhmwDXJi05EtfmMPuOaMIHy7Z09KCn6Z5BtGiShd8QAjXzkpNoVOx_AWfXpZ-5gYFtHpXhhNDtbJ1MBjtiTDfcGIth28u2rz08qXv_bZgIe8pxPwJnzQvf4E")`
-          }}>
-              <div className="flex flex-col gap-4 text-center z-10 max-w-[600px]">
-                <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
-                  Jogue.
-                  <br />
-                  Brilhe.
-                  <br />
-                  Conquiste.
-                </h1>
-                <p className="text-white/80 text-base md:text-lg">
-                  Mostre seu talento e conecte-se com o mundo do futebol.
-                </p>
-              </div>
+        {/* Hero Section with Parallax */}
+        <section ref={heroRef} className="w-full relative overflow-hidden min-h-[320px] md:min-h-[400px]">
+          {/* Parallax Background */}
+          <motion.div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuDT2pTn64tn7UxRaCLdSIqqE1y1Z0AYtCLNTzIggqae4i-MIj4O3l7tX9caZtZ7ZqPJ9QY47044d0PP8IK4sV2NLRz7RxAWknfxoUNw7M8eVGGAGOW7fPI0iPg6KxJ71fbDC5TH4Qt0Q4T-BEbTrHCkhmwDXJi05EtfmMPuOaMIHy7Z09KCn6Z5BtGiShd8QAjXzkpNoVOx_AWfXpZ-5gYFtHpXhhNDtbJ1MBjtiTDfcGIth28u2rz08qXv_bZgIe8pxPwJnzQvf4E")`,
+              y: backgroundY,
+              scale: 1.1,
+            }}
+          />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#102216] via-[#102216]/60 to-[#102216]/20" />
+          
+          {/* Content */}
+          <motion.div 
+            className="relative flex min-h-[320px] md:min-h-[400px] flex-col gap-6 md:gap-8 items-center justify-center p-4"
+            style={{ opacity }}
+          >
+            <div className="flex flex-col gap-4 text-center z-10 max-w-[600px]">
+              <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+                Jogue.
+                <br />
+                Brilhe.
+                <br />
+                Conquiste.
+              </h1>
+              <p className="text-white/80 text-base md:text-lg">
+                Mostre seu talento e conecte-se com o mundo do futebol.
+              </p>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Features Section */}
