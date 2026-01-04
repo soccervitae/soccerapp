@@ -8,19 +8,16 @@ import { useSearchProfiles, usePopularProfiles } from "@/hooks/useSearchProfiles
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { ExploreSkeleton } from "@/components/skeletons/ExploreSkeleton";
 
-const positions = ["Todos", "Goleiro", "Lateral", "Zagueiro", "Volante", "Meia", "Atacante"];
-
 const Explore = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPosition, setSelectedPosition] = useState("Todos");
 
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
-  const isSearchActive = debouncedQuery.trim().length > 0 || selectedPosition !== "Todos";
+  const isSearchActive = debouncedQuery.trim().length > 0;
 
   const { data: searchResults, isLoading: isSearchLoading } = useSearchProfiles(
-    { query: debouncedQuery, position: selectedPosition },
+    { query: debouncedQuery },
     user?.id
   );
 
@@ -63,25 +60,6 @@ const Explore = () => {
           />
         </div>
       </header>
-
-      {/* Position Filters */}
-      <div className="px-4 py-3 overflow-x-auto">
-        <div className="flex gap-2">
-          {positions.map((position) => (
-            <button
-              key={position}
-              onClick={() => setSelectedPosition(position)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                selectedPosition === position
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {position}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Section Title */}
       {!isSearchActive && (
@@ -129,9 +107,7 @@ const Explore = () => {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {searchQuery || selectedPosition !== "Todos"
-                  ? "Nenhum atleta encontrado"
-                  : "Comece a buscar atletas"}
+                {searchQuery ? "Nenhum atleta encontrado" : "Comece a buscar atletas"}
               </p>
             </div>
           )}

@@ -994,7 +994,7 @@ export type Database = {
           onboarding_completed: boolean | null
           password_reset_code: string | null
           password_reset_expires_at: string | null
-          position: string | null
+          position: number | null
           preferred_foot: string | null
           profile_completed: boolean | null
           role: string | null
@@ -1037,7 +1037,7 @@ export type Database = {
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
-          position?: string | null
+          position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null
@@ -1080,7 +1080,7 @@ export type Database = {
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
-          position?: string | null
+          position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null

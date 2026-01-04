@@ -19,7 +19,7 @@ export interface Profile {
   avatar_url: string | null;
   cover_url: string | null;
   bio: string | null;
-  position: string | null;
+  position: number | null;
   team: string | null;
   height: number | null;
   weight: number | null;

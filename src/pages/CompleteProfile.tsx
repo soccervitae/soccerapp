@@ -97,7 +97,7 @@ const CompleteProfile = () => {
       if (profile.gender) setGender(profile.gender);
       if (profile.role) setProfileType(profile.role);
       if (profile.birth_date) setBirthDate(profile.birth_date);
-      if (profile.position) setPosition(profile.position);
+      if (profile.position) setPosition(profile.position.toString());
       if (profile.height) setHeight(profile.height.toString());
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
@@ -176,7 +176,7 @@ const CompleteProfile = () => {
 
       // Add athlete-specific fields only for athletes
       if (isAthlete) {
-        updateData.position = position;
+        updateData.position = Number(position);
         updateData.height = Number(height);
         updateData.weight = Number(weight);
         updateData.preferred_foot = preferredFoot;
@@ -184,7 +184,7 @@ const CompleteProfile = () => {
 
       // Add staff-specific fields only for technical staff
       if (isStaff) {
-        updateData.position = staffFunction; // Store function in position field
+        updateData.position = Number(staffFunction); // Store function ID in position field
       }
 
       const { error } = await supabase
@@ -328,7 +328,7 @@ const CompleteProfile = () => {
               </SelectTrigger>
               <SelectContent>
                 {positions.map((pos) => (
-                  <SelectItem key={pos.id} value={pos.name}>
+                  <SelectItem key={pos.id} value={pos.id.toString()}>
                     {pos.name}
                   </SelectItem>
                 ))}
@@ -352,7 +352,7 @@ const CompleteProfile = () => {
               </SelectTrigger>
               <SelectContent>
                 {functions.map((func) => (
-                  <SelectItem key={func.id} value={func.name}>
+                  <SelectItem key={func.id} value={func.id.toString()}>
                     {func.name}
                   </SelectItem>
                 ))}

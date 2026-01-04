@@ -45,6 +45,32 @@ const EditProfile = () => {
     },
   });
 
+  // Fetch positions based on gender
+  const { data: positions = [] } = useQuery({
+    queryKey: ['positions', profile?.gender],
+    queryFn: async () => {
+      const isFemale = profile?.gender === 'mulher' || profile?.gender === 'feminino' || profile?.gender === 'female';
+      const table = isFemale ? 'posicao_feminina' : 'posicao_masculina';
+      const { data, error } = await supabase.from(table).select('id, name').order('name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.gender,
+  });
+
+  // Fetch functions based on gender (for technical staff)
+  const { data: functions = [] } = useQuery({
+    queryKey: ['functions', profile?.gender],
+    queryFn: async () => {
+      const isFemale = profile?.gender === 'mulher' || profile?.gender === 'feminino' || profile?.gender === 'female';
+      const table = isFemale ? 'funcao_feminina' : 'funcao';
+      const { data, error } = await supabase.from(table).select('id, name').order('name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.gender,
+  });
+
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,7 +216,7 @@ const EditProfile = () => {
         full_name: profile.full_name || "",
         username: profile.username || "",
         bio: profile.bio || "",
-        position: profile.position || "",
+        position: profile.position?.toString() || "",
         role: isComissaoTecnica ? 'comissao_tecnica' : "",
         team: profile.team || "",
         height: profile.height?.toString() || "",
@@ -404,7 +430,7 @@ const EditProfile = () => {
         full_name: formData.full_name || null,
         username: formData.username,
         bio: formData.bio || null,
-        position: formData.position || null,
+        position: formData.position ? Number(formData.position) : null,
         role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
         team: formData.team || null,
         height: formData.height ? Number(formData.height) : null,
@@ -661,12 +687,11 @@ const EditProfile = () => {
                   <SelectValue placeholder="Selecione a função" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Treinador">Treinador</SelectItem>
-                  <SelectItem value="Auxiliar Técnico">Auxiliar Técnico</SelectItem>
-                  <SelectItem value="Preparador Físico">Preparador Físico</SelectItem>
-                  <SelectItem value="Preparador de Goleiro">Preparador de Goleiro</SelectItem>
-                  <SelectItem value="Massagista">Massagista</SelectItem>
-                  <SelectItem value="Roupeiro">Roupeiro</SelectItem>
+                  {functions.map((func) => (
+                    <SelectItem key={func.id} value={func.id.toString()}>
+                      {func.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             ) : (
@@ -678,16 +703,11 @@ const EditProfile = () => {
                   <SelectValue placeholder="Selecione a posição" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Goleiro">Goleiro</SelectItem>
-                  <SelectItem value="Zagueiro">Zagueiro</SelectItem>
-                  <SelectItem value="Lateral Direito">Lateral Direito</SelectItem>
-                  <SelectItem value="Lateral Esquerdo">Lateral Esquerdo</SelectItem>
-                  <SelectItem value="Volante">Volante</SelectItem>
-                  <SelectItem value="Meio-campo Central">Meio-campo Central</SelectItem>
-                  <SelectItem value="Meia Atacante">Meia Atacante</SelectItem>
-                  <SelectItem value="Ponta Direita">Ponta Direita</SelectItem>
-                  <SelectItem value="Ponta Esquerda">Ponta Esquerda</SelectItem>
-                  <SelectItem value="Centroavante">Centroavante</SelectItem>
+                  {positions.map((pos) => (
+                    <SelectItem key={pos.id} value={pos.id.toString()}>
+                      {pos.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

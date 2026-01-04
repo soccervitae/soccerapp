@@ -44,7 +44,7 @@ export interface Post {
     full_name: string | null;
     nickname: string | null;
     avatar_url: string | null;
-    position: string | null;
+    position: number | null;
     team: string | null;
     conta_verificada: boolean;
   };
