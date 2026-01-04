@@ -194,20 +194,6 @@ const Install = () => {
             </p>
           </motion.div>
 
-          {/* Alert Box */}
-          <motion.div initial={{
-          opacity: 0,
-          scale: 0.95
-        }} animate={{
-          opacity: 1,
-          scale: 1
-        }} transition={{
-          delay: 0.6
-        }} className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4">
-            <p className="text-amber-600 dark:text-amber-400 text-sm font-medium text-center">
-              ⚠️ O login só está disponível dentro do aplicativo instalado
-            </p>
-          </motion.div>
         </motion.div>}
 
         {/* Interactive Checklist for Signup Flow */}
