@@ -159,16 +159,6 @@ const Install = () => {
             </div>
           </motion.div>
 
-          {/* Logo */}
-          <motion.div initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          delay: 0.4
-        }}>
-            <img src={logoText} alt="SOCCER VITAE" className="h-8 mx-auto dark:invert" />
-          </motion.div>
 
           {/* Main Message */}
           <motion.div initial={{
