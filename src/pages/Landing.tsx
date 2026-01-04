@@ -17,7 +17,10 @@ import {
   Camera, 
   Heart,
   Share2,
-  MapPin
+  MapPin,
+  UserPlus,
+  Sparkles,
+  Rocket
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -182,6 +185,75 @@ const Landing = () => {
             <div className="flex flex-col items-center">
               <span className="text-[#1cb15c] text-4xl font-black">500+</span>
               <span className="text-white/60 text-sm">Olheiros</span>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-16 px-4 max-w-7xl mx-auto">
+          <div className="flex flex-col gap-4 mb-12 text-center">
+            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+              Como Funciona
+            </p>
+            <h2 className="text-white text-3xl md:text-4xl font-black">
+              Comece sua jornada em 3 passos
+            </h2>
+            <p className="text-white/60 text-base max-w-[600px] mx-auto">
+              É simples e rápido começar a usar a Soccer Vitae e conectar-se com a comunidade do futebol.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <div className="relative flex flex-col items-center text-center gap-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-[#1cb15c]/20 flex items-center justify-center border-2 border-[#1cb15c]">
+                  <UserPlus className="w-10 h-10 text-[#1cb15c]" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#1cb15c] flex items-center justify-center text-white font-bold text-sm">
+                  1
+                </div>
+              </div>
+              <h3 className="text-white text-xl font-bold">Crie sua Conta</h3>
+              <p className="text-white/60 text-sm max-w-[280px]">
+                Cadastre-se gratuitamente com seu e-mail. É rápido e você já pode começar a explorar a plataforma.
+              </p>
+              {/* Connector line for desktop */}
+              <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#1cb15c] to-[#1cb15c]/30" />
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative flex flex-col items-center text-center gap-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-[#1cb15c]/20 flex items-center justify-center border-2 border-[#1cb15c]">
+                  <Sparkles className="w-10 h-10 text-[#1cb15c]" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#1cb15c] flex items-center justify-center text-white font-bold text-sm">
+                  2
+                </div>
+              </div>
+              <h3 className="text-white text-xl font-bold">Complete seu Perfil</h3>
+              <p className="text-white/60 text-sm max-w-[280px]">
+                Adicione sua foto, posição, times, conquistas e destaques. Quanto mais completo, mais visibilidade você terá.
+              </p>
+              {/* Connector line for desktop */}
+              <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#1cb15c] to-[#1cb15c]/30" />
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative flex flex-col items-center text-center gap-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-[#1cb15c]/20 flex items-center justify-center border-2 border-[#1cb15c]">
+                  <Rocket className="w-10 h-10 text-[#1cb15c]" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#1cb15c] flex items-center justify-center text-white font-bold text-sm">
+                  3
+                </div>
+              </div>
+              <h3 className="text-white text-xl font-bold">Conecte-se e Conquiste</h3>
+              <p className="text-white/60 text-sm max-w-[280px]">
+                Siga atletas, publique conteúdo, converse com olheiros e mostre seu talento para o mundo do futebol.
+              </p>
             </div>
           </div>
         </section>
