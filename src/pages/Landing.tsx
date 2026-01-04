@@ -149,7 +149,7 @@ const Landing = () => {
 
         {/* Features Section */}
         <section className="py-8 px-4 max-w-7xl mx-auto">
-          <div className="flex flex-col gap-4 mb-12">
+          <div className="flex flex-col items-center text-center gap-4 mb-12">
             <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
