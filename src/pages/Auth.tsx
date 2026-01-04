@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRequirePwa } from "@/hooks/useRequirePwa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,6 +103,14 @@ const Auth = () => {
   const [socialError, setSocialError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { shouldBlockAccess, isLoading: pwaLoading } = useRequirePwa();
+
+  // Redirect mobile browser users to install page
+  useEffect(() => {
+    if (!pwaLoading && shouldBlockAccess) {
+      navigate("/install", { replace: true });
+    }
+  }, [shouldBlockAccess, pwaLoading, navigate]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -109,6 +118,15 @@ const Auth = () => {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
+
+  // Show loader while checking PWA status
+  if (pwaLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
