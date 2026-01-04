@@ -174,7 +174,7 @@ const Landing = () => {
         <section className="w-full">
           <div className="p-0 md:p-4">
             <div
-              className="relative flex min-h-[560px] flex-col gap-6 md:gap-8 md:rounded-xl items-center justify-center pt-16 p-4 overflow-hidden bg-cover bg-center bg-no-repeat"
+              className="relative flex min-h-[560px] flex-col gap-6 md:gap-8 md:rounded-xl items-center justify-end pb-12 p-4 overflow-hidden bg-cover bg-center bg-no-repeat"
               style={{
                 backgroundImage: `linear-gradient(to top, rgba(16, 34, 22, 1) 0%, rgba(16, 34, 22, 0.6) 40%, rgba(16, 34, 22, 0.2) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDT2pTn64tn7UxRaCLdSIqqE1y1Z0AYtCLNTzIggqae4i-MIj4O3l7tX9caZtZ7ZqPJ9QY47044d0PP8IK4sV2NLRz7RxAWknfxoUNw7M8eVGGAGOW7fPI0iPg6KxJ71fbDC5TH4Qt0Q4T-BEbTrHCkhmwDXJi05EtfmMPuOaMIHy7Z09KCn6Z5BtGiShd8QAjXzkpNoVOx_AWfXpZ-5gYFtHpXhhNDtbJ1MBjtiTDfcGIth28u2rz08qXv_bZgIe8pxPwJnzQvf4E")`
               }}
@@ -384,7 +384,7 @@ const Landing = () => {
             </p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={() => navigate("/install")}
+                onClick={() => navigate("/auth")}
                 className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full"
               >
                 Baixar App
