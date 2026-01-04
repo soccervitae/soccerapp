@@ -140,7 +140,7 @@ const Landing = () => {
                   Conquiste.
                 </h1>
                 <p className="text-white/80 text-base md:text-lg">
-                  A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal.
+                  A rede social definitiva para atletas mostrarem seu talento e encontrarem o time ideal.
                 </p>
               </div>
             </div>
