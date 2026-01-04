@@ -126,7 +126,7 @@ const Landing = () => {
         <section className="w-full">
           <div className="p-0 md:p-4">
             <div
-              className="relative flex min-h-[480px] flex-col gap-6 md:gap-8 md:rounded-xl items-center justify-center p-4 overflow-hidden bg-cover bg-center bg-no-repeat"
+              className="relative flex min-h-[320px] flex-col gap-6 md:gap-8 md:rounded-xl items-center justify-center p-4 overflow-hidden bg-cover bg-center bg-no-repeat"
               style={{
                 backgroundImage: `linear-gradient(to top, rgba(16, 34, 22, 1) 0%, rgba(16, 34, 22, 0.6) 40%, rgba(16, 34, 22, 0.2) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDT2pTn64tn7UxRaCLdSIqqE1y1Z0AYtCLNTzIggqae4i-MIj4O3l7tX9caZtZ7ZqPJ9QY47044d0PP8IK4sV2NLRz7RxAWknfxoUNw7M8eVGGAGOW7fPI0iPg6KxJ71fbDC5TH4Qt0Q4T-BEbTrHCkhmwDXJi05EtfmMPuOaMIHy7Z09KCn6Z5BtGiShd8QAjXzkpNoVOx_AWfXpZ-5gYFtHpXhhNDtbJ1MBjtiTDfcGIth28u2rz08qXv_bZgIe8pxPwJnzQvf4E")`
               }}
@@ -148,7 +148,7 @@ const Landing = () => {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 px-4 max-w-7xl mx-auto">
+        <section className="py-8 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col gap-4 mb-12">
             <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
               Recursos Principais
