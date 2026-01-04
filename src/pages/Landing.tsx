@@ -9,7 +9,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const features = [{
     icon: User,
-    title: "Perfil Profissional",
+    title: "Perfil",
     description: "Crie seu perfil completo com ano, posição, altura, peso, perna predominante e histórico de clubes."
   }, {
     icon: Newspaper,
