@@ -196,6 +196,20 @@ const Landing = () => {
                   A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal.
                 </p>
               </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="flex gap-3 z-10"
+              >
+                <Button
+                  onClick={() => navigate("/auth")}
+                  className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-6 h-12 rounded-full"
+                >
+                  Criar Perfil Grátis
+                </Button>
+              </motion.div>
             </div>
           </div>
         </section>
