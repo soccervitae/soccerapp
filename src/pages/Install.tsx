@@ -172,10 +172,22 @@ const Install = () => {
           delay: 0.5
         }}>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Instale o App
+              Baixe o App para Continuar
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Para continuar, adicione à sua tela inicial e faça o login novamente     
+            <p className="text-muted-foreground mt-2 text-base">
+              O Soccer Vitae funciona como um aplicativo instalado no seu celular. Siga as instruções abaixo para adicionar à sua tela inicial.
+            </p>
+          </motion.div>
+
+          {/* Alert Box */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6 }}
+            className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4"
+          >
+            <p className="text-amber-600 dark:text-amber-400 text-sm font-medium text-center">
+              ⚠️ O login só está disponível dentro do aplicativo instalado
             </p>
           </motion.div>
         </motion.div>
@@ -416,15 +428,20 @@ const Install = () => {
         </motion.div>
 
         {/* Footer Message */}
-        <motion.p initial={{
+        <motion.div initial={{
         opacity: 0
       }} animate={{
         opacity: 1
       }} transition={{
         delay: 1
-      }} className="text-center text-xs text-muted-foreground pb-4">
-          Após instalar, abra o app pela tela inicial
-        </motion.p>
+      }} className="text-center pb-4 space-y-2">
+          <p className="text-sm font-medium text-foreground">
+            📱 Abra o app pela sua tela inicial após instalar
+          </p>
+          <p className="text-xs text-muted-foreground">
+            O aplicativo ficará salvo como um ícone no seu celular
+          </p>
+        </motion.div>
       </div>
     </div>;
 };
