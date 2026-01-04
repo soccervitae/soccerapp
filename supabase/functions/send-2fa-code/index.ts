@@ -25,9 +25,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verificar se a API key está configurada
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY não está configurada");
+      return new Response(
+        JSON.stringify({ error: "Serviço de email não configurado" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     const { email, user_id }: TwoFactorRequest = await req.json();
 
     if (!email || !user_id) {
+      console.error("Email ou user_id não fornecidos");
       return new Response(
         JSON.stringify({ error: "Email e user_id são obrigatórios" }),
         {
@@ -36,6 +49,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+
+    console.log("Enviando código 2FA para:", email);
 
     // Generate 6-digit code
     const code = generateCode();
@@ -73,6 +88,8 @@ const handler = async (req: Request): Promise<Response> => {
     const emailParts = email.split("@");
     const maskedEmail = emailParts[0].substring(0, 3) + "***@" + emailParts[1];
 
+    console.log("Tentando enviar email via Resend para:", email);
+
     // Send email with the code using Resend API
     const emailHtml = `
       <!DOCTYPE html>
@@ -85,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="max-width: 480px; margin: 0 auto; padding: 40px 20px;">
           <div style="background-color: #ffffff; border-radius: 16px; padding: 40px 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
             <div style="text-align: center; margin-bottom: 32px;">
-              <h1 style="margin: 0; font-size: 28px; color: #18181b;">⚽ SportConnect</h1>
+              <h1 style="margin: 0; font-size: 28px; color: #18181b;">⚽ SOCCER VITAE</h1>
             </div>
             
             <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #18181b; text-align: center;">
@@ -112,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <p style="margin: 24px 0 0; font-size: 12px; color: #a1a1aa; text-align: center;">
-            © ${new Date().getFullYear()} SportConnect. Todos os direitos reservados.
+            © ${new Date().getFullYear()} SOCCER VITAE. Todos os direitos reservados.
           </p>
         </div>
       </body>
@@ -126,20 +143,31 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SportConnect <onboarding@resend.dev>",
+        from: "SOCCER VITAE <onboarding@resend.dev>",
         to: [email],
-        subject: "Código de Verificação - SportConnect",
+        subject: "Código de Verificação - SOCCER VITAE",
         html: emailHtml,
       }),
     });
 
+    const responseData = await emailResponse.json();
+    console.log("Resposta do Resend:", JSON.stringify(responseData));
+
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error("Error sending email:", errorData);
-      throw new Error("Failed to send email");
+      console.error("Erro ao enviar email:", responseData);
+      return new Response(
+        JSON.stringify({ 
+          error: "Erro ao enviar email de verificação",
+          details: responseData.message || "Verifique se o domínio está verificado no Resend"
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
-    console.log("2FA email sent successfully");
+    console.log("Email 2FA enviado com sucesso! ID:", responseData.id);
 
     return new Response(
       JSON.stringify({ 
@@ -155,7 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-2fa-code function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Erro interno do servidor" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
