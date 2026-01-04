@@ -16,7 +16,7 @@ const Landing = () => {
     description: "Compartilhe fotos e vídeos da sua carreira, treinos conquistas e as resenhas."
   }, {
     icon: Camera,
-    title: "Replays (Stories)",
+    title: "Replays",
     description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas para seus torcedores."
   }, {
     icon: Film,
