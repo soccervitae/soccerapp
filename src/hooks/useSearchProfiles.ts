@@ -86,6 +86,8 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
         .from("profiles")
         .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
         .eq("profile_completed", true)
+        .not("avatar_url", "is", null)
+        .neq("avatar_url", "")
         .order("full_name");
 
       // Search by name or username
@@ -123,6 +125,8 @@ export const usePopularProfiles = (currentUserId?: string) => {
         .from("profiles")
         .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
         .eq("profile_completed", true)
+        .not("avatar_url", "is", null)
+        .neq("avatar_url", "")
         .neq("id", currentUserId || "")
         .order("conta_verificada", { ascending: false })
         .limit(20);
