@@ -273,7 +273,7 @@ export const FeedPost = ({
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
             </div>
-            {post.profile.position && <p className="text-xs text-muted-foreground">{post.profile.position}</p>}
+            {post.profile.position_name && <p className="text-xs text-muted-foreground">{post.profile.position_name}</p>}
           </div>
         </div>
         <div className="flex items-center gap-2">

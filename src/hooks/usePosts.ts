@@ -45,6 +45,7 @@ export interface Post {
     nickname: string | null;
     avatar_url: string | null;
     position: number | null;
+    position_name: string | null;
     team: string | null;
     conta_verificada: boolean;
   };
@@ -82,7 +83,10 @@ export const usePosts = () => {
             avatar_url,
             position,
             team,
-            conta_verificada
+            conta_verificada,
+            posicao:posicao_masculina!profiles_position_fkey (
+              name
+            )
           ),
           music_track:music_tracks (
             id,
@@ -157,6 +161,10 @@ export const usePosts = () => {
 
         return posts.map(post => ({
           ...post,
+          profile: {
+            ...post.profile,
+            position_name: (post.profile as any)?.posicao?.name || null,
+          },
           liked_by_user: likedPostIds.has(post.id),
           saved_by_user: savedPostIds.has(post.id),
           recent_likes: recentLikesByPost[post.id] || [],
@@ -165,6 +173,10 @@ export const usePosts = () => {
 
       return posts?.map(post => ({
         ...post,
+        profile: {
+          ...post.profile,
+          position_name: (post.profile as any)?.posicao?.name || null,
+        },
         liked_by_user: false,
         saved_by_user: false,
         recent_likes: recentLikesByPost[post.id] || [],
