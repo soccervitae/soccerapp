@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
-import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 type DeviceType = "ios" | "android" | "unknown";
 const useDeviceType = (): DeviceType => {
@@ -23,29 +22,13 @@ const useDeviceType = (): DeviceType => {
 const Install = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const {
-    isInstallable,
-    isInstalled,
-    promptInstall
-  } = usePwaInstall();
-  const {
-    isPWA
-  } = useRequirePwa();
-  const isMobile = useIsMobile();
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
+  const { isPWA } = useRequirePwa();
   const [activeStep, setActiveStep] = useState(0);
   const deviceType = useDeviceType();
   const fromSignup = searchParams.get("from") === "signup";
 
-  // Redirect desktop users to landing page (using real device detection, not viewport)
-  const isRealMobileDevice = useMemo(() => {
-    return /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  }, []);
-
-  useEffect(() => {
-    if (isRealMobileDevice === false) {
-      navigate("/", { replace: true });
-    }
-  }, [isRealMobileDevice, navigate]);
+  // Show installed message when PWA is detected (no auto-redirect)
 
   // Show installed message when PWA is detected (no auto-redirect)
 
