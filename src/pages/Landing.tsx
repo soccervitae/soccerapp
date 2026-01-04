@@ -170,25 +170,6 @@ const Landing = () => {
       </Helmet>
       
       <div className="min-h-screen bg-[#102216] text-white font-sans overflow-x-hidden">
-        {/* Header */}
-        <motion.header 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-between px-4 md:px-10 py-4 border-b border-white/10"
-        >
-          <div className="flex items-center gap-4">
-            <img src={logoText} alt="Soccer Vitae" className="h-8" />
-          </div>
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/auth")}
-            className="text-white hover:bg-white/10 font-medium"
-          >
-            Entrar
-          </Button>
-        </motion.header>
-
         {/* Hero Section */}
         <section className="w-full">
           <div className="p-0 md:p-4">
