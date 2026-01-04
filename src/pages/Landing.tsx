@@ -30,12 +30,12 @@ const Landing = () => {
   const features = [
     {
       icon: User,
-      title: "Perfil",
+      title: "Perfil Profissional",
       description: "Crie seu currículo esportivo completo com foto, posição, altura, peso, pé preferido e histórico de clubes."
     },
     {
       icon: Newspaper,
-      title: "Feed",
+      title: "Feed de Publicações",
       description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas com toda a comunidade."
     },
     {
