@@ -28,7 +28,7 @@ const Landing = () => {
     description: "Converse no chat com jogadores e treinadores que fazem parte da SOCCER VITAE e aumente sua rede de contatos."
   }, {
     icon: Shield,
-    title: "Histórico de Times",
+    title: "Times",
     description: "Adicione todos os clubes por onde passou e construa sua trajetória profissional completa."
   }, {
     icon: Trophy,
