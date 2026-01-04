@@ -1,30 +1,21 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useRequirePwa } from "@/hooks/useRequirePwa";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
 
 const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { isMobile: isMobileDevice, isPWA, isLoading } = useRequirePwa();
   const heroRef = useRef<HTMLElement>(null);
   
   const { scrollY } = useScroll();
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
-
-  // Redirect mobile users (not in PWA) to install page
-  useEffect(() => {
-    if (!isLoading && isMobileDevice && !isPWA) {
-      navigate("/install", { replace: true });
-    }
-  }, [isLoading, isMobileDevice, isPWA, navigate]);
   const features = [{
     icon: User,
     title: "Perfil",
