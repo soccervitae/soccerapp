@@ -202,7 +202,7 @@ const Landing = () => {
               Junte-se a milhares de jogadores e comece sua jornada profissional hoje.
             </p>
             <Button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/install")}
               className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full"
             >
               Baixar App
