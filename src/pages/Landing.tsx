@@ -29,7 +29,7 @@ const Landing = () => {
   }, {
     icon: Shield,
     title: "Times",
-    description: "Adicione todos os clubes por onde passou e construa sua trajetória profissional completa."
+    description: "Adicione todos os clubes por onde passou e construa sua trajetória completa."
   }, {
     icon: Trophy,
     title: "Campeonatos",
