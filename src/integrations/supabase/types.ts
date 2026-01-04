@@ -1103,6 +1103,13 @@ export type Database = {
             referencedRelation: "paises"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_position_fkey"
+            columns: ["position"]
+            isOneToOne: false
+            referencedRelation: "posicao_masculina"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reports: {
