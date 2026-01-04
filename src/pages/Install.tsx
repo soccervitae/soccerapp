@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket, CheckCircle } from "lucide-react";
+import { Download, Share, MoreVertical, Plus, Smartphone, Zap, Bell, Wifi, Rocket, CheckCircle, ChevronRight } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -47,14 +47,7 @@ const Install = () => {
     }
   }, [isRealMobileDevice, navigate]);
 
-  // Auto-redirect to home when PWA is detected
-  useEffect(() => {
-    if (isPWA) {
-      navigate("/", {
-        replace: true
-      });
-    }
-  }, [isPWA, navigate]);
+  // Show installed message when PWA is detected (no auto-redirect)
 
   // Animate through steps
   useEffect(() => {
@@ -130,8 +123,40 @@ const Install = () => {
       </div>
 
       <div className="flex-1 px-4 py-8 max-w-lg mx-auto space-y-6 relative z-10">
-        {/* Hero Section */}
-        <motion.div initial={{
+        {/* Already Installed Notice - Show when PWA is detected */}
+        {isPWA && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-6 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center"
+            >
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
+            </motion.div>
+            <h2 className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
+              Você já está no app!
+            </h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              O SOCCER VITAE está instalado e você está acessando pela tela inicial.
+            </p>
+            <Button
+              onClick={() => navigate("/")}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
+            >
+              Ir para o início
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* Hero Section - Only show if not in PWA */}
+        {!isPWA && (
+          <motion.div initial={{
         opacity: 0,
         y: 20
       }} animate={{
@@ -194,9 +219,10 @@ const Install = () => {
             </p>
           </motion.div>
         </motion.div>
+        )}
 
         {/* Interactive Checklist for Signup Flow */}
-        {fromSignup && <motion.div initial={{
+        {fromSignup && !isPWA && <motion.div initial={{
         opacity: 0,
         scale: 0.95
       }} animate={{
