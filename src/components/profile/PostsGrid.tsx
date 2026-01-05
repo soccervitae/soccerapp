@@ -146,6 +146,7 @@ export const PostsGrid = ({
   });
   const [expandedPost, setExpandedPost] = useState<Post | SavedPost | null>(null);
   const [isSavedPostsViewer, setIsSavedPostsViewer] = useState(false);
+  const [originRect, setOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -178,14 +179,23 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (post: Post) => {
+  const handlePostClick = (post: Post, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
     setExpandedPost(post);
     setIsSavedPostsViewer(false);
   };
 
-  const handleSavedPostClick = (post: SavedPost) => {
+  const handleSavedPostClick = (post: SavedPost, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
     setExpandedPost(post);
     setIsSavedPostsViewer(true);
+  };
+
+  const handleCloseExpanded = () => {
+    setExpandedPost(null);
+    setOriginRect(null);
   };
 
   const getMediaUrls = (mediaUrl: string | null): string[] => {
@@ -343,7 +353,7 @@ export const PostsGrid = ({
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={() => handlePostClick(post)}
+            onClick={(e) => handlePostClick(post, e)}
             aria-label="Abrir post"
           >
             {post.media_url ? (
@@ -418,7 +428,7 @@ export const PostsGrid = ({
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={() => handleSavedPostClick(post)}
+            onClick={(e) => handleSavedPostClick(post, e)}
             aria-label="Abrir post salvo"
           >
             {post.media_url ? (
@@ -576,32 +586,52 @@ export const PostsGrid = ({
 
       {/* Expanded Post Overlay */}
       <AnimatePresence>
-        {expandedPost && (
+        {expandedPost && originRect && (
           <motion.div
             className="fixed inset-0 z-[60] bg-background overflow-y-auto"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.2 }}
+            initial={{ 
+              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
+              opacity: 0.8
+            }}
+            animate={{ 
+              clipPath: "inset(0px 0px 0px 0px round 0px)",
+              opacity: 1
+            }}
+            exit={{ 
+              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
+              opacity: 0
+            }}
+            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
           >
             {/* Header with back button */}
-            <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3">
+            <motion.div 
+              className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.2 }}
+            >
               <button 
-                onClick={() => setExpandedPost(null)}
+                onClick={handleCloseExpanded}
                 className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
               >
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <span className="font-semibold">Post</span>
-            </div>
+            </motion.div>
             
             {/* Feed Post */}
-            <FeedPost 
-              post={isSavedPostsViewer 
-                ? transformSavedPostForViewer(expandedPost as SavedPost) 
-                : transformPostForViewer(expandedPost)
-              } 
-            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.25 }}
+            >
+              <FeedPost 
+                post={isSavedPostsViewer 
+                  ? transformSavedPostForViewer(expandedPost as SavedPost) 
+                  : transformPostForViewer(expandedPost)
+                } 
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
