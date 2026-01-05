@@ -306,11 +306,12 @@ const Messages = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex items-center gap-3"
+              className="flex items-center justify-between w-full"
             >
+              <h1 className="text-lg font-semibold">Mensagens</h1>
               <button
                 onClick={() => setShowArchived(true)}
-                className="p-1.5 -ml-1.5 hover:bg-muted rounded-full transition-colors relative"
+                className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
               >
                 <Archive className="w-5 h-5" />
                 {archivedConversations.length > 0 && (
@@ -319,7 +320,6 @@ const Messages = () => {
                   </span>
                 )}
               </button>
-              <h1 className="text-lg font-semibold">Mensagens</h1>
             </motion.div>
           )}
         </AnimatePresence>
