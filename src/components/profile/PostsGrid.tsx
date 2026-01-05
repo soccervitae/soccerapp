@@ -357,18 +357,14 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post, index) => (
-          <button
+        {filteredPosts.map((post) => (
+          <div
             key={post.id}
-            type="button"
-            data-embla-no-drag="true"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePostClick(e, post, filteredPosts, index)}
-            aria-label="Abrir post"
+            className="aspect-[4/5] bg-muted relative overflow-hidden"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
-                <div className="w-full h-full pointer-events-none">
+                <div className="w-full h-full">
                   <VideoThumbnail src={post.media_url} alt={post.content} />
                 </div>
               ) : post.media_type === "carousel" ? (
@@ -380,10 +376,10 @@ export const PostsGrid = ({
                         <img
                           src={urls[0]}
                           alt={post.content}
-                          className="w-full h-full object-cover pointer-events-none"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                        <div className="absolute top-2 right-2 pointer-events-none">
+                        <div className="absolute top-2 right-2">
                           <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
                         </div>
                       </>
@@ -393,7 +389,7 @@ export const PostsGrid = ({
                       <img
                         src={post.media_url}
                         alt={post.content}
-                        className="w-full h-full object-cover pointer-events-none"
+                        className="w-full h-full object-cover"
                         loading="lazy"
                       />
                     );
@@ -403,17 +399,16 @@ export const PostsGrid = ({
                 <img
                   src={post.media_url}
                   alt={post.content}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                 />
               )
             ) : (
-              <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
+              <div className="w-full h-full flex items-center justify-center p-2">
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
             )}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </button>
+          </div>
         ))}
       </div>
     );
