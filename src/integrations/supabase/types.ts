@@ -1027,6 +1027,8 @@ export type Database = {
           onboarding_completed: boolean | null
           password_reset_code: string | null
           password_reset_expires_at: string | null
+          posicaofem: number | null
+          posicaomas: number | null
           position: number | null
           preferred_foot: string | null
           profile_completed: boolean | null
@@ -1071,6 +1073,8 @@ export type Database = {
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
+          posicaofem?: number | null
+          posicaomas?: number | null
           position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
@@ -1115,6 +1119,8 @@ export type Database = {
           onboarding_completed?: boolean | null
           password_reset_code?: string | null
           password_reset_expires_at?: string | null
+          posicaofem?: number | null
+          posicaomas?: number | null
           position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
@@ -1136,6 +1142,20 @@ export type Database = {
             columns: ["nationality"]
             isOneToOne: false
             referencedRelation: "paises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_posicaofem_fkey"
+            columns: ["posicaofem"]
+            isOneToOne: false
+            referencedRelation: "posicao_feminina"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_posicaomas_fkey"
+            columns: ["posicaomas"]
+            isOneToOne: false
+            referencedRelation: "posicao_masculina"
             referencedColumns: ["id"]
           },
           {
