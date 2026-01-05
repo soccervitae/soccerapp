@@ -73,9 +73,14 @@ const Security = () => {
 
   // Delete account state
   const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+  const [showDeleteAccountEmailVerify, setShowDeleteAccountEmailVerify] = useState(false);
   const [showDeleteAccountFinalConfirm, setShowDeleteAccountFinalConfirm] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isSendingDeleteCode, setIsSendingDeleteCode] = useState(false);
+  const [isVerifyingDeleteCode, setIsVerifyingDeleteCode] = useState(false);
+  const [isResendingDeleteCode, setIsResendingDeleteCode] = useState(false);
+  const [deleteMaskedEmail, setDeleteMaskedEmail] = useState("");
 
   // Load current device fingerprint
   useEffect(() => {
@@ -441,6 +446,116 @@ const Security = () => {
         description: "Não foi possível desativar a verificação em duas etapas.",
       });
     }
+  };
+
+  // Send delete account verification code
+  const handleSendDeleteCode = async () => {
+    if (!user?.email || !user?.id) return;
+    setIsSendingDeleteCode(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-delete-account-code", {
+        body: {
+          email: user.email,
+          user_id: user.id,
+        },
+      });
+
+      if (error) throw error;
+
+      setDeleteMaskedEmail(data?.masked_email || user.email);
+      setShowDeleteAccountConfirm(false);
+      setShowDeleteAccountEmailVerify(true);
+    } catch (error) {
+      console.error("Error sending delete code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar código",
+        description: "Não foi possível enviar o código de confirmação.",
+      });
+    }
+
+    setIsSendingDeleteCode(false);
+  };
+
+  // Verify delete account code
+  const handleVerifyDeleteCode = async (code: string) => {
+    setIsVerifyingDeleteCode(true);
+
+    try {
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("codigo, codigo_expira_em")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) throw error;
+
+      if (profileData.codigo_expira_em && new Date(profileData.codigo_expira_em) < new Date()) {
+        toast({
+          variant: "destructive",
+          title: "Código expirado",
+          description: "Solicite um novo código de confirmação.",
+        });
+        setIsVerifyingDeleteCode(false);
+        return;
+      }
+
+      if (profileData.codigo !== code) {
+        toast({
+          variant: "destructive",
+          title: "Código inválido",
+          description: "O código informado não está correto.",
+        });
+        setIsVerifyingDeleteCode(false);
+        return;
+      }
+
+      // Code verified, proceed to final confirmation
+      setShowDeleteAccountEmailVerify(false);
+      setShowDeleteAccountFinalConfirm(true);
+    } catch (error) {
+      console.error("Error verifying delete code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro na verificação",
+        description: "Ocorreu um erro ao verificar o código.",
+      });
+    }
+
+    setIsVerifyingDeleteCode(false);
+  };
+
+  // Resend delete account code
+  const handleResendDeleteCode = async () => {
+    if (!user?.email || !user?.id) return;
+    setIsResendingDeleteCode(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-delete-account-code", {
+        body: {
+          email: user.email,
+          user_id: user.id,
+        },
+      });
+
+      if (error) throw error;
+
+      setDeleteMaskedEmail(data?.masked_email || user.email);
+      toast({
+        title: "Código reenviado!",
+        description: "Verifique sua caixa de entrada.",
+      });
+    } catch (error) {
+      console.error("Error resending delete code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao reenviar",
+        description: "Não foi possível reenviar o código.",
+      });
+    }
+
+    setIsResendingDeleteCode(false);
   };
 
   const getDeviceIcon = (deviceType: string | null) => {
@@ -990,15 +1105,38 @@ const Security = () => {
         open={showDeleteAccountConfirm}
         onOpenChange={setShowDeleteAccountConfirm}
         title="Deletar conta permanentemente?"
-        description="Esta ação é IRREVERSÍVEL. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações. Você não poderá recuperar sua conta."
+        description="Esta ação é IRREVERSÍVEL. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações. Você não poderá recuperar sua conta. Para sua segurança, enviaremos um código de confirmação para seu email."
         cancelText="Cancelar"
-        confirmText="Continuar"
-        onConfirm={() => {
-          setShowDeleteAccountConfirm(false);
-          setShowDeleteAccountFinalConfirm(true);
-        }}
+        confirmText={isSendingDeleteCode ? "Enviando..." : "Enviar código"}
+        onConfirm={handleSendDeleteCode}
         confirmVariant="destructive"
       />
+
+      {/* Delete Account Email Verification Modal */}
+      <ResponsiveModal open={showDeleteAccountEmailVerify} onOpenChange={(open) => {
+        setShowDeleteAccountEmailVerify(open);
+      }}>
+        <ResponsiveModalContent className="sm:max-w-md">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Confirme sua identidade
+            </ResponsiveModalTitle>
+            <ResponsiveModalDescription>
+              Digite o código de 6 dígitos que enviamos para seu email para continuar com a exclusão da conta.
+            </ResponsiveModalDescription>
+          </ResponsiveModalHeader>
+          <div className="py-4">
+            <TwoFactorInput
+              onComplete={handleVerifyDeleteCode}
+              onResend={handleResendDeleteCode}
+              isVerifying={isVerifyingDeleteCode}
+              isResending={isResendingDeleteCode}
+              maskedEmail={deleteMaskedEmail}
+            />
+          </div>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
 
       {/* Delete Account Final Confirmation Modal */}
       <ResponsiveModal open={showDeleteAccountFinalConfirm} onOpenChange={(open) => {
