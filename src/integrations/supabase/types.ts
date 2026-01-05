@@ -1050,6 +1050,7 @@ export type Database = {
           preferred_foot: string | null
           profile_completed: boolean | null
           role: string | null
+          scheduled_deletion_at: string | null
           show_activity_status: boolean | null
           show_profile_to: string | null
           team: string | null
@@ -1095,6 +1096,7 @@ export type Database = {
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null
+          scheduled_deletion_at?: string | null
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null
@@ -1140,6 +1142,7 @@ export type Database = {
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null
+          scheduled_deletion_at?: string | null
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null

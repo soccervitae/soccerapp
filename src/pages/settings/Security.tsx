@@ -81,6 +81,9 @@ const Security = () => {
   const [isVerifyingDeleteCode, setIsVerifyingDeleteCode] = useState(false);
   const [isResendingDeleteCode, setIsResendingDeleteCode] = useState(false);
   const [deleteMaskedEmail, setDeleteMaskedEmail] = useState("");
+  const [showCancelDeletionConfirm, setShowCancelDeletionConfirm] = useState(false);
+  const [isCancelingDeletion, setIsCancelingDeletion] = useState(false);
+  const [scheduledDeletionAt, setScheduledDeletionAt] = useState<string | null>(null);
 
   // Load current device fingerprint
   useEffect(() => {
@@ -92,13 +95,13 @@ const Security = () => {
   }, []);
 
   // Fetch user profile for security settings
-  const { data: profile } = useQuery({
+  const { data: profile, refetch: refetchProfile } = useQuery({
     queryKey: ["profile-security", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("notify_new_device, notify_security_events, two_factor_enabled")
+        .select("notify_new_device, notify_security_events, two_factor_enabled, scheduled_deletion_at")
         .eq("id", user.id)
         .single();
       if (error) throw error;
@@ -113,6 +116,7 @@ const Security = () => {
       setNotifyNewDevice(profile.notify_new_device ?? true);
       setNotifySecurityEvents(profile.notify_security_events ?? true);
       setTwoFactorEnabled(profile.two_factor_enabled ?? false);
+      setScheduledDeletionAt(profile.scheduled_deletion_at ?? null);
     }
   }, [profile]);
 
@@ -1018,25 +1022,52 @@ const Security = () => {
             <h2 className="text-base font-semibold text-destructive">Zona de Perigo</h2>
           </div>
 
-          <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg space-y-3">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
-              <div className="space-y-1">
-                <p className="font-medium text-sm text-destructive">Deletar conta permanentemente</p>
-                <p className="text-xs text-muted-foreground">
-                  Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações.
-                </p>
+          {scheduledDeletionAt ? (
+            <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium text-sm text-destructive">Exclusão agendada</p>
+                  <p className="text-xs text-muted-foreground">
+                    Sua conta será permanentemente excluída em{" "}
+                    <strong className="text-foreground">
+                      {format(new Date(scheduledDeletionAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </strong>.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Se você mudar de ideia, pode cancelar a exclusão abaixo. Após a data, a exclusão será irreversível.
+                  </p>
+                </div>
               </div>
+              <Button
+                variant="outline"
+                className="w-full border-primary text-primary hover:bg-primary/10"
+                onClick={() => setShowCancelDeletionConfirm(true)}
+              >
+                Cancelar exclusão da conta
+              </Button>
             </div>
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => setShowDeleteAccountConfirm(true)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Deletar minha conta
-            </Button>
-          </div>
+          ) : (
+            <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg space-y-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium text-sm text-destructive">Deletar conta</p>
+                  <p className="text-xs text-muted-foreground">
+                    Ao solicitar a exclusão, sua conta será agendada para exclusão em 7 dias. Durante este período, você pode cancelar a exclusão e recuperar sua conta.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => setShowDeleteAccountConfirm(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deletar minha conta
+              </Button>
+            </div>
+          )}
         </section>
       </div>
 
@@ -1104,8 +1135,8 @@ const Security = () => {
       <ResponsiveAlertModal
         open={showDeleteAccountConfirm}
         onOpenChange={setShowDeleteAccountConfirm}
-        title="Deletar conta permanentemente?"
-        description="Esta ação é IRREVERSÍVEL. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações. Você não poderá recuperar sua conta. Para sua segurança, enviaremos um código de confirmação para seu email."
+        title="Agendar exclusão da conta?"
+        description="Sua conta será agendada para exclusão permanente em 7 dias. Durante este período, você poderá cancelar a exclusão e recuperar sua conta. Após os 7 dias, a exclusão será irreversível. Para sua segurança, enviaremos um código de confirmação para seu email."
         cancelText="Cancelar"
         confirmText={isSendingDeleteCode ? "Enviando..." : "Enviar código"}
         onConfirm={handleSendDeleteCode}
@@ -1147,10 +1178,10 @@ const Security = () => {
           <ResponsiveModalHeader>
             <ResponsiveModalTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Confirmar exclusão da conta
+              Confirmar agendamento de exclusão
             </ResponsiveModalTitle>
             <ResponsiveModalDescription>
-              Para confirmar a exclusão permanente da sua conta, digite <strong className="text-foreground">DELETAR</strong> abaixo.
+              Para confirmar o agendamento da exclusão da sua conta, digite <strong className="text-foreground">DELETAR</strong> abaixo. Sua conta será excluída em 7 dias.
             </ResponsiveModalDescription>
           </ResponsiveModalHeader>
           <div className="py-4 space-y-4">
@@ -1178,47 +1209,97 @@ const Security = () => {
                 onClick={async () => {
                   setIsDeletingAccount(true);
                   try {
-                    // Delete user data from database
                     if (user?.id) {
-                      // Delete user devices
-                      await supabase.from("user_devices").delete().eq("user_id", user.id);
-                      // Delete profile (will cascade to related data)
-                      await supabase.from("profiles").delete().eq("id", user.id);
+                      // Schedule deletion for 7 days from now
+                      const deletionDate = new Date();
+                      deletionDate.setDate(deletionDate.getDate() + 7);
+                      
+                      const { error } = await supabase
+                        .from("profiles")
+                        .update({ 
+                          scheduled_deletion_at: deletionDate.toISOString(),
+                          codigo: null,
+                          codigo_expira_em: null
+                        })
+                        .eq("id", user.id);
+                      
+                      if (error) throw error;
+                      
+                      setScheduledDeletionAt(deletionDate.toISOString());
+                      setShowDeleteAccountFinalConfirm(false);
+                      setDeleteConfirmText("");
+                      refetchProfile();
+                      
+                      toast({
+                        title: "Exclusão agendada",
+                        description: `Sua conta será excluída em ${format(deletionDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}. Você pode cancelar a exclusão a qualquer momento.`,
+                      });
                     }
-                    
-                    // Sign out and delete auth user
-                    await supabase.auth.signOut({ scope: "global" });
-                    
-                    toast({
-                      title: "Conta deletada",
-                      description: "Sua conta foi permanentemente excluída.",
-                    });
-                    
-                    navigate("/auth");
                   } catch (error) {
-                    console.error("Error deleting account:", error);
+                    console.error("Error scheduling account deletion:", error);
                     toast({
                       variant: "destructive",
-                      title: "Erro ao deletar conta",
-                      description: "Não foi possível deletar sua conta. Tente novamente.",
+                      title: "Erro ao agendar exclusão",
+                      description: "Não foi possível agendar a exclusão. Tente novamente.",
                     });
-                    setIsDeletingAccount(false);
                   }
+                  setIsDeletingAccount(false);
                 }}
               >
                 {isDeletingAccount ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Deletando...
+                    Agendando...
                   </>
                 ) : (
-                  "Deletar minha conta"
+                  "Agendar exclusão"
                 )}
               </Button>
             </div>
           </div>
         </ResponsiveModalContent>
       </ResponsiveModal>
+
+      {/* Cancel Deletion Confirmation Modal */}
+      <ResponsiveAlertModal
+        open={showCancelDeletionConfirm}
+        onOpenChange={setShowCancelDeletionConfirm}
+        title="Cancelar exclusão da conta?"
+        description="Sua conta não será mais excluída e você poderá continuar usando normalmente."
+        cancelText="Voltar"
+        confirmText={isCancelingDeletion ? "Cancelando..." : "Sim, manter minha conta"}
+        onConfirm={async () => {
+          setIsCancelingDeletion(true);
+          try {
+            if (user?.id) {
+              const { error } = await supabase
+                .from("profiles")
+                .update({ scheduled_deletion_at: null })
+                .eq("id", user.id);
+              
+              if (error) throw error;
+              
+              setScheduledDeletionAt(null);
+              setShowCancelDeletionConfirm(false);
+              refetchProfile();
+              
+              toast({
+                title: "Exclusão cancelada",
+                description: "Sua conta não será mais excluída.",
+              });
+            }
+          } catch (error) {
+            console.error("Error canceling account deletion:", error);
+            toast({
+              variant: "destructive",
+              title: "Erro ao cancelar exclusão",
+              description: "Não foi possível cancelar a exclusão. Tente novamente.",
+            });
+          }
+          setIsCancelingDeletion(false);
+        }}
+        confirmVariant="default"
+      />
     </div>
   );
 };
