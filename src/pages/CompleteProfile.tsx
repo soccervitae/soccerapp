@@ -195,9 +195,20 @@ const CompleteProfile = () => {
         profile_completed: true,
       };
 
+      const isMale = gender === "homem" || gender === "masculino" || gender === "male";
+      const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
+
       // Add athlete-specific fields only for athletes
       if (isAthlete) {
-        updateData.position = Number(position);
+        // Save position to gender-specific column
+        if (isMale) {
+          updateData.posicaomas = Number(position);
+          updateData.posicaofem = null;
+        } else if (isFemale) {
+          updateData.posicaofem = Number(position);
+          updateData.posicaomas = null;
+        }
+        updateData.funcao = null; // Clear staff function for athletes
         updateData.height = Number(height);
         updateData.weight = Number(weight);
         updateData.preferred_foot = preferredFoot;
@@ -205,7 +216,9 @@ const CompleteProfile = () => {
 
       // Add staff-specific fields only for technical staff
       if (isStaff) {
-        updateData.position = Number(staffFunction); // Store function ID in position field
+        updateData.funcao = Number(staffFunction); // Store function ID in funcao column
+        updateData.posicaomas = null; // Clear athlete positions for staff
+        updateData.posicaofem = null;
       }
 
       const { error } = await supabase
