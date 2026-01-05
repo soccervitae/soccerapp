@@ -120,6 +120,8 @@ export const PostsGrid = ({
   });
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
+  const [viewerPosts, setViewerPosts] = useState<Post[]>([]);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
   const onSelect = useCallback(() => {
@@ -155,7 +157,9 @@ export const PostsGrid = ({
 
   const handlePostClick = (
     e: React.MouseEvent<HTMLElement>,
-    post: Post
+    post: Post,
+    filteredPosts: Post[],
+    index: number
   ) => {
     e.stopPropagation();
     if (feedSheetOpen) return;
@@ -163,7 +167,16 @@ export const PostsGrid = ({
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
     setSelectedPost(post);
+    setSelectedPostIndex(index);
+    setViewerPosts(filteredPosts);
     setFeedSheetOpen(true);
+  };
+
+  const handleNavigatePost = (newIndex: number) => {
+    if (newIndex >= 0 && newIndex < viewerPosts.length) {
+      setSelectedPostIndex(newIndex);
+      setSelectedPost(viewerPosts[newIndex]);
+    }
   };
 
   const getMediaUrls = (mediaUrl: string | null): string[] => {
@@ -273,13 +286,13 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post) => (
+        {filteredPosts.map((post, index) => (
           <button
             key={post.id}
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePostClick(e, post)}
+            onClick={(e) => handlePostClick(e, post, filteredPosts, index)}
             aria-label="Abrir post"
           >
             {post.media_url ? (
@@ -431,9 +444,14 @@ export const PostsGrid = ({
           onClose={() => {
             setFeedSheetOpen(false);
             setSelectedPost(null);
+            setSelectedPostIndex(0);
+            setViewerPosts([]);
             setOriginRect(null);
           }}
           originRect={originRect}
+          posts={viewerPosts.map(transformPostForViewer)}
+          currentPostIndex={selectedPostIndex}
+          onNavigatePost={handleNavigatePost}
         />
       )}
     </section>
