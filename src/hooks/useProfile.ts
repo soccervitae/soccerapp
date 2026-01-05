@@ -222,14 +222,17 @@ export interface UserPost {
   comments_count: number | null;
   created_at: string;
   updated_at: string | null;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 export const useUserPosts = (userId?: string) => {
   const { user } = useAuth();
   const targetUserId = userId || user?.id;
+  const currentUserId = user?.id;
 
   const query = useQuery({
-    queryKey: ["user-posts", targetUserId],
+    queryKey: ["user-posts", targetUserId, currentUserId],
     refetchOnMount: "always",
     staleTime: 0,
     queryFn: async (): Promise<UserPost[]> => {
@@ -244,14 +247,47 @@ export const useUserPosts = (userId?: string) => {
         throw new Error("Sem conexão e sem dados em cache");
       }
 
-      const { data, error } = await supabase
+      const { data: posts, error } = await supabase
         .from("posts")
         .select("*")
         .eq("user_id", targetUserId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      if (!posts || posts.length === 0) return [];
+
+      // If current user is logged in, fetch their likes and saves for these posts
+      if (currentUserId) {
+        const postIds = posts.map(p => p.id);
+        
+        const [likesResult, savesResult] = await Promise.all([
+          supabase
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", currentUserId)
+            .in("post_id", postIds),
+          supabase
+            .from("saved_posts")
+            .select("post_id")
+            .eq("user_id", currentUserId)
+            .in("post_id", postIds)
+        ]);
+
+        const likedPostIds = new Set((likesResult.data || []).map(l => l.post_id));
+        const savedPostIds = new Set((savesResult.data || []).map(s => s.post_id));
+
+        return posts.map(post => ({
+          ...post,
+          liked_by_user: likedPostIds.has(post.id),
+          saved_by_user: savedPostIds.has(post.id),
+        }));
+      }
+
+      return posts.map(post => ({
+        ...post,
+        liked_by_user: false,
+        saved_by_user: false,
+      }));
     },
     enabled: !!targetUserId,
     retry: (failureCount) => {
