@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect, MouseEvent } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Play, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { ProfileMediaViewer } from "./ProfileMediaViewer";
+import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -147,20 +146,7 @@ export const PostsGrid = ({
   };
 
   const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
-    if (!filteredPosts[index]) {
-      toast.error("Post inválido");
-      return;
-    }
-
-    if (import.meta.env.DEV) {
-      console.log("[PostsGrid] thumbnail click", {
-        tab: activeTab,
-        postId: filteredPosts[index]?.id,
-        index,
-        filteredCount: filteredPosts.length,
-      });
-      toast.message("Abrindo post…");
-    }
+    if (!filteredPosts[index]) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
@@ -231,7 +217,8 @@ export const PostsGrid = ({
         {filteredPosts.map((post, index) => (
           <div 
             key={post.id} 
-            className="aspect-[4/5] bg-muted relative group overflow-hidden"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
+            onClick={(e) => handlePostClick(e, filteredPosts, index)}
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -366,9 +353,9 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Profile Media Viewer */}
+      {/* Profile Feed Sheet - Instagram style */}
       {profile && (
-        <ProfileMediaViewer
+        <ProfileFeedSheet
           posts={viewerPosts.length ? viewerPosts : currentFilteredPosts}
           initialPostIndex={selectedPostIndex}
           isOpen={feedSheetOpen}
