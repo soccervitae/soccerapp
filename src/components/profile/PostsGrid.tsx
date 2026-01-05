@@ -237,7 +237,7 @@ export const PostsGrid = ({
                         <img 
                           src={urls[0]} 
                           alt={post.content}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover"
                         />
                         <div className="absolute top-2 right-2">
                           <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
@@ -249,7 +249,7 @@ export const PostsGrid = ({
                       <img 
                         src={post.media_url} 
                         alt={post.content}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full object-cover"
                       />
                     );
                   }
@@ -258,7 +258,7 @@ export const PostsGrid = ({
                 <img 
                   src={post.media_url} 
                   alt={post.content}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover"
                 />
               )
             ) : (
