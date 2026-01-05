@@ -63,7 +63,7 @@ const EditProfile = () => {
     queryKey: ['functions', profile?.gender],
     queryFn: async () => {
       const isFemale = profile?.gender === 'mulher' || profile?.gender === 'feminino' || profile?.gender === 'female';
-      const table = isFemale ? 'funcao_feminina' : 'funcao';
+      const table = isFemale ? 'funcaofem' : 'funcaomas';
       const { data, error } = await supabase.from(table).select('id, name').order('name');
       if (error) throw error;
       return data;

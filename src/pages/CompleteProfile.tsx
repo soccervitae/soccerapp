@@ -37,6 +37,7 @@ const CompleteProfile = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [positions, setPositions] = useState<{ id: number; name: string }[]>([]);
   const [functions, setFunctions] = useState<{ id: number; name: string }[]>([]);
+  const [profileTypes, setProfileTypes] = useState<{ id: number; name: string }[]>([]);
   const [staffFunction, setStaffFunction] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,6 +63,15 @@ const CompleteProfile = () => {
     loadCountries();
   }, []);
 
+  // Load profile types from funcaoperfil
+  useEffect(() => {
+    const loadProfileTypes = async () => {
+      const { data } = await supabase.from("funcaoperfil").select("id, name").order("id");
+      if (data) setProfileTypes(data);
+    };
+    loadProfileTypes();
+  }, []);
+
   // Load positions based on selected gender (not profile.gender)
   useEffect(() => {
     const loadPositions = async () => {
@@ -82,7 +92,7 @@ const CompleteProfile = () => {
       if (!gender) return;
       
       const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
-      const table = isFemale ? "funcao_feminina" : "funcao";
+      const table = isFemale ? "funcaofem" : "funcaomas";
       
       const { data } = await supabase.from(table).select("id, name").order("name");
       if (data) setFunctions(data);
@@ -307,8 +317,11 @@ const CompleteProfile = () => {
               <SelectValue placeholder="Selecione o tipo de perfil" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="atleta">Atleta</SelectItem>
-              <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+              {profileTypes.map((type) => (
+                <SelectItem key={type.id} value={type.name.toLowerCase().replace(/ã/g, 'a').replace(/\s+/g, '_')}>
+                  {type.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {touched.profileType && !isProfileTypeValid && (

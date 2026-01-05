@@ -73,10 +73,10 @@ export const useProfile = (userId?: string) => {
         let posData: { name: string } | null = null;
         
         if (isStaff && isFemale) {
-          const { data: result } = await supabase.from('funcao_feminina').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.position).single();
           posData = result;
         } else if (isStaff) {
-          const { data: result } = await supabase.from('funcao').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.position).single();
           posData = result;
         } else if (isFemale) {
           const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
@@ -143,10 +143,10 @@ export const useProfileByUsername = (username: string) => {
         let posData: { name: string } | null = null;
         
         if (isStaff && isFemale) {
-          const { data: result } = await supabase.from('funcao_feminina').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.position).single();
           posData = result;
         } else if (isStaff) {
-          const { data: result } = await supabase.from('funcao').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.position).single();
           posData = result;
         } else if (isFemale) {
           const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
