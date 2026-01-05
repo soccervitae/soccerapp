@@ -4,7 +4,7 @@ import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { ProfileFeedSheet } from "./ProfileFeedSheet";
+import { ProfileMediaViewer } from "./ProfileMediaViewer";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -358,9 +358,9 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Profile Feed Sheet */}
+      {/* Profile Media Viewer */}
       {profile && (
-        <ProfileFeedSheet
+        <ProfileMediaViewer
           posts={currentFilteredPosts}
           initialPostIndex={selectedPostIndex}
           isOpen={feedSheetOpen}
