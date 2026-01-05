@@ -943,3 +943,88 @@ export const useReorderHighlights = () => {
     },
   });
 };
+
+// Hook to fetch saved posts for the current user
+export const useUserSavedPosts = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+
+  return useQuery({
+    queryKey: ["user-saved-posts", targetUserId],
+    queryFn: async () => {
+      if (!targetUserId) return [];
+
+      const { data, error } = await supabase
+        .from("saved_posts")
+        .select(`
+          id,
+          created_at,
+          post:posts (
+            id,
+            user_id,
+            content,
+            media_url,
+            media_type,
+            likes_count,
+            comments_count,
+            shares_count,
+            created_at,
+            location_name,
+            location_lat,
+            location_lng,
+            music_track_id,
+            music_start_seconds,
+            music_end_seconds,
+            profile:profiles!posts_user_id_fkey (
+              id,
+              username,
+              full_name,
+              nickname,
+              avatar_url,
+              conta_verificada,
+              gender,
+              role,
+              posicaomas,
+              posicaofem,
+              funcao
+            )
+          )
+        `)
+        .eq("user_id", targetUserId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform to Post format with profile data
+      return (
+        data
+          ?.map((item) => {
+            if (!item.post) return null;
+            const post = item.post as any;
+            return {
+              id: post.id,
+              user_id: post.user_id,
+              content: post.content,
+              media_url: post.media_url,
+              media_type: post.media_type,
+              likes_count: post.likes_count,
+              comments_count: post.comments_count,
+              shares_count: post.shares_count,
+              created_at: post.created_at,
+              location_name: post.location_name,
+              location_lat: post.location_lat,
+              location_lng: post.location_lng,
+              music_track_id: post.music_track_id,
+              music_start_seconds: post.music_start_seconds,
+              music_end_seconds: post.music_end_seconds,
+              saved_by_user: true,
+              liked_by_user: false,
+              _profile: post.profile,
+            };
+          })
+          .filter(Boolean) || []
+      );
+    },
+    enabled: !!targetUserId,
+  });
+};

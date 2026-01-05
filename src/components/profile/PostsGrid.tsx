@@ -71,22 +71,40 @@ interface Profile {
   position_name?: string | null;
 }
 
+interface SavedPost extends Post {
+  _profile?: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    nickname: string | null;
+    avatar_url: string | null;
+    conta_verificada: boolean;
+    gender: string | null;
+    role: string | null;
+    posicaomas: number | null;
+    posicaofem: number | null;
+    funcao: number | null;
+  };
+}
+
 interface PostsGridProps {
   posts: Post[];
   taggedPosts?: Post[];
+  savedPosts?: SavedPost[];
   championships?: Championship[];
   achievements?: Achievement[];
   isLoading?: boolean;
   isChampionshipsLoading?: boolean;
   isAchievementsLoading?: boolean;
   isTaggedLoading?: boolean;
+  isSavedPostsLoading?: boolean;
   isOwnProfile?: boolean;
   profile?: Profile;
 }
 
-type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas";
+type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas" | "salvos";
 
-const tabs: { id: Tab; label: string; icon: string }[] = [
+const baseTabs: { id: Tab; label: string; icon: string }[] = [
   { id: "posts", label: "Posts", icon: "grid_view" },
   { id: "times", label: "Times", icon: "shield" },
   { id: "videos", label: "Vídeos", icon: "movie" },
@@ -98,15 +116,22 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
 export const PostsGrid = ({ 
   posts, 
   taggedPosts = [],
+  savedPosts = [],
   championships = [],
   achievements = [],
   isLoading = false,
   isChampionshipsLoading = false,
   isAchievementsLoading = false,
   isTaggedLoading = false,
+  isSavedPostsLoading = false,
   isOwnProfile = false,
   profile,
 }: PostsGridProps) => {
+  // Build tabs dynamically based on isOwnProfile
+  const tabs = isOwnProfile 
+    ? [...baseTabs, { id: "salvos" as Tab, label: "Salvos", icon: "bookmark" }]
+    : baseTabs;
+
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     loop: false, 
@@ -119,10 +144,11 @@ export const PostsGrid = ({
     }
   });
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | SavedPost | null>(null);
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  const [viewerPosts, setViewerPosts] = useState<Post[]>([]);
+  const [viewerPosts, setViewerPosts] = useState<(Post | SavedPost)[]>([]);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [isSavedPostsViewer, setIsSavedPostsViewer] = useState(false);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -171,6 +197,7 @@ export const PostsGrid = ({
     setSelectedPost(post);
     setSelectedPostIndex(index);
     setViewerPosts(filteredPosts);
+    setIsSavedPostsViewer(false);
     setFeedSheetOpen(true);
   };
 
@@ -228,6 +255,48 @@ export const PostsGrid = ({
     liked_by_user: post.liked_by_user ?? false,
     saved_by_user: post.saved_by_user ?? false,
   });
+
+  // Transform saved post with its own profile data
+  const transformSavedPostForViewer = (post: SavedPost) => {
+    const postProfile = post._profile;
+    return {
+      id: post.id,
+      content: post.content,
+      media_url: post.media_url,
+      media_type: post.media_type,
+      created_at: post.created_at || new Date().toISOString(),
+      updated_at: post.created_at || new Date().toISOString(),
+      user_id: post.user_id || postProfile?.id || "",
+      likes_count: post.likes_count || 0,
+      comments_count: post.comments_count || 0,
+      shares_count: post.shares_count || 0,
+      location_name: post.location_name || null,
+      location_lat: post.location_lat || null,
+      location_lng: post.location_lng || null,
+      music_track_id: post.music_track_id || null,
+      music_start_seconds: post.music_start_seconds || null,
+      music_end_seconds: post.music_end_seconds || null,
+      music_track: null,
+      recent_likes: [],
+      profile: {
+        id: postProfile?.id || "",
+        username: postProfile?.username || "usuario",
+        full_name: postProfile?.full_name || "",
+        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || "Usuario",
+        avatar_url: postProfile?.avatar_url || null,
+        team: null,
+        conta_verificada: postProfile?.conta_verificada || false,
+        gender: postProfile?.gender || null,
+        role: postProfile?.role || null,
+        posicaomas: postProfile?.posicaomas || null,
+        posicaofem: postProfile?.posicaofem || null,
+        funcao: postProfile?.funcao || null,
+        position_name: null,
+      },
+      liked_by_user: post.liked_by_user ?? false,
+      saved_by_user: true,
+    };
+  };
 
   // Component to render video with thumbnail
   const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
@@ -296,6 +365,91 @@ export const PostsGrid = ({
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
             onClick={(e) => handlePostClick(e, post, filteredPosts, index)}
             aria-label="Abrir post"
+          >
+            {post.media_url ? (
+              post.media_type === "video" ? (
+                <div className="w-full h-full pointer-events-none">
+                  <VideoThumbnail src={post.media_url} alt={post.content} />
+                </div>
+              ) : post.media_type === "carousel" ? (
+                (() => {
+                  try {
+                    const urls = JSON.parse(post.media_url);
+                    return (
+                      <>
+                        <img
+                          src={urls[0]}
+                          alt={post.content}
+                          className="w-full h-full object-cover pointer-events-none"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-2 right-2 pointer-events-none">
+                          <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
+                        </div>
+                      </>
+                    );
+                  } catch {
+                    return (
+                      <img
+                        src={post.media_url}
+                        alt={post.content}
+                        className="w-full h-full object-cover pointer-events-none"
+                        loading="lazy"
+                      />
+                    );
+                  }
+                })()
+              ) : (
+                <img
+                  src={post.media_url}
+                  alt={post.content}
+                  className="w-full h-full object-cover pointer-events-none"
+                  loading="lazy"
+                />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
+                <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // Render saved posts grid with their own profile data
+  const renderSavedPostGrid = (filteredPosts: SavedPost[], emptyMessage: string, emptyIcon: string) => {
+    if (filteredPosts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
+          <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">{emptyIcon}</span>
+          <p className="text-muted-foreground text-sm mt-2">{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-1 mb-8">
+        {filteredPosts.map((post, index) => (
+          <button
+            key={post.id}
+            type="button"
+            data-embla-no-drag="true"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (feedSheetOpen) return;
+              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+              setOriginRect(rect);
+              setSelectedPost(post);
+              setSelectedPostIndex(index);
+              setViewerPosts(filteredPosts);
+              setIsSavedPostsViewer(true);
+              setFeedSheetOpen(true);
+            }}
+            aria-label="Abrir post salvo"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -432,13 +586,31 @@ export const PostsGrid = ({
             />
           </div>
           
+          {/* Salvos - only for own profile */}
+          {isOwnProfile && (
+            <div className="flex-[0_0_100%] min-w-0">
+              {isSavedPostsLoading ? (
+                <div className="grid grid-cols-3 gap-1 mb-8">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                renderSavedPostGrid(savedPosts, "Nenhum post salvo", "bookmark")
+              )}
+            </div>
+          )}
+          
         </div>
       </div>
 
       {/* Post Media Viewer - Fullscreen */}
       {selectedPost && (
         <PostMediaViewer
-          post={transformPostForViewer(selectedPost)}
+          post={isSavedPostsViewer 
+            ? transformSavedPostForViewer(selectedPost as SavedPost) 
+            : transformPostForViewer(selectedPost)
+          }
           mediaUrls={getMediaUrls(selectedPost.media_url)}
           mediaType={selectedPost.media_type}
           initialIndex={0}
@@ -449,9 +621,14 @@ export const PostsGrid = ({
             setSelectedPostIndex(0);
             setViewerPosts([]);
             setOriginRect(null);
+            setIsSavedPostsViewer(false);
           }}
           originRect={originRect}
-          posts={viewerPosts.map(transformPostForViewer)}
+          posts={viewerPosts.map(p => 
+            isSavedPostsViewer 
+              ? transformSavedPostForViewer(p as SavedPost) 
+              : transformPostForViewer(p)
+          )}
           currentPostIndex={selectedPostIndex}
           onNavigatePost={handleNavigatePost}
         />
