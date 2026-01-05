@@ -23,37 +23,67 @@ export const RefreshableContainer = ({
   const startY = useRef(0);
   const currentY = useRef(0);
   const hasVibrated = useRef(false);
+  const isEligiblePull = useRef(false);
+
+  const MIN_PULL_START_PX = 12;
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const target = e.target as HTMLElement | null;
+
+    // Don't hijack taps on interactive elements (e.g. profile post thumbnails).
+    if (target?.closest("button,a,input,textarea,select,[role='button']")) {
+      isEligiblePull.current = false;
+      return;
+    }
+
     if (containerRef.current?.scrollTop === 0) {
       startY.current = e.touches[0].clientY;
-      setIsPulling(true);
+      currentY.current = startY.current;
+      isEligiblePull.current = true;
+      setIsPulling(false);
+      setPullDistance(0);
       hasVibrated.current = false;
+    } else {
+      isEligiblePull.current = false;
     }
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling) return;
-    
-    currentY.current = e.touches[0].clientY;
-    const distance = Math.max(0, currentY.current - startY.current);
-    
-    // Apply resistance to pull
-    const resistedDistance = Math.min(distance * 0.5, threshold * 1.5);
-    setPullDistance(resistedDistance);
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isEligiblePull.current) return;
 
-    // Vibrate when threshold is reached (once per pull)
-    if (resistedDistance >= threshold && !hasVibrated.current && navigator.vibrate) {
-      navigator.vibrate(10);
-      hasVibrated.current = true;
-    }
-  }, [isPulling, threshold]);
+      currentY.current = e.touches[0].clientY;
+      const rawDistance = currentY.current - startY.current;
+
+      // Only start pull-to-refresh after a small intentional downward drag.
+      if (rawDistance < MIN_PULL_START_PX && !isPulling) return;
+
+      if (!isPulling) setIsPulling(true);
+
+      const distance = Math.max(0, rawDistance - MIN_PULL_START_PX);
+
+      // Prevent scroll bounce only when we're actively pulling.
+      if (distance > 0) e.preventDefault();
+
+      // Apply resistance to pull
+      const resistedDistance = Math.min(distance * 0.5, threshold * 1.5);
+      setPullDistance(resistedDistance);
+
+      // Vibrate when threshold is reached (once per pull)
+      if (resistedDistance >= threshold && !hasVibrated.current && navigator.vibrate) {
+        navigator.vibrate(10);
+        hasVibrated.current = true;
+      }
+    },
+    [isPulling, threshold]
+  );
 
   const handleTouchEnd = useCallback(async () => {
     if (pullDistance >= threshold && !isRefreshing) {
       await onRefresh();
     }
-    
+
+    isEligiblePull.current = false;
     setIsPulling(false);
     setPullDistance(0);
     startY.current = 0;
