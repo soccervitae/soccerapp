@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
@@ -7,17 +7,35 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSearchProfiles, usePopularProfiles } from "@/hooks/useSearchProfiles";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { ExploreSkeleton } from "@/components/skeletons/ExploreSkeleton";
+import ExploreFiltersSheet, { ExploreFilters } from "@/components/explore/ExploreFiltersSheet";
 
 const Explore = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<ExploreFilters>({
+    profileType: null,
+    gender: null,
+    birthYear: null,
+    countryId: null,
+  });
 
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
-  const isSearchActive = debouncedQuery.trim().length > 0;
+  
+  const hasActiveFilters = useMemo(() => {
+    return !!(filters.profileType || filters.gender || filters.birthYear || filters.countryId);
+  }, [filters]);
+
+  const isSearchActive = debouncedQuery.trim().length > 0 || hasActiveFilters;
 
   const { data: searchResults, isLoading: isSearchLoading } = useSearchProfiles(
-    { query: debouncedQuery },
+    { 
+      query: debouncedQuery,
+      profileType: filters.profileType,
+      gender: filters.gender,
+      birthYear: filters.birthYear,
+      countryId: filters.countryId,
+    },
     user?.id
   );
 
@@ -46,7 +64,14 @@ const Explore = () => {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-4">
-        <h1 className="text-xl font-bold text-foreground mb-4">Explorar</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-foreground">Explorar</h1>
+          <ExploreFiltersSheet
+            filters={filters}
+            onFiltersChange={setFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </div>
 
         {/* Search Bar */}
         <div className="relative">
