@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikePost, useSavePost, type Post } from "@/hooks/usePosts";
 import { usePostLikes } from "@/hooks/usePostLikes";
@@ -36,6 +37,7 @@ export const PostMediaViewer = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showLikesSheet, setShowLikesSheet] = useState(false);
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
@@ -70,7 +72,7 @@ export const PostMediaViewer = ({
   // Hooks for interactions
   const likePost = useLikePost();
   const savePost = useSavePost();
-  const { data: likers = [] } = usePostLikes(post.id, isOpen && post.likes_count > 0);
+  const { data: likers = [] } = usePostLikes(post.id, isOpen && likesCountLocal > 0);
 
   useEffect(() => {
     if (isOpen) {
@@ -190,8 +192,13 @@ export const PostMediaViewer = ({
     likePost.mutate({
       postId: post.id,
       isLiked: wasLiked,
+    }, {
+      onSuccess: () => {
+        // Refresh likers list after like/unlike
+        queryClient.invalidateQueries({ queryKey: ["post-likes", post.id] });
+      }
     });
-  }, [user, navigate, likePost, post.id, isLikedLocal]);
+  }, [user, navigate, likePost, post.id, isLikedLocal, queryClient]);
 
   const handleDoubleTapLike = useCallback(() => {
     if (!user) {
@@ -209,9 +216,14 @@ export const PostMediaViewer = ({
       likePost.mutate({
         postId: post.id,
         isLiked: false,
+      }, {
+        onSuccess: () => {
+          // Refresh likers list after like
+          queryClient.invalidateQueries({ queryKey: ["post-likes", post.id] });
+        }
       });
     }
-  }, [user, navigate, likePost, post.id, isLikedLocal]);
+  }, [user, navigate, likePost, post.id, isLikedLocal, queryClient]);
 
   const handleSave = useCallback(() => {
     if (!user) {
