@@ -212,11 +212,29 @@ const EditProfile = () => {
       const roleNormalized = (profile.role ?? '').trim().toLowerCase();
       const isComissaoTecnica = roleNormalized === 'comissao_tecnica';
       
+      // Determine gender
+      const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+      const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+      
+      // Get the correct position/function ID based on user type and gender
+      let positionValue = "";
+      if (isComissaoTecnica) {
+        // For staff, use funcao column
+        positionValue = profile.funcao?.toString() || "";
+      } else {
+        // For athletes, use gender-specific position column
+        if (isMale) {
+          positionValue = profile.posicaomas?.toString() || "";
+        } else if (isFemale) {
+          positionValue = profile.posicaofem?.toString() || "";
+        }
+      }
+      
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
         bio: profile.bio || "",
-        position: profile.position?.toString() || "",
+        position: positionValue,
         role: isComissaoTecnica ? 'comissao_tecnica' : "",
         team: profile.team || "",
         height: profile.height?.toString() || "",
@@ -425,23 +443,50 @@ const EditProfile = () => {
         if (url) coverUrl = url;
       }
 
-      // Update profile - derive role from userType for consistency
-      await updateProfile.mutateAsync({
+      // Determine gender for correct column assignment
+      const isMale = formData.gender === 'homem' || formData.gender === 'masculino' || formData.gender === 'male';
+      const isFemale = formData.gender === 'mulher' || formData.gender === 'feminino' || formData.gender === 'female';
+      
+      // Build update data with correct position/function columns
+      const updateData: Record<string, unknown> = {
         full_name: formData.full_name || null,
         username: formData.username,
         bio: formData.bio || null,
-        position: formData.position ? Number(formData.position) : null,
         role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
         team: formData.team || null,
-        height: formData.height ? Number(formData.height) : null,
-        weight: formData.weight ? Number(formData.weight) : null,
         birth_date: formData.birth_date || null,
-        preferred_foot: formData.preferred_foot || null,
         gender: formData.gender || null,
         nationality: formData.nationality ? Number(formData.nationality) : null,
         avatar_url: avatarUrl,
         cover_url: coverUrl,
-      });
+      };
+      
+      // Set position/function based on user type and gender
+      if (userType === 'atleta') {
+        // Athletes: save to gender-specific position column
+        if (isMale) {
+          updateData.posicaomas = formData.position ? Number(formData.position) : null;
+          updateData.posicaofem = null;
+        } else if (isFemale) {
+          updateData.posicaofem = formData.position ? Number(formData.position) : null;
+          updateData.posicaomas = null;
+        }
+        updateData.funcao = null; // Clear staff function for athletes
+        updateData.height = formData.height ? Number(formData.height) : null;
+        updateData.weight = formData.weight ? Number(formData.weight) : null;
+        updateData.preferred_foot = formData.preferred_foot || null;
+      } else {
+        // Staff: save to funcao column
+        updateData.funcao = formData.position ? Number(formData.position) : null;
+        updateData.posicaomas = null; // Clear athlete positions for staff
+        updateData.posicaofem = null;
+        updateData.height = null;
+        updateData.weight = null;
+        updateData.preferred_foot = null;
+      }
+      
+      // Update profile
+      await updateProfile.mutateAsync(updateData);
 
       navigate("/profile");
     } catch (error) {

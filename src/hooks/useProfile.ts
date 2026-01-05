@@ -21,6 +21,9 @@ export interface Profile {
   bio: string | null;
   position: number | null;
   position_name: string | null;
+  posicaomas: number | null;
+  posicaofem: number | null;
+  funcao: number | null;
   team: string | null;
   height: number | null;
   weight: number | null;
@@ -66,28 +69,33 @@ export const useProfile = (userId?: string) => {
       
       // Fetch position name based on gender and role
       let position_name: string | null = null;
-      if (data.position) {
-        const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
-        const isFemale = data.gender === 'mulher';
-        
-        let posData: { name: string } | null = null;
-        
-        if (isStaff && isFemale) {
-          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.position).single();
-          posData = result;
-        } else if (isStaff) {
-          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.position).single();
-          posData = result;
-        } else if (isFemale) {
-          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
+      const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+      const isFemale = data.gender === 'mulher' || data.gender === 'feminino' || data.gender === 'female';
+      const isMale = data.gender === 'homem' || data.gender === 'masculino' || data.gender === 'male';
+      
+      let posData: { name: string } | null = null;
+      
+      if (isStaff && data.funcao) {
+        // Staff: use funcao column
+        if (isFemale) {
+          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.funcao).single();
           posData = result;
         } else {
-          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.funcao).single();
           posData = result;
         }
-        
-        position_name = posData?.name || null;
+      } else if (!isStaff) {
+        // Athletes: use gender-specific position columns
+        if (isMale && data.posicaomas) {
+          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.posicaomas).single();
+          posData = result;
+        } else if (isFemale && data.posicaofem) {
+          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.posicaofem).single();
+          posData = result;
+        }
       }
+      
+      position_name = posData?.name || null;
       
       return {
         ...data,
@@ -136,28 +144,33 @@ export const useProfileByUsername = (username: string) => {
       
       // Fetch position name based on gender and role
       let position_name: string | null = null;
-      if (data.position) {
-        const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
-        const isFemale = data.gender === 'mulher';
-        
-        let posData: { name: string } | null = null;
-        
-        if (isStaff && isFemale) {
-          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.position).single();
-          posData = result;
-        } else if (isStaff) {
-          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.position).single();
-          posData = result;
-        } else if (isFemale) {
-          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.position).single();
+      const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+      const isFemale = data.gender === 'mulher' || data.gender === 'feminino' || data.gender === 'female';
+      const isMale = data.gender === 'homem' || data.gender === 'masculino' || data.gender === 'male';
+      
+      let posData: { name: string } | null = null;
+      
+      if (isStaff && data.funcao) {
+        // Staff: use funcao column
+        if (isFemale) {
+          const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.funcao).single();
           posData = result;
         } else {
-          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.position).single();
+          const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.funcao).single();
           posData = result;
         }
-        
-        position_name = posData?.name || null;
+      } else if (!isStaff) {
+        // Athletes: use gender-specific position columns
+        if (isMale && data.posicaomas) {
+          const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.posicaomas).single();
+          posData = result;
+        } else if (isFemale && data.posicaofem) {
+          const { data: result } = await supabase.from('posicao_feminina').select('name').eq('id', data.posicaofem).single();
+          posData = result;
+        }
       }
+      
+      position_name = posData?.name || null;
       
       return {
         ...data,
