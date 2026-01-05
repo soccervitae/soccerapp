@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePostComments, useCreateComment, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
+import { useCommentLikes, useLikeComment } from "@/hooks/useCommentLikes";
+import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -24,6 +27,11 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   const [comment, setComment] = useState("");
   const { data: comments, isLoading } = usePostComments(post.id);
   const createComment = useCreateComment();
+  const likeComment = useLikeComment();
+
+  // Get all comment IDs for fetching likes
+  const commentIds = useMemo(() => comments?.map(c => c.id) || [], [comments]);
+  const { data: likesData } = useCommentLikes(commentIds);
 
   const handleComment = () => {
     if (!user) {
@@ -36,6 +44,16 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
       { postId: post.id, content: comment },
       { onSuccess: () => setComment("") }
     );
+  };
+
+  const handleLikeComment = (commentId: string) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    const isLiked = likesData?.likedByUser[commentId] || false;
+    likeComment.mutate({ commentId, isLiked });
   };
 
   const getTimeAgo = (date: string) => {
@@ -65,38 +83,71 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
             </div>
           ) : comments && comments.length > 0 ? (
             <div className="space-y-4">
-              {comments.map((c) => (
-                <div key={c.id} className="flex gap-3 px-1">
-                  <img
-                    src={c.profile?.avatar_url || "/placeholder.svg"}
-                    alt={c.profile?.username}
-                    className="w-9 h-9 rounded-full object-cover flex-shrink-0 cursor-pointer"
-                    onClick={() => {
-                      onOpenChange(false);
-                      navigate(`/${c.profile?.username}`);
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className="font-semibold text-sm text-foreground cursor-pointer hover:underline"
-                        onClick={() => {
-                          onOpenChange(false);
-                          navigate(`/${c.profile?.username}`);
-                        }}
-                      >
-                        {c.profile?.username}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {getTimeAgo(c.created_at)}
-                      </span>
+              {comments.map((c) => {
+                const isLiked = likesData?.likedByUser[c.id] || false;
+                const likesCount = likesData?.counts[c.id] || 0;
+                
+                return (
+                  <div key={c.id} className="flex gap-3 px-1">
+                    <img
+                      src={c.profile?.avatar_url || "/placeholder.svg"}
+                      alt={c.profile?.username}
+                      className="w-9 h-9 rounded-full object-cover flex-shrink-0 cursor-pointer"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/${c.profile?.username}`);
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className="font-semibold text-sm text-foreground cursor-pointer hover:underline"
+                          onClick={() => {
+                            onOpenChange(false);
+                            navigate(`/${c.profile?.username}`);
+                          }}
+                        >
+                          {c.profile?.username}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {getTimeAgo(c.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground mt-0.5 break-words">
+                        {c.content}
+                      </p>
+                      {/* Like count */}
+                      {likesCount > 0 && (
+                        <span className="text-xs text-muted-foreground mt-1 inline-block">
+                          {likesCount} {likesCount === 1 ? "aplauso" : "aplausos"}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-sm text-foreground mt-0.5 break-words">
-                      {c.content}
-                    </p>
+                    {/* Like button */}
+                    <button
+                      onClick={() => handleLikeComment(c.id)}
+                      disabled={likeComment.isPending}
+                      className="flex-shrink-0 p-1 transition-all active:scale-110"
+                    >
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={isLiked ? "liked" : "unliked"}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.8, opacity: 0 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
+                        >
+                          <ClappingHandsIcon 
+                            className="w-4 h-4" 
+                            filled={isLiked} 
+                            variant="green" 
+                          />
+                        </motion.div>
+                      </AnimatePresence>
+                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
