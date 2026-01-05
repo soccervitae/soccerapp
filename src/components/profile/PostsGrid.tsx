@@ -145,6 +145,15 @@ export const PostsGrid = ({
   };
 
   const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
+    if (import.meta.env.DEV) {
+      console.log("[PostsGrid] thumbnail click", {
+        tab: activeTab,
+        postId: filteredPosts[index]?.id,
+        index,
+        filteredCount: filteredPosts.length,
+      });
+    }
+
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
     setSelectedPostIndex(index);
