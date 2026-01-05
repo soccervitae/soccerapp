@@ -4,6 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface SearchFilters {
   query: string;
   position?: number;
+  profileType?: number | null;
+  gender?: string | null;
+  birthYear?: number | null;
+  countryId?: number | null;
 }
 
 export interface SearchProfile {
@@ -85,7 +89,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
     queryFn: async () => {
       let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, birth_date, nationality")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
@@ -103,6 +107,22 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
         query = query.or(`posicaomas.eq.${filters.position},posicaofem.eq.${filters.position}`);
       }
 
+      // Profile type filter (funcaoperfil)
+      if (filters.profileType) {
+        // funcao references funcaoperfil for the profile type
+        query = query.eq("funcao", filters.profileType);
+      }
+
+      // Gender filter
+      if (filters.gender) {
+        query = query.eq("gender", filters.gender);
+      }
+
+      // Country filter
+      if (filters.countryId) {
+        query = query.eq("nationality", filters.countryId);
+      }
+
       // Exclude current user
       if (currentUserId) {
         query = query.neq("id", currentUserId);
@@ -111,7 +131,17 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
       const { data, error } = await query.limit(50);
       if (error) throw error;
       
-      const profiles = (data || []) as SearchProfile[];
+      let profiles = (data || []) as SearchProfile[];
+
+      // Birth year filter (client-side since we need to extract year from date)
+      if (filters.birthYear) {
+        profiles = profiles.filter((p: any) => {
+          if (!p.birth_date) return false;
+          const year = new Date(p.birth_date).getFullYear();
+          return year === filters.birthYear;
+        });
+      }
+
       return fetchPositionNames(profiles);
     },
   });
