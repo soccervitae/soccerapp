@@ -146,7 +146,10 @@ export const PostsGrid = ({
   };
 
   const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
-    if (!filteredPosts[index]) return;
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!filteredPosts[index] || feedSheetOpen) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
