@@ -231,8 +231,7 @@ export const PostsGrid = ({
         {filteredPosts.map((post, index) => (
           <div 
             key={post.id} 
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onClick={(e) => handlePostClick(e, filteredPosts, index)}
+            className="aspect-[4/5] bg-muted relative group overflow-hidden"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
