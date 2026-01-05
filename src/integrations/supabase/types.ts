@@ -1153,6 +1153,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "profiles_funcao_fkey"
+            columns: ["funcao"]
+            isOneToOne: false
+            referencedRelation: "funcaoperfil"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "profiles_nationality_fkey"
             columns: ["nationality"]
             isOneToOne: false
