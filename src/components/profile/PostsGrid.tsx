@@ -4,7 +4,7 @@ import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { ProfileFeedSheet } from "./ProfileFeedSheet";
+import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -119,9 +119,8 @@ export const PostsGrid = ({
     }
   });
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
-  const [selectedPostIndex, setSelectedPostIndex] = useState<number>(-1);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
-  const [viewerPosts, setViewerPosts] = useState<Post[]>([]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -156,19 +155,64 @@ export const PostsGrid = ({
 
   const handlePostClick = (
     e: React.MouseEvent<HTMLElement>,
-    filteredPosts: Post[],
-    index: number
+    post: Post
   ) => {
     e.stopPropagation();
-
-    if (!filteredPosts[index] || feedSheetOpen) return;
+    if (feedSheetOpen) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
-    setViewerPosts(filteredPosts);
-    setSelectedPostIndex(index);
+    setSelectedPost(post);
     setFeedSheetOpen(true);
   };
+
+  const getMediaUrls = (mediaUrl: string | null): string[] => {
+    if (!mediaUrl) return [];
+    try {
+      const parsed = JSON.parse(mediaUrl);
+      return Array.isArray(parsed) ? parsed : [mediaUrl];
+    } catch {
+      return [mediaUrl];
+    }
+  };
+
+  const transformPostForViewer = (post: Post) => ({
+    id: post.id,
+    content: post.content,
+    media_url: post.media_url,
+    media_type: post.media_type,
+    created_at: post.created_at || new Date().toISOString(),
+    updated_at: post.created_at || new Date().toISOString(),
+    user_id: post.user_id || profile?.id || "",
+    likes_count: post.likes_count || 0,
+    comments_count: post.comments_count || 0,
+    shares_count: post.shares_count || 0,
+    location_name: post.location_name || null,
+    location_lat: post.location_lat || null,
+    location_lng: post.location_lng || null,
+    music_track_id: post.music_track_id || null,
+    music_start_seconds: post.music_start_seconds || null,
+    music_end_seconds: post.music_end_seconds || null,
+    music_track: null,
+    recent_likes: [],
+    profile: {
+      id: profile?.id || "",
+      username: profile?.username || "",
+      full_name: profile?.full_name || "",
+      nickname: profile?.nickname || profile?.full_name || "",
+      avatar_url: profile?.avatar_url || null,
+      team: null,
+      conta_verificada: profile?.conta_verificada || false,
+      gender: profile?.gender || null,
+      role: profile?.role || null,
+      posicaomas: profile?.posicaomas || null,
+      posicaofem: profile?.posicaofem || null,
+      funcao: profile?.funcao || null,
+      position_name: profile?.position_name || null,
+    },
+    liked_by_user: post.liked_by_user ?? false,
+    saved_by_user: post.saved_by_user ?? false,
+  });
 
   // Component to render video with thumbnail
   const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
@@ -229,10 +273,14 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post, index) => (
-          <div
+        {filteredPosts.map((post) => (
+          <button
             key={post.id}
-            className="aspect-[4/5] bg-muted relative group overflow-hidden"
+            type="button"
+            data-embla-no-drag="true"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
+            onClick={(e) => handlePostClick(e, post)}
+            aria-label="Abrir post"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -281,7 +329,7 @@ export const PostsGrid = ({
               </div>
             )}
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </div>
+          </button>
         ))}
       </div>
     );
@@ -372,19 +420,19 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Profile Feed Sheet - Instagram style */}
-      {profile && (
-        <ProfileFeedSheet
-          posts={viewerPosts.length ? viewerPosts : currentFilteredPosts}
-          initialPostIndex={selectedPostIndex}
+      {/* Post Media Viewer - Fullscreen */}
+      {profile && selectedPost && (
+        <PostMediaViewer
+          post={transformPostForViewer(selectedPost)}
+          mediaUrls={getMediaUrls(selectedPost.media_url)}
+          mediaType={selectedPost.media_type}
+          initialIndex={0}
           isOpen={feedSheetOpen}
           onClose={() => {
             setFeedSheetOpen(false);
-            setSelectedPostIndex(-1);
+            setSelectedPost(null);
             setOriginRect(null);
-            setViewerPosts([]);
           }}
-          profile={profile}
           originRect={originRect}
         />
       )}
