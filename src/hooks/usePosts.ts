@@ -104,6 +104,8 @@ export const usePosts = () => {
         `)
         .order("created_at", { ascending: false });
 
+      console.log('[usePosts] Fetched posts:', { postsCount: posts?.length, error });
+
       if (error) throw error;
 
       // Get post IDs for batch queries
