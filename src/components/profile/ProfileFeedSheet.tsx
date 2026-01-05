@@ -18,6 +18,8 @@ interface Post {
   music_track_id?: string | null;
   music_start_seconds?: number | null;
   music_end_seconds?: number | null;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 interface Profile {
@@ -124,8 +126,8 @@ export const ProfileFeedSheet = ({
       team: "",
       conta_verificada: profile.conta_verificada || false,
     },
-    liked_by_user: false,
-    saved_by_user: false,
+    liked_by_user: post.liked_by_user ?? false,
+    saved_by_user: post.saved_by_user ?? false,
     recent_likes: [],
   });
 

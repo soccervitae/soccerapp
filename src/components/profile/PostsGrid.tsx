@@ -23,6 +23,8 @@ interface Post {
   music_track_id?: string | null;
   music_start_seconds?: number | null;
   music_end_seconds?: number | null;
+  liked_by_user?: boolean;
+  saved_by_user?: boolean;
 }
 
 interface Championship {
