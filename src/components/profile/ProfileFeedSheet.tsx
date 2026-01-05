@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 interface Post {
   id: string;
@@ -179,7 +180,7 @@ export const ProfileFeedSheet = ({
                 onClick={onClose}
                 className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
               >
-                <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+                <ArrowLeft className="w-6 h-6" />
               </button>
               <span className="font-semibold ml-2">Posts</span>
             </div>
