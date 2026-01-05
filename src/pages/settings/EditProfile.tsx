@@ -12,13 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
-import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronsUpDown } from "lucide-react";
+import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronRight } from "lucide-react";
+import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
 
@@ -845,66 +844,37 @@ const EditProfile = () => {
             <Label htmlFor="nationality" className="flex items-center gap-1">
               Nacionalidade <span className="text-destructive">*</span>
             </Label>
-            <Popover open={nationalityOpen} onOpenChange={setNationalityOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  role="combobox"
-                  aria-expanded={nationalityOpen}
-                  className={`flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${showValidationErrors && validationErrors.nationality ? "border-destructive" : "border-input"}`}
-                >
-                  {formData.nationality ? (
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={countries.find(c => c.id.toString() === formData.nationality)?.bandeira_url} 
-                        alt="" 
-                        className="w-5 h-4 object-cover rounded-sm"
-                      />
-                      <span>{countries.find(c => c.id.toString() === formData.nationality)?.nome}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">Buscar país...</span>
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Buscar país..." />
-                  <CommandList>
-                    <CommandEmpty>Nenhum país encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {countries.map((country) => (
-                        <CommandItem
-                          key={country.id}
-                          value={country.nome}
-                          onSelect={() => {
-                            setFormData({ ...formData, nationality: country.id.toString() });
-                            setNationalityOpen(false);
-                          }}
-                        >
-                          <div className="flex items-center gap-2 flex-1">
-                            <img 
-                              src={country.bandeira_url} 
-                              alt={country.nome} 
-                              className="w-5 h-4 object-cover rounded-sm"
-                            />
-                            <span>{country.nome}</span>
-                          </div>
-                          {formData.nationality === country.id.toString() && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <button
+              type="button"
+              onClick={() => setNationalityOpen(true)}
+              className={`flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${showValidationErrors && validationErrors.nationality ? "border-destructive" : "border-input"}`}
+            >
+              {formData.nationality ? (
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={countries.find(c => c.id.toString() === formData.nationality)?.bandeira_url || ""} 
+                    alt="" 
+                    className="w-5 h-4 object-cover rounded-sm"
+                  />
+                  <span>{countries.find(c => c.id.toString() === formData.nationality)?.nome}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">Selecione seu país</span>
+              )}
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
             {showValidationErrors && validationErrors.nationality && (
               <p className="text-sm text-destructive">{validationErrors.nationality}</p>
             )}
           </div>
+
+          <CountryPickerSheet
+            open={nationalityOpen}
+            onOpenChange={setNationalityOpen}
+            countries={countries}
+            selectedCountryId={formData.nationality}
+            onSelectCountry={(value) => setFormData({ ...formData, nationality: value })}
+          />
 
 
         </div>
