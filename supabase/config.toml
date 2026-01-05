@@ -27,3 +27,6 @@ verify_jwt = false
 
 [functions.download-team-emblems]
 verify_jwt = false
+
+[functions.send-delete-account-code]
+verify_jwt = false
