@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -59,7 +60,7 @@ export const ProfileFeedSheet = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
   const queryClient = useQueryClient();
-  
+
   // Store originRect in state to preserve it during exit animation
   const [savedOriginRect, setSavedOriginRect] = useState<DOMRect | null>(null);
 
@@ -69,7 +70,7 @@ export const ProfileFeedSheet = ({
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
   const PULL_THRESHOLD = 80;
-  
+
   // Save originRect when opening
   useEffect(() => {
     if (isOpen && originRect) {
@@ -93,7 +94,7 @@ export const ProfileFeedSheet = ({
   useEffect(() => {
     if (isOpen && initialPostIndex >= 0 && postRefs.current[initialPostIndex]) {
       setTimeout(() => {
-        postRefs.current[initialPostIndex]?.scrollIntoView({ behavior: "instant", block: "start" });
+        postRefs.current[initialPostIndex]?.scrollIntoView({ behavior: "auto", block: "start" });
       }, 100);
     }
   }, [isOpen, initialPostIndex]);
@@ -107,20 +108,23 @@ export const ProfileFeedSheet = ({
     }
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current || isRefreshing) return;
-    
-    const scrollTop = scrollContainerRef.current?.scrollTop || 0;
-    if (scrollTop > 0) {
-      isPulling.current = false;
-      setPullDistance(0);
-      return;
-    }
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isPulling.current || isRefreshing) return;
 
-    const currentY = e.touches[0].clientY;
-    const distance = Math.max(0, (currentY - touchStartY.current) * 0.5);
-    setPullDistance(Math.min(distance, PULL_THRESHOLD * 1.5));
-  }, [isRefreshing]);
+      const scrollTop = scrollContainerRef.current?.scrollTop || 0;
+      if (scrollTop > 0) {
+        isPulling.current = false;
+        setPullDistance(0);
+        return;
+      }
+
+      const currentY = e.touches[0].clientY;
+      const distance = Math.max(0, (currentY - touchStartY.current) * 0.5);
+      setPullDistance(Math.min(distance, PULL_THRESHOLD * 1.5));
+    },
+    [isRefreshing]
+  );
 
   const handleTouchEnd = useCallback(async () => {
     if (!isPulling.current) return;
@@ -129,13 +133,13 @@ export const ProfileFeedSheet = ({
     if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
       setIsRefreshing(true);
       setPullDistance(PULL_THRESHOLD);
-      
-      // Invalidate user posts query
-      await queryClient.invalidateQueries({ queryKey: ["user-posts", profile.id] });
-      
+
+      // Match useUserPosts queryKey shape: ["user-posts", targetUserId, currentUserId]
+      await queryClient.invalidateQueries({ queryKey: ["user-posts", profile.id], exact: false });
+
       setIsRefreshing(false);
     }
-    
+
     setPullDistance(0);
   }, [pullDistance, isRefreshing, queryClient, profile.id]);
 
@@ -158,7 +162,7 @@ export const ProfileFeedSheet = ({
       borderRadius: "12px",
     };
   };
-  
+
   const getExitPosition = () => {
     const rect = savedOriginRect;
     if (!rect) {
@@ -224,7 +228,9 @@ export const ProfileFeedSheet = ({
     recent_likes: [],
   });
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[60]">
@@ -241,26 +247,16 @@ export const ProfileFeedSheet = ({
           <motion.div
             className="relative w-full h-full flex flex-col bg-background overflow-hidden"
             initial={getInitialPosition()}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
-              x: 0, 
-              y: 0, 
-              borderRadius: "0px" 
-            }}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0, borderRadius: "0px" }}
             exit={getExitPosition()}
-            transition={{ 
-              type: "spring", 
-              stiffness: 280, 
-              damping: 28,
-              mass: 0.8
-            }}
+            transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.8 }}
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-background border-b border-border flex items-center px-4 h-14">
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 -ml-2 text-foreground hover:text-muted-foreground transition-colors"
+                aria-label="Fechar feed do perfil"
               >
                 <ArrowLeft className="w-6 h-6" />
               </button>
@@ -268,28 +264,32 @@ export const ProfileFeedSheet = ({
             </div>
 
             {/* Pull-to-refresh indicator */}
-            <div 
+            <div
               className="flex items-center justify-center overflow-hidden transition-all duration-200"
               style={{ height: pullDistance > 0 ? pullDistance : 0 }}
             >
               {pullDistance > 0 && (
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 
-                    className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
-                    style={{ 
-                      transform: isRefreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
-                      opacity: Math.min(pullDistance / PULL_THRESHOLD, 1)
+                  <Loader2
+                    className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
+                    style={{
+                      transform: isRefreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
+                      opacity: Math.min(pullDistance / PULL_THRESHOLD, 1),
                     }}
                   />
                   <span className="text-sm" style={{ opacity: Math.min(pullDistance / PULL_THRESHOLD, 1) }}>
-                    {isRefreshing ? 'Atualizando...' : pullDistance >= PULL_THRESHOLD ? 'Solte para atualizar' : 'Puxe para atualizar'}
+                    {isRefreshing
+                      ? "Atualizando..."
+                      : pullDistance >= PULL_THRESHOLD
+                        ? "Solte para atualizar"
+                        : "Puxe para atualizar"}
                   </span>
                 </div>
               )}
             </div>
 
             {/* Feed */}
-            <div 
+            <div
               ref={scrollContainerRef}
               className="flex-1 overflow-y-auto"
               onTouchStart={handleTouchStart}
@@ -297,9 +297,11 @@ export const ProfileFeedSheet = ({
               onTouchEnd={handleTouchEnd}
             >
               {posts.map((post, index) => (
-                <div 
-                  key={post.id} 
-                  ref={(el) => { postRefs.current[index] = el; }}
+                <div
+                  key={post.id}
+                  ref={(el) => {
+                    postRefs.current[index] = el;
+                  }}
                 >
                   <FeedPost post={transformPostForFeed(post)} />
                 </div>
@@ -308,6 +310,7 @@ export const ProfileFeedSheet = ({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
