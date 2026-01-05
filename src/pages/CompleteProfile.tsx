@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, ChevronRight } from "lucide-react";
+import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
 
 interface Country {
   id: number;
@@ -40,6 +41,7 @@ const CompleteProfile = () => {
   const [profileTypes, setProfileTypes] = useState<{ id: number; name: string }[]>([]);
   const [staffFunction, setStaffFunction] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   const [touched, setTouched] = useState({
     nickname: false,
@@ -433,27 +435,41 @@ const CompleteProfile = () => {
           <Label htmlFor="nationality">
             Nacionalidade <span className="text-destructive">*</span>
           </Label>
-          <Select value={nationality} onValueChange={(value) => { setNationality(value); handleBlur("nationality"); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isNationalityValid, touched.nationality))}>
-              <SelectValue placeholder="Selecione seu país" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((country) => (
-                <SelectItem key={country.id} value={country.id.toString()}>
-                  <span className="flex items-center gap-2">
-                    {country.bandeira_url && (
-                      <img src={country.bandeira_url} alt="" className="w-5 h-3 object-cover rounded-sm" />
-                    )}
-                    {country.nome}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <button
+            type="button"
+            onClick={() => { setCountryPickerOpen(true); handleBlur("nationality"); }}
+            className={`w-full flex items-center justify-between px-3 py-2 border rounded-md bg-background text-left ${
+              getInputClass(getFieldStatus(isNationalityValid, touched.nationality))
+            }`}
+          >
+            {nationality ? (
+              <span className="flex items-center gap-2">
+                {countries.find(c => c.id.toString() === nationality)?.bandeira_url && (
+                  <img 
+                    src={countries.find(c => c.id.toString() === nationality)?.bandeira_url || ""} 
+                    alt="" 
+                    className="w-5 h-3 object-cover rounded-sm" 
+                  />
+                )}
+                <span>{countries.find(c => c.id.toString() === nationality)?.nome}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Selecione seu país</span>
+            )}
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
           {touched.nationality && !isNationalityValid && (
             <p className="text-xs text-destructive">Selecione sua nacionalidade.</p>
           )}
         </div>
+
+        <CountryPickerSheet
+          open={countryPickerOpen}
+          onOpenChange={setCountryPickerOpen}
+          countries={countries}
+          selectedCountryId={nationality}
+          onSelectCountry={(value) => { setNationality(value); handleBlur("nationality"); }}
+        />
 
         {/* Height & Weight Row - Only for Athletes */}
         {isAthlete && (
