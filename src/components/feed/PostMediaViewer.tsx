@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
@@ -88,6 +89,13 @@ export const PostMediaViewer = ({
   const { data: likers = [] } = usePostLikes(post.id, isOpen && likesCountLocal > 0);
 
   useEffect(() => {
+    console.log("[PostMediaViewer] isOpen change", {
+      isOpen,
+      postId: post?.id,
+      mediaUrlsCount: mediaUrls?.length,
+      mediaType,
+    });
+
     if (isOpen) {
       setCurrentIndex(initialIndex);
       setMediaLoaded(false);
@@ -95,7 +103,7 @@ export const PostMediaViewer = ({
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
-  }, [isOpen, initialIndex]);
+  }, [isOpen, initialIndex, post?.id, mediaType, mediaUrls?.length]);
 
   // Reset loaded state when changing media in carousel
   useEffect(() => {
@@ -390,7 +398,9 @@ export const PostMediaViewer = ({
   const isVideo = mediaType === "video";
 
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  const content = (
     <>
       <AnimatePresence>
         {isOpen && (
@@ -424,9 +434,9 @@ export const PostMediaViewer = ({
               }}
             >
               {/* Media - fullscreen */}
-              <div 
+              <div
                 ref={imageContainerRef}
-                className={`absolute inset-0 ${isVideo ? 'bg-black' : 'bg-white'} flex items-center justify-center touch-none`}
+                className={`absolute inset-0 ${isVideo ? "bg-black" : "bg-white"} flex items-center justify-center touch-none`}
                 onClick={handleTapNavigation}
                 onTouchStart={!isVideo ? handleTouchStart : undefined}
                 onTouchMove={!isVideo ? handleTouchMove : undefined}
@@ -435,10 +445,10 @@ export const PostMediaViewer = ({
                 {/* Skeleton placeholder while loading */}
                 {!mediaLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Skeleton className={`w-full h-full ${isVideo ? 'bg-gray-800' : 'bg-gray-200'}`} />
+                    <Skeleton className={`w-full h-full ${isVideo ? "bg-gray-800" : "bg-gray-200"}`} />
                   </div>
                 )}
-                
+
                 {isVideo ? (
                   <>
                     <video
@@ -472,7 +482,7 @@ export const PostMediaViewer = ({
                       }`}
                       style={{
                         transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-                        transition: scale === 1 ? 'transform 0.2s ease-out' : 'none',
+                        transition: scale === 1 ? "transform 0.2s ease-out" : "none",
                       }}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: mediaLoaded ? 1 : 0 }}
@@ -493,8 +503,8 @@ export const PostMediaViewer = ({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
-                      <ClappingHandsIcon 
-                        className="w-24 h-24 animate-applause-burst drop-shadow-lg" 
+                      <ClappingHandsIcon
+                        className="w-24 h-24 animate-applause-burst drop-shadow-lg"
                         filled={true}
                         variant="green"
                       />
@@ -505,7 +515,7 @@ export const PostMediaViewer = ({
 
               {/* Progress bar for carousel */}
               {isCarousel && showInfo && (
-                <motion.div 
+                <motion.div
                   className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2 pt-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -522,8 +532,8 @@ export const PostMediaViewer = ({
                           index < currentIndex
                             ? "w-full"
                             : index === currentIndex
-                            ? "w-full"
-                            : "w-0"
+                              ? "w-full"
+                              : "w-0"
                         }`}
                       />
                     </div>
@@ -533,7 +543,7 @@ export const PostMediaViewer = ({
 
               {/* Top gradient - only for non-video and when info is shown */}
               {!isVideo && showInfo && (
-                <motion.div 
+                <motion.div
                   className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/90 via-white/50 to-transparent z-10 pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -545,7 +555,7 @@ export const PostMediaViewer = ({
               {/* Header - overlaid with profile info and close button */}
               <AnimatePresence>
                 {showInfo && (
-                  <motion.div 
+                  <motion.div
                     className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -585,9 +595,9 @@ export const PostMediaViewer = ({
                     <button
                       onClick={onClose}
                       className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
-                        isVideo 
-                          ? 'bg-black/50 text-white hover:bg-black/70' 
-                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        isVideo
+                          ? "bg-black/50 text-white hover:bg-black/70"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                       }`}
                     >
                       <span className="material-symbols-outlined">arrow_back</span>
@@ -611,7 +621,7 @@ export const PostMediaViewer = ({
 
               {/* Bottom gradient - only for non-video and when info is shown */}
               {!isVideo && showInfo && (
-                <motion.div 
+                <motion.div
                   className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white/95 via-white/70 to-transparent z-10 pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -623,7 +633,7 @@ export const PostMediaViewer = ({
               {/* Footer - overlaid - hidden for video and when info is hidden */}
               <AnimatePresence>
                 {!isVideo && showInfo && (
-                  <motion.div 
+                  <motion.div
                     className="absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -632,9 +642,7 @@ export const PostMediaViewer = ({
                   >
                     {/* Caption */}
                     {post.content && (
-                      <p className="text-sm text-gray-900 line-clamp-2">
-                        {post.content}
-                      </p>
+                      <p className="text-sm text-gray-900 line-clamp-2">{post.content}</p>
                     )}
 
                     {/* Location */}
@@ -650,31 +658,30 @@ export const PostMediaViewer = ({
                       </a>
                     )}
 
-
                     {/* Applauded by section */}
                     {likesCountLocal > 0 && likers.length > 0 && (
                       <div className="pt-1 pb-1">
-                        <button 
-                          onClick={() => setShowLikesSheet(true)} 
+                        <button
+                          onClick={() => setShowLikesSheet(true)}
                           className="flex items-center gap-2 group text-left"
                         >
                           {/* Stacked avatars */}
                           <div className="flex -space-x-2">
                             {likers.slice(0, 3).map((liker, index) => (
-                              <img 
-                                key={liker.user_id} 
-                                src={liker.avatar_url || "/placeholder.svg"} 
+                              <img
+                                key={liker.user_id}
+                                src={liker.avatar_url || "/placeholder.svg"}
                                 alt={liker.username}
                                 className="w-6 h-6 rounded-full border-2 border-background object-cover"
                                 style={{ zIndex: 3 - index }}
                               />
                             ))}
                           </div>
-                          
+
                           {/* Text */}
                           <p className="text-sm text-foreground">
                             Aplaudido por{" "}
-                            <span 
+                            <span
                               className="font-semibold group-hover:underline"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -687,8 +694,8 @@ export const PostMediaViewer = ({
                               <>
                                 {" "}e{" "}
                                 <span className="font-semibold group-hover:underline">
-                                  {likesCountLocal === 2 
-                                    ? likers[1]?.username || "outra pessoa" 
+                                  {likesCountLocal === 2
+                                    ? likers[1]?.username || "outra pessoa"
                                     : `outras ${likesCountLocal - 1} pessoas`}
                                 </span>
                               </>
@@ -767,15 +774,13 @@ export const PostMediaViewer = ({
                           onClick={handleSave}
                           disabled={savePost.isPending}
                           className={`flex items-center justify-center p-3 transition-colors ${
-                            isSavedLocal 
-                              ? 'text-primary' 
-                              : 'text-foreground hover:text-muted-foreground'
+                            isSavedLocal ? "text-primary" : "text-foreground hover:text-muted-foreground"
                           }`}
                         >
-                          <Bookmark 
-                            className="w-6 h-6" 
-                            strokeWidth={1.5} 
-                            fill={isSavedLocal ? 'currentColor' : 'none'} 
+                          <Bookmark
+                            className="w-6 h-6"
+                            strokeWidth={1.5}
+                            fill={isSavedLocal ? "currentColor" : "none"}
                           />
                         </button>
                       </div>
@@ -789,18 +794,10 @@ export const PostMediaViewer = ({
       </AnimatePresence>
 
       {/* Likes Sheet */}
-      <LikesSheet
-        postId={post.id}
-        open={showLikesSheet}
-        onOpenChange={setShowLikesSheet}
-      />
+      <LikesSheet postId={post.id} open={showLikesSheet} onOpenChange={setShowLikesSheet} />
 
       {/* Comments Sheet */}
-      <CommentsSheet
-        post={post}
-        open={showCommentsSheet}
-        onOpenChange={setShowCommentsSheet}
-      />
+      <CommentsSheet post={post} open={showCommentsSheet} onOpenChange={setShowCommentsSheet} />
 
       {/* Share Sheet */}
       <ShareToChatSheet
@@ -814,4 +811,6 @@ export const PostMediaViewer = ({
       />
     </>
   );
+
+  return createPortal(content, document.body);
 };

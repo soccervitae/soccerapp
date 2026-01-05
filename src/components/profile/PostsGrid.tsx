@@ -162,9 +162,11 @@ export const PostsGrid = ({
     index: number
   ) => {
     e.stopPropagation();
+    console.log("[PostsGrid] post click", { postId: post.id, index, feedSheetOpen });
     if (feedSheetOpen) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    console.log("[PostsGrid] originRect", rect);
     setOriginRect(rect);
     setSelectedPost(post);
     setSelectedPostIndex(index);
