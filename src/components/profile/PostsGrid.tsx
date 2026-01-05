@@ -112,6 +112,7 @@ export const PostsGrid = ({
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number>(-1);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [viewerPosts, setViewerPosts] = useState<Post[]>([]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -156,6 +157,7 @@ export const PostsGrid = ({
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setOriginRect(rect);
+    setViewerPosts(filteredPosts);
     setSelectedPostIndex(index);
     setFeedSheetOpen(true);
   };
@@ -361,13 +363,14 @@ export const PostsGrid = ({
       {/* Profile Media Viewer */}
       {profile && (
         <ProfileMediaViewer
-          posts={currentFilteredPosts}
+          posts={viewerPosts.length ? viewerPosts : currentFilteredPosts}
           initialPostIndex={selectedPostIndex}
           isOpen={feedSheetOpen}
           onClose={() => {
             setFeedSheetOpen(false);
             setSelectedPostIndex(-1);
             setOriginRect(null);
+            setViewerPosts([]);
           }}
           profile={profile}
           originRect={originRect}
