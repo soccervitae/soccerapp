@@ -183,8 +183,25 @@ export const FeedPost = ({
     // Wait to check for double tap
     const now = Date.now();
     const target = e.currentTarget;
+
+    if (import.meta.env.DEV) {
+      console.log("[FeedPost] media click", {
+        postId: post.id,
+        mediaType: post.media_type,
+        imageIndex,
+        now,
+      });
+    }
+
     setTimeout(() => {
       if (lastTapRef.current === now) {
+        if (import.meta.env.DEV) {
+          console.log("[FeedPost] opening FullscreenImageViewer", {
+            postId: post.id,
+            imageIndex,
+          });
+        }
+
         // Single tap - open fullscreen image viewer with origin rect
         const rect = target.getBoundingClientRect();
         setImageOriginRect({
@@ -197,6 +214,7 @@ export const FeedPost = ({
         setIsImageViewerOpen(true);
       }
     }, 300);
+
     handleDoubleTap(e);
   };
   const handleSave = () => {
