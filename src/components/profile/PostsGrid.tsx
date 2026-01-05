@@ -224,8 +224,10 @@ export const PostsGrid = ({
           <button
             key={post.id}
             type="button"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
             onClick={(e) => handlePostClick(e, filteredPosts, index)}
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onTouchStartCapture={(e) => e.stopPropagation()}
             aria-label="Abrir post"
           >
             {post.media_url ? (
