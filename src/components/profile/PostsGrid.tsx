@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { Play, Loader2 } from "lucide-react";
+import { Play, Loader2, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import { FeedPost } from "@/components/feed/FeedPost";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -143,11 +144,7 @@ export const PostsGrid = ({
       return true;
     }
   });
-  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<Post | SavedPost | null>(null);
-  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  const [viewerPosts, setViewerPosts] = useState<(Post | SavedPost)[]>([]);
-  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [expandedPost, setExpandedPost] = useState<Post | SavedPost | null>(null);
   const [isSavedPostsViewer, setIsSavedPostsViewer] = useState(false);
 
   const onSelect = useCallback(() => {
@@ -181,31 +178,14 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (
-    e: React.MouseEvent<HTMLElement>,
-    post: Post,
-    filteredPosts: Post[],
-    index: number
-  ) => {
-    e.stopPropagation();
-    console.log("[PostsGrid] post click", { postId: post.id, index, feedSheetOpen });
-    if (feedSheetOpen) return;
-
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    console.log("[PostsGrid] originRect", rect);
-    setOriginRect(rect);
-    setSelectedPost(post);
-    setSelectedPostIndex(index);
-    setViewerPosts(filteredPosts);
+  const handlePostClick = (post: Post) => {
+    setExpandedPost(post);
     setIsSavedPostsViewer(false);
-    setFeedSheetOpen(true);
   };
 
-  const handleNavigatePost = (newIndex: number) => {
-    if (newIndex >= 0 && newIndex < viewerPosts.length) {
-      setSelectedPostIndex(newIndex);
-      setSelectedPost(viewerPosts[newIndex]);
-    }
+  const handleSavedPostClick = (post: SavedPost) => {
+    setExpandedPost(post);
+    setIsSavedPostsViewer(true);
   };
 
   const getMediaUrls = (mediaUrl: string | null): string[] => {
@@ -358,13 +338,17 @@ export const PostsGrid = ({
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
         {filteredPosts.map((post) => (
-          <div
+          <button
             key={post.id}
-            className="aspect-[4/5] bg-muted relative overflow-hidden"
+            type="button"
+            data-embla-no-drag="true"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
+            onClick={() => handlePostClick(post)}
+            aria-label="Abrir post"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
-                <div className="w-full h-full">
+                <div className="w-full h-full pointer-events-none">
                   <VideoThumbnail src={post.media_url} alt={post.content} />
                 </div>
               ) : post.media_type === "carousel" ? (
@@ -376,10 +360,10 @@ export const PostsGrid = ({
                         <img
                           src={urls[0]}
                           alt={post.content}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover pointer-events-none"
                           loading="lazy"
                         />
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 right-2 pointer-events-none">
                           <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
                         </div>
                       </>
@@ -389,7 +373,7 @@ export const PostsGrid = ({
                       <img
                         src={post.media_url}
                         alt={post.content}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover pointer-events-none"
                         loading="lazy"
                       />
                     );
@@ -399,16 +383,17 @@ export const PostsGrid = ({
                 <img
                   src={post.media_url}
                   alt={post.content}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                   loading="lazy"
                 />
               )
             ) : (
-              <div className="w-full h-full flex items-center justify-center p-2">
+              <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
             )}
-          </div>
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
+          </button>
         ))}
       </div>
     );
@@ -427,23 +412,13 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post, index) => (
+        {filteredPosts.map((post) => (
           <button
             key={post.id}
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (feedSheetOpen) return;
-              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-              setOriginRect(rect);
-              setSelectedPost(post);
-              setSelectedPostIndex(index);
-              setViewerPosts(filteredPosts);
-              setIsSavedPostsViewer(true);
-              setFeedSheetOpen(true);
-            }}
+            onClick={() => handleSavedPostClick(post)}
             aria-label="Abrir post salvo"
           >
             {post.media_url ? (
@@ -599,35 +574,37 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Post Media Viewer - Fullscreen */}
-      {selectedPost && (
-        <PostMediaViewer
-          post={isSavedPostsViewer 
-            ? transformSavedPostForViewer(selectedPost as SavedPost) 
-            : transformPostForViewer(selectedPost)
-          }
-          mediaUrls={getMediaUrls(selectedPost.media_url)}
-          mediaType={selectedPost.media_type}
-          initialIndex={0}
-          isOpen={feedSheetOpen}
-          onClose={() => {
-            setFeedSheetOpen(false);
-            setSelectedPost(null);
-            setSelectedPostIndex(0);
-            setViewerPosts([]);
-            setOriginRect(null);
-            setIsSavedPostsViewer(false);
-          }}
-          originRect={originRect}
-          posts={viewerPosts.map(p => 
-            isSavedPostsViewer 
-              ? transformSavedPostForViewer(p as SavedPost) 
-              : transformPostForViewer(p)
-          )}
-          currentPostIndex={selectedPostIndex}
-          onNavigatePost={handleNavigatePost}
-        />
-      )}
+      {/* Expanded Post Overlay */}
+      <AnimatePresence>
+        {expandedPost && (
+          <motion.div
+            className="fixed inset-0 z-[60] bg-background overflow-y-auto"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Header with back button */}
+            <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3">
+              <button 
+                onClick={() => setExpandedPost(null)}
+                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <span className="font-semibold">Post</span>
+            </div>
+            
+            {/* Feed Post */}
+            <FeedPost 
+              post={isSavedPostsViewer 
+                ? transformSavedPostForViewer(expandedPost as SavedPost) 
+                : transformPostForViewer(expandedPost)
+              } 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
