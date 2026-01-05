@@ -108,7 +108,16 @@ export const PostsGrid = ({
   profile,
 }: PostsGridProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("posts");
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, skipSnaps: false });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false, 
+    skipSnaps: false,
+    watchDrag: (_emblaApi, event) => {
+      const target = event.target as HTMLElement | null;
+      // Don't allow drag when touching post thumbnails
+      if (target?.closest('[data-embla-no-drag="true"]')) return false;
+      return true;
+    }
+  });
   const [feedSheetOpen, setFeedSheetOpen] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number>(-1);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
@@ -224,10 +233,9 @@ export const PostsGrid = ({
           <button
             key={post.id}
             type="button"
+            data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
             onClick={(e) => handlePostClick(e, filteredPosts, index)}
-            onPointerDownCapture={(e) => e.stopPropagation()}
-            onTouchStartCapture={(e) => e.stopPropagation()}
             aria-label="Abrir post"
           >
             {post.media_url ? (
