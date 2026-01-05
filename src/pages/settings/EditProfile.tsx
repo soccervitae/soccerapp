@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
 import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronsUpDown } from "lucide-react";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
@@ -910,13 +910,13 @@ const EditProfile = () => {
         </div>
       </form>
 
-      {/* Cover Photo Menu Sheet */}
-      <Sheet open={coverMenuOpen} onOpenChange={setCoverMenuOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader>
-            <SheetTitle>Alterar foto de capa</SheetTitle>
-          </SheetHeader>
-          <div className="py-4 space-y-2">
+      {/* Cover Photo Menu Drawer */}
+      <Drawer open={coverMenuOpen} onOpenChange={setCoverMenuOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Alterar foto de capa</DrawerTitle>
+          </DrawerHeader>
+          <div className="py-4 px-4 space-y-2">
             <button
               onClick={() => processCameraImage('cover', 'camera')}
               disabled={isProcessingImage}
@@ -948,16 +948,16 @@ const EditProfile = () => {
               <span>Cancelar</span>
             </button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
-      {/* Avatar Photo Menu Sheet */}
-      <Sheet open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader>
-            <SheetTitle>Alterar foto de perfil</SheetTitle>
-          </SheetHeader>
-          <div className="py-4 space-y-2">
+      {/* Avatar Photo Menu Drawer */}
+      <Drawer open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Alterar foto de perfil</DrawerTitle>
+          </DrawerHeader>
+          <div className="py-4 px-4 space-y-2">
             <button
               onClick={() => processCameraImage('avatar', 'camera')}
               disabled={isProcessingImage}
@@ -989,8 +989,8 @@ const EditProfile = () => {
               <span>Cancelar</span>
             </button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       {/* Image Crop Editor */}
       {showCropEditor && imageToCrop && (

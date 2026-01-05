@@ -10,7 +10,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, ResponsiveModalTitle } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -252,12 +252,12 @@ export const ProfileInfo = ({
                   Compartilhar
                 </button>
                 
-                <Sheet open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
-                  <SheetContent side="bottom" className="rounded-t-2xl">
-                    <SheetHeader className="pb-2">
-                      <SheetTitle className="text-center">Compartilhar Perfil</SheetTitle>
-                    </SheetHeader>
-                    <div className="flex flex-col gap-2 py-4">
+                <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+                  <DrawerContent>
+                    <DrawerHeader className="pb-2">
+                      <DrawerTitle className="text-center">Compartilhar Perfil</DrawerTitle>
+                    </DrawerHeader>
+                    <div className="flex flex-col gap-2 py-4 px-4">
                       <button onClick={() => {
                   handleShareProfile();
                   setShareSheetOpen(false);
@@ -280,8 +280,8 @@ export const ProfileInfo = ({
                           <span className="font-medium">Compartilhar</span>
                         </button>}
                     </div>
-                  </SheetContent>
-                </Sheet>
+                  </DrawerContent>
+                </Drawer>
               </> : <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex-1 bg-muted hover:bg-muted/80 text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors border border-border flex items-center justify-center gap-1.5 shadow-sm">
