@@ -123,11 +123,11 @@ const ExploreFiltersSheet = ({
               Tipo de Perfil
             </label>
             <Select
-              value={localFilters.profileType?.toString() || ""}
+              value={localFilters.profileType?.toString() || "all"}
               onValueChange={(value) =>
                 setLocalFilters({
                   ...localFilters,
-                  profileType: value ? Number(value) : null,
+                  profileType: value === "all" ? null : Number(value),
                 })
               }
             >
@@ -135,7 +135,7 @@ const ExploreFiltersSheet = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border z-50">
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {profileTypes?.map((type) => (
                   <SelectItem key={type.id} value={type.id.toString()}>
                     {type.name}
@@ -149,11 +149,11 @@ const ExploreFiltersSheet = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Sexo</label>
             <Select
-              value={localFilters.gender || ""}
+              value={localFilters.gender || "all"}
               onValueChange={(value) =>
                 setLocalFilters({
                   ...localFilters,
-                  gender: value || null,
+                  gender: value === "all" ? null : value,
                 })
               }
             >
@@ -161,7 +161,7 @@ const ExploreFiltersSheet = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border z-50">
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="masculino">Masculino</SelectItem>
                 <SelectItem value="feminino">Feminino</SelectItem>
               </SelectContent>
@@ -174,11 +174,11 @@ const ExploreFiltersSheet = ({
               Ano de Nascimento
             </label>
             <Select
-              value={localFilters.birthYear?.toString() || ""}
+              value={localFilters.birthYear?.toString() || "all"}
               onValueChange={(value) =>
                 setLocalFilters({
                   ...localFilters,
-                  birthYear: value ? Number(value) : null,
+                  birthYear: value === "all" ? null : Number(value),
                 })
               }
             >
@@ -186,7 +186,7 @@ const ExploreFiltersSheet = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border z-50 max-h-60">
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {years.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
@@ -200,11 +200,11 @@ const ExploreFiltersSheet = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">País</label>
             <Select
-              value={localFilters.countryId?.toString() || ""}
+              value={localFilters.countryId?.toString() || "all"}
               onValueChange={(value) =>
                 setLocalFilters({
                   ...localFilters,
-                  countryId: value ? Number(value) : null,
+                  countryId: value === "all" ? null : Number(value),
                 })
               }
             >
@@ -212,7 +212,7 @@ const ExploreFiltersSheet = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border z-50 max-h-60">
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {countries?.map((country) => (
                   <SelectItem key={country.id} value={country.id.toString()}>
                     <div className="flex items-center gap-2">
