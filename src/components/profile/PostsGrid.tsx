@@ -60,8 +60,15 @@ interface Profile {
   id: string;
   username: string;
   full_name: string | null;
+  nickname?: string | null;
   avatar_url: string | null;
   conta_verificada?: boolean;
+  gender?: string | null;
+  role?: string | null;
+  posicaomas?: number | null;
+  posicaofem?: number | null;
+  funcao?: number | null;
+  position_name?: string | null;
 }
 
 interface PostsGridProps {

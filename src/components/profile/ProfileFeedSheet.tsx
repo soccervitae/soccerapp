@@ -26,8 +26,15 @@ interface Profile {
   id: string;
   username: string;
   full_name: string | null;
+  nickname?: string | null;
   avatar_url: string | null;
   conta_verificada?: boolean;
+  gender?: string | null;
+  role?: string | null;
+  posicaomas?: number | null;
+  posicaofem?: number | null;
+  funcao?: number | null;
+  position_name?: string | null;
 }
 
 interface ProfileFeedSheetProps {
@@ -119,16 +126,16 @@ export const ProfileFeedSheet = ({
       id: profile.id,
       username: profile.username,
       full_name: profile.full_name,
-      nickname: profile.full_name || "",
+      nickname: profile.nickname || profile.full_name || "",
       avatar_url: profile.avatar_url,
       team: "",
       conta_verificada: profile.conta_verificada || false,
-      gender: null,
-      role: null,
-      posicaomas: null,
-      posicaofem: null,
-      funcao: null,
-      position_name: null,
+      gender: profile.gender || null,
+      role: profile.role || null,
+      posicaomas: profile.posicaomas || null,
+      posicaofem: profile.posicaofem || null,
+      funcao: profile.funcao || null,
+      position_name: profile.position_name || null,
     },
     liked_by_user: post.liked_by_user ?? false,
     saved_by_user: post.saved_by_user ?? false,
