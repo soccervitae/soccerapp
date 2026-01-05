@@ -266,11 +266,14 @@ const EditProfile = () => {
   const hasUnsavedChanges = useMemo(() => {
     if (!profile) return false;
     
+    // Get current position based on gender/role for comparison
+    const currentPosition = profile.posicaomas?.toString() || profile.posicaofem?.toString() || profile.funcao?.toString() || "";
+    
     const hasFormChanges = 
       formData.full_name !== (profile.full_name || "") ||
       formData.username !== (profile.username || "") ||
       formData.bio !== (profile.bio || "") ||
-      formData.position !== (profile.position || "") ||
+      formData.position !== currentPosition ||
       formData.role !== (profile.role || "") ||
       formData.team !== (profile.team || "") ||
       formData.height !== (profile.height?.toString() || "") ||

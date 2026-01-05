@@ -34,12 +34,50 @@ export const RightSidebar = () => {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, position, team")
+        .select("id, username, full_name, avatar_url, team, gender, role, posicaomas, posicaofem, funcao")
         .not("id", "in", `(${followingIds.join(",")})`)
         .limit(5);
 
       if (error) throw error;
-      return data;
+      
+      // Fetch position names
+      const positionNamesMap = new Map<string, string>();
+      const malePositionIds = new Set<number>();
+      const femalePositionIds = new Set<number>();
+      
+      data?.forEach(profile => {
+        const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+        const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+        if (isMale && profile.posicaomas) {
+          malePositionIds.add(profile.posicaomas);
+        } else if (isFemale && profile.posicaofem) {
+          femalePositionIds.add(profile.posicaofem);
+        }
+      });
+      
+      const [malePositions, femalePositions] = await Promise.all([
+        malePositionIds.size > 0 
+          ? supabase.from('posicao_masculina').select('id, name').in('id', Array.from(malePositionIds))
+          : { data: [] },
+        femalePositionIds.size > 0
+          ? supabase.from('posicao_feminina').select('id, name').in('id', Array.from(femalePositionIds))
+          : { data: [] },
+      ]);
+      
+      malePositions.data?.forEach(p => positionNamesMap.set(`m-${p.id}`, p.name));
+      femalePositions.data?.forEach(p => positionNamesMap.set(`f-${p.id}`, p.name));
+      
+      return data?.map(profile => {
+        const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+        const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+        let positionName: string | null = null;
+        if (isMale && profile.posicaomas) {
+          positionName = positionNamesMap.get(`m-${profile.posicaomas}`) || null;
+        } else if (isFemale && profile.posicaofem) {
+          positionName = positionNamesMap.get(`f-${profile.posicaofem}`) || null;
+        }
+        return { ...profile, position_name: positionName };
+      }) || [];
     },
     enabled: !!user,
   });
@@ -89,7 +127,7 @@ export const RightSidebar = () => {
                     {profile.full_name || profile.username}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {profile.position || "Atleta"} {profile.team && `• ${profile.team}`}
+                    {profile.position_name || "Atleta"} {profile.team && `• ${profile.team}`}
                   </p>
                 </div>
                 <Button

@@ -19,7 +19,6 @@ export interface Profile {
   avatar_url: string | null;
   cover_url: string | null;
   bio: string | null;
-  position: number | null;
   position_name: string | null;
   posicaomas: number | null;
   posicaofem: number | null;

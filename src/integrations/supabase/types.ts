@@ -1047,7 +1047,6 @@ export type Database = {
           password_reset_expires_at: string | null
           posicaofem: number | null
           posicaomas: number | null
-          position: number | null
           preferred_foot: string | null
           profile_completed: boolean | null
           role: string | null
@@ -1093,7 +1092,6 @@ export type Database = {
           password_reset_expires_at?: string | null
           posicaofem?: number | null
           posicaomas?: number | null
-          position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null
@@ -1139,7 +1137,6 @@ export type Database = {
           password_reset_expires_at?: string | null
           posicaofem?: number | null
           posicaomas?: number | null
-          position?: number | null
           preferred_foot?: string | null
           profile_completed?: boolean | null
           role?: string | null
@@ -1172,13 +1169,6 @@ export type Database = {
           {
             foreignKeyName: "profiles_posicaomas_fkey"
             columns: ["posicaomas"]
-            isOneToOne: false
-            referencedRelation: "posicao_masculina"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_position_fkey"
-            columns: ["position"]
             isOneToOne: false
             referencedRelation: "posicao_masculina"
             referencedColumns: ["id"]

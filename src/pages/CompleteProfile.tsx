@@ -107,7 +107,10 @@ const CompleteProfile = () => {
       if (profile.gender) setGender(profile.gender);
       if (profile.role) setProfileType(profile.role);
       if (profile.birth_date) setBirthDate(profile.birth_date);
-      if (profile.position) setPosition(profile.position.toString());
+      // Load position based on gender/role
+      if (profile.posicaomas) setPosition(profile.posicaomas.toString());
+      else if (profile.posicaofem) setPosition(profile.posicaofem.toString());
+      else if (profile.funcao) setPosition(profile.funcao.toString());
       if (profile.height) setHeight(profile.height.toString());
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
