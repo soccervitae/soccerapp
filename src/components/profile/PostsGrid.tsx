@@ -230,13 +230,9 @@ export const PostsGrid = ({
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
         {filteredPosts.map((post, index) => (
-          <button
+          <div
             key={post.id}
-            type="button"
-            data-embla-no-drag="true"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePostClick(e, filteredPosts, index)}
-            aria-label="Abrir post"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -285,7 +281,7 @@ export const PostsGrid = ({
               </div>
             )}
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </button>
+          </div>
         ))}
       </div>
     );
