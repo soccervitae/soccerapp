@@ -7,7 +7,7 @@ import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { ConversationItem } from "@/components/messages/ConversationItem";
 import { OnlineUserAvatar } from "@/components/messages/OnlineUserAvatar";
-import { NotificationPermissionButton } from "@/components/notifications/NotificationPermissionButton";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
@@ -54,6 +54,14 @@ const Messages = () => {
   
   const isRefetching = (isFetching || isFetchingFollowing) && !isLoading && !isLoadingFollowing;
   const { isUserOnline } = usePresenceContext();
+  const { requestPermission } = usePushNotifications();
+  
+  // Request notification permission automatically on mount
+  useEffect(() => {
+    if (user && 'Notification' in window && Notification.permission === 'default') {
+      requestPermission();
+    }
+  }, [user, requestPermission]);
 
   const handleRefresh = async () => {
     await refetch();
@@ -290,10 +298,6 @@ const Messages = () => {
           <OfflineIndicator />
         </div>
 
-        {/* Notification permission prompt */}
-        <div className="px-3 pb-2">
-          <NotificationPermissionButton />
-        </div>
 
         {/* Campo de busca */}
         <div className="px-3 pb-3">
