@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, MouseEvent } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
@@ -145,8 +145,11 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
-    // Avoid duplicate opens when Embla interprets click/drag sequences
+  const handlePostClick = (
+    e: React.MouseEvent<HTMLElement>,
+    filteredPosts: Post[],
+    index: number
+  ) => {
     e.stopPropagation();
 
     if (!filteredPosts[index] || feedSheetOpen) return;
@@ -156,9 +159,6 @@ export const PostsGrid = ({
     setViewerPosts(filteredPosts);
     setSelectedPostIndex(index);
     setFeedSheetOpen(true);
-
-    // Debug (remove later)
-    console.log("[PostsGrid] open ProfileFeedSheet", { postId: filteredPosts[index].id, index });
   };
 
   // Component to render video with thumbnail
@@ -221,10 +221,12 @@ export const PostsGrid = ({
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
         {filteredPosts.map((post, index) => (
-          <div 
-            key={post.id} 
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onPointerUp={(e) => handlePostClick(e as unknown as MouseEvent, filteredPosts, index)}
+          <button
+            key={post.id}
+            type="button"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation"
+            onClick={(e) => handlePostClick(e, filteredPosts, index)}
+            aria-label="Abrir post"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -235,10 +237,11 @@ export const PostsGrid = ({
                     const urls = JSON.parse(post.media_url);
                     return (
                       <>
-                        <img 
-                          src={urls[0]} 
+                        <img
+                          src={urls[0]}
                           alt={post.content}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                         <div className="absolute top-2 right-2">
                           <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
@@ -247,19 +250,21 @@ export const PostsGrid = ({
                     );
                   } catch {
                     return (
-                      <img 
-                        src={post.media_url} 
+                      <img
+                        src={post.media_url}
                         alt={post.content}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     );
                   }
                 })()
               ) : (
-                <img 
-                  src={post.media_url} 
+                <img
+                  src={post.media_url}
                   alt={post.content}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               )
             ) : (
@@ -268,7 +273,7 @@ export const PostsGrid = ({
               </div>
             )}
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors" />
-          </div>
+          </button>
         ))}
       </div>
     );

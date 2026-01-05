@@ -57,10 +57,6 @@ export const ProfileFeedSheet = ({
   profile,
   originRect,
 }: ProfileFeedSheetProps) => {
-  // Debug (remove later)
-  useEffect(() => {
-    console.log("[ProfileFeedSheet] render", { isOpen, postsLen: posts.length, initialPostIndex });
-  }, [isOpen, posts.length, initialPostIndex]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
