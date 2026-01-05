@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, MouseEvent } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Play, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
@@ -146,6 +147,11 @@ export const PostsGrid = ({
   };
 
   const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
+    if (!filteredPosts[index]) {
+      toast.error("Post inválido");
+      return;
+    }
+
     if (import.meta.env.DEV) {
       console.log("[PostsGrid] thumbnail click", {
         tab: activeTab,
@@ -153,6 +159,7 @@ export const PostsGrid = ({
         index,
         filteredCount: filteredPosts.length,
       });
+      toast.message("Abrindo post…");
     }
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
