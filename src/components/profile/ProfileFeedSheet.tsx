@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Post {
   id: string;
@@ -57,6 +58,14 @@ export const ProfileFeedSheet = ({
 }: ProfileFeedSheetProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const queryClient = useQueryClient();
+
+  // Pull-to-refresh state
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
+  const PULL_THRESHOLD = 80;
 
   // Block body scroll when open
   useEffect(() => {
@@ -78,6 +87,47 @@ export const ProfileFeedSheet = ({
       }, 100);
     }
   }, [isOpen, initialPostIndex]);
+
+  // Pull-to-refresh handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const scrollTop = scrollContainerRef.current?.scrollTop || 0;
+    if (scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current || isRefreshing) return;
+    
+    const scrollTop = scrollContainerRef.current?.scrollTop || 0;
+    if (scrollTop > 0) {
+      isPulling.current = false;
+      setPullDistance(0);
+      return;
+    }
+
+    const currentY = e.touches[0].clientY;
+    const distance = Math.max(0, (currentY - touchStartY.current) * 0.5);
+    setPullDistance(Math.min(distance, PULL_THRESHOLD * 1.5));
+  }, [isRefreshing]);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (!isPulling.current) return;
+    isPulling.current = false;
+
+    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
+      setIsRefreshing(true);
+      setPullDistance(PULL_THRESHOLD);
+      
+      // Invalidate user posts query
+      await queryClient.invalidateQueries({ queryKey: ["user-posts", profile.id] });
+      
+      setIsRefreshing(false);
+    }
+    
+    setPullDistance(0);
+  }, [pullDistance, isRefreshing, queryClient, profile.id]);
 
   const getInitialPosition = () => {
     if (!originRect) {
@@ -185,10 +235,34 @@ export const ProfileFeedSheet = ({
               <span className="font-semibold ml-2">Posts</span>
             </div>
 
+            {/* Pull-to-refresh indicator */}
+            <div 
+              className="flex items-center justify-center overflow-hidden transition-all duration-200"
+              style={{ height: pullDistance > 0 ? pullDistance : 0 }}
+            >
+              {pullDistance > 0 && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 
+                    className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
+                    style={{ 
+                      transform: isRefreshing ? 'none' : `rotate(${pullDistance * 3}deg)`,
+                      opacity: Math.min(pullDistance / PULL_THRESHOLD, 1)
+                    }}
+                  />
+                  <span className="text-sm" style={{ opacity: Math.min(pullDistance / PULL_THRESHOLD, 1) }}>
+                    {isRefreshing ? 'Atualizando...' : pullDistance >= PULL_THRESHOLD ? 'Solte para atualizar' : 'Puxe para atualizar'}
+                  </span>
+                </div>
+              )}
+            </div>
+
             {/* Feed */}
             <div 
               ref={scrollContainerRef}
               className="flex-1 overflow-y-auto"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {posts.map((post, index) => (
                 <div 
