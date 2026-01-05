@@ -71,6 +71,12 @@ const Security = () => {
   const [isSigningOutOthers, setIsSigningOutOthers] = useState(false);
   const [isSigningOutAll, setIsSigningOutAll] = useState(false);
 
+  // Delete account state
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+  const [showDeleteAccountFinalConfirm, setShowDeleteAccountFinalConfirm] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
   // Load current device fingerprint
   useEffect(() => {
     const loadFingerprint = async () => {
@@ -887,6 +893,36 @@ const Security = () => {
             </div>
           </div>
         </section>
+
+        <Separator />
+
+        {/* Delete Account Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Trash2 className="h-5 w-5 text-destructive" />
+            <h2 className="text-base font-semibold text-destructive">Zona de Perigo</h2>
+          </div>
+
+          <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+              <div className="space-y-1">
+                <p className="font-medium text-sm text-destructive">Deletar conta permanentemente</p>
+                <p className="text-xs text-muted-foreground">
+                  Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => setShowDeleteAccountConfirm(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Deletar minha conta
+            </Button>
+          </div>
+        </section>
       </div>
 
       {/* Remove Device Modal - Responsive */}
@@ -948,6 +984,103 @@ const Security = () => {
         onConfirm={handleSignOutAll}
         confirmVariant="destructive"
       />
+
+      {/* Delete Account First Confirmation */}
+      <ResponsiveAlertModal
+        open={showDeleteAccountConfirm}
+        onOpenChange={setShowDeleteAccountConfirm}
+        title="Deletar conta permanentemente?"
+        description="Esta ação é IRREVERSÍVEL. Todos os seus dados serão permanentemente excluídos, incluindo posts, mensagens, seguidores e configurações. Você não poderá recuperar sua conta."
+        cancelText="Cancelar"
+        confirmText="Continuar"
+        onConfirm={() => {
+          setShowDeleteAccountConfirm(false);
+          setShowDeleteAccountFinalConfirm(true);
+        }}
+        confirmVariant="destructive"
+      />
+
+      {/* Delete Account Final Confirmation Modal */}
+      <ResponsiveModal open={showDeleteAccountFinalConfirm} onOpenChange={(open) => {
+        setShowDeleteAccountFinalConfirm(open);
+        if (!open) setDeleteConfirmText("");
+      }}>
+        <ResponsiveModalContent className="sm:max-w-md">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Confirmar exclusão da conta
+            </ResponsiveModalTitle>
+            <ResponsiveModalDescription>
+              Para confirmar a exclusão permanente da sua conta, digite <strong className="text-foreground">DELETAR</strong> abaixo.
+            </ResponsiveModalDescription>
+          </ResponsiveModalHeader>
+          <div className="py-4 space-y-4">
+            <Input
+              placeholder="Digite DELETAR para confirmar"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+              className="text-center font-mono"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowDeleteAccountFinalConfirm(false);
+                  setDeleteConfirmText("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                disabled={deleteConfirmText !== "DELETAR" || isDeletingAccount}
+                onClick={async () => {
+                  setIsDeletingAccount(true);
+                  try {
+                    // Delete user data from database
+                    if (user?.id) {
+                      // Delete user devices
+                      await supabase.from("user_devices").delete().eq("user_id", user.id);
+                      // Delete profile (will cascade to related data)
+                      await supabase.from("profiles").delete().eq("id", user.id);
+                    }
+                    
+                    // Sign out and delete auth user
+                    await supabase.auth.signOut({ scope: "global" });
+                    
+                    toast({
+                      title: "Conta deletada",
+                      description: "Sua conta foi permanentemente excluída.",
+                    });
+                    
+                    navigate("/auth");
+                  } catch (error) {
+                    console.error("Error deleting account:", error);
+                    toast({
+                      variant: "destructive",
+                      title: "Erro ao deletar conta",
+                      description: "Não foi possível deletar sua conta. Tente novamente.",
+                    });
+                    setIsDeletingAccount(false);
+                  }
+                }}
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Deletando...
+                  </>
+                ) : (
+                  "Deletar minha conta"
+                )}
+              </Button>
+            </div>
+          </div>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
     </div>
   );
 };
