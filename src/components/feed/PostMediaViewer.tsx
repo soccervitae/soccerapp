@@ -573,7 +573,9 @@ export const PostMediaViewer = ({
                           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 p-[2px]" />
                           <Avatar className="w-10 h-10 relative border-2 border-white">
                             <AvatarImage src={post.profile.avatar_url || "/placeholder.svg"} />
-                            <AvatarFallback>{post.profile.username[0].toUpperCase()}</AvatarFallback>
+                            <AvatarFallback>
+                              {(post.profile.username?.[0] ?? "?").toUpperCase()}
+                            </AvatarFallback>
                           </Avatar>
                         </div>
                         <div className="text-left">

@@ -212,9 +212,9 @@ export const PostsGrid = ({
     recent_likes: [],
     profile: {
       id: profile?.id || "",
-      username: profile?.username || "",
+      username: profile?.username || "usuario",
       full_name: profile?.full_name || "",
-      nickname: profile?.nickname || profile?.full_name || "",
+      nickname: profile?.nickname || profile?.full_name || profile?.username || "Usuario",
       avatar_url: profile?.avatar_url || null,
       team: null,
       conta_verificada: profile?.conta_verificada || false,
@@ -436,7 +436,7 @@ export const PostsGrid = ({
       </div>
 
       {/* Post Media Viewer - Fullscreen */}
-      {profile && selectedPost && (
+      {selectedPost && (
         <PostMediaViewer
           post={transformPostForViewer(selectedPost)}
           mediaUrls={getMediaUrls(selectedPost.media_url)}
