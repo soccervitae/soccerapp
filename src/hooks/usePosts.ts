@@ -44,10 +44,14 @@ export interface Post {
     full_name: string | null;
     nickname: string | null;
     avatar_url: string | null;
-    position: number | null;
-    position_name: string | null;
     team: string | null;
     conta_verificada: boolean;
+    gender: string | null;
+    role: string | null;
+    posicaomas: number | null;
+    posicaofem: number | null;
+    funcao: number | null;
+    position_name: string | null;
   };
   liked_by_user: boolean;
   saved_by_user: boolean;
@@ -81,12 +85,13 @@ export const usePosts = () => {
             full_name,
             nickname,
             avatar_url,
-            position,
             team,
             conta_verificada,
-            posicao:posicao_masculina!profiles_position_fkey (
-              name
-            )
+            gender,
+            role,
+            posicaomas,
+            posicaofem,
+            funcao
           ),
           music_track:music_tracks (
             id,
@@ -141,6 +146,79 @@ export const usePosts = () => {
         }
       }
 
+      // Fetch position names for all posts
+      const positionNamesMap = new Map<string, string>();
+      
+      // Collect all unique position IDs by gender
+      const malePositionIds = new Set<number>();
+      const femalePositionIds = new Set<number>();
+      const maleFuncaoIds = new Set<number>();
+      const femaleFuncaoIds = new Set<number>();
+      
+      posts?.forEach(post => {
+        const profile = post.profile as any;
+        const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+        const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+        const isStaff = profile.role === 'tecnico' || profile.role === 'preparador_fisico' || profile.role === 'auxiliar' || profile.role === 'comissao_tecnica';
+        
+        if (isStaff && profile.funcao) {
+          if (isFemale) {
+            femaleFuncaoIds.add(profile.funcao);
+          } else {
+            maleFuncaoIds.add(profile.funcao);
+          }
+        } else {
+          if (isMale && profile.posicaomas) {
+            malePositionIds.add(profile.posicaomas);
+          } else if (isFemale && profile.posicaofem) {
+            femalePositionIds.add(profile.posicaofem);
+          }
+        }
+      });
+      
+      // Fetch all position names in parallel
+      const [malePositions, femalePositions, maleFuncoes, femaleFuncoes] = await Promise.all([
+        malePositionIds.size > 0 
+          ? supabase.from('posicao_masculina').select('id, name').in('id', Array.from(malePositionIds))
+          : { data: [] },
+        femalePositionIds.size > 0
+          ? supabase.from('posicao_feminina').select('id, name').in('id', Array.from(femalePositionIds))
+          : { data: [] },
+        maleFuncaoIds.size > 0
+          ? supabase.from('funcaomas').select('id, name').in('id', Array.from(maleFuncaoIds))
+          : { data: [] },
+        femaleFuncaoIds.size > 0
+          ? supabase.from('funcaofem').select('id, name').in('id', Array.from(femaleFuncaoIds))
+          : { data: [] },
+      ]);
+      
+      malePositions.data?.forEach(p => positionNamesMap.set(`posicaomas-${p.id}`, p.name));
+      femalePositions.data?.forEach(p => positionNamesMap.set(`posicaofem-${p.id}`, p.name));
+      maleFuncoes.data?.forEach(p => positionNamesMap.set(`funcaomas-${p.id}`, p.name));
+      femaleFuncoes.data?.forEach(p => positionNamesMap.set(`funcaofem-${p.id}`, p.name));
+      
+      // Helper to get position name for a profile
+      const getPositionName = (profile: any): string | null => {
+        const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+        const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+        const isStaff = profile.role === 'tecnico' || profile.role === 'preparador_fisico' || profile.role === 'auxiliar' || profile.role === 'comissao_tecnica';
+        
+        if (isStaff && profile.funcao) {
+          if (isFemale) {
+            return positionNamesMap.get(`funcaofem-${profile.funcao}`) || null;
+          }
+          return positionNamesMap.get(`funcaomas-${profile.funcao}`) || null;
+        }
+        
+        if (isMale && profile.posicaomas) {
+          return positionNamesMap.get(`posicaomas-${profile.posicaomas}`) || null;
+        }
+        if (isFemale && profile.posicaofem) {
+          return positionNamesMap.get(`posicaofem-${profile.posicaofem}`) || null;
+        }
+        return null;
+      };
+
       // Check if posts are liked/saved by current user
       if (user && posts) {
         const [likesRes, savedRes] = await Promise.all([
@@ -163,7 +241,7 @@ export const usePosts = () => {
           ...post,
           profile: {
             ...post.profile,
-            position_name: (post.profile as any)?.posicao?.name || null,
+            position_name: getPositionName(post.profile),
           },
           liked_by_user: likedPostIds.has(post.id),
           saved_by_user: savedPostIds.has(post.id),
@@ -175,7 +253,7 @@ export const usePosts = () => {
         ...post,
         profile: {
           ...post.profile,
-          position_name: (post.profile as any)?.posicao?.name || null,
+          position_name: getPositionName(post.profile),
         },
         liked_by_user: false,
         saved_by_user: false,

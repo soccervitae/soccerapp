@@ -11,7 +11,9 @@ export interface SearchProfile {
   username: string;
   full_name: string | null;
   avatar_url: string | null;
-  position: number | null;
+  posicaomas: number | null;
+  posicaofem: number | null;
+  funcao: number | null;
   position_name?: string | null;
   team: string | null;
   conta_verificada: boolean;
@@ -21,59 +23,58 @@ export interface SearchProfile {
 }
 
 const fetchPositionNames = async (profiles: SearchProfile[]): Promise<SearchProfile[]> => {
-  // Filter only athletes (role is null, 'atleta', or empty string means athlete)
-  const athleteProfiles = profiles.filter(p => 
-    p.position && (!p.role || p.role === 'atleta' || p.role === '')
-  );
+  // Collect all unique position IDs by gender
+  const malePositionIds = new Set<number>();
+  const femalePositionIds = new Set<number>();
   
-  if (athleteProfiles.length === 0) return profiles;
-
-  // Group by gender to fetch from correct tables
-  const maleIds = athleteProfiles
-    .filter(p => p.gender === 'masculino')
-    .map(p => p.position!)
-    .filter((v, i, a) => a.indexOf(v) === i);
+  profiles.forEach(p => {
+    const isMale = p.gender === 'homem' || p.gender === 'masculino' || p.gender === 'male';
+    const isFemale = p.gender === 'mulher' || p.gender === 'feminino' || p.gender === 'female';
+    
+    if (isMale && p.posicaomas) {
+      malePositionIds.add(p.posicaomas);
+    } else if (isFemale && p.posicaofem) {
+      femalePositionIds.add(p.posicaofem);
+    }
+  });
   
-  const femaleIds = athleteProfiles
-    .filter(p => p.gender === 'feminino')
-    .map(p => p.position!)
-    .filter((v, i, a) => a.indexOf(v) === i);
+  if (malePositionIds.size === 0 && femalePositionIds.size === 0) return profiles;
 
   const positionNameMap = new Map<string, string>();
 
-  // Fetch male positions
-  if (maleIds.length > 0) {
-    const { data: malePositions } = await supabase
-      .from('posicao_masculina')
-      .select('id, name')
-      .in('id', maleIds);
-    
-    malePositions?.forEach(p => {
-      positionNameMap.set(`masculino-${p.id}`, p.name);
-    });
-  }
-
-  // Fetch female positions
-  if (femaleIds.length > 0) {
-    const { data: femalePositions } = await supabase
-      .from('posicao_feminina')
-      .select('id, name')
-      .in('id', femaleIds);
-    
-    femalePositions?.forEach(p => {
-      positionNameMap.set(`feminino-${p.id}`, p.name);
-    });
-  }
+  // Fetch positions in parallel
+  const [malePositions, femalePositions] = await Promise.all([
+    malePositionIds.size > 0
+      ? supabase.from('posicao_masculina').select('id, name').in('id', Array.from(malePositionIds))
+      : { data: [] },
+    femalePositionIds.size > 0
+      ? supabase.from('posicao_feminina').select('id, name').in('id', Array.from(femalePositionIds))
+      : { data: [] },
+  ]);
+  
+  malePositions.data?.forEach(p => {
+    positionNameMap.set(`m-${p.id}`, p.name);
+  });
+  
+  femalePositions.data?.forEach(p => {
+    positionNameMap.set(`f-${p.id}`, p.name);
+  });
 
   // Map position names to profiles
   return profiles.map(p => {
-    if (!p.position || (p.role && p.role !== 'atleta' && p.role !== '')) {
-      return p;
+    const isMale = p.gender === 'homem' || p.gender === 'masculino' || p.gender === 'male';
+    const isFemale = p.gender === 'mulher' || p.gender === 'feminino' || p.gender === 'female';
+    
+    let positionName: string | null = null;
+    if (isMale && p.posicaomas) {
+      positionName = positionNameMap.get(`m-${p.posicaomas}`) || null;
+    } else if (isFemale && p.posicaofem) {
+      positionName = positionNameMap.get(`f-${p.posicaofem}`) || null;
     }
-    const key = `${p.gender || 'masculino'}-${p.position}`;
+    
     return {
       ...p,
-      position_name: positionNameMap.get(key) || null
+      position_name: positionName
     };
   });
 };
@@ -84,7 +85,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
     queryFn: async () => {
       let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
@@ -97,9 +98,9 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
         );
       }
 
-      // Position filter (numeric ID)
+      // Position filter (numeric ID) - filter by posicaomas or posicaofem
       if (filters.position) {
-        query = query.eq("position", filters.position);
+        query = query.or(`posicaomas.eq.${filters.position},posicaofem.eq.${filters.position}`);
       }
 
       // Exclude current user
@@ -110,7 +111,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
       const { data, error } = await query.limit(50);
       if (error) throw error;
       
-      const profiles = (data as SearchProfile[]) || [];
+      const profiles = (data || []) as SearchProfile[];
       return fetchPositionNames(profiles);
     },
   });
@@ -123,7 +124,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       // Fetch verified profiles first
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, position, team, conta_verificada, role, gender")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
@@ -152,7 +153,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       const profilesWithCount = profiles.map(p => ({
         ...p,
         followers_count: followerCountMap.get(p.id) || 0,
-      }));
+      })) as SearchProfile[];
 
       // Sort: verified first, then by followers
       const sorted = profilesWithCount.sort((a, b) => {
@@ -160,7 +161,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
           return a.conta_verificada ? -1 : 1;
         }
         return b.followers_count - a.followers_count;
-      }) as SearchProfile[];
+      });
 
       return fetchPositionNames(sorted);
     },
