@@ -17,11 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -248,14 +248,14 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
         </>
       )}
 
-      {/* Options Sheet for other profiles (mobile/PWA) */}
+      {/* Options Drawer for other profiles (mobile/PWA) */}
       {!isOwnProfile && (
-        <Sheet open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
-          <SheetContent side="bottom" className="rounded-t-2xl">
-            <SheetHeader className="pb-2">
-              <SheetTitle className="text-center">Opções</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-2 py-4">
+        <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+          <DrawerContent>
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-center">Opções</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-2 py-4 px-4">
               <button 
                 onClick={() => { handleShareProfile(); setShareSheetOpen(false); }}
                 className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
@@ -288,16 +288,16 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
                 <span className="font-medium">Denunciar</span>
               </button>
             </div>
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       )}
 
-      {/* Report Sheet */}
-      <Sheet open={reportSheetOpen} onOpenChange={setReportSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-center">Denunciar @{username}</SheetTitle>
-          </SheetHeader>
+      {/* Report Drawer */}
+      <Drawer open={reportSheetOpen} onOpenChange={setReportSheetOpen}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader className="pb-4">
+            <DrawerTitle className="text-center">Denunciar @{username}</DrawerTitle>
+          </DrawerHeader>
           <div className="flex flex-col gap-4 py-2">
             <p className="text-sm text-muted-foreground text-center">
               Por que você está denunciando este perfil?
@@ -350,8 +350,8 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
               {isSubmittingReport ? "Enviando..." : "Enviar denúncia"}
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       {/* QR Code Modal */}
       <ResponsiveModal open={qrDialogOpen} onOpenChange={setQrDialogOpen}>

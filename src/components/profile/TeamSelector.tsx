@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Check, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -191,9 +191,9 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-2xl flex flex-col p-0 h-[85dvh] max-h-[85dvh]">
-          <SheetHeader className="px-4 pt-4 pb-2">
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent className="flex flex-col p-0 h-[85dvh] max-h-[85dvh]">
+          <DrawerHeader className="px-4 pt-4 pb-2">
             <div className="flex items-center justify-between">
               {step !== "country" ? (
                 <Button
@@ -207,7 +207,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
               ) : (
                 <div className="w-8" />
               )}
-              <SheetTitle className="text-center flex-1">{getStepTitle()}</SheetTitle>
+              <DrawerTitle className="text-center flex-1">{getStepTitle()}</DrawerTitle>
               {step === "teams" ? (
                 <Button
                   variant="default"
@@ -250,7 +250,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 )}
               </div>
             )}
-          </SheetHeader>
+          </DrawerHeader>
 
           {/* Step 1: Country Selection */}
           {step === "country" && (
@@ -462,8 +462,8 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
               </p>
             </div>
           )}
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       {/* Discard changes confirmation dialog */}
       <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>

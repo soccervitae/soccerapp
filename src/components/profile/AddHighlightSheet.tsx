@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -276,11 +276,11 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Adicionar Destaque</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={handleClose}>
+      <DrawerContent className="max-h-[80vh] overflow-y-auto">
+        <DrawerHeader>
+          <DrawerTitle>Adicionar Destaque</DrawerTitle>
+        </DrawerHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
           <div className="flex flex-col gap-2">
@@ -354,7 +354,7 @@ export const AddHighlightSheet = ({ open, onOpenChange }: AddHighlightSheetProps
             )}
           </Button>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };

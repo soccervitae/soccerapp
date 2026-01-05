@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -289,10 +289,10 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
     : 0;
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+    <Drawer open={open} onOpenChange={handleClose}>
+      <DrawerContent className="max-h-[80vh] overflow-y-auto">
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-2">
             {isEditingTitle ? (
               <div className="flex items-center gap-2 flex-1">
                 <Input
@@ -336,8 +336,8 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
                 </Button>
               </>
             )}
-          </SheetTitle>
-        </SheetHeader>
+          </DrawerTitle>
+        </DrawerHeader>
 
         <div className="flex flex-col gap-4 mt-4">
           <div className="flex flex-col gap-2">
@@ -409,7 +409,7 @@ export const EditHighlightSheet = ({ open, onOpenChange, highlight }: EditHighli
             Concluído
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };

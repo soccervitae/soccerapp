@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Image as ImageIcon, Film } from "lucide-react";
 import { UserHighlight } from "@/hooks/useProfile";
@@ -29,11 +29,11 @@ export const SelectHighlightSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl bg-background">
-        <SheetHeader className="pb-4 border-b border-border">
-          <SheetTitle className="text-center">Adicionar aos Destaques</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[70vh]">
+        <DrawerHeader className="pb-4 border-b border-border">
+          <DrawerTitle className="text-center">Adicionar aos Destaques</DrawerTitle>
+        </DrawerHeader>
 
         <div className="py-4 overflow-y-auto max-h-[calc(70vh-100px)]">
           {/* Create New Option */}
@@ -100,8 +100,8 @@ export const SelectHighlightSheet = ({
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

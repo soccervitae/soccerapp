@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Select,
   SelectContent,
@@ -169,8 +169,8 @@ const ExploreFiltersSheet = ({
     localFilters.position;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -181,11 +181,11 @@ const ExploreFiltersSheet = ({
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full" />
           )}
         </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl overflow-y-auto">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="text-lg font-semibold">Filtros</SheetTitle>
-        </SheetHeader>
+      </DrawerTrigger>
+      <DrawerContent className="max-h-[85vh] overflow-y-auto">
+        <DrawerHeader className="pb-4">
+          <DrawerTitle className="text-lg font-semibold">Filtros</DrawerTitle>
+        </DrawerHeader>
 
         <div className="space-y-5 pb-6">
           {/* Profile Type */}
@@ -331,7 +331,7 @@ const ExploreFiltersSheet = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-2 border-t border-border">
+        <div className="flex gap-3 pt-2 border-t border-border px-4 pb-4">
           {hasLocalFilters && (
             <Button
               variant="outline"
@@ -346,8 +346,8 @@ const ExploreFiltersSheet = ({
             Aplicar Filtros
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
