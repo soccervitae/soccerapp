@@ -595,42 +595,50 @@ export const PostMediaViewer = ({
 
 
                     {/* Applauded by section */}
-                    {likesCountLocal > 0 && (
-                      <button
-                        onClick={() => setShowLikesSheet(true)}
-                        className="flex items-center gap-2 text-left"
-                      >
-                        {/* Stacked avatars */}
-                        {likers.length > 0 && (
+                    {likesCountLocal > 0 && likers.length > 0 && (
+                      <div className="pt-1 pb-1">
+                        <button 
+                          onClick={() => setShowLikesSheet(true)} 
+                          className="flex items-center gap-2 group text-left"
+                        >
+                          {/* Stacked avatars */}
                           <div className="flex -space-x-2">
                             {likers.slice(0, 3).map((liker, index) => (
-                              <Avatar 
+                              <img 
                                 key={liker.user_id} 
-                                className="w-5 h-5 border border-gray-100"
+                                src={liker.avatar_url || "/placeholder.svg"} 
+                                alt={liker.username}
+                                className="w-6 h-6 rounded-full border-2 border-background object-cover"
                                 style={{ zIndex: 3 - index }}
-                              >
-                                <AvatarImage src={liker.avatar_url || "/placeholder.svg"} />
-                                <AvatarFallback className="text-[8px]">
-                                  {liker.username[0]?.toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
+                              />
                             ))}
                           </div>
-                        )}
-                        <span className="text-xs text-gray-700">
-                          {likers.length > 0 ? (
-                            <>
-                              Aplaudido por{" "}
-                              <span className="font-semibold">{likers[0]?.username}</span>
-                              {likesCountLocal > 1 && (
-                                <> e <span className="font-semibold">outros {likesCountLocal - 1}</span></>
-                              )}
-                            </>
-                          ) : (
-                            <span className="font-semibold">{formatNumber(likesCountLocal)} aplausos</span>
-                          )}
-                        </span>
-                      </button>
+                          
+                          {/* Text */}
+                          <p className="text-sm text-foreground">
+                            Aplaudido por{" "}
+                            <span 
+                              className="font-semibold group-hover:underline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/${likers[0].username}`);
+                              }}
+                            >
+                              {likers[0].username}
+                            </span>
+                            {likesCountLocal > 1 && (
+                              <>
+                                {" "}e{" "}
+                                <span className="font-semibold group-hover:underline">
+                                  {likesCountLocal === 2 
+                                    ? likers[1]?.username || "outra pessoa" 
+                                    : `outras ${likesCountLocal - 1} pessoas`}
+                                </span>
+                              </>
+                            )}
+                          </p>
+                        </button>
+                      </div>
                     )}
 
                     {/* Actions */}
