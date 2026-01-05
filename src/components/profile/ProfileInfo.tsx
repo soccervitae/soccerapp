@@ -187,7 +187,7 @@ export const ProfileInfo = ({
       </div>
 
       {/* Name and Position */}
-      <div className="text-center space-y-1.5">
+      <div className="text-center space-y-0.5">
         <h2 className="text-2xl font-bold text-foreground leading-tight">
           {profile.full_name || profile.username}
         </h2>
