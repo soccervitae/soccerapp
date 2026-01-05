@@ -512,7 +512,7 @@ export const PostMediaViewer = ({
                     )}
                     {isVideo && <div />}
 
-                    {/* Close button */}
+                    {/* Close button - always arrow */}
                     <button
                       onClick={onClose}
                       className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
@@ -521,7 +521,7 @@ export const PostMediaViewer = ({
                           : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                       }`}
                     >
-                      <span className="material-symbols-outlined">close</span>
+                      <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                   </motion.div>
                 )}
@@ -531,12 +531,12 @@ export const PostMediaViewer = ({
               {!showInfo && (
                 <motion.button
                   onClick={onClose}
-                  className="absolute top-4 right-4 z-20 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-black/50 text-white hover:bg-black/70"
+                  className="absolute top-4 left-4 z-20 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-black/50 text-white hover:bg-black/70"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined">arrow_back</span>
                 </motion.button>
               )}
 
