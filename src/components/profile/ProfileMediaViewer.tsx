@@ -74,7 +74,7 @@ export const ProfileMediaViewer = ({
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
 
-  const [currentPostIndex, setCurrentPostIndex] = useState(initialPostIndex);
+  const [currentPostIndex, setCurrentPostIndex] = useState(Math.max(0, initialPostIndex));
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showLikesSheet, setShowLikesSheet] = useState(false);
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
@@ -125,7 +125,7 @@ export const ProfileMediaViewer = ({
   }, [currentPostIndex, currentPost]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && initialPostIndex >= 0) {
       setCurrentPostIndex(initialPostIndex);
       setCurrentMediaIndex(0);
       setMediaLoaded(false);
@@ -133,7 +133,7 @@ export const ProfileMediaViewer = ({
       setScale(1);
       setPosition({ x: 0, y: 0 });
       document.body.style.overflow = "hidden";
-    } else {
+    } else if (!isOpen) {
       document.body.style.overflow = "";
     }
     return () => {
@@ -439,7 +439,7 @@ export const ProfileMediaViewer = ({
     return num.toString();
   };
 
-  if (!currentPost) return null;
+  if (!isOpen || !currentPost) return null;
 
   return (
     <>
