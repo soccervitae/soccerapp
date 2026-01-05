@@ -23,6 +23,10 @@ interface PostMediaViewerProps {
   isOpen: boolean;
   onClose: () => void;
   originRect?: DOMRect | null;
+  // Navigation between posts
+  posts?: Post[];
+  currentPostIndex?: number;
+  onNavigatePost?: (index: number) => void;
 }
 
 export const PostMediaViewer = ({
@@ -33,6 +37,9 @@ export const PostMediaViewer = ({
   isOpen,
   onClose,
   originRect,
+  posts,
+  currentPostIndex = 0,
+  onNavigatePost,
 }: PostMediaViewerProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -68,6 +75,12 @@ export const PostMediaViewer = ({
   const initialScale = useRef<number>(1);
   const lastPosition = useRef({ x: 0, y: 0 });
   const isPanning = useRef(false);
+  
+  // Swipe navigation for posts
+  const swipeStartX = useRef<number | null>(null);
+  const swipeStartY = useRef<number | null>(null);
+  const hasNavigatedPost = useRef(false);
+  const canNavigatePosts = !!posts && posts.length > 1 && !!onNavigatePost;
 
   // Hooks for interactions
   const likePost = useLikePost();
@@ -121,12 +134,19 @@ export const PostMediaViewer = ({
       e.preventDefault();
       initialPinchDistance.current = getDistance(e.touches);
       initialScale.current = scale;
-    } else if (e.touches.length === 1 && scale > 1) {
-      isPanning.current = true;
-      lastPosition.current = {
-        x: e.touches[0].clientX - position.x,
-        y: e.touches[0].clientY - position.y,
-      };
+    } else if (e.touches.length === 1) {
+      // Track swipe start for post navigation
+      swipeStartX.current = e.touches[0].clientX;
+      swipeStartY.current = e.touches[0].clientY;
+      hasNavigatedPost.current = false;
+      
+      if (scale > 1) {
+        isPanning.current = true;
+        lastPosition.current = {
+          x: e.touches[0].clientX - position.x,
+          y: e.touches[0].clientY - position.y,
+        };
+      }
     }
   };
 
@@ -160,7 +180,38 @@ export const PostMediaViewer = ({
       initialPinchDistance.current = null;
     }
     if (e.touches.length === 0) {
+      // Handle swipe for post navigation
+      if (
+        canNavigatePosts &&
+        scale === 1 &&
+        !isCarousel &&
+        swipeStartX.current !== null &&
+        !hasNavigatedPost.current
+      ) {
+        const endX = e.changedTouches[0]?.clientX ?? swipeStartX.current;
+        const endY = e.changedTouches[0]?.clientY ?? swipeStartY.current ?? 0;
+        const deltaX = endX - swipeStartX.current;
+        const deltaY = endY - (swipeStartY.current ?? 0);
+        
+        // Check if horizontal swipe is dominant and above threshold
+        const swipeThreshold = 50;
+        if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+          if (deltaX < 0 && currentPostIndex < (posts?.length ?? 0) - 1) {
+            // Swipe left - next post
+            onNavigatePost?.(currentPostIndex + 1);
+            hasNavigatedPost.current = true;
+          } else if (deltaX > 0 && currentPostIndex > 0) {
+            // Swipe right - previous post
+            onNavigatePost?.(currentPostIndex - 1);
+            hasNavigatedPost.current = true;
+          }
+        }
+      }
+      
+      swipeStartX.current = null;
+      swipeStartY.current = null;
       isPanning.current = false;
+      
       // Reset position if scale is back to 1
       if (scale <= 1) {
         setScale(1);
