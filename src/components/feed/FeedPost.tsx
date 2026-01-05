@@ -260,9 +260,7 @@ export const FeedPost = ({
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3 cursor-pointer" onClick={handleProfileClick}>
           <div className="relative">
-            <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-600">
-              <img src={post.profile.avatar_url || "/placeholder.svg"} alt={post.profile.full_name || post.profile.username} className="w-full h-full rounded-full border-2 border-background object-cover" />
-            </div>
+            <img src={post.profile.avatar_url || "/placeholder.svg"} alt={post.profile.full_name || post.profile.username} className="w-11 h-11 rounded-full object-cover" />
             {post.profile.conta_verificada && <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
                 <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
               </div>}
