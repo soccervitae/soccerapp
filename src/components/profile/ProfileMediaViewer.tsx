@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLikePost, useSavePost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useDeletePost, type Post } from "@/hooks/usePosts";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
@@ -13,7 +13,9 @@ import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoControls } from "@/components/feed/VideoControls";
-import { Send, Bookmark, MessageCircle, ChevronUp, ChevronDown } from "lucide-react";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
+import { Send, Bookmark, MessageCircle, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProfilePost {
   id: string;
@@ -84,8 +86,10 @@ export const ProfileMediaViewer = ({
   const [showInfo, setShowInfo] = useState(true);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const currentPost = posts[currentPostIndex];
+  const isOwnProfile = user?.id === profile.id;
 
   // Local optimistic state for like/save
   const [isLikedLocal, setIsLikedLocal] = useState(currentPost?.liked_by_user ?? false);
@@ -104,6 +108,7 @@ export const ProfileMediaViewer = ({
   // Hooks for interactions
   const likePost = useLikePost();
   const savePost = useSavePost();
+  const deletePost = useDeletePost();
   const { data: likers = [] } = usePostLikes(currentPost?.id || "", isOpen && likesCountLocal > 0);
 
   // Sync with post changes
@@ -332,6 +337,29 @@ export const ProfileMediaViewer = ({
       }
     );
   }, [user, navigate, savePost, currentPost, isSavedLocal, queryClient]);
+
+  const handleDelete = useCallback(() => {
+    if (!currentPost) return;
+    
+    deletePost.mutate(currentPost.id, {
+      onSuccess: () => {
+        toast.success("Publicação excluída com sucesso");
+        setShowDeleteDialog(false);
+        // If it was the last post, close the viewer
+        if (posts.length === 1) {
+          onClose();
+        } else if (currentPostIndex >= posts.length - 1) {
+          // If deleting the last post in array, go to previous
+          setCurrentPostIndex((prev) => Math.max(0, prev - 1));
+        }
+        queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+      },
+      onError: () => {
+        toast.error("Erro ao excluir publicação");
+      },
+    });
+  }, [currentPost, deletePost, posts.length, currentPostIndex, onClose, queryClient]);
 
   const handleTapNavigation = (e: React.MouseEvent | React.TouchEvent) => {
     if (scale > 1) return;
@@ -611,12 +639,22 @@ export const ProfileMediaViewer = ({
                     )}
                     {isVideo && <div />}
 
-                    <button
-                      onClick={onClose}
-                      className="w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-foreground/10 text-foreground hover:bg-foreground/20"
-                    >
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {isOwnProfile && (
+                        <button
+                          onClick={() => setShowDeleteDialog(true)}
+                          className="w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-foreground/10 text-foreground hover:bg-foreground/20"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={onClose}
+                        className="w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-foreground/10 text-foreground hover:bg-foreground/20"
+                      >
+                        <span className="material-symbols-outlined">close</span>
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -785,6 +823,18 @@ export const ProfileMediaViewer = ({
         contentUrl={`${window.location.origin}/post/${currentPost?.id}`}
         contentPreview={mediaUrls[0]}
         contentTitle={currentPost?.content?.substring(0, 50) || "Publicação"}
+      />
+
+      {/* Delete confirmation dialog */}
+      <ResponsiveAlertModal
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Excluir publicação"
+        description="Tem certeza que deseja excluir esta publicação? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={handleDelete}
+        confirmVariant="destructive"
       />
     </>
   );
