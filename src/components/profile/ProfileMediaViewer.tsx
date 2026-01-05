@@ -125,21 +125,24 @@ export const ProfileMediaViewer = ({
   }, [currentPostIndex, currentPost]);
 
   useEffect(() => {
-    if (isOpen && initialPostIndex >= 0) {
-      setCurrentPostIndex(initialPostIndex);
+    if (isOpen) {
+      const nextIndex = initialPostIndex >= 0 ? initialPostIndex : 0;
+      const clampedIndex = Math.min(Math.max(0, nextIndex), Math.max(0, posts.length - 1));
+
+      setCurrentPostIndex(clampedIndex);
       setCurrentMediaIndex(0);
       setMediaLoaded(false);
       setShowInfo(true);
       setScale(1);
       setPosition({ x: 0, y: 0 });
       document.body.style.overflow = "hidden";
-    } else if (!isOpen) {
+    } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, initialPostIndex]);
+  }, [isOpen, initialPostIndex, posts.length]);
 
   // Get media URLs from post
   const getMediaUrls = useCallback((): string[] => {
@@ -439,7 +442,17 @@ export const ProfileMediaViewer = ({
     return num.toString();
   };
 
-  if (!isOpen || !currentPost) return null;
+  if (!isOpen) return null;
+
+  if (!currentPost) {
+    return (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background">
+        <div className="w-full max-w-sm px-6">
+          <Skeleton className="h-[70vh] w-full rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
