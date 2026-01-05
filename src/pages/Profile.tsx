@@ -15,7 +15,8 @@ import {
   useUserChampionships,
   useUserAchievements,
   useUserTaggedPosts,
-  useUserHighlights
+  useUserHighlights,
+  useUserSavedPosts
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
@@ -54,6 +55,10 @@ const Profile = () => {
   const { data: highlights, isLoading: highlightsLoading } = useUserHighlights(targetUserId);
   const profileView = useProfileView();
 
+  const isOwnProfile = user?.id === targetUserId;
+  
+  const { data: savedPosts, isLoading: savedPostsLoading } = useUserSavedPosts(isOwnProfile ? targetUserId : undefined);
+
   // Record profile view
   useEffect(() => {
     if (targetUserId && user && targetUserId !== user.id) {
@@ -61,7 +66,6 @@ const Profile = () => {
     }
   }, [targetUserId, user?.id]);
 
-  const isOwnProfile = user?.id === targetUserId;
   const isLoading = profileLoading || statsLoading;
   
   // Refetching state for overlay
@@ -158,12 +162,14 @@ const Profile = () => {
           <PostsGrid 
             posts={posts || []} 
             taggedPosts={taggedPosts || []}
+            savedPosts={savedPosts || []}
             championships={championships || []}
             achievements={achievements || []}
             isLoading={postsLoading} 
             isChampionshipsLoading={championshipsLoading}
             isAchievementsLoading={achievementsLoading}
             isTaggedLoading={taggedLoading}
+            isSavedPostsLoading={savedPostsLoading}
             isOwnProfile={isOwnProfile}
             profile={profile}
           />
@@ -210,12 +216,14 @@ const Profile = () => {
                 <PostsGrid 
                   posts={posts || []} 
                   taggedPosts={taggedPosts || []}
+                  savedPosts={savedPosts || []}
                   championships={championships || []}
                   achievements={achievements || []}
                   isLoading={postsLoading} 
                   isChampionshipsLoading={championshipsLoading}
                   isAchievementsLoading={achievementsLoading}
                   isTaggedLoading={taggedLoading}
+                  isSavedPostsLoading={savedPostsLoading}
                   isOwnProfile={isOwnProfile}
                   profile={profile}
                 />
