@@ -115,6 +115,17 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
+  // Map UI "Tipo de perfil" labels to canonical values stored in profiles.role
+  const mapProfileTypeValue = (typeName: string) => {
+    const n = typeName.trim().toLowerCase();
+    if (n.startsWith("atleta")) return "atleta";
+    if (n.startsWith("comiss")) return "comissao_tecnica";
+    return n
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/\s+/g, "_");
+  };
+
   // Check if profile type is athlete or technical staff
   const isAthlete = profileType === "atleta";
   const isStaff = profileType === "comissao_tecnica";
@@ -312,13 +323,13 @@ const CompleteProfile = () => {
           <Label htmlFor="profileType">
             Tipo de perfil <span className="text-destructive">*</span>
           </Label>
-          <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); }}>
+          <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
             <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
               <SelectValue placeholder="Selecione o tipo de perfil" />
             </SelectTrigger>
             <SelectContent>
               {profileTypes.map((type) => (
-                <SelectItem key={type.id} value={type.name.toLowerCase().replace(/ã/g, 'a').replace(/\s+/g, '_')}>
+                <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
                   {type.name}
                 </SelectItem>
               ))}
