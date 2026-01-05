@@ -70,13 +70,14 @@ export const useProfile = (userId?: string) => {
       // Fetch position name based on gender and role
       let position_name: string | null = null;
       const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+      const isAthlete = data.role === 'atleta' || (!data.role && (data.posicaomas || data.posicaofem));
       const isFemale = data.gender === 'mulher' || data.gender === 'feminino' || data.gender === 'female';
       const isMale = data.gender === 'homem' || data.gender === 'masculino' || data.gender === 'male';
       
       let posData: { name: string } | null = null;
       
       if (isStaff && data.funcao) {
-        // Staff: use funcao column
+        // Staff: use funcao column based on gender
         if (isFemale) {
           const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.funcao).single();
           posData = result;
@@ -84,7 +85,7 @@ export const useProfile = (userId?: string) => {
           const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.funcao).single();
           posData = result;
         }
-      } else if (!isStaff) {
+      } else if (isAthlete || !isStaff) {
         // Athletes: use gender-specific position columns
         if (isMale && data.posicaomas) {
           const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.posicaomas).single();
@@ -145,13 +146,14 @@ export const useProfileByUsername = (username: string) => {
       // Fetch position name based on gender and role
       let position_name: string | null = null;
       const isStaff = data.role === 'tecnico' || data.role === 'preparador_fisico' || data.role === 'auxiliar' || data.role === 'comissao_tecnica';
+      const isAthlete = data.role === 'atleta' || (!data.role && (data.posicaomas || data.posicaofem));
       const isFemale = data.gender === 'mulher' || data.gender === 'feminino' || data.gender === 'female';
       const isMale = data.gender === 'homem' || data.gender === 'masculino' || data.gender === 'male';
       
       let posData: { name: string } | null = null;
       
       if (isStaff && data.funcao) {
-        // Staff: use funcao column
+        // Staff: use funcao column based on gender
         if (isFemale) {
           const { data: result } = await supabase.from('funcaofem').select('name').eq('id', data.funcao).single();
           posData = result;
@@ -159,7 +161,7 @@ export const useProfileByUsername = (username: string) => {
           const { data: result } = await supabase.from('funcaomas').select('name').eq('id', data.funcao).single();
           posData = result;
         }
-      } else if (!isStaff) {
+      } else if (isAthlete || !isStaff) {
         // Athletes: use gender-specific position columns
         if (isMale && data.posicaomas) {
           const { data: result } = await supabase.from('posicao_masculina').select('name').eq('id', data.posicaomas).single();

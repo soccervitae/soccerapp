@@ -238,8 +238,8 @@ return <section className="flex flex-col items-center gap-4">
           </button>
         </div>}
 
-      {/* Physical Stats - Only for athletes (no role means athlete) */}
-      {!profile.role && (
+      {/* Physical Stats - Only for athletes (role is 'atleta' or null/empty with positions) */}
+      {(profile.role === 'atleta' || (!profile.role && (profile.posicaomas || profile.posicaofem)) || (!profile.role && !profile.funcao)) && (
         <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
           <div className="flex flex-col gap-1 p-2 text-center">
             <p className="text-foreground text-sm font-bold">{age || "-"}</p>
