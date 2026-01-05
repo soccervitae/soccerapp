@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -23,6 +23,7 @@ export interface ExploreFilters {
   gender?: string | null;
   birthYear?: number | null;
   countryId?: number | null;
+  position?: number | null;
 }
 
 interface ExploreFiltersSheetProps {
@@ -57,6 +58,61 @@ const ExploreFiltersSheet = ({
     },
   });
 
+  // Find "Atleta" profile type ID
+  const atletaTypeId = useMemo(() => {
+    return profileTypes?.find((t) => t.name.toLowerCase() === "atleta")?.id;
+  }, [profileTypes]);
+
+  const isAtletaSelected = localFilters.profileType === atletaTypeId;
+
+  // Fetch male positions
+  const { data: malePositions } = useQuery({
+    queryKey: ["male-positions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("posicao_masculina")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAtletaSelected,
+  });
+
+  // Fetch female positions
+  const { data: femalePositions } = useQuery({
+    queryKey: ["female-positions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("posicao_feminina")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAtletaSelected,
+  });
+
+  // Determine which positions to show based on gender
+  const positions = useMemo(() => {
+    if (localFilters.gender === "masculino") {
+      return malePositions || [];
+    } else if (localFilters.gender === "feminino") {
+      return femalePositions || [];
+    }
+    // If no gender selected, combine both (showing unique names)
+    const allPositions = [...(malePositions || []), ...(femalePositions || [])];
+    const uniqueNames = new Map<string, { id: number; name: string }>();
+    allPositions.forEach((p) => {
+      if (!uniqueNames.has(p.name)) {
+        uniqueNames.set(p.name, p);
+      }
+    });
+    return Array.from(uniqueNames.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+  }, [localFilters.gender, malePositions, femalePositions]);
+
   // Fetch countries
   const { data: countries } = useQuery({
     queryKey: ["countries"],
@@ -85,17 +141,32 @@ const ExploreFiltersSheet = ({
       gender: null,
       birthYear: null,
       countryId: null,
+      position: null,
     };
     setLocalFilters(emptyFilters);
     onFiltersChange(emptyFilters);
     setOpen(false);
   };
 
+  // Clear position when profile type changes away from Atleta
+  const handleProfileTypeChange = (value: string) => {
+    const newProfileType = value === "all" ? null : Number(value);
+    const newAtletaSelected = newProfileType === atletaTypeId;
+    
+    setLocalFilters({
+      ...localFilters,
+      profileType: newProfileType,
+      // Clear position if not Atleta
+      position: newAtletaSelected ? localFilters.position : null,
+    });
+  };
+
   const hasLocalFilters =
     localFilters.profileType ||
     localFilters.gender ||
     localFilters.birthYear ||
-    localFilters.countryId;
+    localFilters.countryId ||
+    localFilters.position;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -111,7 +182,7 @@ const ExploreFiltersSheet = ({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl">
+      <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl overflow-y-auto">
         <SheetHeader className="pb-4">
           <SheetTitle className="text-lg font-semibold">Filtros</SheetTitle>
         </SheetHeader>
@@ -124,12 +195,7 @@ const ExploreFiltersSheet = ({
             </label>
             <Select
               value={localFilters.profileType?.toString() || "all"}
-              onValueChange={(value) =>
-                setLocalFilters({
-                  ...localFilters,
-                  profileType: value === "all" ? null : Number(value),
-                })
-              }
+              onValueChange={handleProfileTypeChange}
             >
               <SelectTrigger className="w-full bg-muted/50">
                 <SelectValue placeholder="Todos" />
@@ -154,6 +220,8 @@ const ExploreFiltersSheet = ({
                 setLocalFilters({
                   ...localFilters,
                   gender: value === "all" ? null : value,
+                  // Clear position when gender changes (positions differ by gender)
+                  position: null,
                 })
               }
             >
@@ -167,6 +235,36 @@ const ExploreFiltersSheet = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Position - Only show when Atleta is selected */}
+          {isAtletaSelected && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Posição
+              </label>
+              <Select
+                value={localFilters.position?.toString() || "all"}
+                onValueChange={(value) =>
+                  setLocalFilters({
+                    ...localFilters,
+                    position: value === "all" ? null : Number(value),
+                  })
+                }
+              >
+                <SelectTrigger className="w-full bg-muted/50">
+                  <SelectValue placeholder="Todas" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50 max-h-60">
+                  <SelectItem value="all">Todas</SelectItem>
+                  {positions.map((pos) => (
+                    <SelectItem key={pos.id} value={pos.id.toString()}>
+                      {pos.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Birth Year */}
           <div className="space-y-2">
