@@ -10,7 +10,8 @@ import { usePostTags } from "@/hooks/usePostTags";
 import { PostMusicPlayer } from "./PostMusicPlayer";
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
 import { FullscreenImageViewer } from "./FullscreenImageViewer";
-
+import { useStories } from "@/hooks/useStories";
+import { StoryViewer } from "./StoryViewer";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -79,6 +80,15 @@ export const FeedPost = ({
   const {
     data: postTags = []
   } = usePostTags(post.id);
+  
+  // Story/Replay indicator logic
+  const { data: groupedStories } = useStories();
+  const userStoryGroup = groupedStories?.find(g => g.userId === post.user_id);
+  const hasActiveStories = !!userStoryGroup && userStoryGroup.stories.length > 0;
+  const hasUnviewedStories = userStoryGroup?.hasNewStory ?? false;
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  const [storyClickOrigin, setStoryClickOrigin] = useState<DOMRect | null>(null);
+  
   const likePost = useLikePost();
   const savePost = useSavePost();
   const updatePost = useUpdatePost();
@@ -258,14 +268,39 @@ export const FeedPost = ({
   return <article className="border-b border-border bg-background px-4">
       {/* Header */}
       <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={handleProfileClick}>
-          <div className="relative">
-            <img src={post.profile.avatar_url || "/placeholder.svg"} alt={post.profile.full_name || post.profile.username} className="w-11 h-11 rounded-full object-cover" />
+        <div className="flex items-center gap-3">
+          <div 
+            className={`relative ${hasActiveStories ? 'cursor-pointer' : ''}`}
+            onClick={(e) => {
+              if (hasActiveStories) {
+                e.stopPropagation();
+                setStoryClickOrigin(e.currentTarget.getBoundingClientRect());
+                setStoryViewerOpen(true);
+              } else {
+                handleProfileClick();
+              }
+            }}
+          >
+            <div 
+              className={`w-11 h-11 rounded-full p-[2px] transition-all duration-200 ${
+                hasActiveStories 
+                  ? (hasUnviewedStories 
+                      ? 'bg-gradient-to-tr from-primary to-emerald-400' 
+                      : 'bg-muted-foreground/40')
+                  : 'bg-transparent'
+              }`}
+            >
+              <img 
+                src={post.profile.avatar_url || "/placeholder.svg"} 
+                alt={post.profile.full_name || post.profile.username} 
+                className={`w-full h-full rounded-full object-cover ${hasActiveStories ? 'border-2 border-background' : ''}`} 
+              />
+            </div>
             {post.profile.conta_verificada && <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
                 <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
               </div>}
           </div>
-          <div>
+          <div className="cursor-pointer" onClick={handleProfileClick}>
             <div className="flex items-center gap-1">
               <span className="font-bold text-sm text-foreground hover:underline">
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
@@ -663,6 +698,17 @@ export const FeedPost = ({
         onClose={() => setIsImageViewerOpen(false)}
         originRect={imageOriginRect}
       />
+
+      {/* Story Viewer */}
+      {userStoryGroup && (
+        <StoryViewer
+          groupedStories={[userStoryGroup]}
+          initialGroupIndex={0}
+          isOpen={storyViewerOpen}
+          onClose={() => setStoryViewerOpen(false)}
+          originRect={storyClickOrigin}
+        />
+      )}
 
     </article>;
 };
