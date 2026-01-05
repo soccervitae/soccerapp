@@ -583,7 +583,7 @@ export const PostMediaViewer = ({
 
 
                     {/* Applauded by section */}
-                    {post.likes_count > 0 && (
+                    {likesCountLocal > 0 && (
                       <button
                         onClick={() => setShowLikesSheet(true)}
                         className="flex items-center gap-2 text-left"
@@ -610,12 +610,12 @@ export const PostMediaViewer = ({
                             <>
                               Aplaudido por{" "}
                               <span className="font-semibold">{likers[0]?.username}</span>
-                              {post.likes_count > 1 && (
-                                <> e <span className="font-semibold">outros {post.likes_count - 1}</span></>
+                              {likesCountLocal > 1 && (
+                                <> e <span className="font-semibold">outros {likesCountLocal - 1}</span></>
                               )}
                             </>
                           ) : (
-                            <span className="font-semibold">{formatNumber(post.likes_count)} aplausos</span>
+                            <span className="font-semibold">{formatNumber(likesCountLocal)} aplausos</span>
                           )}
                         </span>
                       </button>
