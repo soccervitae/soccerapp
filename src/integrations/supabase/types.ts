@@ -290,7 +290,7 @@ export type Database = {
           },
         ]
       }
-      funcao: {
+      funcaofem: {
         Row: {
           created_at: string | null
           id: number
@@ -308,7 +308,7 @@ export type Database = {
         }
         Relationships: []
       }
-      funcao_feminina: {
+      funcaomas: {
         Row: {
           created_at: string | null
           id: number
