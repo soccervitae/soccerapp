@@ -131,11 +131,6 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
                   onClick={() => handleComingSoon("Idioma")}
                 />
                 <SettingsItem
-                  icon="dark_mode"
-                  label="Tema"
-                  onClick={() => handleComingSoon("Tema")}
-                />
-                <SettingsItem
                   icon="info"
                   label="Sobre"
                   onClick={() => handleComingSoon("Sobre")}
