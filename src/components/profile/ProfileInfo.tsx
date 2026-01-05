@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
-
 import { useStories } from "@/hooks/useStories";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -16,7 +15,6 @@ import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, Respons
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
-
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
@@ -47,24 +45,24 @@ export const ProfileInfo = ({
   const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  
+
   // Story viewer state
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
-  
-  
+
   // Fetch stories to check if user has active replays
-  const { data: groupedStories } = useStories();
+  const {
+    data: groupedStories
+  } = useStories();
   const userStoryGroup = groupedStories?.find(g => g.userId === profile.id);
   const hasActiveStories = !!userStoryGroup && userStoryGroup.stories.length > 0;
   const hasUnviewedStories = userStoryGroup?.hasNewStory ?? false;
-  
   const handleStoryClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!hasActiveStories) return;
     setClickOrigin(e.currentTarget.getBoundingClientRect());
     setStoryViewerOpen(true);
   };
-  
+
   // Use Sheet on mobile or PWA, DropdownMenu on desktop
   const useSheet = isMobile || isPWA;
   const profileUrl = `${window.location.origin}/${profile.username}`;
@@ -123,7 +121,6 @@ export const ProfileInfo = ({
       navigate("/login");
       return;
     }
-    
     followUser.mutate({
       userId: profile.id,
       isFollowing: isCheering
@@ -167,41 +164,22 @@ export const ProfileInfo = ({
     };
     return footMap[foot.toLowerCase()] || foot;
   };
-return <section className="flex flex-col items-center gap-4">
+  return <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
       <div className="w-full h-32 relative overflow-hidden">
-        {profile.cover_url ? (
-          <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-muted/30 flex flex-col items-center justify-center gap-1">
+        {profile.cover_url ? <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted/30 flex flex-col items-center justify-center gap-1">
             <span className="material-symbols-outlined text-3xl text-muted-foreground/50">add_photo_alternate</span>
-            {isOwnProfile && (
-              <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>
-            )}
-          </div>
-        )}
+            {isOwnProfile && <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>}
+          </div>}
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
       </div>
 
       {/* Profile Picture */}
       <div className="relative -mt-16 z-10">
-        <div 
-          className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${
-            hasActiveStories 
-              ? (hasUnviewedStories 
-                  ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' 
-                  : 'bg-muted-foreground/40 cursor-pointer')
-              : ''
-          }`}
-          onClick={hasActiveStories ? handleStoryClick : undefined}
-        >
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" />
-          ) : (
-            <div className="w-full h-full rounded-full border-4 border-background bg-muted flex items-center justify-center">
+        <div className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : ''}`} onClick={hasActiveStories ? handleStoryClick : undefined}>
+          {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" /> : <div className="w-full h-full rounded-full border-4 border-background bg-muted flex items-center justify-center">
               <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
-            </div>
-          )}
+            </div>}
         </div>
         {profile.conta_verificada && <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
             <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
@@ -213,13 +191,13 @@ return <section className="flex flex-col items-center gap-4">
         <h2 className="text-2xl font-bold text-foreground leading-tight">
           {profile.full_name || profile.username}
         </h2>
-        <p className="text-muted-foreground font-medium text-sm">
+        <p className="text-muted-foreground font-bold text-base">
           {(() => {
-            // For technical staff, show position (function), for athletes also show position
-            const displayRole = profile.position_name;
-            if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
-            return displayRole || profile.team || `@${profile.username}`;
-          })()}
+          // For technical staff, show position (function), for athletes also show position
+          const displayRole = profile.position_name;
+          if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
+          return displayRole || profile.team || `@${profile.username}`;
+        })()}
         </p>
         {profile.bio && <p className="text-muted-foreground/80 text-sm px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
             {profile.bio}
@@ -239,8 +217,7 @@ return <section className="flex flex-col items-center gap-4">
         </div>}
 
       {/* Physical Stats - Only for athletes (role is 'atleta' or null/empty with positions) */}
-      {(profile.role === 'atleta' || (!profile.role && (profile.posicaomas || profile.posicaofem)) || (!profile.role && !profile.funcao)) && (
-        <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
+      {(profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
           <div className="flex flex-col gap-1 p-2 text-center">
             <p className="text-foreground text-sm font-bold">{age || "-"}</p>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
@@ -257,8 +234,7 @@ return <section className="flex flex-col items-center gap-4">
             <p className="text-foreground text-sm font-bold">{formatFoot(profile.preferred_foot)}</p>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
           </div>
-        </div>
-      )}
+        </div>}
 
 
       {/* Action Buttons */}
@@ -330,20 +306,21 @@ return <section className="flex flex-col items-center gap-4">
               </DropdownMenu>}
           </> : <>
             <div className="relative flex-1">
-              <button 
-                ref={buttonRef}
-                onClick={handleFollowClick} 
-                disabled={followUser.isPending} 
-                className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}
-              >
+              <button ref={buttonRef} onClick={handleFollowClick} disabled={followUser.isPending} className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
                 <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={isCheering ? "cheering" : "cheer"}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
+                  <motion.span key={isCheering ? "cheering" : "cheer"} initial={{
+                opacity: 0,
+                y: 10
+              }} animate={{
+                opacity: 1,
+                y: 0
+              }} exit={{
+                opacity: 0,
+                y: -10
+              }} transition={{
+                duration: 0.2,
+                ease: "easeOut"
+              }}>
                     {isCheering ? "Torcendo" : "Torcer"}
                   </motion.span>
                 </AnimatePresence>
@@ -383,14 +360,6 @@ return <section className="flex flex-col items-center gap-4">
       </ResponsiveModal>
 
       {/* Story Viewer */}
-      {groupedStories && hasActiveStories && (
-        <StoryViewer
-          groupedStories={groupedStories}
-          initialGroupIndex={groupedStories.findIndex(g => g.userId === profile.id)}
-          isOpen={storyViewerOpen}
-          onClose={() => setStoryViewerOpen(false)}
-          originRect={clickOrigin}
-        />
-      )}
+      {groupedStories && hasActiveStories && <StoryViewer groupedStories={groupedStories} initialGroupIndex={groupedStories.findIndex(g => g.userId === profile.id)} isOpen={storyViewerOpen} onClose={() => setStoryViewerOpen(false)} originRect={clickOrigin} />}
     </section>;
 };
