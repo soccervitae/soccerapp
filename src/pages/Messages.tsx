@@ -12,13 +12,12 @@ import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { Input } from "@/components/ui/input";
-import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, MessageCircleOff } from "lucide-react";
+import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { MessagesSkeleton, OnlineUsersSkeleton } from "@/components/skeletons/MessagesSkeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -80,7 +79,7 @@ const Messages = () => {
   }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
+  const [showArchived, setShowArchived] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
@@ -89,13 +88,9 @@ const Messages = () => {
     return new Set(conversations.filter(c => c.participant).map(c => c.participant!.id));
   }, [conversations]);
 
-  // Filter conversations by tab
+  // Filter conversations
   const allConversations = useMemo(() => {
     return conversations.filter(c => !c.isArchived);
-  }, [conversations]);
-
-  const unreadConversations = useMemo(() => {
-    return conversations.filter(c => !c.isArchived && c.unreadCount > 0);
   }, [conversations]);
 
   const archivedConversations = useMemo(() => {
@@ -288,7 +283,46 @@ const Messages = () => {
     >
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Mensagens</h1>
+        <AnimatePresence mode="wait">
+          {showArchived ? (
+            <motion.div
+              key="archived-header"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex items-center gap-3"
+            >
+              <button
+                onClick={() => setShowArchived(false)}
+                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <h1 className="text-lg font-semibold">Arquivadas</h1>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="main-header"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex items-center gap-3"
+            >
+              <button
+                onClick={() => setShowArchived(true)}
+                className="p-1.5 -ml-1.5 hover:bg-muted rounded-full transition-colors relative"
+              >
+                <Archive className="w-5 h-5" />
+                {archivedConversations.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
+                    {archivedConversations.length}
+                  </span>
+                )}
+              </button>
+              <h1 className="text-lg font-semibold">Mensagens</h1>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Content */}
@@ -298,211 +332,140 @@ const Messages = () => {
           <OfflineIndicator />
         </div>
 
-
-        {/* Campo de busca */}
-        <div className="px-3 pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar entre quem você segue..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="px-3 pb-3">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all" className="gap-1.5">
-                <MessageCircle className="h-4 w-4" />
-                Todas
-              </TabsTrigger>
-              <TabsTrigger value="unread" className="gap-1.5">
-                <MessageCircleOff className="h-4 w-4" />
-                Não lidas
-                {unreadConversations.length > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
-                    {unreadConversations.length}
-                  </Badge>
+        <AnimatePresence mode="wait">
+          {showArchived ? (
+            <motion.div
+              key="archived-content"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.2 }}
+              className="px-3"
+            >
+              <ScrollArea className="h-[calc(100vh-140px)]">
+                {archivedConversations.length > 0 ? (
+                  <div className="mb-4">
+                    <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                      {archivedConversations.map(renderArchivedItem)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma conversa arquivada
+                    </p>
+                  </div>
                 )}
-              </TabsTrigger>
-              <TabsTrigger value="archived" className="gap-1.5">
-                <Archive className="h-4 w-4" />
-                Arquivadas
-                {archivedConversations.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
-                    {archivedConversations.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Loading state */}
-            {isLoadingFollowing && (
-              <div className="mt-4">
-                <OnlineUsersSkeleton />
-                <div className="mt-4">
-                  <MessagesSkeleton />
+              </ScrollArea>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="main-content"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Campo de busca */}
+              <div className="px-3 pb-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Buscar entre quem você segue..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
                 </div>
               </div>
-            )}
 
-            {/* Empty state - não segue ninguém */}
-            {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && (
-              <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
-                <h2 className="text-lg font-medium mb-1">Você ainda não segue ninguém</h2>
-                <p className="text-muted-foreground text-sm">
-                  Siga pessoas para iniciar conversas
-                </p>
-              </div>
-            )}
-
-            {/* Empty state - busca sem resultados */}
-            {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length >= 2 && (
-              <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                <Search className="h-12 w-12 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">
-                  Nenhum usuário encontrado para "{searchQuery}"
-                </p>
-              </div>
-            )}
-
-            {/* Tab Content with Animation */}
-            <AnimatePresence mode="wait">
-              {activeTab === "all" && (
-                <TabsContent value="all" className="mt-0" forceMount asChild>
-                  <motion.div
-                    key="all"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    {!isLoadingFollowing && filteredUsers.length > 0 && (
-                      <ScrollArea className="h-[calc(100vh-320px)]">
-                        {/* Seção Online - Horizontal scroll */}
-                        {onlineUsers.length > 0 && (
-                          <div className="mb-4 mt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                              <h3 className="text-sm font-medium text-muted-foreground">
-                                Online agora ({onlineUsers.length})
-                              </h3>
-                            </div>
-                            <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                              {onlineUsers.map(userProfile => (
-                                <OnlineUserAvatar 
-                                  key={userProfile.id} 
-                                  user={userProfile} 
-                                  onClick={() => handleStartConversation(userProfile.id)} 
-                                  disabled={creatingUserId !== null} 
-                                  isLoading={creatingUserId === userProfile.id} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Seção de conversas recentes */}
-                        {allConversations.length > 0 && (
-                          <div className="mb-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="text-sm font-medium text-muted-foreground">
-                                Conversas recentes ({allConversations.length})
-                              </h3>
-                            </div>
-                            <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                              {allConversations.map(conversation => (
-                                <ConversationItem 
-                                  key={conversation.id} 
-                                  conversation={conversation} 
-                                  onClick={() => navigate(`/messages/${conversation.id}`)} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Empty conversations state */}
-                        {allConversations.length === 0 && !isLoading && (
-                          <div className="py-8 text-center">
-                            <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                            <p className="text-sm text-muted-foreground">
-                              Nenhuma conversa ainda. Clique em alguém online para iniciar!
-                            </p>
-                          </div>
-                        )}
-                      </ScrollArea>
-                    )}
-                  </motion.div>
-                </TabsContent>
+              {/* Loading state */}
+              {isLoadingFollowing && (
+                <div className="px-3">
+                  <OnlineUsersSkeleton />
+                  <div className="mt-4">
+                    <MessagesSkeleton />
+                  </div>
+                </div>
               )}
 
-              {activeTab === "unread" && (
-                <TabsContent value="unread" className="mt-0" forceMount asChild>
-                  <motion.div
-                    key="unread"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <ScrollArea className="h-[calc(100vh-320px)]">
-                      {unreadConversations.length > 0 ? (
-                        <div className="mb-4 mt-4">
-                          <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                            {unreadConversations.map(conversation => (
-                              <ConversationItem 
-                                key={conversation.id} 
-                                conversation={conversation} 
-                                onClick={() => navigate(`/messages/${conversation.id}`)} 
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="py-8 text-center">
-                          <MessageCircleOff className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                          <p className="text-sm text-muted-foreground">
-                            Nenhuma mensagem não lida
-                          </p>
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </motion.div>
-                </TabsContent>
+              {/* Empty state - não segue ninguém */}
+              {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length < 2 && (
+                <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                  <UserPlus className="h-12 w-12 text-muted-foreground mb-3" />
+                  <h2 className="text-lg font-medium mb-1">Você ainda não segue ninguém</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Siga pessoas para iniciar conversas
+                  </p>
+                </div>
               )}
 
-              {activeTab === "archived" && (
-                <TabsContent value="archived" className="mt-0" forceMount asChild>
-                  <motion.div
-                    key="archived"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <ScrollArea className="h-[calc(100vh-320px)]">
-                      {archivedConversations.length > 0 ? (
-                        <div className="mb-4 mt-4">
-                          <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
-                            {archivedConversations.map(renderArchivedItem)}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="py-8 text-center">
-                          <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                          <p className="text-sm text-muted-foreground">
-                            Nenhuma conversa arquivada
-                          </p>
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </motion.div>
-                </TabsContent>
+              {/* Empty state - busca sem resultados */}
+              {!isLoadingFollowing && filteredUsers.length === 0 && searchQuery.length >= 2 && (
+                <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                  <Search className="h-12 w-12 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">
+                    Nenhum usuário encontrado para "{searchQuery}"
+                  </p>
+                </div>
               )}
-            </AnimatePresence>
-          </Tabs>
-        </div>
+
+              {/* Main content */}
+              {!isLoadingFollowing && filteredUsers.length > 0 && (
+                <ScrollArea className="h-[calc(100vh-200px)] px-3">
+                  {/* Seção Online - Horizontal scroll */}
+                  {onlineUsers.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Circle className="h-3 w-3 fill-green-500 text-green-500" />
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Online agora ({onlineUsers.length})
+                        </h3>
+                      </div>
+                      <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                        {onlineUsers.map(userProfile => (
+                          <OnlineUserAvatar 
+                            key={userProfile.id} 
+                            user={userProfile} 
+                            onClick={() => handleStartConversation(userProfile.id)} 
+                            disabled={creatingUserId !== null} 
+                            isLoading={creatingUserId === userProfile.id} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção de conversas recentes */}
+                  {allConversations.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Conversas recentes ({allConversations.length})
+                        </h3>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                        {allConversations.map(conversation => (
+                          <ConversationItem 
+                            key={conversation.id} 
+                            conversation={conversation} 
+                            onClick={() => navigate(`/messages/${conversation.id}`)} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty conversations state */}
+                  {allConversations.length === 0 && !isLoading && (
+                    <div className="py-8 text-center">
+                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        Nenhuma conversa ainda. Clique em alguém online para iniciar!
+                      </p>
+                    </div>
+                  )}
+                </ScrollArea>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Delete confirmation dialog */}
