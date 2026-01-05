@@ -59,6 +59,9 @@ export const ProfileFeedSheet = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const postRefs = useRef<(HTMLDivElement | null)[]>([]);
   const queryClient = useQueryClient();
+  
+  // Store originRect in state to preserve it during exit animation
+  const [savedOriginRect, setSavedOriginRect] = useState<DOMRect | null>(null);
 
   // Pull-to-refresh state
   const [pullDistance, setPullDistance] = useState(0);
@@ -66,6 +69,13 @@ export const ProfileFeedSheet = ({
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
   const PULL_THRESHOLD = 80;
+  
+  // Save originRect when opening
+  useEffect(() => {
+    if (isOpen && originRect) {
+      setSavedOriginRect(originRect);
+    }
+  }, [isOpen, originRect]);
 
   // Block body scroll when open
   useEffect(() => {
@@ -130,21 +140,42 @@ export const ProfileFeedSheet = ({
   }, [pullDistance, isRefreshing, queryClient, profile.id]);
 
   const getInitialPosition = () => {
-    if (!originRect) {
-      return { opacity: 0, scale: 0.9, borderRadius: "16px" };
+    const rect = savedOriginRect || originRect;
+    if (!rect) {
+      return { opacity: 0, scale: 0.95, y: 50 };
     }
 
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    const originCenterX = originRect.left + originRect.width / 2;
-    const originCenterY = originRect.top + originRect.height / 2;
+    const originCenterX = rect.left + rect.width / 2;
+    const originCenterY = rect.top + rect.height / 2;
 
     return {
       opacity: 0,
-      scale: Math.min(originRect.width / window.innerWidth, 0.2),
+      scale: Math.max(rect.width / window.innerWidth, 0.15),
       x: originCenterX - centerX,
       y: originCenterY - centerY,
-      borderRadius: "16px",
+      borderRadius: "12px",
+    };
+  };
+  
+  const getExitPosition = () => {
+    const rect = savedOriginRect;
+    if (!rect) {
+      return { opacity: 0, scale: 0.95, y: 50 };
+    }
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const originCenterX = rect.left + rect.width / 2;
+    const originCenterY = rect.top + rect.height / 2;
+
+    return {
+      opacity: 0,
+      scale: Math.max(rect.width / window.innerWidth, 0.15),
+      x: originCenterX - centerX,
+      y: originCenterY - centerY,
+      borderRadius: "12px",
     };
   };
 
@@ -203,7 +234,7 @@ export const ProfileFeedSheet = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           />
 
           {/* Main container with expansion animation */}
@@ -217,11 +248,12 @@ export const ProfileFeedSheet = ({
               y: 0, 
               borderRadius: "0px" 
             }}
-            exit={getInitialPosition()}
+            exit={getExitPosition()}
             transition={{ 
               type: "spring", 
-              stiffness: 200, 
-              damping: 25 
+              stiffness: 280, 
+              damping: 28,
+              mass: 0.8
             }}
           >
             {/* Header */}
