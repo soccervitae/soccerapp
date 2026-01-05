@@ -13,7 +13,7 @@ import { CommentsSheet } from "@/components/feed/CommentsSheet";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoControls } from "@/components/feed/VideoControls";
-import { Send, Bookmark } from "lucide-react";
+import { Send, Bookmark, MessageCircle } from "lucide-react";
 
 interface PostMediaViewerProps {
   post: Post;
@@ -194,8 +194,9 @@ export const PostMediaViewer = ({
       isLiked: wasLiked,
     }, {
       onSuccess: () => {
-        // Refresh likers list after like/unlike
+        // Refresh likers list and posts after like/unlike
         queryClient.invalidateQueries({ queryKey: ["post-likes", post.id] });
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
       }
     });
   }, [user, navigate, likePost, post.id, isLikedLocal, queryClient]);
@@ -218,8 +219,9 @@ export const PostMediaViewer = ({
         isLiked: false,
       }, {
         onSuccess: () => {
-          // Refresh likers list after like
+          // Refresh likers list and posts after like
           queryClient.invalidateQueries({ queryKey: ["post-likes", post.id] });
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
         }
       });
     }
@@ -236,8 +238,12 @@ export const PostMediaViewer = ({
     savePost.mutate({
       postId: post.id,
       isSaved: isSavedLocal,
+    }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+      }
     });
-  }, [user, navigate, savePost, post.id, isSavedLocal]);
+  }, [user, navigate, savePost, post.id, isSavedLocal, queryClient]);
 
   const handleProfileClick = (username: string) => {
     onClose();
@@ -641,71 +647,78 @@ export const PostMediaViewer = ({
                       </div>
                     )}
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-4">
-                        {/* Like button */}
-                        <button
-                          onClick={handleLike}
-                          disabled={likePost.isPending}
-                          className="flex items-center gap-1.5 transition-all active:scale-110"
-                        >
-                          <AnimatePresence mode="wait" initial={false}>
-                            <motion.div
-                              key={isLikedLocal ? "liked" : "unliked"}
-                              initial={{ scale: 0.8, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              exit={{ scale: 0.8, opacity: 0 }}
-                              transition={{ duration: 0.15, ease: "easeOut" }}
-                            >
-                              <ClappingHandsIcon
-                                className={`w-6 h-6 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
-                                filled={isLikedLocal}
-                                variant="green"
-                              />
-                            </motion.div>
-                          </AnimatePresence>
-                          {likesCountLocal > 0 && (
-                            <span className="text-sm font-medium text-gray-900">
-                              {formatNumber(likesCountLocal)}
-                            </span>
-                          )}
-                        </button>
+                    {/* Actions - same layout as FeedPost */}
+                    <div className="grid grid-cols-4 pt-2 -mx-4">
+                      {/* Like button */}
+                      <button
+                        onClick={handleLike}
+                        disabled={likePost.isPending}
+                        className="flex items-center justify-center p-3 gap-1.5 text-foreground transition-all active:scale-110"
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={isLikedLocal ? "liked" : "unliked"}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
+                          >
+                            <ClappingHandsIcon
+                              className={`w-6 h-6 ${isLikeAnimating ? "animate-applause-pop" : ""}`}
+                              filled={isLikedLocal}
+                              variant="green"
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                        {likesCountLocal > 0 && (
+                          <span className="text-xs font-medium text-foreground">
+                            {formatNumber(likesCountLocal)}
+                          </span>
+                        )}
+                      </button>
 
-                        {/* Comment button */}
+                      {/* Comment button */}
+                      <div className="flex items-center justify-center relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
                         <button
                           onClick={() => setShowCommentsSheet(true)}
-                          className="flex items-center gap-1.5 text-gray-900 hover:text-gray-600 transition-colors"
+                          className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
                         >
-                          <span className="material-symbols-outlined text-[26px]">chat_bubble_outline</span>
+                          <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
                           {post.comments_count > 0 && (
-                            <span className="text-sm font-medium">
+                            <span className="text-xs font-medium">
                               {formatNumber(post.comments_count)}
                             </span>
                           )}
                         </button>
+                      </div>
 
-                        {/* Share button */}
+                      {/* Share button */}
+                      <div className="flex items-center justify-center relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
                         <button
                           onClick={() => setShowShareSheet(true)}
-                          className="flex items-center gap-1.5 text-gray-900 hover:text-gray-600 transition-colors"
+                          className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
                         >
-                          <Send className="w-6 h-6" />
+                          <Send className="w-6 h-6" strokeWidth={1.5} />
                           {(post.shares_count ?? 0) > 0 && (
-                            <span className="text-sm font-medium">
+                            <span className="text-xs font-medium">
                               {formatNumber(post.shares_count ?? 0)}
                             </span>
                           )}
                         </button>
+                      </div>
 
-                        {/* Save button */}
+                      {/* Save button */}
+                      <div className="flex items-center justify-center relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
                         <button
                           onClick={handleSave}
                           disabled={savePost.isPending}
-                          className={`flex items-center gap-1.5 transition-colors ${
+                          className={`flex items-center justify-center p-3 transition-colors ${
                             isSavedLocal 
-                              ? 'text-emerald-500' 
-                              : 'text-gray-900 hover:text-gray-600'
+                              ? 'text-primary' 
+                              : 'text-foreground hover:text-muted-foreground'
                           }`}
                         >
                           <Bookmark 
