@@ -232,7 +232,9 @@ export const PostsGrid = ({
           >
             {post.media_url ? (
               post.media_type === "video" ? (
-                <VideoThumbnail src={post.media_url} alt={post.content} />
+                <div className="w-full h-full pointer-events-none">
+                  <VideoThumbnail src={post.media_url} alt={post.content} />
+                </div>
               ) : post.media_type === "carousel" ? (
                 (() => {
                   try {
@@ -242,10 +244,10 @@ export const PostsGrid = ({
                         <img
                           src={urls[0]}
                           alt={post.content}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover pointer-events-none"
                           loading="lazy"
                         />
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 right-2 pointer-events-none">
                           <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
                         </div>
                       </>
@@ -255,7 +257,7 @@ export const PostsGrid = ({
                       <img
                         src={post.media_url}
                         alt={post.content}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover pointer-events-none"
                         loading="lazy"
                       />
                     );
@@ -265,16 +267,16 @@ export const PostsGrid = ({
                 <img
                   src={post.media_url}
                   alt={post.content}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                   loading="lazy"
                 />
               )
             ) : (
-              <div className="w-full h-full flex items-center justify-center p-2">
+              <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
             )}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors" />
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
           </button>
         ))}
       </div>
