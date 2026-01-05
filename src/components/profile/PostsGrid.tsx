@@ -146,9 +146,9 @@ export const PostsGrid = ({
   };
 
   const handlePostClick = (e: MouseEvent, filteredPosts: Post[], index: number) => {
+    // Avoid duplicate opens when Embla interprets click/drag sequences
     e.stopPropagation();
-    e.preventDefault();
-    
+
     if (!filteredPosts[index] || feedSheetOpen) return;
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -156,6 +156,9 @@ export const PostsGrid = ({
     setViewerPosts(filteredPosts);
     setSelectedPostIndex(index);
     setFeedSheetOpen(true);
+
+    // Debug (remove later)
+    console.log("[PostsGrid] open ProfileFeedSheet", { postId: filteredPosts[index].id, index });
   };
 
   // Component to render video with thumbnail
@@ -221,7 +224,7 @@ export const PostsGrid = ({
           <div 
             key={post.id} 
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer"
-            onClick={(e) => handlePostClick(e, filteredPosts, index)}
+            onPointerUp={(e) => handlePostClick(e as unknown as MouseEvent, filteredPosts, index)}
           >
             {post.media_url ? (
               post.media_type === "video" ? (
