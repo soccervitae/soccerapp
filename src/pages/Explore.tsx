@@ -18,12 +18,13 @@ const Explore = () => {
     gender: null,
     birthYear: null,
     countryId: null,
+    position: null,
   });
 
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
   
   const hasActiveFilters = useMemo(() => {
-    return !!(filters.profileType || filters.gender || filters.birthYear || filters.countryId);
+    return !!(filters.profileType || filters.gender || filters.birthYear || filters.countryId || filters.position);
   }, [filters]);
 
   const isSearchActive = debouncedQuery.trim().length > 0 || hasActiveFilters;
@@ -35,6 +36,7 @@ const Explore = () => {
       gender: filters.gender,
       birthYear: filters.birthYear,
       countryId: filters.countryId,
+      position: filters.position,
     },
     user?.id
   );
