@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePostComments, useCreateComment, type Post } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -19,6 +20,7 @@ interface CommentsSheetProps {
 export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: currentUserProfile } = useProfile(user?.id);
   const [comment, setComment] = useState("");
   const { data: comments, isLoading } = usePostComments(post.id);
   const createComment = useCreateComment();
@@ -109,10 +111,10 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
         <div className="border-t border-border bg-background p-4 mt-auto">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-              {user ? (
+              {user && currentUserProfile?.avatar_url ? (
                 <img 
-                  src="/placeholder.svg" 
-                  alt="You" 
+                  src={currentUserProfile.avatar_url} 
+                  alt={currentUserProfile.username || "You"} 
                   className="w-full h-full object-cover"
                 />
               ) : (
