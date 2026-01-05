@@ -198,13 +198,13 @@ export const PostsGrid = ({
     }
   };
 
-  const transformPostForViewer = (post: Post) => ({
+  const transformPostForViewer = (post: Post): import("@/hooks/usePosts").Post => ({
     id: post.id,
     content: post.content,
     media_url: post.media_url,
     media_type: post.media_type,
     created_at: post.created_at || new Date().toISOString(),
-    updated_at: post.created_at || new Date().toISOString(),
+    updated_at: post.created_at || null,
     user_id: post.user_id || profile?.id || "",
     likes_count: post.likes_count || 0,
     comments_count: post.comments_count || 0,
@@ -220,8 +220,8 @@ export const PostsGrid = ({
     profile: {
       id: profile?.id || "",
       username: profile?.username || "usuario",
-      full_name: profile?.full_name || "",
-      nickname: profile?.nickname || profile?.full_name || profile?.username || "Usuario",
+      full_name: profile?.full_name || null,
+      nickname: profile?.nickname || profile?.full_name || profile?.username || null,
       avatar_url: profile?.avatar_url || null,
       team: null,
       conta_verificada: profile?.conta_verificada || false,
@@ -237,7 +237,7 @@ export const PostsGrid = ({
   });
 
   // Transform saved post with its own profile data
-  const transformSavedPostForViewer = (post: SavedPost) => {
+  const transformSavedPostForViewer = (post: SavedPost): import("@/hooks/usePosts").Post => {
     const postProfile = post._profile;
     return {
       id: post.id,
@@ -245,7 +245,7 @@ export const PostsGrid = ({
       media_url: post.media_url,
       media_type: post.media_type,
       created_at: post.created_at || new Date().toISOString(),
-      updated_at: post.created_at || new Date().toISOString(),
+      updated_at: post.created_at || null,
       user_id: post.user_id || postProfile?.id || "",
       likes_count: post.likes_count || 0,
       comments_count: post.comments_count || 0,
@@ -261,8 +261,8 @@ export const PostsGrid = ({
       profile: {
         id: postProfile?.id || "",
         username: postProfile?.username || "usuario",
-        full_name: postProfile?.full_name || "",
-        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || "Usuario",
+        full_name: postProfile?.full_name || null,
+        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || null,
         avatar_url: postProfile?.avatar_url || null,
         team: null,
         conta_verificada: postProfile?.conta_verificada || false,
