@@ -36,6 +36,14 @@ const Install = () => {
   const deviceType = useDeviceType();
   const fromSignup = searchParams.get("from") === "signup";
 
+  // Animate through steps
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep(prev => (prev + 1) % 4);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Redirect desktop users to home
   useEffect(() => {
     if (isMobile === false) {
@@ -47,18 +55,6 @@ const Install = () => {
   if (isMobile === undefined || isMobile === false) {
     return null;
   }
-
-  // Show installed message when PWA is detected (no auto-redirect)
-
-  // Show installed message when PWA is detected (no auto-redirect)
-
-  // Animate through steps
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep(prev => (prev + 1) % 4);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
   const handleInstall = async () => {
     await promptInstall();
   };
