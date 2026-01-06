@@ -37,7 +37,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
+  const currentTab = activeTab || (location.pathname === "/profile" || location.pathname.startsWith("/profile/") ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : location.pathname === "/" ? "home" : undefined);
 
   const handleHomeClick = () => {
     if (location.pathname === "/") {
