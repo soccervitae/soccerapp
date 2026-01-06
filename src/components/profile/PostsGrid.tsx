@@ -6,6 +6,7 @@ import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { type Post as FeedPostType } from "@/hooks/usePosts";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
@@ -160,6 +161,11 @@ export const PostsGrid = ({
   const [imageViewerIndex, setImageViewerIndex] = useState(0);
   const [imageViewerOriginRect, setImageViewerOriginRect] = useState<DOMRect | null>(null);
 
+  // State for fullscreen video viewer
+  const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
+  const [videoViewerUrl, setVideoViewerUrl] = useState<string>("");
+  const [videoViewerOriginRect, setVideoViewerOriginRect] = useState<DOMRect | null>(null);
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     const index = emblaApi.selectedScrollSnap();
@@ -220,6 +226,42 @@ export const PostsGrid = ({
   const handleCloseImageViewer = () => {
     setIsImageViewerOpen(false);
     setImageViewerOriginRect(null);
+  };
+
+  const handleCloseVideoViewer = () => {
+    setIsVideoViewerOpen(false);
+    setVideoViewerOriginRect(null);
+  };
+
+  // Handle media click for Posts tab - opens fullscreen viewer based on media type
+  const handleMediaClick = (post: Post, event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!post.media_url) return;
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    
+    if (post.media_type === "video") {
+      setVideoViewerUrl(post.media_url);
+      setVideoViewerOriginRect(rect);
+      setIsVideoViewerOpen(true);
+    } else if (post.media_type === "carousel") {
+      try {
+        const urls = JSON.parse(post.media_url);
+        setImageViewerImages(urls);
+        setImageViewerIndex(0);
+        setImageViewerOriginRect(rect);
+        setIsImageViewerOpen(true);
+      } catch {
+        setImageViewerImages([post.media_url]);
+        setImageViewerIndex(0);
+        setImageViewerOriginRect(rect);
+        setIsImageViewerOpen(true);
+      }
+    } else {
+      setImageViewerImages([post.media_url]);
+      setImageViewerIndex(0);
+      setImageViewerOriginRect(rect);
+      setIsImageViewerOpen(true);
+    }
   };
 
   // Component to render video with thumbnail
@@ -345,9 +387,14 @@ export const PostsGrid = ({
     return (
       <div className="grid grid-cols-3 gap-0.5">
         {filteredPosts.map((post) => (
-          <div
+          <button
             key={post.id}
-            className="aspect-[4/5] bg-muted relative overflow-hidden"
+            type="button"
+            data-embla-no-drag="true"
+            className="aspect-[4/5] bg-muted relative overflow-hidden cursor-pointer touch-manipulation select-none"
+            onClick={(e) => handleMediaClick(post, e)}
+            disabled={!post.media_url}
+            aria-label="Abrir mídia em tela cheia"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -395,7 +442,7 @@ export const PostsGrid = ({
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
     );
@@ -631,7 +678,7 @@ export const PostsGrid = ({
         />
       )}
 
-      {/* Fullscreen Image Viewer for Fotos tab */}
+      {/* Fullscreen Image Viewer for Fotos tab and Posts tab */}
       <FullscreenImageViewer
         images={imageViewerImages}
         initialIndex={imageViewerIndex}
@@ -642,6 +689,19 @@ export const PostsGrid = ({
           y: imageViewerOriginRect.y,
           width: imageViewerOriginRect.width,
           height: imageViewerOriginRect.height,
+        } : null}
+      />
+
+      {/* Fullscreen Video Viewer for Posts tab */}
+      <FullscreenVideoViewer
+        videoUrl={videoViewerUrl}
+        isOpen={isVideoViewerOpen}
+        onClose={handleCloseVideoViewer}
+        originRect={videoViewerOriginRect ? {
+          x: videoViewerOriginRect.x,
+          y: videoViewerOriginRect.y,
+          width: videoViewerOriginRect.width,
+          height: videoViewerOriginRect.height,
         } : null}
       />
     </section>
