@@ -346,38 +346,38 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
-      <TabsList className="w-full h-10 bg-muted p-1 rounded-md grid grid-cols-5 gap-2">
+      <TabsList className="w-full h-10 bg-muted p-1 rounded-md flex overflow-x-auto gap-2 scrollbar-hide">
         <TabsTrigger 
           value="profile" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          className="gap-1 text-xs whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">grid_on</span>
           Posts
         </TabsTrigger>
         <TabsTrigger 
           value="videos" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          className="gap-1 text-xs whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">play_circle</span>
           Vídeos
         </TabsTrigger>
         <TabsTrigger 
           value="championships" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          className="gap-1 text-xs whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">sports_soccer</span>
           Campeonatos
         </TabsTrigger>
         <TabsTrigger 
           value="achievements" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          className="gap-1 text-xs whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">trophy</span>
           Conquistas
         </TabsTrigger>
         <TabsTrigger 
           value="photos" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          className="gap-1 text-xs whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">photo_library</span>
           Fotos
