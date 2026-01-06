@@ -52,25 +52,7 @@ const EditProfile = () => {
     },
   });
 
-  // Check if Brazil is selected
-  const isBrazilSelected = countries.find(c => c.id.toString() === formData.nationality)?.nome?.toLowerCase() === "brasil";
-
-  // Fetch states when Brazil is selected
-  const { data: states = [] } = useQuery({
-    queryKey: ['states', isBrazilSelected],
-    queryFn: async () => {
-      const brazilId = countries.find(c => c.nome.toLowerCase() === "brasil")?.id;
-      if (!brazilId) return [];
-      const { data, error } = await supabase
-        .from('estados')
-        .select('id, nome, uf, bandeira_url')
-        .eq('pais_id', brazilId)
-        .order('nome');
-      if (error) throw error;
-      return data as State[];
-    },
-    enabled: isBrazilSelected,
-  });
+  
 
   // Fetch positions based on gender
   const { data: positions = [] } = useQuery({
@@ -135,6 +117,26 @@ const EditProfile = () => {
   const [statePickerOpen, setStatePickerOpen] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if Brazil is selected
+  const isBrazilSelected = countries.find(c => c.id.toString() === formData.nationality)?.nome?.toLowerCase() === "brasil";
+
+  // Fetch states when Brazil is selected
+  const { data: states = [] } = useQuery({
+    queryKey: ['states', isBrazilSelected],
+    queryFn: async () => {
+      const brazilId = countries.find(c => c.nome.toLowerCase() === "brasil")?.id;
+      if (!brazilId) return [];
+      const { data, error } = await supabase
+        .from('estados')
+        .select('id, nome, uf, bandeira_url')
+        .eq('pais_id', brazilId)
+        .order('nome');
+      if (error) throw error;
+      return data as State[];
+    },
+    enabled: isBrazilSelected,
+  });
 
   // Helper function to calculate age from birth date
   const calculateAge = (birthDate: string): number => {
