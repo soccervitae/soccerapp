@@ -184,12 +184,14 @@ const Profile = () => {
     </>
   );
 
+  // Only show RefreshableContainer for own profile
+  const ContentWrapper = isOwnProfile ? RefreshableContainer : 'div';
+  const wrapperProps = isOwnProfile 
+    ? { onRefresh: handleRefresh, isRefreshing: isRefetching, className: "bg-background min-h-screen relative pb-24" }
+    : { className: "bg-background min-h-screen relative pb-24 overflow-auto" };
+
   return (
-    <RefreshableContainer
-      onRefresh={handleRefresh}
-      isRefreshing={isRefetching}
-      className="bg-background min-h-screen relative pb-24"
-    >
+    <ContentWrapper {...wrapperProps as any}>
       {fromOnboarding ? (
         <motion.div
           variants={containerVariants}
@@ -248,7 +250,7 @@ const Profile = () => {
       ) : (
         <GuestBanner />
       )}
-    </RefreshableContainer>
+    </ContentWrapper>
   );
 };
 
