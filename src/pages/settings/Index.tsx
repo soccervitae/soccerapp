@@ -87,11 +87,6 @@ export default function Settings() {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conta</p>
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <SettingsItem 
-              icon="person"
-              label="Editar perfil"
-              onClick={() => navigate("/settings/profile")}
-            />
-            <SettingsItem 
               icon="lock"
               label="Privacidade"
               onClick={() => navigate("/settings/privacy")}
