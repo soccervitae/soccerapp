@@ -1,33 +1,237 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserSavedPosts, useProfile } from "@/hooks/useProfile";
+import { useUserSavedPosts } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
+import { FeedPost } from "@/components/feed/FeedPost";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Play, Loader2 } from "lucide-react";
+import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
+import { formatDuration } from "@/hooks/useVideoDuration";
 
 interface SavedPost {
   id: string;
+  user_id: string;
   media_url: string | null;
   media_type: string | null;
   content: string;
   likes_count: number;
   comments_count: number;
+  shares_count: number;
+  created_at: string;
+  location_name?: string | null;
+  location_lat?: number | null;
+  location_lng?: number | null;
+  music_track_id?: string | null;
+  music_start_seconds?: number | null;
+  music_end_seconds?: number | null;
+  saved_by_user?: boolean;
+  liked_by_user?: boolean;
+  _profile?: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    nickname: string | null;
+    avatar_url: string | null;
+    conta_verificada: boolean;
+    gender: string | null;
+    role: string | null;
+    posicaomas: number | null;
+    posicaofem: number | null;
+    funcao: number | null;
+  };
 }
+
+// Component to render video with thumbnail
+const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (src) {
+      setIsLoading(true);
+      
+      generateVideoThumbnailWithCache(src, 1).then((result) => {
+        if (result.thumbnail) {
+          setThumbnail(result.thumbnail);
+        }
+        setIsLoading(false);
+      });
+    }
+  }, [src]);
+
+  return (
+    <>
+      {isLoading ? (
+        <div className="w-full h-full bg-muted flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+        </div>
+      ) : thumbnail ? (
+        <img 
+          src={thumbnail}
+          alt={alt}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-muted flex items-center justify-center">
+          <Play className="w-8 h-8 text-muted-foreground/60 fill-muted-foreground/60" />
+        </div>
+      )}
+      <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
+        <span className="material-symbols-outlined text-background text-[32px] drop-shadow-lg">play_arrow</span>
+      </div>
+    </>
+  );
+};
 
 export default function Saved() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
   const { data: savedPosts = [], isLoading: postsLoading } = useUserSavedPosts(user?.id);
-  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  
+  const [expandedPost, setExpandedPost] = useState<SavedPost | null>(null);
+  const [originRect, setOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
-  const handlePostClick = (index: number) => {
-    setSelectedPostIndex(index);
+  const handlePostClick = (post: SavedPost, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
+    setExpandedPost(post);
+  };
+
+  const handleCloseExpanded = () => {
+    setExpandedPost(null);
+    setOriginRect(null);
+  };
+
+  // Transform saved post with its own profile data for FeedPost
+  const transformSavedPostForViewer = (post: SavedPost): import("@/hooks/usePosts").Post => {
+    const postProfile = post._profile;
+    return {
+      id: post.id,
+      content: post.content,
+      media_url: post.media_url,
+      media_type: post.media_type,
+      created_at: post.created_at || new Date().toISOString(),
+      updated_at: post.created_at || null,
+      user_id: post.user_id || postProfile?.id || "",
+      likes_count: post.likes_count || 0,
+      comments_count: post.comments_count || 0,
+      shares_count: post.shares_count || 0,
+      location_name: post.location_name || null,
+      location_lat: post.location_lat || null,
+      location_lng: post.location_lng || null,
+      music_track_id: post.music_track_id || null,
+      music_start_seconds: post.music_start_seconds || null,
+      music_end_seconds: post.music_end_seconds || null,
+      music_track: null,
+      recent_likes: [],
+      profile: {
+        id: postProfile?.id || "",
+        username: postProfile?.username || "usuario",
+        full_name: postProfile?.full_name || null,
+        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || null,
+        avatar_url: postProfile?.avatar_url || null,
+        team: null,
+        conta_verificada: postProfile?.conta_verificada || false,
+        gender: postProfile?.gender || null,
+        role: postProfile?.role || null,
+        posicaomas: postProfile?.posicaomas || null,
+        posicaofem: postProfile?.posicaofem || null,
+        funcao: postProfile?.funcao || null,
+        position_name: null,
+      },
+      liked_by_user: post.liked_by_user ?? false,
+      saved_by_user: true,
+    };
   };
 
   // Filter posts with media for grid display
   const postsWithMedia = savedPosts.filter((post: SavedPost) => post.media_url);
+
+  const renderPostGrid = (posts: SavedPost[]) => {
+    if (posts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 px-4">
+          <span className="material-symbols-outlined text-[64px] text-muted-foreground/50 mb-4">
+            bookmark
+          </span>
+          <p className="text-muted-foreground text-center">
+            Você ainda não salvou nenhum post
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-0.5">
+        {posts.map((post: SavedPost) => (
+          <button
+            key={post.id}
+            type="button"
+            onClick={(e) => handlePostClick(post, e)}
+            className="aspect-[4/5] relative overflow-hidden bg-muted group cursor-pointer touch-manipulation select-none"
+          >
+            {post.media_type === "video" ? (
+              <div className="w-full h-full pointer-events-none">
+                <VideoThumbnail src={post.media_url || ""} alt={post.content} />
+              </div>
+            ) : post.media_type === "carousel" || post.media_url?.includes(",") ? (
+              (() => {
+                try {
+                  const urls = post.media_url?.startsWith("[") 
+                    ? JSON.parse(post.media_url) 
+                    : post.media_url?.split(",");
+                  return (
+                    <>
+                      <img
+                        src={urls?.[0] || ""}
+                        alt=""
+                        className="w-full h-full object-cover pointer-events-none"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-2 right-2 pointer-events-none">
+                        <span className="material-symbols-outlined text-white drop-shadow-lg text-[20px]">
+                          collections
+                        </span>
+                      </div>
+                    </>
+                  );
+                } catch {
+                  return (
+                    <img
+                      src={post.media_url || ""}
+                      alt=""
+                      className="w-full h-full object-cover pointer-events-none"
+                      loading="lazy"
+                    />
+                  );
+                }
+              })()
+            ) : (
+              <img
+                src={post.media_url || ""}
+                alt=""
+                className="w-full h-full object-cover pointer-events-none"
+                loading="lazy"
+              />
+            )}
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 pointer-events-none">
+              <div className="flex items-center gap-1 text-white">
+                <span className="material-symbols-outlined text-[20px] fill-icon">favorite</span>
+                <span className="font-semibold">{post.likes_count || 0}</span>
+              </div>
+              <div className="flex items-center gap-1 text-white">
+                <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
+                <span className="font-semibold">{post.comments_count || 0}</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,64 +270,8 @@ export default function Saved() {
                   <Skeleton key={i} className="aspect-[4/5]" />
                 ))}
               </div>
-            ) : postsWithMedia.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 px-4">
-                <span className="material-symbols-outlined text-[64px] text-muted-foreground/50 mb-4">
-                  bookmark
-                </span>
-                <p className="text-muted-foreground text-center">
-                  Você ainda não salvou nenhum post
-                </p>
-              </div>
             ) : (
-              <div className="grid grid-cols-3 gap-0.5">
-                {postsWithMedia.map((post: SavedPost, index: number) => (
-                  <button
-                    key={post.id}
-                    onClick={() => handlePostClick(index)}
-                    className="aspect-[4/5] relative overflow-hidden bg-muted group"
-                  >
-                    {post.media_type === "video" ? (
-                      <video
-                        src={post.media_url || ""}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : post.media_url?.includes(",") ? (
-                      <>
-                        <img
-                          src={post.media_url.split(",")[0]}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <span className="material-symbols-outlined text-white drop-shadow-lg text-[20px]">
-                            collections
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <img
-                        src={post.media_url || ""}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <div className="flex items-center gap-1 text-white">
-                        <span className="material-symbols-outlined text-[20px] fill-icon">favorite</span>
-                        <span className="font-semibold">{post.likes_count || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-white">
-                        <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
-                        <span className="font-semibold">{post.comments_count || 0}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              renderPostGrid(postsWithMedia)
             )}
           </TabsContent>
 
@@ -140,28 +288,52 @@ export default function Saved() {
         </Tabs>
       </div>
 
-      {/* Post Feed Sheet */}
-      {selectedPostIndex !== null && profile && (
-        <ProfileFeedSheet
-          isOpen={selectedPostIndex !== null}
-          onClose={() => setSelectedPostIndex(null)}
-          posts={savedPosts as any}
-          initialPostIndex={selectedPostIndex}
-          profile={{
-            id: profile.id,
-            username: profile.username,
-            full_name: profile.full_name,
-            nickname: profile.nickname,
-            avatar_url: profile.avatar_url,
-            conta_verificada: profile.conta_verificada,
-            gender: profile.gender,
-            role: profile.role,
-            posicaomas: profile.posicaomas,
-            posicaofem: profile.posicaofem,
-            funcao: profile.funcao,
-          }}
-        />
-      )}
+      {/* Expanded Post Overlay */}
+      <AnimatePresence>
+        {expandedPost && originRect && (
+          <motion.div
+            className="fixed inset-0 z-[60] bg-background overflow-y-auto"
+            initial={{ 
+              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
+              opacity: 0.8
+            }}
+            animate={{ 
+              clipPath: "inset(0px 0px 0px 0px round 0px)",
+              opacity: 1
+            }}
+            exit={{ 
+              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
+              opacity: 0
+            }}
+            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+          >
+            {/* Header with back button */}
+            <motion.div 
+              className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.2 }}
+            >
+              <button 
+                onClick={handleCloseExpanded}
+                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <span className="font-semibold">Post</span>
+            </motion.div>
+            
+            {/* Feed Post */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.25 }}
+            >
+              <FeedPost post={transformSavedPostForViewer(expandedPost)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
