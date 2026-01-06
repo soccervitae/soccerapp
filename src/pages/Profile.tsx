@@ -231,7 +231,7 @@ const Profile = () => {
             <div 
               key={post.id} 
               ref={(el) => { gridItemRefs.current[index] = el; }}
-              className="aspect-square relative overflow-hidden rounded-sm bg-muted cursor-pointer"
+              className="aspect-square relative overflow-hidden bg-muted cursor-pointer"
               onClick={() => handleGridItemClick(index, gridItemRefs.current[index])}
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
