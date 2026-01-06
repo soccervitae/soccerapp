@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Send, ImageOff } from "lucide-react";
+import { Trash2, X, Pencil, Check, Pause, MessageCircle, Eye, Send, ImageOff, Bookmark } from "lucide-react";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
@@ -24,6 +24,7 @@ import {
   useHighlightReplyCount,
   useHighlightLikeCount
 } from "@/hooks/useHighlightInteractions";
+import { useHighlightSaveStatus, useToggleSaveHighlight } from "@/hooks/useSavedHighlights";
 import { HighlightViewersSheet } from "@/components/profile/HighlightViewersSheet";
 import { HighlightRepliesSheet } from "@/components/profile/HighlightRepliesSheet";
 import { HighlightLikesSheet } from "@/components/profile/HighlightLikesSheet";
@@ -115,6 +116,12 @@ export const HighlightFullscreenView = ({
     isOwnProfile ? selectedHighlight?.id : undefined
   );
   
+  // Save highlight hooks
+  const { data: isSaved = false } = useHighlightSaveStatus(
+    !isOwnProfile ? selectedHighlight?.id : undefined
+  );
+  const toggleSave = useToggleSaveHighlight();
+  
   // Mark highlight as viewed when opened (only if not own profile)
   useEffect(() => {
     if (viewDialogOpen && selectedHighlight && user && !isOwnProfile) {
@@ -143,6 +150,13 @@ export const HighlightFullscreenView = ({
       setShowHeartAnimation(true);
       setTimeout(() => setShowHeartAnimation(false), 1000);
     }
+  };
+
+  // Handle save action
+  const handleSave = () => {
+    if (!selectedHighlight || !user) return;
+    toggleSave.mutate({ highlightId: selectedHighlight.id, isSaved });
+    toast.success(isSaved ? "Destaque removido dos salvos" : "Destaque salvo");
   };
 
   // Handle reply submit
@@ -578,6 +592,13 @@ export const HighlightFullscreenView = ({
                             />
                           </motion.div>
                         </AnimatePresence>
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        disabled={toggleSave.isPending}
+                        className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+                      >
+                        <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-white' : ''}`} strokeWidth={1.5} />
                       </button>
                       <button
                         onClick={handleShare}

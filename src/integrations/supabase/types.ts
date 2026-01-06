@@ -1240,6 +1240,35 @@ export type Database = {
           },
         ]
       }
+      saved_highlights: {
+        Row: {
+          created_at: string
+          highlight_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          highlight_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          highlight_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_highlights_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "user_highlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_posts: {
         Row: {
           created_at: string
