@@ -5,10 +5,9 @@ import { useSavedHighlights, SavedHighlight } from "@/hooks/useSavedHighlights";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
 import { Play, Loader2 } from "lucide-react";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
-import type { Post } from "@/hooks/usePosts";
 import { HighlightFullscreenView } from "@/components/profile/HighlightFullscreenView";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import useEmblaCarousel from "embla-carousel-react";
@@ -110,47 +109,10 @@ export default function Saved() {
   // Filter posts with media for grid display
   const postsWithMedia = savedPosts.filter((post: SavedPost) => post.media_url);
 
-  // Transform saved posts to Post format for the viewer
-  const transformedPosts: Post[] = postsWithMedia.map((post: SavedPost) => {
-    const postProfile = post._profile;
-    return {
-      id: post.id,
-      content: post.content,
-      media_url: post.media_url,
-      media_type: post.media_type,
-      created_at: post.created_at || new Date().toISOString(),
-      updated_at: post.created_at || null,
-      user_id: post.user_id || postProfile?.id || "",
-      likes_count: post.likes_count || 0,
-      comments_count: post.comments_count || 0,
-      shares_count: post.shares_count || 0,
-      location_name: post.location_name || null,
-      location_lat: post.location_lat || null,
-      location_lng: post.location_lng || null,
-      music_track_id: post.music_track_id || null,
-      music_start_seconds: post.music_start_seconds || null,
-      music_end_seconds: post.music_end_seconds || null,
-      music_track: null,
-      recent_likes: [],
-      profile: {
-        id: postProfile?.id || "",
-        username: postProfile?.username || "usuario",
-        full_name: postProfile?.full_name || null,
-        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || null,
-        avatar_url: postProfile?.avatar_url || null,
-        team: null,
-        conta_verificada: postProfile?.conta_verificada || false,
-        gender: postProfile?.gender || null,
-        role: postProfile?.role || null,
-        posicaomas: postProfile?.posicaomas || null,
-        posicaofem: postProfile?.posicaofem || null,
-        funcao: postProfile?.funcao || null,
-        position_name: null,
-      },
-      liked_by_user: post.liked_by_user ?? false,
-      saved_by_user: true,
-    };
-  });
+  // Selected post's profile for the feed sheet
+  const selectedPostProfile = expandedPostIndex !== null 
+    ? postsWithMedia[expandedPostIndex]?._profile 
+    : null;
 
   const handlePostClick = (postIndex: number, event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -161,20 +123,6 @@ export default function Saved() {
   const handleCloseViewer = () => {
     setExpandedPostIndex(null);
     setOriginRect(null);
-  };
-
-  const handleNavigatePost = (index: number) => {
-    setExpandedPostIndex(index);
-  };
-
-  const getMediaUrls = (mediaUrl: string | null): string[] => {
-    if (!mediaUrl) return [];
-    try {
-      const parsed = JSON.parse(mediaUrl);
-      return Array.isArray(parsed) ? parsed : [mediaUrl];
-    } catch {
-      return [mediaUrl];
-    }
   };
 
   // Transform saved highlights to UserHighlight format for the viewer
@@ -367,8 +315,6 @@ export default function Saved() {
     );
   };
 
-  const currentPost = expandedPostIndex !== null ? transformedPosts[expandedPostIndex] : null;
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -425,18 +371,45 @@ export default function Saved() {
         </Tabs>
       </div>
 
-      {/* PostMediaViewer */}
-      {currentPost && (
-        <PostMediaViewer
-          post={currentPost}
-          mediaUrls={getMediaUrls(currentPost.media_url)}
-          mediaType={currentPost.media_type}
+      {/* ProfileFeedSheet for saved posts */}
+      {selectedPostProfile && (
+        <ProfileFeedSheet
+          posts={postsWithMedia.map(post => ({
+            id: post.id,
+            media_url: post.media_url,
+            media_type: post.media_type,
+            content: post.content,
+            created_at: post.created_at,
+            user_id: post.user_id,
+            likes_count: post.likes_count,
+            comments_count: post.comments_count,
+            shares_count: post.shares_count,
+            location_name: post.location_name,
+            location_lat: post.location_lat,
+            location_lng: post.location_lng,
+            music_track_id: post.music_track_id,
+            music_start_seconds: post.music_start_seconds,
+            music_end_seconds: post.music_end_seconds,
+            liked_by_user: post.liked_by_user,
+            saved_by_user: post.saved_by_user,
+          }))}
+          initialPostIndex={expandedPostIndex ?? 0}
           isOpen={expandedPostIndex !== null}
           onClose={handleCloseViewer}
+          profile={{
+            id: selectedPostProfile.id,
+            username: selectedPostProfile.username,
+            full_name: selectedPostProfile.full_name,
+            nickname: selectedPostProfile.nickname,
+            avatar_url: selectedPostProfile.avatar_url,
+            conta_verificada: selectedPostProfile.conta_verificada,
+            gender: selectedPostProfile.gender,
+            role: selectedPostProfile.role,
+            posicaomas: selectedPostProfile.posicaomas,
+            posicaofem: selectedPostProfile.posicaofem,
+            funcao: selectedPostProfile.funcao,
+          }}
           originRect={originRect}
-          posts={transformedPosts}
-          currentPostIndex={expandedPostIndex ?? 0}
-          onNavigatePost={handleNavigatePost}
         />
       )}
 
