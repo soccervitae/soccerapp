@@ -343,9 +343,12 @@ const Profile = () => {
     }
   };
 
+  // Check if has highlights
+  const hasHighlights = highlights && highlights.length > 0;
+
   // Profile tabs component
   const ProfileTabs = () => (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-6' : 'mt-2'}`}>
       <TabsList className="w-full h-10 bg-muted p-1 rounded-md flex overflow-x-auto gap-2 scrollbar-hide">
         <TabsTrigger 
           value="profile" 
