@@ -25,6 +25,8 @@ import EditProfile from "./pages/settings/EditProfile";
 import Privacy from "./pages/settings/Privacy";
 import Security from "./pages/settings/Security";
 import Notifications from "./pages/settings/Notifications";
+import Settings from "./pages/settings/Index";
+import Saved from "./pages/settings/Saved";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 
@@ -123,6 +125,11 @@ const AnimatedRoutes = () => {
             <PageTransition><Explore /></PageTransition>
           </ProtectedRoute>
         } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <PageTransition><Settings /></PageTransition>
+          </ProtectedRoute>
+        } />
         <Route path="/settings/profile" element={
           <ProtectedRoute>
             <PageTransition><EditProfile /></PageTransition>
@@ -141,6 +148,11 @@ const AnimatedRoutes = () => {
         <Route path="/settings/notifications" element={
           <ProtectedRoute>
             <PageTransition><Notifications /></PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings/saved" element={
+          <ProtectedRoute>
+            <PageTransition><Saved /></PageTransition>
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
