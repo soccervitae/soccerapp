@@ -595,19 +595,9 @@ export const PostsGrid = ({
       {/* Swipeable content */}
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
-          {/* Posts - Facebook-style feed with pull-to-refresh */}
+          {/* Posts - Facebook-style feed */}
           <div className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto">
-            {onRefresh ? (
-              <RefreshableContainer
-                onRefresh={onRefresh}
-                isRefreshing={isRefreshing}
-                className="min-h-full"
-              >
-                {profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
-              </RefreshableContainer>
-            ) : (
-              profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)
-            )}
+            {profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
           </div>
           
           {/* Times */}
