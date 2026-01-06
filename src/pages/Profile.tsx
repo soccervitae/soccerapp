@@ -346,7 +346,7 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
-      <TabsList className="w-full h-10 bg-muted p-1 rounded-md grid grid-cols-5 gap-1">
+      <TabsList className="w-full h-10 bg-muted p-1 rounded-md grid grid-cols-5 gap-2">
         <TabsTrigger 
           value="profile" 
           className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
