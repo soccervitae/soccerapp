@@ -344,14 +344,10 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-0.5">
-        {filteredPosts.map((post, index) => (
-          <button
+        {filteredPosts.map((post) => (
+          <div
             key={post.id}
-            type="button"
-            data-embla-no-drag="true"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePostClick(filteredPosts, index, postProfile, e)}
-            aria-label="Abrir post"
+            className="aspect-[4/5] bg-muted relative overflow-hidden"
           >
             {post.media_url ? (
               post.media_type === "video" ? (
@@ -399,14 +395,13 @@ export const PostsGrid = ({
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
             )}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </button>
+          </div>
         ))}
       </div>
     );
   };
 
-  // Render photos grid for Fotos tab - opens fullscreen image viewer
+  // Render photos grid for Fotos tab
   const renderPhotosGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
     if (filteredPosts.length === 0) {
       return (
@@ -419,25 +414,20 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-0.5">
-        {filteredPosts.map((post, index) => (
-          <button
+        {filteredPosts.map((post) => (
+          <div
             key={post.id}
-            type="button"
-            data-embla-no-drag="true"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePhotoClick(filteredPosts, index, e)}
-            aria-label="Abrir foto em tela cheia"
+            className="aspect-[4/5] bg-muted relative overflow-hidden"
           >
             {post.media_url && (
               <img
                 src={post.media_url}
                 alt={post.content}
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
             )}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </button>
+          </div>
         ))}
       </div>
     );
@@ -456,80 +446,59 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-0.5">
-        {filteredPosts.map((post, index) => {
-          const postProfile: Profile = post._profile ? {
-            id: post._profile.id,
-            username: post._profile.username,
-            full_name: post._profile.full_name,
-            nickname: post._profile.nickname,
-            avatar_url: post._profile.avatar_url,
-            conta_verificada: post._profile.conta_verificada,
-            gender: post._profile.gender,
-            role: post._profile.role,
-            posicaomas: post._profile.posicaomas,
-            posicaofem: post._profile.posicaofem,
-            funcao: post._profile.funcao,
-          } : profile!;
-          
-          return (
-            <button
-              key={post.id}
-              type="button"
-              data-embla-no-drag="true"
-              className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-              onClick={(e) => handlePostClick(filteredPosts as Post[], index, postProfile, e)}
-              aria-label="Abrir post salvo"
-            >
-              {post.media_url ? (
-                post.media_type === "video" ? (
-                  <div className="w-full h-full pointer-events-none">
-                    <VideoThumbnail src={post.media_url} alt={post.content} />
-                  </div>
-                ) : post.media_type === "carousel" ? (
-                  (() => {
-                    try {
-                      const urls = JSON.parse(post.media_url);
-                      return (
-                        <>
-                          <img
-                            src={urls[0]}
-                            alt={post.content}
-                            className="w-full h-full object-cover pointer-events-none"
-                            loading="lazy"
-                          />
-                          <div className="absolute top-2 right-2 pointer-events-none">
-                            <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
-                          </div>
-                        </>
-                      );
-                    } catch {
-                      return (
+        {filteredPosts.map((post) => (
+          <div
+            key={post.id}
+            className="aspect-[4/5] bg-muted relative overflow-hidden"
+          >
+            {post.media_url ? (
+              post.media_type === "video" ? (
+                <div className="w-full h-full">
+                  <VideoThumbnail src={post.media_url} alt={post.content} />
+                </div>
+              ) : post.media_type === "carousel" ? (
+                (() => {
+                  try {
+                    const urls = JSON.parse(post.media_url);
+                    return (
+                      <>
                         <img
-                          src={post.media_url}
+                          src={urls[0]}
                           alt={post.content}
-                          className="w-full h-full object-cover pointer-events-none"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                      );
-                    }
-                  })()
-                ) : (
-                  <img
-                    src={post.media_url}
-                    alt={post.content}
-                    className="w-full h-full object-cover pointer-events-none"
-                    loading="lazy"
-                  />
-                )
+                        <div className="absolute top-2 right-2">
+                          <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
+                        </div>
+                      </>
+                    );
+                  } catch {
+                    return (
+                      <img
+                        src={post.media_url}
+                        alt={post.content}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    );
+                  }
+                })()
               ) : (
-                <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
-                  <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-            </button>
-          );
-        })}
+                <img
+                  src={post.media_url}
+                  alt={post.content}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-2">
+                <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     );
   };
