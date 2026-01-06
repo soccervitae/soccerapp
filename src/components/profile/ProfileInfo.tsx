@@ -15,6 +15,8 @@ import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, Respons
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
+import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
@@ -45,6 +47,11 @@ export const ProfileInfo = ({
   const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Fullscreen image viewer state
+  const [fullscreenImageOpen, setFullscreenImageOpen] = useState(false);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
+  const [fullscreenClickOrigin, setFullscreenClickOrigin] = useState<DOMRect | null>(null);
 
   // Story viewer state
   const [storyViewerOpen, setStoryViewerOpen] = useState(false);
@@ -164,19 +171,44 @@ export const ProfileInfo = ({
     };
     return footMap[foot.toLowerCase()] || foot;
   };
+  const handleCoverClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!profile.cover_url) return;
+    setFullscreenClickOrigin(e.currentTarget.getBoundingClientRect());
+    setFullscreenImageUrl(profile.cover_url);
+    setFullscreenImageOpen(true);
+  };
+
+  const handleAvatarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If has active stories, open story viewer instead
+    if (hasActiveStories) {
+      handleStoryClick(e);
+      return;
+    }
+    if (!profile.avatar_url) return;
+    setFullscreenClickOrigin(e.currentTarget.getBoundingClientRect());
+    setFullscreenImageUrl(profile.avatar_url);
+    setFullscreenImageOpen(true);
+  };
+
   return <section className="flex flex-col items-center gap-4">
       {/* Cover Photo */}
-      <div className="w-full h-32 relative overflow-hidden">
+      <div 
+        className={`w-full h-32 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
+        onClick={handleCoverClick}
+      >
         {profile.cover_url ? <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted/30 flex flex-col items-center justify-center gap-1">
             <span className="material-symbols-outlined text-3xl text-muted-foreground/50">add_photo_alternate</span>
             {isOwnProfile && <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>}
           </div>}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
       </div>
 
       {/* Profile Picture */}
       <div className="relative -mt-16 z-10">
-        <div className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : ''}`} onClick={hasActiveStories ? handleStoryClick : undefined}>
+        <div 
+          className={`w-28 h-28 rounded-full p-[3px] transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : profile.avatar_url ? 'cursor-pointer' : ''}`} 
+          onClick={handleAvatarClick}
+        >
           {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-background bg-muted object-cover" /> : <div className="w-full h-full rounded-full border-4 border-background bg-muted flex items-center justify-center">
               <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
             </div>}
@@ -361,5 +393,18 @@ export const ProfileInfo = ({
 
       {/* Story Viewer */}
       {groupedStories && hasActiveStories && <StoryViewer groupedStories={groupedStories} initialGroupIndex={groupedStories.findIndex(g => g.userId === profile.id)} isOpen={storyViewerOpen} onClose={() => setStoryViewerOpen(false)} originRect={clickOrigin} />}
+
+      {/* Fullscreen Image Viewer for avatar/cover */}
+      {fullscreenImageUrl && (
+        <FullscreenImageViewer
+          isOpen={fullscreenImageOpen}
+          onClose={() => {
+            setFullscreenImageOpen(false);
+            setFullscreenImageUrl(null);
+          }}
+          images={[fullscreenImageUrl]}
+          originRect={fullscreenClickOrigin}
+        />
+      )}
     </section>;
 };
