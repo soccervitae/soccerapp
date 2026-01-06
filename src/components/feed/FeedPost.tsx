@@ -391,12 +391,14 @@ export const FeedPost = ({
       </div>}
 
       {/* Media */}
-      {post.media_url && <div className={`relative -mx-4 ${
+      {post.media_url && <div
+        data-no-pull="true"
+        className={`relative -mx-4 ${
         post.media_type === "video" 
           ? "" 
           : "bg-muted overflow-hidden aspect-[4/5] max-h-[75vh]"
       }`}>
-          {post.media_type === "video" ? <div 
+          {post.media_type === "video" ? <div
         ref={videoContainerRef}
         className="relative w-full cursor-pointer"
         style={{
