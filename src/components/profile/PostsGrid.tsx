@@ -233,35 +233,18 @@ export const PostsGrid = ({
     setVideoViewerOriginRect(null);
   };
 
-  // Handle media click for Posts tab - opens fullscreen viewer based on media type
-  const handleMediaClick = (post: Post, event: React.MouseEvent<HTMLButtonElement>) => {
+  // Handle media click for Posts tab - opens ProfileFeedSheet
+  const handleMediaClick = (post: Post, event: React.MouseEvent<HTMLButtonElement>, postsArray: Post[], postProfile: Profile) => {
     if (!post.media_url) return;
     
     const rect = event.currentTarget.getBoundingClientRect();
+    const postIndex = postsArray.findIndex(p => p.id === post.id);
     
-    if (post.media_type === "video") {
-      setVideoViewerUrl(post.media_url);
-      setVideoViewerOriginRect(rect);
-      setIsVideoViewerOpen(true);
-    } else if (post.media_type === "carousel") {
-      try {
-        const urls = JSON.parse(post.media_url);
-        setImageViewerImages(urls);
-        setImageViewerIndex(0);
-        setImageViewerOriginRect(rect);
-        setIsImageViewerOpen(true);
-      } catch {
-        setImageViewerImages([post.media_url]);
-        setImageViewerIndex(0);
-        setImageViewerOriginRect(rect);
-        setIsImageViewerOpen(true);
-      }
-    } else {
-      setImageViewerImages([post.media_url]);
-      setImageViewerIndex(0);
-      setImageViewerOriginRect(rect);
-      setIsImageViewerOpen(true);
-    }
+    setOriginRect(rect);
+    setSheetPosts(postsArray);
+    setSelectedPostIndex(postIndex >= 0 ? postIndex : 0);
+    setSheetProfile(postProfile);
+    setIsSheetOpen(true);
   };
 
   // Component to render video with thumbnail
@@ -393,9 +376,9 @@ export const PostsGrid = ({
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative overflow-hidden cursor-pointer touch-manipulation select-none"
             style={{ WebkitTapHighlightColor: 'transparent' }}
-            onClick={(e) => handleMediaClick(post, e)}
+            onClick={(e) => handleMediaClick(post, e, filteredPosts, postProfile)}
             disabled={!post.media_url}
-            aria-label="Abrir mídia em tela cheia"
+            aria-label="Abrir post"
           >
             {post.media_url ? (
               post.media_type === "video" ? (

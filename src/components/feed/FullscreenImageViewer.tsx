@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-
 interface OriginRect {
   x: number;
   y: number;
@@ -245,7 +245,9 @@ export const FullscreenImageViewer = ({
 
   const initialStyles = getInitialStyles();
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence mode="wait">
       {isOpen && (
         <motion.div
@@ -277,7 +279,7 @@ export const FullscreenImageViewer = ({
 
           {/* Zoom indicator */}
           {scale > 1 && (
-            <motion.div 
+            <motion.div
               className="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -289,7 +291,7 @@ export const FullscreenImageViewer = ({
 
           {/* Image counter */}
           {images.length > 1 && (
-            <motion.div 
+            <motion.div
               className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -318,7 +320,7 @@ export const FullscreenImageViewer = ({
               <ChevronLeft className="w-7 h-7 text-white" />
             </motion.button>
           )}
-          
+
           {images.length > 1 && currentIndex < images.length - 1 && (
             <motion.button
               onClick={(e) => {
@@ -340,25 +342,28 @@ export const FullscreenImageViewer = ({
             <motion.div
               key={currentIndex}
               className="relative max-w-full max-h-full flex items-center justify-center"
-              initial={currentIndex === initialIndex && !swipeDirection ? initialStyles : { 
-                opacity: 0, 
-                x: swipeDirection === "left" ? 100 : swipeDirection === "right" ? -100 : 0 
-              }}
-              animate={{ 
-                opacity: 1, 
-                x: 0, 
-                y: 0, 
-                scale: 1 
-              }}
-              exit={isExiting && currentIndex === initialIndex ? initialStyles : { 
-                opacity: 0, 
-                x: swipeDirection === "left" ? -100 : swipeDirection === "right" ? 100 : 0 
-              }}
-              transition={{ 
+              initial={
+                currentIndex === initialIndex && !swipeDirection
+                  ? initialStyles
+                  : {
+                      opacity: 0,
+                      x: swipeDirection === "left" ? 100 : swipeDirection === "right" ? -100 : 0,
+                    }
+              }
+              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              exit={
+                isExiting && currentIndex === initialIndex
+                  ? initialStyles
+                  : {
+                      opacity: 0,
+                      x: swipeDirection === "left" ? -100 : swipeDirection === "right" ? 100 : 0,
+                    }
+              }
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30,
-                duration: 0.3
+                duration: 0.3,
               }}
             >
               <motion.img
@@ -367,7 +372,7 @@ export const FullscreenImageViewer = ({
                 className="max-w-full max-h-full object-contain select-none pointer-events-auto blur-md"
                 style={{
                   transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-                  transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                  transition: isDragging ? "none" : "transform 0.2s ease-out",
                 }}
                 animate={{
                   filter: imageLoaded ? "blur(0px)" : "blur(8px)",
@@ -386,7 +391,7 @@ export const FullscreenImageViewer = ({
 
           {/* Dot indicators */}
           {images.length > 1 && (
-            <motion.div 
+            <motion.div
               className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -402,9 +407,7 @@ export const FullscreenImageViewer = ({
                     setCurrentIndex(index);
                   }}
                   className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex 
-                      ? "bg-white w-4" 
-                      : "bg-white/40 hover:bg-white/60"
+                    index === currentIndex ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
                   }`}
                 />
               ))}
@@ -412,6 +415,7 @@ export const FullscreenImageViewer = ({
           )}
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

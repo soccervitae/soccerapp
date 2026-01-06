@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { VideoControls } from "./VideoControls";
@@ -111,7 +112,9 @@ export const FullscreenVideoViewer = ({
 
   const initialStyles = getInitialStyles();
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
       {isOpen && !isExiting && (
         <motion.div
@@ -140,14 +143,9 @@ export const FullscreenVideoViewer = ({
           <motion.div
             className="relative w-full h-full flex items-center justify-center"
             initial={initialStyles}
-            animate={{ 
-              opacity: 1, 
-              x: 0, 
-              y: 0, 
-              scale: 1 
-            }}
+            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
             exit={initialStyles}
-            transition={{ 
+            transition={{
               type: "spring",
               stiffness: 260,
               damping: 25,
@@ -177,6 +175,7 @@ export const FullscreenVideoViewer = ({
           />
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
