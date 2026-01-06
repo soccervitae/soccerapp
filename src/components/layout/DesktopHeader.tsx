@@ -106,7 +106,7 @@ export const DesktopHeader = () => {
                   <span className="material-symbols-outlined mr-2 text-[18px]">person</span>
                   Meu Perfil
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/settings/edit")}>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
                   <span className="material-symbols-outlined mr-2 text-[18px]">settings</span>
                   Configurações
                 </DropdownMenuItem>

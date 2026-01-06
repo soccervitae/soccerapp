@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
-import { ProfileSettingsSheet } from "./ProfileSettingsSheet";
 import { ProfileVisitorsSheet } from "./ProfileVisitorsSheet";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,7 +48,6 @@ const REPORT_REASONS = [
 export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: ProfileHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [visitorsSheetOpen, setVisitorsSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -189,7 +187,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
                 )}
               </button>
               <button 
-                onClick={() => setSettingsOpen(true)}
+                onClick={() => navigate("/settings")}
                 className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
               >
                 <span className="material-symbols-outlined text-[24px]">more_horiz</span>
@@ -240,12 +238,9 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
         </div>
       </header>
 
-      {/* Settings Sheet for own profile */}
+      {/* Visitors Sheet for own profile */}
       {isOwnProfile && (
-        <>
-          <ProfileSettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
-          <ProfileVisitorsSheet isOpen={visitorsSheetOpen} onClose={() => setVisitorsSheetOpen(false)} />
-        </>
+        <ProfileVisitorsSheet isOpen={visitorsSheetOpen} onClose={() => setVisitorsSheetOpen(false)} />
       )}
 
       {/* Options Drawer for other profiles (mobile/PWA) */}
