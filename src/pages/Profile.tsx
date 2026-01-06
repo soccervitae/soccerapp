@@ -352,37 +352,37 @@ const Profile = () => {
       <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border flex justify-between">
         <TabsTrigger 
           value="profile" 
-          className="flex-1 flex-col gap-0.5 text-[10px] py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
-          <span className="material-symbols-outlined text-[18px]">grid_on</span>
+          <span className="material-symbols-outlined text-[20px]">grid_on</span>
           Posts
         </TabsTrigger>
         <TabsTrigger 
           value="videos" 
-          className="flex-1 flex-col gap-0.5 text-[10px] py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
-          <span className="material-symbols-outlined text-[18px]">play_circle</span>
+          <span className="material-symbols-outlined text-[20px]">play_circle</span>
           Vídeos
         </TabsTrigger>
         <TabsTrigger 
           value="championships" 
-          className="flex-1 flex-col gap-0.5 text-[10px] py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
-          <span className="material-symbols-outlined text-[18px]">sports_soccer</span>
+          <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
           Campeonatos
         </TabsTrigger>
         <TabsTrigger 
           value="achievements" 
-          className="flex-1 flex-col gap-0.5 text-[10px] py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
-          <span className="material-symbols-outlined text-[18px]">trophy</span>
+          <span className="material-symbols-outlined text-[20px]">trophy</span>
           Conquistas
         </TabsTrigger>
         <TabsTrigger 
           value="photos" 
-          className="flex-1 flex-col gap-0.5 text-[10px] py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
-          <span className="material-symbols-outlined text-[18px]">photo_library</span>
+          <span className="material-symbols-outlined text-[20px]">photo_library</span>
           Fotos
         </TabsTrigger>
       </TabsList>
