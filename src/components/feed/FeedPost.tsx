@@ -180,31 +180,37 @@ export const FeedPost = ({
   };
   
   const handleMediaClick = (e: React.MouseEvent<HTMLImageElement>, imageIndex: number) => {
-    // Wait to check for double tap
     const now = Date.now();
     const target = e.currentTarget;
+    const timeSinceLastTap = now - lastTapRef.current;
 
-    console.log("[FeedPost] media click", {
-      postId: post.id,
-      mediaType: post.media_type,
-      imageIndex,
-      now,
-      lastTapRef: lastTapRef.current,
-    });
+    // Check for double tap first
+    if (timeSinceLastTap < 300 && lastTapRef.current !== 0) {
+      // Double tap detected - toggle applause
+      e.preventDefault();
+      lastTapRef.current = 0;
+      
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+      
+      if (post.liked_by_user) {
+        handleLike();
+      } else {
+        handleLike();
+        setShowApplauseAnimation(true);
+        setTimeout(() => setShowApplauseAnimation(false), 1000);
+      }
+      return;
+    }
+
+    // First tap - save timestamp and wait to see if it's a double tap
+    lastTapRef.current = now;
 
     setTimeout(() => {
-      console.log("[FeedPost] timeout check", {
-        lastTapRef: lastTapRef.current,
-        now,
-        shouldOpen: lastTapRef.current === now,
-      });
       if (lastTapRef.current === now) {
-        console.log("[FeedPost] opening FullscreenImageViewer", {
-          postId: post.id,
-          imageIndex,
-        });
-
-        // Single tap - open fullscreen image viewer with origin rect
+        // Single tap confirmed - open fullscreen
         const rect = target.getBoundingClientRect();
         setImageOriginRect({
           x: rect.left,
@@ -214,10 +220,9 @@ export const FeedPost = ({
         });
         setSelectedImageIndex(imageIndex);
         setIsImageViewerOpen(true);
+        lastTapRef.current = 0;
       }
     }, 300);
-
-    handleDoubleTap(e);
   };
   const handleSave = () => {
     if (!user) {
