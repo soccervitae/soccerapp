@@ -5,6 +5,7 @@ import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { ProfileFeedSheet } from "./ProfileFeedSheet";
+import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -145,6 +146,12 @@ export const PostsGrid = ({
   const [sheetPosts, setSheetPosts] = useState<Post[]>([]);
   const [sheetProfile, setSheetProfile] = useState<Profile | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  
+  // State for fullscreen image viewer (Fotos tab)
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [imageViewerImages, setImageViewerImages] = useState<string[]>([]);
+  const [imageViewerIndex, setImageViewerIndex] = useState(0);
+  const [imageViewerOriginRect, setImageViewerOriginRect] = useState<DOMRect | null>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -191,6 +198,22 @@ export const PostsGrid = ({
     setOriginRect(null);
   };
 
+  // Handle photo click for Fotos tab - opens fullscreen image viewer
+  const handlePhotoClick = (postsArray: Post[], index: number, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setImageViewerOriginRect(rect);
+    
+    // Extract all image URLs from the posts
+    const images = postsArray.map(post => post.media_url || "").filter(url => url);
+    setImageViewerImages(images);
+    setImageViewerIndex(index);
+    setIsImageViewerOpen(true);
+  };
+
+  const handleCloseImageViewer = () => {
+    setIsImageViewerOpen(false);
+    setImageViewerOriginRect(null);
+  };
 
   // Component to render video with thumbnail
   const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
@@ -305,6 +328,43 @@ export const PostsGrid = ({
               <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
                 <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
               </div>
+            )}
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // Render photos grid for Fotos tab - opens fullscreen image viewer
+  const renderPhotosGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
+    if (filteredPosts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
+          <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">{emptyIcon}</span>
+          <p className="text-muted-foreground text-sm mt-2">{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-0.5">
+        {filteredPosts.map((post, index) => (
+          <button
+            key={post.id}
+            type="button"
+            data-embla-no-drag="true"
+            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
+            onClick={(e) => handlePhotoClick(filteredPosts, index, e)}
+            aria-label="Abrir foto em tela cheia"
+          >
+            {post.media_url && (
+              <img
+                src={post.media_url}
+                alt={post.content}
+                className="w-full h-full object-cover pointer-events-none"
+                loading="lazy"
+              />
             )}
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
           </button>
@@ -465,7 +525,7 @@ export const PostsGrid = ({
           
           {/* Fotos */}
           <div className="flex-[0_0_100%] min-w-0">
-            {profile && renderPostGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera", profile)}
+            {renderPhotosGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
           </div>
           
           {/* Campeonatos */}
@@ -501,6 +561,20 @@ export const PostsGrid = ({
           originRect={originRect}
         />
       )}
+
+      {/* Fullscreen Image Viewer for Fotos tab */}
+      <FullscreenImageViewer
+        images={imageViewerImages}
+        initialIndex={imageViewerIndex}
+        isOpen={isImageViewerOpen}
+        onClose={handleCloseImageViewer}
+        originRect={imageViewerOriginRect ? {
+          x: imageViewerOriginRect.x,
+          y: imageViewerOriginRect.y,
+          width: imageViewerOriginRect.width,
+          height: imageViewerOriginRect.height,
+        } : null}
+      />
     </section>
   );
 };
