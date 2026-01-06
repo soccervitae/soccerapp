@@ -1,7 +1,7 @@
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileInfo } from "@/components/profile/ProfileInfo";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
-import { PostsGrid } from "@/components/profile/PostsGrid";
+
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import GuestBanner from "@/components/common/GuestBanner";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
@@ -10,7 +10,6 @@ import {
   useProfile, 
   useProfileByUsername,
   useFollowStats, 
-  useUserPosts, 
   useProfileView,
   useUserHighlights,
 } from "@/hooks/useProfile";
@@ -44,7 +43,6 @@ const Profile = () => {
   const targetUserId = profile?.id;
   
   const { data: followStats, isLoading: statsLoading, isFetching: statsFetching, refetch: refetchStats } = useFollowStats(targetUserId);
-  const { data: posts, isLoading: postsLoading, refetch: refetchPosts } = useUserPosts(targetUserId);
   const { data: highlights, isLoading: highlightsLoading } = useUserHighlights(targetUserId);
   const profileView = useProfileView();
 
@@ -68,7 +66,6 @@ const Profile = () => {
     await Promise.all([
       refetchProfile(),
       refetchStats(),
-      refetchPosts(),
     ]);
   };
 
@@ -151,11 +148,6 @@ const Profile = () => {
             profileAvatarUrl={profile.avatar_url}
           />
         </div>
-        <PostsGrid 
-          posts={posts || []} 
-          isLoading={postsLoading} 
-          profile={profile}
-        />
       </div>
     </>
   );
@@ -197,13 +189,6 @@ const Profile = () => {
                 />
               </motion.div>
             </div>
-            <motion.div variants={itemVariants}>
-              <PostsGrid 
-                posts={posts || []} 
-                isLoading={postsLoading} 
-                profile={profile}
-              />
-            </motion.div>
           </div>
         </motion.div>
       ) : (
