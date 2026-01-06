@@ -25,6 +25,7 @@ import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 interface FeedPostProps {
   post: Post;
   disableVideoViewer?: boolean;
+  hideActions?: boolean;
 }
 const REPORT_REASONS = [{
   value: "spam",
@@ -44,7 +45,8 @@ const REPORT_REASONS = [{
 }];
 export const FeedPost = ({
   post,
-  disableVideoViewer = false
+  disableVideoViewer = false,
+  hideActions = false
 }: FeedPostProps) => {
   const navigate = useNavigate();
   const {
@@ -518,15 +520,13 @@ export const FeedPost = ({
         </div>}
 
       {/* Location */}
-      {post.location_name && <a href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 pt-2 text-xs text-muted-foreground hover:text-primary transition-colors">
+      {!hideActions && post.location_name && <a href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 pt-2 text-xs text-muted-foreground hover:text-primary transition-colors">
           <span className="material-symbols-outlined text-[16px]">location_on</span>
           <span className="truncate">{post.location_name}</span>
         </a>}
 
-
-
       {/* Liked by section */}
-      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
+      {!hideActions && post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
           <button onClick={() => setIsLikesSheetOpen(true)} className="flex items-center gap-2 group text-left">
             {/* Stacked avatars */}
             <div className="flex -space-x-2">
@@ -555,47 +555,49 @@ export const FeedPost = ({
         </div>}
 
       {/* Actions */}
-      <div className="pt-3 py-[4px] -mx-4">
-        <div className="grid grid-cols-4">
-          <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={post.liked_by_user ? "liked" : "unliked"}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+      {!hideActions && (
+        <div className="pt-3 py-[4px] -mx-4">
+          <div className="grid grid-cols-4">
+            <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={post.liked_by_user ? "liked" : "unliked"}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} variant="green" />
+                </motion.div>
+              </AnimatePresence>
+              {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
+            </button>
+            <div className="flex items-center justify-center relative">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+              <button onClick={() => setIsCommentsSheetOpen(true)} className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors">
+                <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
+                {(post.comments_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>}
+              </button>
+            </div>
+            <div className="flex items-center justify-center relative">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+              <button 
+                onClick={() => setShareSheetOpen(true)}
+                className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
               >
-                <ClappingHandsIcon className={`w-6 h-6 ${isLikeAnimating ? 'animate-applause-pop' : ''}`} filled={post.liked_by_user} variant="green" />
-              </motion.div>
-            </AnimatePresence>
-            {(post.likes_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.likes_count)}</span>}
-          </button>
-          <div className="flex items-center justify-center relative">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
-            <button onClick={() => setIsCommentsSheetOpen(true)} className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors">
-              <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
-              {(post.comments_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.comments_count)}</span>}
-            </button>
-          </div>
-          <div className="flex items-center justify-center relative">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
-            <button 
-              onClick={() => setShareSheetOpen(true)}
-              className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
-            >
-              <Send className="w-6 h-6" strokeWidth={1.5} />
-              {(post.shares_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.shares_count)}</span>}
-            </button>
-          </div>
-          <div className="flex items-center justify-center relative">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
-            <button onClick={handleSave} disabled={savePost.isPending} className={`flex items-center justify-center p-3 transition-colors ${post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'}`}>
-              <Bookmark className="w-6 h-6" strokeWidth={1.5} fill={post.saved_by_user ? 'currentColor' : 'none'} />
-            </button>
+                <Send className="w-6 h-6" strokeWidth={1.5} />
+                {(post.shares_count || 0) >= 1 && <span className="text-xs font-medium">{formatNumber(post.shares_count)}</span>}
+              </button>
+            </div>
+            <div className="flex items-center justify-center relative">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+              <button onClick={handleSave} disabled={savePost.isPending} className={`flex items-center justify-center p-3 transition-colors ${post.saved_by_user ? 'text-primary' : 'text-foreground hover:text-muted-foreground'}`}>
+                <Bookmark className="w-6 h-6" strokeWidth={1.5} fill={post.saved_by_user ? 'currentColor' : 'none'} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       
 
