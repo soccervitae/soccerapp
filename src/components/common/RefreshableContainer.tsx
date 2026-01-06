@@ -129,15 +129,17 @@ export const RefreshableContainer = ({
         )}
       </AnimatePresence>
 
-      {/* Content with transform during pull */}
-      <motion.div
-        animate={{ 
-          y: isPulling && !isRefreshing ? pullDistance * 0.3 : 0 
-        }}
-        transition={{ duration: 0.1 }}
-      >
-        {children}
-      </motion.div>
+      {/* Content - only animate when actively pulling */}
+      {isPulling && !isRefreshing && pullDistance > 0 ? (
+        <motion.div
+          animate={{ y: pullDistance * 0.3 }}
+          transition={{ duration: 0.1 }}
+        >
+          {children}
+        </motion.div>
+      ) : (
+        <div>{children}</div>
+      )}
     </div>
   );
 };
