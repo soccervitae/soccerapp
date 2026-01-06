@@ -351,8 +351,8 @@ const Profile = () => {
           value="profile" 
           className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
-          <span className="material-symbols-outlined text-[16px]">person</span>
-          Perfil
+          <span className="material-symbols-outlined text-[16px]">grid_on</span>
+          Posts
         </TabsTrigger>
         <TabsTrigger 
           value="videos" 
@@ -366,14 +366,14 @@ const Profile = () => {
           className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">sports_soccer</span>
-          Camp.
+          Campeonatos
         </TabsTrigger>
         <TabsTrigger 
           value="achievements" 
           className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
           <span className="material-symbols-outlined text-[16px]">trophy</span>
-          Conq.
+          Conquistas
         </TabsTrigger>
         <TabsTrigger 
           value="photos" 
