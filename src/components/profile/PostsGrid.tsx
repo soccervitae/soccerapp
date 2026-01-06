@@ -326,7 +326,7 @@ export const PostsGrid = ({
     return (
       <div className="divide-y divide-border">
         {feedPosts.map((post) => (
-          <FeedPost key={post.id} post={post} hideActions />
+          <FeedPost key={post.id} post={post} />
         ))}
       </div>
     );
