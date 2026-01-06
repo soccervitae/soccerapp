@@ -330,6 +330,19 @@ const Profile = () => {
     );
   };
 
+  // Tab order for swipe navigation
+  const tabOrder = ["profile", "videos", "championships", "achievements", "photos"];
+  
+  // Handle swipe gesture
+  const handleSwipe = (direction: "left" | "right") => {
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (direction === "left" && currentIndex < tabOrder.length - 1) {
+      setActiveTab(tabOrder[currentIndex + 1]);
+    } else if (direction === "right" && currentIndex > 0) {
+      setActiveTab(tabOrder[currentIndex - 1]);
+    }
+  };
+
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
@@ -340,13 +353,6 @@ const Profile = () => {
         >
           <span className="material-symbols-outlined text-[16px]">person</span>
           Perfil
-        </TabsTrigger>
-        <TabsTrigger 
-          value="photos" 
-          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[16px]">photo_library</span>
-          Fotos
         </TabsTrigger>
         <TabsTrigger 
           value="videos" 
@@ -369,35 +375,64 @@ const Profile = () => {
           <span className="material-symbols-outlined text-[16px]">trophy</span>
           Conq.
         </TabsTrigger>
+        <TabsTrigger 
+          value="photos" 
+          className="gap-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+        >
+          <span className="material-symbols-outlined text-[16px]">photo_library</span>
+          Fotos
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="profile" className="mt-4">
-        {renderProfileFeed()}
-      </TabsContent>
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.2 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(_, info) => {
+          if (info.offset.x < -50) {
+            handleSwipe("left");
+          } else if (info.offset.x > 50) {
+            handleSwipe("right");
+          }
+        }}
+      >
+        <TabsContent value="profile" className="mt-4" forceMount={activeTab === "profile" ? true : undefined}>
+          {activeTab === "profile" && renderProfileFeed()}
+        </TabsContent>
 
-      <TabsContent value="photos" className="mt-4 px-1">
-        {renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
-      </TabsContent>
+        <TabsContent value="videos" className="mt-4 px-1" forceMount={activeTab === "videos" ? true : undefined}>
+          {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
+        </TabsContent>
 
-      <TabsContent value="videos" className="mt-4 px-1">
-        {renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
-      </TabsContent>
+        <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
+          {activeTab === "championships" && (
+            <ChampionshipsTab 
+              championships={championships || []} 
+              isLoading={championshipsLoading} 
+              isOwnProfile={isOwnProfile} 
+            />
+          )}
+        </TabsContent>
 
-      <TabsContent value="championships" className="mt-4">
-        <ChampionshipsTab 
-          championships={championships || []} 
-          isLoading={championshipsLoading} 
-          isOwnProfile={isOwnProfile} 
-        />
-      </TabsContent>
+        <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
+          {activeTab === "achievements" && (
+            <AchievementsTab 
+              achievements={achievements || []} 
+              isLoading={achievementsLoading} 
+              isOwnProfile={isOwnProfile} 
+            />
+          )}
+        </TabsContent>
 
-      <TabsContent value="achievements" className="mt-4">
-        <AchievementsTab 
-          achievements={achievements || []} 
-          isLoading={achievementsLoading} 
-          isOwnProfile={isOwnProfile} 
-        />
-      </TabsContent>
+        <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
+          {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
+        </TabsContent>
+      </motion.div>
     </Tabs>
   );
 
