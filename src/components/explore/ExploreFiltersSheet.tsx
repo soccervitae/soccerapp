@@ -187,7 +187,7 @@ const ExploreFiltersSheet = ({
           <DrawerTitle className="text-lg font-semibold">Filtros</DrawerTitle>
         </DrawerHeader>
 
-        <div className="space-y-5 pb-6">
+        <div className="space-y-5 pb-6 px-4">
           {/* Profile Type */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
