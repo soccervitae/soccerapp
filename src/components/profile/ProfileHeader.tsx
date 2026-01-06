@@ -167,8 +167,9 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: Pro
           <div className="w-10 h-10" />
         ) : (
           <button 
+            type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors active:bg-muted/80"
           >
             <span className="material-symbols-outlined text-[24px]">arrow_back</span>
           </button>
