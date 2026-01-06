@@ -37,14 +37,27 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  const currentTab = activeTab || (location.pathname === "/profile" || location.pathname.startsWith("/profile/") ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : location.pathname === "/" ? "home" : undefined);
+  // Reserved routes that are NOT profile pages
+  const reservedRoutes = ["/", "/explore", "/messages", "/settings", "/teams", "/install", "/auth", "/login", "/forgot-password", "/welcome", "/complete-profile", "/follow"];
+  const isProfileRoute = location.pathname === "/profile" || location.pathname.startsWith("/profile/") || 
+    (!reservedRoutes.some(route => location.pathname === route || location.pathname.startsWith(route + "/")) && location.pathname !== "/");
+  
+  const currentTab = activeTab || (isProfileRoute ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : location.pathname === "/" ? "home" : undefined);
 
   const handleHomeClick = () => {
     if (location.pathname === "/") {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       window.dispatchEvent(new CustomEvent('home-tab-pressed'));
     } else {
-      navigate("/");
+      // Force navigation with fallback for PWA edge cases
+      navigate("/", { replace: false });
+      
+      // Fallback: if SPA navigation doesn't work, force hard redirect
+      setTimeout(() => {
+        if (window.location.pathname !== "/") {
+          window.location.href = "/";
+        }
+      }, 100);
     }
   };
 
