@@ -184,23 +184,25 @@ export const FeedPost = ({
     const now = Date.now();
     const target = e.currentTarget;
 
-    if (import.meta.env.DEV) {
-      console.log("[FeedPost] media click", {
-        postId: post.id,
-        mediaType: post.media_type,
-        imageIndex,
-        now,
-      });
-    }
+    console.log("[FeedPost] media click", {
+      postId: post.id,
+      mediaType: post.media_type,
+      imageIndex,
+      now,
+      lastTapRef: lastTapRef.current,
+    });
 
     setTimeout(() => {
+      console.log("[FeedPost] timeout check", {
+        lastTapRef: lastTapRef.current,
+        now,
+        shouldOpen: lastTapRef.current === now,
+      });
       if (lastTapRef.current === now) {
-        if (import.meta.env.DEV) {
-          console.log("[FeedPost] opening FullscreenImageViewer", {
-            postId: post.id,
-            imageIndex,
-          });
-        }
+        console.log("[FeedPost] opening FullscreenImageViewer", {
+          postId: post.id,
+          imageIndex,
+        });
 
         // Single tap - open fullscreen image viewer with origin rect
         const rect = target.getBoundingClientRect();
