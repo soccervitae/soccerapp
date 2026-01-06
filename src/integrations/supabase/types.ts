@@ -1025,6 +1025,7 @@ export type Database = {
           conta_verificada: boolean
           cover_url: string | null
           created_at: string
+          estado_id: number | null
           full_name: string | null
           funcao: number | null
           gender: string | null
@@ -1071,6 +1072,7 @@ export type Database = {
           conta_verificada?: boolean
           cover_url?: string | null
           created_at?: string
+          estado_id?: number | null
           full_name?: string | null
           funcao?: number | null
           gender?: string | null
@@ -1117,6 +1119,7 @@ export type Database = {
           conta_verificada?: boolean
           cover_url?: string | null
           created_at?: string
+          estado_id?: number | null
           full_name?: string | null
           funcao?: number | null
           gender?: string | null
@@ -1155,6 +1158,13 @@ export type Database = {
           weight?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_estado_id_fkey"
+            columns: ["estado_id"]
+            isOneToOne: false
+            referencedRelation: "estados"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_funcao_fkey"
             columns: ["funcao"]

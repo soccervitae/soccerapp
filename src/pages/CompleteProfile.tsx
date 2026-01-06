@@ -11,10 +11,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Loader2, Check, ChevronRight } from "lucide-react";
 import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
+import { StatePickerSheet } from "@/components/profile/StatePickerSheet";
 
 interface Country {
   id: number;
   nome: string;
+  bandeira_url: string | null;
+}
+
+interface State {
+  id: number;
+  nome: string;
+  uf: string;
   bandeira_url: string | null;
 }
 
@@ -34,14 +42,17 @@ const CompleteProfile = () => {
   const [weight, setWeight] = useState("");
   const [preferredFoot, setPreferredFoot] = useState("");
   const [nickname, setNickname] = useState("");
+  const [estado, setEstado] = useState<string>("");
   
   const [countries, setCountries] = useState<Country[]>([]);
+  const [states, setStates] = useState<State[]>([]);
   const [positions, setPositions] = useState<{ id: number; name: string }[]>([]);
   const [functions, setFunctions] = useState<{ id: number; name: string }[]>([]);
   const [profileTypes, setProfileTypes] = useState<{ id: number; name: string }[]>([]);
   const [staffFunction, setStaffFunction] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [countryPickerOpen, setCountryPickerOpen] = useState(false);
+  const [statePickerOpen, setStatePickerOpen] = useState(false);
 
   const [touched, setTouched] = useState({
     nickname: false,
@@ -64,6 +75,31 @@ const CompleteProfile = () => {
     };
     loadCountries();
   }, []);
+
+  // Check if Brazil is selected
+  const isBrazilSelected = countries.find(c => c.id.toString() === nationality)?.nome?.toLowerCase() === "brasil";
+
+  // Load states when Brazil is selected
+  useEffect(() => {
+    const loadStates = async () => {
+      if (!isBrazilSelected) {
+        setStates([]);
+        setEstado("");
+        return;
+      }
+      
+      const brazilId = countries.find(c => c.nome.toLowerCase() === "brasil")?.id;
+      if (!brazilId) return;
+      
+      const { data } = await supabase
+        .from("estados")
+        .select("id, nome, uf, bandeira_url")
+        .eq("pais_id", brazilId)
+        .order("nome");
+      if (data) setStates(data);
+    };
+    loadStates();
+  }, [isBrazilSelected, countries]);
 
   // Load profile types from funcaoperfil
   useEffect(() => {
@@ -198,6 +234,7 @@ const CompleteProfile = () => {
         nationality: Number(nationality),
         nickname: nickname.trim() || null,
         profile_completed: true,
+        estado_id: isBrazilSelected && estado ? Number(estado) : null,
       };
 
       const isMale = gender === "homem" || gender === "masculino" || gender === "male";
@@ -468,8 +505,48 @@ const CompleteProfile = () => {
           onOpenChange={setCountryPickerOpen}
           countries={countries}
           selectedCountryId={nationality}
-          onSelectCountry={(value) => { setNationality(value); handleBlur("nationality"); }}
+          onSelectCountry={(value) => { setNationality(value); setEstado(""); handleBlur("nationality"); }}
         />
+
+        {/* State - Only for Brazil */}
+        {isBrazilSelected && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="estado">
+                Estado
+              </Label>
+              <button
+                type="button"
+                onClick={() => setStatePickerOpen(true)}
+                className="w-full flex items-center justify-between px-3 py-2 border rounded-md bg-background text-left"
+              >
+                {estado ? (
+                  <span className="flex items-center gap-2">
+                    {states.find(s => s.id.toString() === estado)?.bandeira_url && (
+                      <img 
+                        src={states.find(s => s.id.toString() === estado)?.bandeira_url || ""} 
+                        alt="" 
+                        className="w-5 h-3 object-cover rounded-sm" 
+                      />
+                    )}
+                    <span>{states.find(s => s.id.toString() === estado)?.nome}</span>
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Selecione seu estado</span>
+                )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+
+            <StatePickerSheet
+              open={statePickerOpen}
+              onOpenChange={setStatePickerOpen}
+              states={states}
+              selectedStateId={estado}
+              onSelectState={(value) => setEstado(value)}
+            />
+          </>
+        )}
 
         {/* Height & Weight Row - Only for Athletes */}
         {isAthlete && (
