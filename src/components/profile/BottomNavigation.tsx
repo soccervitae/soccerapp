@@ -110,7 +110,11 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         <div className="flex justify-around items-center">
           <button 
             type="button"
-            onClick={handleHomeClick}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleHomeClick();
+            }}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
