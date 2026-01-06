@@ -184,20 +184,13 @@ const Profile = () => {
     music_track: null,
   });
 
-  // Render profile feed
+  // Render profile feed as grid
   const renderProfileFeed = () => {
     if (postsLoading) {
       return (
-        <div className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="space-y-3 px-4">
-              <div className="flex items-center gap-3">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="aspect-[4/5] w-full rounded-lg" />
-            </div>
+        <div className="grid grid-cols-3 gap-1">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className="aspect-square bg-muted animate-pulse rounded-sm" />
           ))}
         </div>
       );
@@ -206,17 +199,50 @@ const Profile = () => {
     if (!userPosts || userPosts.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <span className="material-symbols-outlined text-[48px] mb-2">post_add</span>
+          <span className="material-symbols-outlined text-[48px] mb-2">grid_view</span>
           <p className="text-sm">Nenhuma publicação ainda</p>
         </div>
       );
     }
 
     return (
-      <div className="space-y-6">
-        {userPosts.map((post) => (
-          <FeedPost key={post.id} post={transformToFeedPost(post)} />
-        ))}
+      <div className="grid grid-cols-3 gap-1">
+        {userPosts.map((post) => {
+          const mediaUrls = post.media_url?.split(',') || [];
+          const firstMedia = mediaUrls[0];
+          const isVideo = post.media_type === 'video';
+          const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
+
+          return (
+            <div key={post.id} className="aspect-square relative overflow-hidden rounded-sm bg-muted">
+              {isVideo ? (
+                <video
+                  src={firstMedia}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={firstMedia}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              )}
+              {isVideo && (
+                <div className="absolute top-2 right-2">
+                  <span className="material-symbols-outlined text-white text-[18px] drop-shadow-lg">play_circle</span>
+                </div>
+              )}
+              {isCarousel && (
+                <div className="absolute top-2 right-2">
+                  <span className="material-symbols-outlined text-white text-[18px] drop-shadow-lg">photo_library</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
