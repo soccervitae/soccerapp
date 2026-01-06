@@ -102,7 +102,7 @@ interface PostsGridProps {
   profile?: Profile;
 }
 
-type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas" | "salvos";
+type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas";
 
 const baseTabs: { id: Tab; label: string; icon: string }[] = [
   { id: "posts", label: "Posts", icon: "grid_view" },
@@ -127,10 +127,7 @@ export const PostsGrid = ({
   isOwnProfile = false,
   profile,
 }: PostsGridProps) => {
-  // Build tabs dynamically based on isOwnProfile
-  const tabs = isOwnProfile 
-    ? [...baseTabs, { id: "salvos" as Tab, label: "Salvos", icon: "bookmark" }]
-    : baseTabs;
+  const tabs = baseTabs;
 
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
@@ -489,20 +486,6 @@ export const PostsGrid = ({
             />
           </div>
           
-          {/* Salvos - only for own profile */}
-          {isOwnProfile && (
-            <div className="flex-[0_0_100%] min-w-0">
-              {isSavedPostsLoading ? (
-                <div className="grid grid-cols-3 gap-1 mb-8">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
-                  ))}
-                </div>
-              ) : (
-                renderSavedPostGrid(savedPosts, "Nenhum post salvo", "bookmark")
-              )}
-            </div>
-          )}
           
         </div>
       </div>
