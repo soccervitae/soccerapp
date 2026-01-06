@@ -878,7 +878,7 @@ const EditProfile = () => {
               type="date"
               value={formData.birth_date}
               onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-              className={showValidationErrors && validationErrors.birth_date ? "border-destructive" : ""}
+              className={`w-full ${showValidationErrors && validationErrors.birth_date ? "border-destructive" : ""}`}
             />
             {showValidationErrors && validationErrors.birth_date && (
               <p className="text-sm text-destructive">{validationErrors.birth_date}</p>
