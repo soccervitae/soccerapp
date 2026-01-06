@@ -503,7 +503,7 @@ export const FeedPost = ({
                 {mediaUrls.map((_, index) => <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />)}
               </div>
             </> : <>
-              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleMediaClick(e, 0)} />
+              <img src={mediaUrls[0]} alt="Post" className="w-full h-full object-cover" />
               {/* Tags overlay for single image */}
               {showTags && postTags.filter(tag => tag.photo_index === 0).map(tag => <button key={tag.id} onClick={(e) => { e.stopPropagation(); navigate(`/${tag.profile.username}`); }} className="absolute bg-foreground/90 text-background px-2 py-1 rounded text-xs font-medium transform -translate-x-1/2 -translate-y-1/2 hover:bg-foreground transition-colors z-10" style={{
           left: `${tag.x_position}%`,
