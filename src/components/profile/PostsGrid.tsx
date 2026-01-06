@@ -392,6 +392,7 @@ export const PostsGrid = ({
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative overflow-hidden cursor-pointer touch-manipulation select-none"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
             onClick={(e) => handleMediaClick(post, e)}
             disabled={!post.media_url}
             aria-label="Abrir mídia em tela cheia"
