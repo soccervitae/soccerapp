@@ -236,9 +236,12 @@ const EditProfile = () => {
   // Track if form has been initialized
   const [formInitialized, setFormInitialized] = useState(false);
 
-  // Initialize form when profile loads
+  // Initialize form when profile loads AND positions/functions are available
   useEffect(() => {
-    if (profile && !formInitialized) {
+    // Wait for profile and the relevant options to be loaded
+    const hasPositionOptions = positions.length > 0 || functions.length > 0;
+    
+    if (profile && !formInitialized && hasPositionOptions) {
       // Normalize role to determine user type correctly
       const roleNormalized = (profile.role ?? '').trim().toLowerCase();
       const isComissaoTecnica = roleNormalized === 'comissao_tecnica';
@@ -280,7 +283,7 @@ const EditProfile = () => {
       setUserType(isComissaoTecnica ? 'comissao_tecnica' : 'atleta');
       setFormInitialized(true);
     }
-  }, [profile, formInitialized]);
+  }, [profile, formInitialized, positions, functions]);
 
   // Handle user type change
   const handleUserTypeChange = (newType: 'atleta' | 'comissao_tecnica') => {
