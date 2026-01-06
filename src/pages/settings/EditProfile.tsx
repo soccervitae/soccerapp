@@ -878,6 +878,11 @@ const EditProfile = () => {
               type="date"
               value={formData.birth_date}
               onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+              max={(() => {
+                const today = new Date();
+                const minAgeDate = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+                return minAgeDate.toISOString().split('T')[0];
+              })()}
               className={`w-full ${showValidationErrors && validationErrors.birth_date ? "border-destructive" : ""}`}
             />
             {showValidationErrors && validationErrors.birth_date && (
