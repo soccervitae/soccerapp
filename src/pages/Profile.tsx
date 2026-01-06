@@ -4,7 +4,10 @@ import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { ChampionshipsTab } from "@/components/profile/ChampionshipsTab";
 import { AchievementsTab } from "@/components/profile/AchievementsTab";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
+import { FeedPost } from "@/components/feed/FeedPost";
 import { useUserChampionships, useUserAchievements, useUserPosts } from "@/hooks/useProfile";
+import { Skeleton } from "@/components/ui/skeleton";
+import { type Post } from "@/hooks/usePosts";
 import GuestBanner from "@/components/common/GuestBanner";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { useParams, useLocation } from "react-router-dom";
@@ -142,6 +145,82 @@ const Profile = () => {
     },
   };
 
+  // Transform user post to Post format for FeedPost
+  const transformToFeedPost = (post: NonNullable<typeof userPosts>[0]): Post => ({
+    id: post.id,
+    user_id: post.user_id,
+    content: post.content,
+    media_url: post.media_url,
+    media_type: post.media_type,
+    created_at: post.created_at,
+    likes_count: post.likes_count || 0,
+    comments_count: post.comments_count || 0,
+    shares_count: 0,
+    location_name: null,
+    location_lat: null,
+    location_lng: null,
+    music_track_id: null,
+    music_start_seconds: null,
+    music_end_seconds: null,
+    updated_at: post.updated_at,
+    liked_by_user: post.liked_by_user || false,
+    saved_by_user: post.saved_by_user || false,
+    recent_likes: [],
+    profile: {
+      id: profile?.id || '',
+      username: profile?.username || '',
+      avatar_url: profile?.avatar_url || null,
+      full_name: profile?.full_name || null,
+      nickname: profile?.nickname || null,
+      team: profile?.team || null,
+      conta_verificada: profile?.conta_verificada || false,
+      gender: profile?.gender || null,
+      role: profile?.role || null,
+      posicaomas: profile?.posicaomas || null,
+      posicaofem: profile?.posicaofem || null,
+      funcao: profile?.funcao || null,
+      position_name: profile?.position_name || null,
+    },
+    music_track: null,
+  });
+
+  // Render profile feed
+  const renderProfileFeed = () => {
+    if (postsLoading) {
+      return (
+        <div className="space-y-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="space-y-3 px-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="aspect-[4/5] w-full rounded-lg" />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (!userPosts || userPosts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <span className="material-symbols-outlined text-[48px] mb-2">post_add</span>
+          <p className="text-sm">Nenhuma publicação ainda</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {userPosts.map((post) => (
+          <FeedPost key={post.id} post={transformToFeedPost(post)} />
+        ))}
+      </div>
+    );
+  };
+
   // Render media grid
   const renderMediaGrid = (posts: typeof userPosts, emptyMessage: string, emptyIcon: string) => {
     if (postsLoading) {
@@ -246,11 +325,8 @@ const Profile = () => {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="profile" className="mt-4 px-4">
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <span className="material-symbols-outlined text-[48px] mb-2">info</span>
-          <p className="text-sm">Informações do perfil</p>
-        </div>
+      <TabsContent value="profile" className="mt-4">
+        {renderProfileFeed()}
       </TabsContent>
 
       <TabsContent value="photos" className="mt-4 px-1">
