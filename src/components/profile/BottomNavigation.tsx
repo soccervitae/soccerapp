@@ -109,18 +109,21 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
       <nav ref={ref} className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
         <div className="flex justify-around items-center">
           <button 
+            type="button"
             onClick={handleHomeClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
           </button>
           <button 
+            type="button"
             onClick={handleExploreClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "search" ? "fill-1" : ""}`}>search</span>
           </button>
           <button 
+            type="button"
             onClick={() => setIsMenuOpen(true)}
             className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-nav-active transition-colors"
           >
@@ -129,6 +132,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             </div>
           </button>
           <button 
+            type="button"
             onClick={handleMessagesClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors relative ${currentTab === "messages" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
@@ -140,6 +144,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             )}
           </button>
           <button 
+            type="button"
             onClick={handleProfileClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "profile" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
