@@ -23,6 +23,7 @@ export interface ExploreFilters {
   gender?: string | null;
   birthYear?: number | null;
   countryId?: number | null;
+  stateId?: number | null;
   position?: number | null;
 }
 
@@ -126,6 +127,28 @@ const ExploreFiltersSheet = ({
     },
   });
 
+  // Find Brazil ID
+  const brazilId = useMemo(() => {
+    return countries?.find((c) => c.nome.toLowerCase() === "brasil")?.id;
+  }, [countries]);
+
+  const isBrazilSelected = localFilters.countryId === brazilId;
+
+  // Fetch states for Brazil
+  const { data: states } = useQuery({
+    queryKey: ["states-brazil", brazilId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("estados")
+        .select("id, nome, uf, bandeira_url")
+        .eq("pais_id", brazilId!)
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!brazilId && isBrazilSelected,
+  });
+
   // Generate year options (last 50 years)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 50 }, (_, i) => currentYear - 16 - i);
@@ -141,6 +164,7 @@ const ExploreFiltersSheet = ({
       gender: null,
       birthYear: null,
       countryId: null,
+      stateId: null,
       position: null,
     };
     setLocalFilters(emptyFilters);
@@ -161,11 +185,25 @@ const ExploreFiltersSheet = ({
     });
   };
 
+  // Handle country change - clear state if not Brazil
+  const handleCountryChange = (value: string) => {
+    const newCountryId = value === "all" ? null : Number(value);
+    const newIsBrazil = newCountryId === brazilId;
+    
+    setLocalFilters({
+      ...localFilters,
+      countryId: newCountryId,
+      // Clear state if not Brazil
+      stateId: newIsBrazil ? localFilters.stateId : null,
+    });
+  };
+
   const hasLocalFilters =
     localFilters.profileType ||
     localFilters.gender ||
     localFilters.birthYear ||
     localFilters.countryId ||
+    localFilters.stateId ||
     localFilters.position;
 
   return (
@@ -299,12 +337,7 @@ const ExploreFiltersSheet = ({
             <label className="text-sm font-medium text-foreground">País</label>
             <Select
               value={localFilters.countryId?.toString() || "all"}
-              onValueChange={(value) =>
-                setLocalFilters({
-                  ...localFilters,
-                  countryId: value === "all" ? null : Number(value),
-                })
-              }
+              onValueChange={handleCountryChange}
             >
               <SelectTrigger className="w-full bg-muted/50">
                 <SelectValue placeholder="Todos" />
@@ -328,6 +361,45 @@ const ExploreFiltersSheet = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* State - Only show when Brazil is selected */}
+          {isBrazilSelected && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Estado
+              </label>
+              <Select
+                value={localFilters.stateId?.toString() || "all"}
+                onValueChange={(value) =>
+                  setLocalFilters({
+                    ...localFilters,
+                    stateId: value === "all" ? null : Number(value),
+                  })
+                }
+              >
+                <SelectTrigger className="w-full bg-muted/50">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50 max-h-60">
+                  <SelectItem value="all">Todos</SelectItem>
+                  {states?.map((state) => (
+                    <SelectItem key={state.id} value={state.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        {state.bandeira_url && (
+                          <img
+                            src={state.bandeira_url}
+                            alt={state.nome}
+                            className="w-5 h-3.5 object-cover rounded-sm"
+                          />
+                        )}
+                        {state.nome}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
