@@ -188,7 +188,7 @@ const Profile = () => {
   const ContentWrapper = isOwnProfile ? RefreshableContainer : 'div';
   const wrapperProps = isOwnProfile 
     ? { onRefresh: handleRefresh, isRefreshing: isRefetching, className: "bg-background min-h-screen relative pb-24" }
-    : { className: "bg-background min-h-screen relative pb-24 overflow-auto" };
+    : { className: "bg-background min-h-screen relative pb-24" };
 
   return (
     <ContentWrapper {...wrapperProps as any}>
