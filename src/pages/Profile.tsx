@@ -155,31 +155,31 @@ const Profile = () => {
           followStats={followStats}
           isOwnProfile={isOwnProfile}
         />
-        <div className="px-4 flex flex-col gap-6">
-              <HighlightsSection 
-                highlights={highlights || []} 
-                isLoading={highlightsLoading}
-                isOwnProfile={isOwnProfile}
-                profileUsername={profile.username}
-                profileAvatarUrl={profile.avatar_url}
-              />
-          <PostsGrid 
-            posts={posts || []} 
-            taggedPosts={taggedPosts || []}
-            savedPosts={savedPosts || []}
-            championships={championships || []}
-            achievements={achievements || []}
-            isLoading={postsLoading} 
-            isChampionshipsLoading={championshipsLoading}
-            isAchievementsLoading={achievementsLoading}
-            isTaggedLoading={taggedLoading}
-            isSavedPostsLoading={savedPostsLoading}
+        <div className="px-4">
+          <HighlightsSection 
+            highlights={highlights || []} 
+            isLoading={highlightsLoading}
             isOwnProfile={isOwnProfile}
-            profile={profile}
-            onRefresh={handlePostsRefresh}
-            isRefreshing={postsFetching && !postsLoading}
+            profileUsername={profile.username}
+            profileAvatarUrl={profile.avatar_url}
           />
         </div>
+        <PostsGrid 
+          posts={posts || []} 
+          taggedPosts={taggedPosts || []}
+          savedPosts={savedPosts || []}
+          championships={championships || []}
+          achievements={achievements || []}
+          isLoading={postsLoading} 
+          isChampionshipsLoading={championshipsLoading}
+          isAchievementsLoading={achievementsLoading}
+          isTaggedLoading={taggedLoading}
+          isSavedPostsLoading={savedPostsLoading}
+          isOwnProfile={isOwnProfile}
+          profile={profile}
+          onRefresh={handlePostsRefresh}
+          isRefreshing={postsFetching && !postsLoading}
+        />
       </div>
     </>
   );
@@ -208,7 +208,7 @@ const Profile = () => {
                 isOwnProfile={isOwnProfile}
               />
             </motion.div>
-            <div className="px-4 flex flex-col gap-6">
+            <div className="px-4">
               <motion.div variants={itemVariants}>
                 <HighlightsSection 
                   highlights={highlights || []} 
@@ -218,25 +218,25 @@ const Profile = () => {
                   profileAvatarUrl={profile.avatar_url}
                 />
               </motion.div>
-              <motion.div variants={itemVariants}>
-                <PostsGrid 
-                  posts={posts || []} 
-                  taggedPosts={taggedPosts || []}
-                  savedPosts={savedPosts || []}
-                  championships={championships || []}
-                  achievements={achievements || []}
-                  isLoading={postsLoading} 
-                  isChampionshipsLoading={championshipsLoading}
-                  isAchievementsLoading={achievementsLoading}
-                  isTaggedLoading={taggedLoading}
-                  isSavedPostsLoading={savedPostsLoading}
-                  isOwnProfile={isOwnProfile}
-                  profile={profile}
-                  onRefresh={handlePostsRefresh}
-                  isRefreshing={postsFetching && !postsLoading}
-                />
-              </motion.div>
             </div>
+            <motion.div variants={itemVariants}>
+              <PostsGrid 
+                posts={posts || []} 
+                taggedPosts={taggedPosts || []}
+                savedPosts={savedPosts || []}
+                championships={championships || []}
+                achievements={achievements || []}
+                isLoading={postsLoading} 
+                isChampionshipsLoading={championshipsLoading}
+                isAchievementsLoading={achievementsLoading}
+                isTaggedLoading={taggedLoading}
+                isSavedPostsLoading={savedPostsLoading}
+                isOwnProfile={isOwnProfile}
+                profile={profile}
+                onRefresh={handlePostsRefresh}
+                isRefreshing={postsFetching && !postsLoading}
+              />
+            </motion.div>
           </div>
         </motion.div>
       ) : (
