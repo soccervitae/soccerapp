@@ -20,9 +20,10 @@ import {
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
@@ -32,6 +33,10 @@ const Profile = () => {
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
+  const [feedSheetOriginRect, setFeedSheetOriginRect] = useState<DOMRect | null>(null);
+  const gridItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   useEffect(() => {
     // Check if navigated from welcome page (onboarding)
@@ -184,6 +189,15 @@ const Profile = () => {
     music_track: null,
   });
 
+  // Handle grid item click
+  const handleGridItemClick = (index: number, element: HTMLDivElement | null) => {
+    if (element) {
+      setFeedSheetOriginRect(element.getBoundingClientRect());
+    }
+    setSelectedPostIndex(index);
+    setFeedSheetOpen(true);
+  };
+
   // Render profile feed as grid
   const renderProfileFeed = () => {
     if (postsLoading) {
@@ -207,14 +221,20 @@ const Profile = () => {
 
     return (
       <div className="grid grid-cols-3 gap-1">
-        {userPosts.map((post) => {
+        {userPosts.map((post, index) => {
           const mediaUrls = post.media_url?.split(',') || [];
           const firstMedia = mediaUrls[0];
           const isVideo = post.media_type === 'video';
           const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
 
           return (
-            <div key={post.id} className="aspect-square relative overflow-hidden rounded-sm bg-muted">
+            <div 
+              key={post.id} 
+              ref={(el) => { gridItemRefs.current[index] = el; }}
+              className="aspect-square relative overflow-hidden rounded-sm bg-muted cursor-pointer"
+              onClick={() => handleGridItemClick(index, gridItemRefs.current[index])}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
               {isVideo ? (
                 <video
                   src={firstMedia}
@@ -455,6 +475,31 @@ const Profile = () => {
         <BottomNavigation activeTab="profile" />
       ) : (
         <GuestBanner />
+      )}
+
+      {/* Profile Feed Sheet */}
+      {profile && userPosts && (
+        <ProfileFeedSheet
+          posts={userPosts}
+          initialPostIndex={selectedPostIndex}
+          isOpen={feedSheetOpen}
+          onClose={() => setFeedSheetOpen(false)}
+          profile={{
+            id: profile.id,
+            username: profile.username,
+            full_name: profile.full_name,
+            nickname: profile.nickname,
+            avatar_url: profile.avatar_url,
+            conta_verificada: profile.conta_verificada,
+            gender: profile.gender,
+            role: profile.role,
+            posicaomas: profile.posicaomas,
+            posicaofem: profile.posicaofem,
+            funcao: profile.funcao,
+            position_name: profile.position_name,
+          }}
+          originRect={feedSheetOriginRect}
+        />
       )}
     </ContentWrapper>
   );
