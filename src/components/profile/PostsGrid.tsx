@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
@@ -6,6 +6,8 @@ import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
 import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+import { FeedPost } from "@/components/feed/FeedPost";
+import { type Post as FeedPostType } from "@/hooks/usePosts";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -262,6 +264,69 @@ export const PostsGrid = ({
     );
   };
 
+  // Transform posts to FeedPost format for the feed view
+  const transformPostsToFeedFormat = useCallback((filteredPosts: Post[], postProfile: Profile): FeedPostType[] => {
+    return filteredPosts.map(post => ({
+      id: post.id,
+      user_id: post.user_id || postProfile.id,
+      content: post.content,
+      media_url: post.media_url,
+      media_type: post.media_type,
+      likes_count: post.likes_count || 0,
+      comments_count: post.comments_count || 0,
+      shares_count: post.shares_count || 0,
+      created_at: post.created_at || new Date().toISOString(),
+      updated_at: null,
+      location_name: post.location_name || null,
+      location_lat: post.location_lat || null,
+      location_lng: post.location_lng || null,
+      music_track_id: post.music_track_id || null,
+      music_start_seconds: post.music_start_seconds || null,
+      music_end_seconds: post.music_end_seconds || null,
+      music_track: null,
+      profile: {
+        id: postProfile.id,
+        username: postProfile.username,
+        full_name: postProfile.full_name,
+        nickname: postProfile.nickname || null,
+        avatar_url: postProfile.avatar_url,
+        team: null,
+        conta_verificada: postProfile.conta_verificada || false,
+        gender: postProfile.gender || null,
+        role: postProfile.role || null,
+        posicaomas: postProfile.posicaomas || null,
+        posicaofem: postProfile.posicaofem || null,
+        funcao: postProfile.funcao || null,
+        position_name: postProfile.position_name || null,
+      },
+      liked_by_user: post.liked_by_user || false,
+      saved_by_user: post.saved_by_user || false,
+      recent_likes: [],
+    }));
+  }, []);
+
+  // Render posts as Facebook-style feed
+  const renderPostsFeed = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string, postProfile: Profile) => {
+    if (filteredPosts.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
+          <span className="material-symbols-outlined text-[48px] text-muted-foreground/50">{emptyIcon}</span>
+          <p className="text-muted-foreground text-sm mt-2">{emptyMessage}</p>
+        </div>
+      );
+    }
+
+    const feedPosts = transformPostsToFeedFormat(filteredPosts, postProfile);
+
+    return (
+      <div className="divide-y divide-border">
+        {feedPosts.map((post) => (
+          <FeedPost key={post.id} post={post} />
+        ))}
+      </div>
+    );
+  };
+
   const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string, postProfile: Profile) => {
     if (filteredPosts.length === 0) {
       return (
@@ -508,9 +573,9 @@ export const PostsGrid = ({
       {/* Swipeable content */}
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
-          {/* Posts */}
+          {/* Posts - Facebook-style feed */}
           <div className="flex-[0_0_100%] min-w-0">
-            {profile && renderPostGrid(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
+            {profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
           </div>
           
           {/* Times */}
