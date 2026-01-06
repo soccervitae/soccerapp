@@ -219,8 +219,8 @@ const Profile = () => {
       );
     }
 
-    return (
-      <div className="grid grid-cols-3 gap-1">
+      return (
+        <div className="grid grid-cols-3 gap-px">
         {userPosts.map((post, index) => {
           const mediaUrls = post.media_url?.split(',') || [];
           const firstMedia = mediaUrls[0];
