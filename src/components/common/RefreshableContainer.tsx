@@ -30,8 +30,8 @@ export const RefreshableContainer = ({
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null;
 
-    // Don't hijack taps on interactive elements (e.g. profile post thumbnails).
-    if (target?.closest("button,a,input,textarea,select,[role='button']")) {
+    // Don't hijack taps on interactive elements (e.g. profile post thumbnails / feed media).
+    if (target?.closest("button,a,input,textarea,select,[role='button'],[data-no-pull='true']")) {
       isEligiblePull.current = false;
       return;
     }
