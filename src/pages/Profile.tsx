@@ -48,7 +48,7 @@ const Profile = () => {
   const targetUserId = profile?.id;
   
   const { data: followStats, isLoading: statsLoading, isFetching: statsFetching, refetch: refetchStats } = useFollowStats(targetUserId);
-  const { data: posts, isLoading: postsLoading, refetch: refetchPosts } = useUserPosts(targetUserId);
+  const { data: posts, isLoading: postsLoading, isFetching: postsFetching, refetch: refetchPosts } = useUserPosts(targetUserId);
   const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
   const { data: achievements, isLoading: achievementsLoading } = useUserAchievements(targetUserId);
   const { data: taggedPosts, isLoading: taggedLoading } = useUserTaggedPosts(targetUserId);
@@ -79,6 +79,10 @@ const Profile = () => {
       refetchStats(),
       refetchPosts(),
     ]);
+  };
+
+  const handlePostsRefresh = async () => {
+    await refetchPosts();
   };
 
   // Listen for profile tab press to refresh
@@ -172,6 +176,8 @@ const Profile = () => {
             isSavedPostsLoading={savedPostsLoading}
             isOwnProfile={isOwnProfile}
             profile={profile}
+            onRefresh={handlePostsRefresh}
+            isRefreshing={postsFetching && !postsLoading}
           />
         </div>
       </div>
@@ -226,6 +232,8 @@ const Profile = () => {
                   isSavedPostsLoading={savedPostsLoading}
                   isOwnProfile={isOwnProfile}
                   profile={profile}
+                  onRefresh={handlePostsRefresh}
+                  isRefreshing={postsFetching && !postsLoading}
                 />
               </motion.div>
             </div>

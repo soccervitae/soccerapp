@@ -8,6 +8,7 @@ import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { type Post as FeedPostType } from "@/hooks/usePosts";
+import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -103,6 +104,8 @@ interface PostsGridProps {
   isSavedPostsLoading?: boolean;
   isOwnProfile?: boolean;
   profile?: Profile;
+  onRefresh?: () => Promise<void>;
+  isRefreshing?: boolean;
 }
 
 type Tab = "posts" | "videos" | "fotos" | "times" | "campeonatos" | "conquistas";
@@ -129,6 +132,8 @@ export const PostsGrid = ({
   isSavedPostsLoading = false,
   isOwnProfile = false,
   profile,
+  onRefresh,
+  isRefreshing = false,
 }: PostsGridProps) => {
   const tabs = baseTabs;
 
@@ -573,9 +578,19 @@ export const PostsGrid = ({
       {/* Swipeable content */}
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
-          {/* Posts - Facebook-style feed */}
-          <div className="flex-[0_0_100%] min-w-0">
-            {profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
+          {/* Posts - Facebook-style feed with pull-to-refresh */}
+          <div className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto">
+            {onRefresh ? (
+              <RefreshableContainer
+                onRefresh={onRefresh}
+                isRefreshing={isRefreshing}
+                className="min-h-full"
+              >
+                {profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
+              </RefreshableContainer>
+            ) : (
+              profile && renderPostsFeed(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)
+            )}
           </div>
           
           {/* Times */}
