@@ -109,8 +109,8 @@ const baseTabs: { id: Tab; label: string; icon: string }[] = [
   { id: "times", label: "Times", icon: "shield" },
   { id: "videos", label: "Vídeos", icon: "movie" },
   { id: "fotos", label: "Fotos", icon: "photo_camera" },
-  { id: "campeonatos", label: "Campeonatos", icon: "emoji_events" },
-  { id: "conquistas", label: "Conquistas", icon: "military_tech" },
+  { id: "campeonatos", label: "Campeonatos", icon: "sports_soccer" },
+  { id: "conquistas", label: "Conquistas", icon: "trophy" },
 ];
 
 export const PostsGrid = ({ 
