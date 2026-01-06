@@ -428,14 +428,14 @@ export const PostsGrid = ({
   return (
     <section>
       {/* Tabs - scrollable */}
-      <div className="flex border-b border-border mb-4 sticky top-[100px] bg-background z-20 pt-2 overflow-x-auto scrollbar-hide">
+      <div className="flex border-b border-border sticky top-[100px] bg-background z-20 overflow-x-auto scrollbar-hide h-12">
         {tabs.map((tab, index) => (
           <button 
             key={tab.id}
             onClick={() => handleTabClick(tab.id, index)}
-            className={`flex-shrink-0 min-w-[80px] px-3 pb-3 text-xs font-bold transition-colors relative whitespace-nowrap ${
+            className={`flex-shrink-0 min-w-[80px] px-3 h-full text-xs font-semibold transition-colors relative whitespace-nowrap flex items-center justify-center ${
               activeTab === tab.id 
-                ? "text-foreground border-b-2 border-foreground" 
+                ? "text-foreground border-b-2 border-primary" 
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
