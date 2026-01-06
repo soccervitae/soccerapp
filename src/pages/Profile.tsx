@@ -138,18 +138,20 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
-      <TabsList className="w-full h-12 bg-transparent border-b border-border rounded-none p-0 flex justify-around">
+      <TabsList className="w-full h-10 bg-muted p-1 rounded-md">
         <TabsTrigger 
           value="championships" 
-          className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold"
+          className="flex-1 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
-          <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
+          <span className="material-symbols-outlined text-[18px]">sports_soccer</span>
+          Campeonatos
         </TabsTrigger>
         <TabsTrigger 
           value="achievements" 
-          className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold"
+          className="flex-1 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
         >
-          <span className="material-symbols-outlined text-[20px]">trophy</span>
+          <span className="material-symbols-outlined text-[18px]">trophy</span>
+          Conquistas
         </TabsTrigger>
       </TabsList>
 
