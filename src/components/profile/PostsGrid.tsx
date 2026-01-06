@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { Play, Loader2, ArrowLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Play, Loader2 } from "lucide-react";
 import { ChampionshipsTab } from "./ChampionshipsTab";
 import { AchievementsTab } from "./AchievementsTab";
 import { TeamsTab } from "./TeamsTab";
-import { FeedPost } from "@/components/feed/FeedPost";
+import { ProfileFeedSheet } from "./ProfileFeedSheet";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
 interface Post {
@@ -144,9 +143,11 @@ export const PostsGrid = ({
       return true;
     }
   });
-  const [expandedPost, setExpandedPost] = useState<Post | SavedPost | null>(null);
-  const [isSavedPostsViewer, setIsSavedPostsViewer] = useState(false);
-  const [originRect, setOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
+  const [sheetPosts, setSheetPosts] = useState<Post[]>([]);
+  const [sheetProfile, setSheetProfile] = useState<Profile | null>(null);
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -179,114 +180,20 @@ export const PostsGrid = ({
     return [];
   };
 
-  const handlePostClick = (post: Post, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePostClick = (postsArray: Post[], index: number, postProfile: Profile, event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
-    setExpandedPost(post);
-    setIsSavedPostsViewer(false);
+    setOriginRect(rect);
+    setSheetPosts(postsArray);
+    setSelectedPostIndex(index);
+    setSheetProfile(postProfile);
+    setIsSheetOpen(true);
   };
 
-  const handleSavedPostClick = (post: SavedPost, event: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
-    setExpandedPost(post);
-    setIsSavedPostsViewer(true);
-  };
-
-  const handleCloseExpanded = () => {
-    setExpandedPost(null);
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
     setOriginRect(null);
   };
 
-  const getMediaUrls = (mediaUrl: string | null): string[] => {
-    if (!mediaUrl) return [];
-    try {
-      const parsed = JSON.parse(mediaUrl);
-      return Array.isArray(parsed) ? parsed : [mediaUrl];
-    } catch {
-      return [mediaUrl];
-    }
-  };
-
-  const transformPostForViewer = (post: Post): import("@/hooks/usePosts").Post => ({
-    id: post.id,
-    content: post.content,
-    media_url: post.media_url,
-    media_type: post.media_type,
-    created_at: post.created_at || new Date().toISOString(),
-    updated_at: post.created_at || null,
-    user_id: post.user_id || profile?.id || "",
-    likes_count: post.likes_count || 0,
-    comments_count: post.comments_count || 0,
-    shares_count: post.shares_count || 0,
-    location_name: post.location_name || null,
-    location_lat: post.location_lat || null,
-    location_lng: post.location_lng || null,
-    music_track_id: post.music_track_id || null,
-    music_start_seconds: post.music_start_seconds || null,
-    music_end_seconds: post.music_end_seconds || null,
-    music_track: null,
-    recent_likes: [],
-    profile: {
-      id: profile?.id || "",
-      username: profile?.username || "usuario",
-      full_name: profile?.full_name || null,
-      nickname: profile?.nickname || profile?.full_name || profile?.username || null,
-      avatar_url: profile?.avatar_url || null,
-      team: null,
-      conta_verificada: profile?.conta_verificada || false,
-      gender: profile?.gender || null,
-      role: profile?.role || null,
-      posicaomas: profile?.posicaomas || null,
-      posicaofem: profile?.posicaofem || null,
-      funcao: profile?.funcao || null,
-      position_name: profile?.position_name || null,
-    },
-    liked_by_user: post.liked_by_user ?? false,
-    saved_by_user: post.saved_by_user ?? false,
-  });
-
-  // Transform saved post with its own profile data
-  const transformSavedPostForViewer = (post: SavedPost): import("@/hooks/usePosts").Post => {
-    const postProfile = post._profile;
-    return {
-      id: post.id,
-      content: post.content,
-      media_url: post.media_url,
-      media_type: post.media_type,
-      created_at: post.created_at || new Date().toISOString(),
-      updated_at: post.created_at || null,
-      user_id: post.user_id || postProfile?.id || "",
-      likes_count: post.likes_count || 0,
-      comments_count: post.comments_count || 0,
-      shares_count: post.shares_count || 0,
-      location_name: post.location_name || null,
-      location_lat: post.location_lat || null,
-      location_lng: post.location_lng || null,
-      music_track_id: post.music_track_id || null,
-      music_start_seconds: post.music_start_seconds || null,
-      music_end_seconds: post.music_end_seconds || null,
-      music_track: null,
-      recent_likes: [],
-      profile: {
-        id: postProfile?.id || "",
-        username: postProfile?.username || "usuario",
-        full_name: postProfile?.full_name || null,
-        nickname: postProfile?.nickname || postProfile?.full_name || postProfile?.username || null,
-        avatar_url: postProfile?.avatar_url || null,
-        team: null,
-        conta_verificada: postProfile?.conta_verificada || false,
-        gender: postProfile?.gender || null,
-        role: postProfile?.role || null,
-        posicaomas: postProfile?.posicaomas || null,
-        posicaofem: postProfile?.posicaofem || null,
-        funcao: postProfile?.funcao || null,
-        position_name: null,
-      },
-      liked_by_user: post.liked_by_user ?? false,
-      saved_by_user: true,
-    };
-  };
 
   // Component to render video with thumbnail
   const VideoThumbnail = ({ src, alt }: { src: string; alt: string }) => {
@@ -335,7 +242,7 @@ export const PostsGrid = ({
     );
   };
 
-  const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string) => {
+  const renderPostGrid = (filteredPosts: Post[], emptyMessage: string, emptyIcon: string, postProfile: Profile) => {
     if (filteredPosts.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
@@ -347,13 +254,13 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post) => (
+        {filteredPosts.map((post, index) => (
           <button
             key={post.id}
             type="button"
             data-embla-no-drag="true"
             className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handlePostClick(post, e)}
+            onClick={(e) => handlePostClick(filteredPosts, index, postProfile, e)}
             aria-label="Abrir post"
           >
             {post.media_url ? (
@@ -422,64 +329,80 @@ export const PostsGrid = ({
 
     return (
       <div className="grid grid-cols-3 gap-1 mb-8">
-        {filteredPosts.map((post) => (
-          <button
-            key={post.id}
-            type="button"
-            data-embla-no-drag="true"
-            className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
-            onClick={(e) => handleSavedPostClick(post, e)}
-            aria-label="Abrir post salvo"
-          >
-            {post.media_url ? (
-              post.media_type === "video" ? (
-                <div className="w-full h-full pointer-events-none">
-                  <VideoThumbnail src={post.media_url} alt={post.content} />
-                </div>
-              ) : post.media_type === "carousel" ? (
-                (() => {
-                  try {
-                    const urls = JSON.parse(post.media_url);
-                    return (
-                      <>
+        {filteredPosts.map((post, index) => {
+          const postProfile: Profile = post._profile ? {
+            id: post._profile.id,
+            username: post._profile.username,
+            full_name: post._profile.full_name,
+            nickname: post._profile.nickname,
+            avatar_url: post._profile.avatar_url,
+            conta_verificada: post._profile.conta_verificada,
+            gender: post._profile.gender,
+            role: post._profile.role,
+            posicaomas: post._profile.posicaomas,
+            posicaofem: post._profile.posicaofem,
+            funcao: post._profile.funcao,
+          } : profile!;
+          
+          return (
+            <button
+              key={post.id}
+              type="button"
+              data-embla-no-drag="true"
+              className="aspect-[4/5] bg-muted relative group overflow-hidden cursor-pointer touch-manipulation select-none"
+              onClick={(e) => handlePostClick(filteredPosts as Post[], index, postProfile, e)}
+              aria-label="Abrir post salvo"
+            >
+              {post.media_url ? (
+                post.media_type === "video" ? (
+                  <div className="w-full h-full pointer-events-none">
+                    <VideoThumbnail src={post.media_url} alt={post.content} />
+                  </div>
+                ) : post.media_type === "carousel" ? (
+                  (() => {
+                    try {
+                      const urls = JSON.parse(post.media_url);
+                      return (
+                        <>
+                          <img
+                            src={urls[0]}
+                            alt={post.content}
+                            className="w-full h-full object-cover pointer-events-none"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-2 right-2 pointer-events-none">
+                            <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
+                          </div>
+                        </>
+                      );
+                    } catch {
+                      return (
                         <img
-                          src={urls[0]}
+                          src={post.media_url}
                           alt={post.content}
                           className="w-full h-full object-cover pointer-events-none"
                           loading="lazy"
                         />
-                        <div className="absolute top-2 right-2 pointer-events-none">
-                          <span className="material-symbols-outlined text-background text-[18px] drop-shadow-lg">collections</span>
-                        </div>
-                      </>
-                    );
-                  } catch {
-                    return (
-                      <img
-                        src={post.media_url}
-                        alt={post.content}
-                        className="w-full h-full object-cover pointer-events-none"
-                        loading="lazy"
-                      />
-                    );
-                  }
-                })()
+                      );
+                    }
+                  })()
+                ) : (
+                  <img
+                    src={post.media_url}
+                    alt={post.content}
+                    className="w-full h-full object-cover pointer-events-none"
+                    loading="lazy"
+                  />
+                )
               ) : (
-                <img
-                  src={post.media_url}
-                  alt={post.content}
-                  className="w-full h-full object-cover pointer-events-none"
-                  loading="lazy"
-                />
-              )
-            ) : (
-              <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
-                <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
-              </div>
-            )}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
-          </button>
-        ))}
+                <div className="w-full h-full flex items-center justify-center p-2 pointer-events-none">
+                  <p className="text-xs text-muted-foreground line-clamp-3 text-center">{post.content}</p>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors pointer-events-none" />
+            </button>
+          );
+        })}
       </div>
     );
   };
@@ -530,7 +453,7 @@ export const PostsGrid = ({
         <div className="flex">
           {/* Posts */}
           <div className="flex-[0_0_100%] min-w-0">
-            {renderPostGrid(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library")}
+            {profile && renderPostGrid(getFilteredPosts("posts"), "Nenhum post ainda", "photo_library", profile)}
           </div>
           
           {/* Times */}
@@ -540,12 +463,12 @@ export const PostsGrid = ({
           
           {/* Videos */}
           <div className="flex-[0_0_100%] min-w-0">
-            {renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie")}
+            {profile && renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie", profile)}
           </div>
           
           {/* Fotos */}
           <div className="flex-[0_0_100%] min-w-0">
-            {renderPostGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
+            {profile && renderPostGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera", profile)}
           </div>
           
           {/* Campeonatos */}
@@ -584,57 +507,17 @@ export const PostsGrid = ({
         </div>
       </div>
 
-      {/* Expanded Post Overlay */}
-      <AnimatePresence>
-        {expandedPost && originRect && (
-          <motion.div
-            className="fixed inset-0 z-[60] bg-background overflow-y-auto"
-            initial={{ 
-              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
-              opacity: 0.8
-            }}
-            animate={{ 
-              clipPath: "inset(0px 0px 0px 0px round 0px)",
-              opacity: 1
-            }}
-            exit={{ 
-              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
-              opacity: 0
-            }}
-            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-          >
-            {/* Header with back button */}
-            <motion.div 
-              className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.2 }}
-            >
-              <button 
-                onClick={handleCloseExpanded}
-                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-6 h-6" />
-              </button>
-              <span className="font-semibold">Post</span>
-            </motion.div>
-            
-            {/* Feed Post */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.25 }}
-            >
-              <FeedPost 
-                post={isSavedPostsViewer 
-                  ? transformSavedPostForViewer(expandedPost as SavedPost) 
-                  : transformPostForViewer(expandedPost)
-                } 
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Profile Feed Sheet */}
+      {sheetProfile && (
+        <ProfileFeedSheet
+          posts={sheetPosts}
+          initialPostIndex={selectedPostIndex}
+          isOpen={isSheetOpen}
+          onClose={handleCloseSheet}
+          profile={sheetProfile}
+          originRect={originRect}
+        />
+      )}
     </section>
   );
 };
