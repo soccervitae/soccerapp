@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserSavedPosts } from "@/hooks/useProfile";
+import { useSavedHighlights, SavedHighlight } from "@/hooks/useSavedHighlights";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,6 +9,9 @@ import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
 import { Play, Loader2 } from "lucide-react";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import type { Post } from "@/hooks/usePosts";
+import { HighlightFullscreenView } from "@/components/profile/HighlightFullscreenView";
+import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
+import useEmblaCarousel from "embla-carousel-react";
 
 interface SavedPost {
   id: string;
@@ -88,9 +92,20 @@ export default function Saved() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: savedPosts = [], isLoading: postsLoading } = useUserSavedPosts(user?.id);
+  const { data: savedHighlights = [], isLoading: highlightsLoading } = useSavedHighlights(user?.id);
   
   const [expandedPostIndex, setExpandedPostIndex] = useState<number | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  
+  // Highlight viewer state
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
+  const [currentHighlightIndex, setCurrentHighlightIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Embla carousel for highlight images
+  const [imageEmblaRef, imageEmblaApi] = useEmblaCarousel({ loop: false });
+  const [highlightEmblaRef, highlightEmblaApi] = useEmblaCarousel({ loop: false });
 
   // Filter posts with media for grid display
   const postsWithMedia = savedPosts.filter((post: SavedPost) => post.media_url);
@@ -160,6 +175,114 @@ export default function Saved() {
     } catch {
       return [mediaUrl];
     }
+  };
+
+  // Transform saved highlights to UserHighlight format for the viewer
+  const displayHighlights: UserHighlight[] = savedHighlights.map((sh: SavedHighlight) => ({
+    id: sh.highlight.id,
+    title: sh.highlight.title,
+    image_url: sh.highlight.image_url,
+    user_id: sh.highlight.user_id,
+    created_at: sh.highlight.created_at,
+    display_order: sh.highlight.display_order,
+    views_seen_at: sh.highlight.views_seen_at,
+    images: sh.highlight.images.map(img => ({
+      id: img.id,
+      highlight_id: sh.highlight.id,
+      image_url: img.image_url,
+      media_type: img.media_type,
+      display_order: img.display_order,
+      created_at: null,
+    })) as HighlightImage[],
+  }));
+
+  const selectedHighlight = displayHighlights[currentHighlightIndex] || null;
+  const currentImages: HighlightImage[] = selectedHighlight?.images || [];
+  const currentHighlightProfile = savedHighlights[currentHighlightIndex]?.highlight.profile;
+
+  const handleHighlightClick = (index: number, event: React.MouseEvent) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setClickOrigin(new DOMRect(rect.left, rect.top, rect.width, rect.height));
+    setCurrentHighlightIndex(index);
+    setCurrentImageIndex(0);
+    setViewDialogOpen(true);
+  };
+
+  const handleCloseHighlightViewer = () => {
+    setViewDialogOpen(false);
+    setClickOrigin(null);
+  };
+
+  const handlePrevHighlight = () => {
+    if (currentHighlightIndex > 0) {
+      setCurrentHighlightIndex(prev => prev - 1);
+      setCurrentImageIndex(0);
+    }
+  };
+
+  const handleNextHighlight = () => {
+    if (currentHighlightIndex < displayHighlights.length - 1) {
+      setCurrentHighlightIndex(prev => prev + 1);
+      setCurrentImageIndex(0);
+    }
+  };
+
+  // Track image carousel index
+  useEffect(() => {
+    if (!imageEmblaApi) return;
+    
+    const onSelect = () => {
+      setCurrentImageIndex(imageEmblaApi.selectedScrollSnap());
+    };
+    
+    imageEmblaApi.on("select", onSelect);
+    return () => {
+      imageEmblaApi.off("select", onSelect);
+    };
+  }, [imageEmblaApi]);
+
+  const renderHighlightsGrid = () => {
+    if (savedHighlights.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 px-4">
+          <span className="material-symbols-outlined text-[64px] text-muted-foreground/50 mb-4">
+            auto_awesome
+          </span>
+          <p className="text-muted-foreground text-center">
+            Você ainda não salvou nenhum destaque
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-0.5">
+        {savedHighlights.map((savedHighlight: SavedHighlight, index: number) => (
+          <button
+            key={savedHighlight.id}
+            type="button"
+            onClick={(e) => handleHighlightClick(index, e)}
+            className="aspect-[4/5] relative overflow-hidden bg-muted group cursor-pointer touch-manipulation select-none"
+          >
+            <img
+              src={savedHighlight.highlight.image_url || savedHighlight.highlight.images?.[0]?.image_url || ""}
+              alt={savedHighlight.highlight.title}
+              className="w-full h-full object-cover pointer-events-none"
+              loading="lazy"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            {/* Title and author */}
+            <div className="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
+              <p className="text-white text-xs font-medium truncate">{savedHighlight.highlight.title}</p>
+              <p className="text-white/70 text-[10px] truncate">@{savedHighlight.highlight.profile?.username}</p>
+            </div>
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          </button>
+        ))}
+      </div>
+    );
   };
 
   const renderPostGrid = (posts: SavedPost[]) => {
@@ -289,14 +412,15 @@ export default function Saved() {
           </TabsContent>
 
           <TabsContent value="highlights" className="mt-0">
-            <div className="flex flex-col items-center justify-center py-20 px-4">
-              <span className="material-symbols-outlined text-[64px] text-muted-foreground/50 mb-4">
-                auto_awesome
-              </span>
-              <p className="text-muted-foreground text-center">
-                Você ainda não salvou nenhum destaque
-              </p>
-            </div>
+            {highlightsLoading ? (
+              <div className="grid grid-cols-3 gap-0.5">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[4/5]" />
+                ))}
+              </div>
+            ) : (
+              renderHighlightsGrid()
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -315,6 +439,36 @@ export default function Saved() {
           onNavigatePost={handleNavigatePost}
         />
       )}
+
+      {/* HighlightFullscreenView */}
+      <HighlightFullscreenView
+        viewDialogOpen={viewDialogOpen}
+        onClose={handleCloseHighlightViewer}
+        clickOrigin={clickOrigin}
+        currentImages={currentImages}
+        currentImageIndex={currentImageIndex}
+        currentHighlightIndex={currentHighlightIndex}
+        displayHighlights={displayHighlights}
+        selectedHighlight={selectedHighlight}
+        isOwnProfile={false}
+        isEditingTitle={false}
+        editedTitle=""
+        setEditedTitle={() => {}}
+        handleTitleKeyDown={() => {}}
+        handleTitleSave={() => {}}
+        updateHighlight={{ isPending: false }}
+        handleTitleClick={() => {}}
+        setDeleteDialogOpen={() => {}}
+        imageEmblaRef={imageEmblaRef}
+        imageEmblaApi={imageEmblaApi}
+        highlightEmblaApi={highlightEmblaApi}
+        handlePrevHighlight={handlePrevHighlight}
+        handleNextHighlight={handleNextHighlight}
+        setSelectedImageToDelete={() => {}}
+        setDeleteImageDialogOpen={() => {}}
+        profileUsername={currentHighlightProfile?.username}
+        authorAvatarUrl={currentHighlightProfile?.avatar_url || undefined}
+      />
     </div>
   );
 }
