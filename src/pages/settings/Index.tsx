@@ -75,7 +75,9 @@ export default function Settings() {
             </Avatar>
             <div className="flex-1 text-left">
               <p className="font-semibold text-foreground">{profile?.full_name || profile?.username}</p>
-              <p className="text-sm text-muted-foreground">@{profile?.username}</p>
+              {profile?.position_name && (
+                <p className="text-sm text-muted-foreground">{profile.position_name}</p>
+              )}
             </div>
           </div>
         </div>
