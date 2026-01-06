@@ -66,10 +66,7 @@ export default function Settings() {
       <div className="pt-14 pb-20">
         {/* Profile Card */}
         <div className="p-4 border-b border-border">
-          <button 
-            onClick={() => navigate("/settings/profile")}
-            className="flex items-center gap-4 w-full p-3 rounded-xl hover:bg-muted transition-colors"
-          >
+          <div className="flex items-center gap-4 w-full p-3 rounded-xl">
             <Avatar className="h-14 w-14">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
@@ -80,8 +77,7 @@ export default function Settings() {
               <p className="font-semibold text-foreground">{profile?.full_name || profile?.username}</p>
               <p className="text-sm text-muted-foreground">@{profile?.username}</p>
             </div>
-            <span className="material-symbols-outlined text-muted-foreground">chevron_right</span>
-          </button>
+          </div>
         </div>
 
         {/* Conta */}
