@@ -253,7 +253,7 @@ export const PostsGrid = ({
     }
 
     return (
-      <div className="grid grid-cols-3 gap-1 mb-8">
+      <div className="grid grid-cols-3 gap-0.5">
         {filteredPosts.map((post, index) => (
           <button
             key={post.id}
@@ -328,7 +328,7 @@ export const PostsGrid = ({
     }
 
     return (
-      <div className="grid grid-cols-3 gap-1 mb-8">
+      <div className="grid grid-cols-3 gap-0.5">
         {filteredPosts.map((post, index) => {
           const postProfile: Profile = post._profile ? {
             id: post._profile.id,
@@ -417,7 +417,7 @@ export const PostsGrid = ({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-1 mb-8">
+        <div className="grid grid-cols-3 gap-0.5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="aspect-[4/5] bg-muted animate-pulse" />
           ))}
