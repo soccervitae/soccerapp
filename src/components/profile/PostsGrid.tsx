@@ -598,14 +598,34 @@ export const PostsGrid = ({
             <TeamsTab userId={profile?.id} />
           </div>
           
-          {/* Videos */}
-          <div className="flex-[0_0_100%] min-w-0">
-            {profile && renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie", profile)}
+          {/* Videos with pull-to-refresh */}
+          <div className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto">
+            {onRefresh ? (
+              <RefreshableContainer
+                onRefresh={onRefresh}
+                isRefreshing={isRefreshing}
+                className="min-h-full"
+              >
+                {profile && renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie", profile)}
+              </RefreshableContainer>
+            ) : (
+              profile && renderPostGrid(getFilteredPosts("videos"), "Nenhum vídeo ainda", "movie", profile)
+            )}
           </div>
           
-          {/* Fotos */}
-          <div className="flex-[0_0_100%] min-w-0">
-            {renderPhotosGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
+          {/* Fotos with pull-to-refresh */}
+          <div className="flex-[0_0_100%] min-w-0 h-full overflow-y-auto">
+            {onRefresh ? (
+              <RefreshableContainer
+                onRefresh={onRefresh}
+                isRefreshing={isRefreshing}
+                className="min-h-full"
+              >
+                {renderPhotosGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")}
+              </RefreshableContainer>
+            ) : (
+              renderPhotosGrid(getFilteredPosts("fotos"), "Nenhuma foto ainda", "photo_camera")
+            )}
           </div>
           
           {/* Campeonatos */}
