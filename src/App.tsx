@@ -47,6 +47,15 @@ const CallNotificationHandler = () => {
   return null;
 };
 
+// Check if running as PWA
+const isPWA = (): boolean => {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true ||
+    document.referrer.includes('android-app://')
+  );
+};
+
 // Component to handle landing vs authenticated index
 const LandingOrIndex = () => {
   const { user, loading } = useAuth();
@@ -55,7 +64,11 @@ const LandingOrIndex = () => {
     return null;
   }
   
+  // If not logged in and in PWA mode, redirect to auth
   if (!user) {
+    if (isPWA()) {
+      return <Navigate to="/auth" replace />;
+    }
     return <PageTransition><Landing /></PageTransition>;
   }
   
