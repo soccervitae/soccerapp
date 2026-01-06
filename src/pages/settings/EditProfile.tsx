@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { toast } from "sonner";
 import { Camera, ArrowLeft, Loader2, Check, X, ImageIcon, ChevronRight } from "lucide-react";
@@ -548,25 +548,33 @@ const EditProfile = () => {
 
   return (
     <>
-      {/* Unsaved Changes Dialog */}
-      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
-            <AlertDialogDescription>
+      {/* Unsaved Changes Sheet */}
+      <Drawer open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <DrawerContent>
+          <DrawerHeader className="text-center">
+            <DrawerTitle>Alterações não salvas</DrawerTitle>
+            <p className="text-sm text-muted-foreground mt-1">
               Você tem alterações não salvas. Deseja sair sem salvar?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              Continuar editando
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => navigate(-1)}>
+            </p>
+          </DrawerHeader>
+          <div className="p-4 space-y-2">
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => navigate(-1)}
+            >
               Sair sem salvar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowExitDialog(false)}
+            >
+              Continuar editando
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <main className="bg-background min-h-screen">
       {/* Header */}
