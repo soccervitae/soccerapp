@@ -1,14 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserSavedPosts } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FeedPost } from "@/components/feed/FeedPost";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Play, Loader2 } from "lucide-react";
+import { PostMediaViewer } from "@/components/feed/PostMediaViewer";
+import { Play, Loader2 } from "lucide-react";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
-import { formatDuration } from "@/hooks/useVideoDuration";
+import type { Post } from "@/hooks/usePosts";
 
 interface SavedPost {
   id: string;
@@ -90,22 +89,14 @@ export default function Saved() {
   const { user } = useAuth();
   const { data: savedPosts = [], isLoading: postsLoading } = useUserSavedPosts(user?.id);
   
-  const [expandedPost, setExpandedPost] = useState<SavedPost | null>(null);
-  const [originRect, setOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [expandedPostIndex, setExpandedPostIndex] = useState<number | null>(null);
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
-  const handlePostClick = (post: SavedPost, event: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setOriginRect({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
-    setExpandedPost(post);
-  };
+  // Filter posts with media for grid display
+  const postsWithMedia = savedPosts.filter((post: SavedPost) => post.media_url);
 
-  const handleCloseExpanded = () => {
-    setExpandedPost(null);
-    setOriginRect(null);
-  };
-
-  // Transform saved post with its own profile data for FeedPost
-  const transformSavedPostForViewer = (post: SavedPost): import("@/hooks/usePosts").Post => {
+  // Transform saved posts to Post format for the viewer
+  const transformedPosts: Post[] = postsWithMedia.map((post: SavedPost) => {
     const postProfile = post._profile;
     return {
       id: post.id,
@@ -144,10 +135,32 @@ export default function Saved() {
       liked_by_user: post.liked_by_user ?? false,
       saved_by_user: true,
     };
+  });
+
+  const handlePostClick = (postIndex: number, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOriginRect(new DOMRect(rect.left, rect.top, rect.width, rect.height));
+    setExpandedPostIndex(postIndex);
   };
 
-  // Filter posts with media for grid display
-  const postsWithMedia = savedPosts.filter((post: SavedPost) => post.media_url);
+  const handleCloseViewer = () => {
+    setExpandedPostIndex(null);
+    setOriginRect(null);
+  };
+
+  const handleNavigatePost = (index: number) => {
+    setExpandedPostIndex(index);
+  };
+
+  const getMediaUrls = (mediaUrl: string | null): string[] => {
+    if (!mediaUrl) return [];
+    try {
+      const parsed = JSON.parse(mediaUrl);
+      return Array.isArray(parsed) ? parsed : [mediaUrl];
+    } catch {
+      return [mediaUrl];
+    }
+  };
 
   const renderPostGrid = (posts: SavedPost[]) => {
     if (posts.length === 0) {
@@ -165,23 +178,21 @@ export default function Saved() {
 
     return (
       <div className="grid grid-cols-3 gap-0.5">
-        {posts.map((post: SavedPost) => (
+        {posts.map((post: SavedPost, index: number) => (
           <button
             key={post.id}
             type="button"
-            onClick={(e) => handlePostClick(post, e)}
+            onClick={(e) => handlePostClick(index, e)}
             className="aspect-[4/5] relative overflow-hidden bg-muted group cursor-pointer touch-manipulation select-none"
           >
             {post.media_type === "video" ? (
               <div className="w-full h-full pointer-events-none">
                 <VideoThumbnail src={post.media_url || ""} alt={post.content} />
               </div>
-            ) : post.media_type === "carousel" || post.media_url?.includes(",") ? (
+            ) : post.media_type === "carousel" || post.media_url?.includes("[") ? (
               (() => {
                 try {
-                  const urls = post.media_url?.startsWith("[") 
-                    ? JSON.parse(post.media_url) 
-                    : post.media_url?.split(",");
+                  const urls = JSON.parse(post.media_url || "[]");
                   return (
                     <>
                       <img
@@ -232,6 +243,8 @@ export default function Saved() {
       </div>
     );
   };
+
+  const currentPost = expandedPostIndex !== null ? transformedPosts[expandedPostIndex] : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -288,52 +301,20 @@ export default function Saved() {
         </Tabs>
       </div>
 
-      {/* Expanded Post Overlay */}
-      <AnimatePresence>
-        {expandedPost && originRect && (
-          <motion.div
-            className="fixed inset-0 z-[60] bg-background overflow-y-auto"
-            initial={{ 
-              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
-              opacity: 0.8
-            }}
-            animate={{ 
-              clipPath: "inset(0px 0px 0px 0px round 0px)",
-              opacity: 1
-            }}
-            exit={{ 
-              clipPath: `inset(${originRect.y}px ${window.innerWidth - originRect.x - originRect.width}px ${window.innerHeight - originRect.y - originRect.height}px ${originRect.x}px round 8px)`,
-              opacity: 0
-            }}
-            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-          >
-            {/* Header with back button */}
-            <motion.div 
-              className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.2 }}
-            >
-              <button 
-                onClick={handleCloseExpanded}
-                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-6 h-6" />
-              </button>
-              <span className="font-semibold">Post</span>
-            </motion.div>
-            
-            {/* Feed Post */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.25 }}
-            >
-              <FeedPost post={transformSavedPostForViewer(expandedPost)} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* PostMediaViewer */}
+      {currentPost && (
+        <PostMediaViewer
+          post={currentPost}
+          mediaUrls={getMediaUrls(currentPost.media_url)}
+          mediaType={currentPost.media_type}
+          isOpen={expandedPostIndex !== null}
+          onClose={handleCloseViewer}
+          originRect={originRect}
+          posts={transformedPosts}
+          currentPostIndex={expandedPostIndex ?? 0}
+          onNavigatePost={handleNavigatePost}
+        />
+      )}
     </div>
   );
 }
