@@ -83,7 +83,7 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync" initial={false}>
       <Routes location={location} key={location.pathname}>
         {/* Landing page for unauthenticated users, feed for authenticated */}
         <Route path="/" element={<LandingOrIndex />} />
