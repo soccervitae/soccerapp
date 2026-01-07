@@ -47,7 +47,9 @@ const NavIcon = ({
     {isActive && (
       <motion.div
         className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-nav-active"
-        layoutId="activeIndicator"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       />
     )}
