@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppErrorBoundary } from "@/components/common/AppErrorBoundary";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
@@ -246,12 +247,14 @@ const App = () => {
               {/* PWA auto-update hook */}
               <PwaAutoUpdate />
               <BrowserRouter>
-                <MessageNotificationProvider>
-                  <CallNotificationHandler />
-                  <ScrollToTop />
-                  <GlobalOfflineBanner />
-                  <AnimatedRoutes />
-                </MessageNotificationProvider>
+                <AppErrorBoundary>
+                  <MessageNotificationProvider>
+                    <CallNotificationHandler />
+                    <ScrollToTop />
+                    <GlobalOfflineBanner />
+                    <AnimatedRoutes />
+                  </MessageNotificationProvider>
+                </AppErrorBoundary>
               </BrowserRouter>
             </PresenceProvider>
           </AuthProvider>
