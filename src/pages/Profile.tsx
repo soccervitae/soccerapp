@@ -348,7 +348,7 @@ const Profile = () => {
 
   // Profile tabs component
   const ProfileTabs = () => (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-6' : 'mt-2'}`}>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
       <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border flex justify-between">
         <TabsTrigger 
           value="profile" 
@@ -443,7 +443,7 @@ const Profile = () => {
     <>
       <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
       
-      <div className="pt-12 flex flex-col gap-6">
+      <div className="pt-12 flex flex-col gap-4">
         <ProfileInfo 
           profile={profile} 
           followStats={followStats}
@@ -481,7 +481,7 @@ const Profile = () => {
             <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
           </motion.div>
           
-          <div className="pt-12 flex flex-col gap-6">
+          <div className="pt-12 flex flex-col gap-4">
             <motion.div variants={itemVariants}>
               <ProfileInfo 
                 profile={profile} 
