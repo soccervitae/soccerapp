@@ -43,9 +43,11 @@ const Profile = () => {
   // Media viewer states
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [mediaViewerImages, setMediaViewerImages] = useState<string[]>([]);
+  const [mediaViewerInitialIndex, setMediaViewerInitialIndex] = useState(0);
   const [mediaViewerOriginRect, setMediaViewerOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [videoViewerOpen, setVideoViewerOpen] = useState(false);
-  const [videoViewerUrl, setVideoViewerUrl] = useState("");
+  const [videoViewerVideos, setVideoViewerVideos] = useState<string[]>([]);
+  const [videoViewerInitialIndex, setVideoViewerInitialIndex] = useState(0);
   const [videoViewerOriginRect, setVideoViewerOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const mediaGridItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   
@@ -299,38 +301,51 @@ const Profile = () => {
       );
     }
 
-    const handleMediaClick = (post: typeof posts[0], element: HTMLDivElement | null) => {
-      const mediaUrls = post.media_url?.split(',') || [];
+    const handleMediaClick = (post: typeof posts[0], element: HTMLDivElement | null, postIndex: number) => {
       const isVideo = post.media_type === 'video';
       const rect = element?.getBoundingClientRect();
       const originRect = rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null;
 
       if (isVideo) {
-        setVideoViewerUrl(mediaUrls[0]);
+        // Collect all videos from posts
+        const allVideos = posts
+          .filter(p => p.media_type === 'video')
+          .map(p => p.media_url?.split(',')[0] || '');
+        const videoIndex = posts.filter((p, i) => p.media_type === 'video' && i < postIndex).length;
+        
+        setVideoViewerVideos(allVideos);
+        setVideoViewerInitialIndex(videoIndex);
         setVideoViewerOriginRect(originRect);
         setVideoViewerOpen(true);
       } else {
-        setMediaViewerImages(mediaUrls);
+        // Collect all images from posts (first image of each post)
+        const allImages = posts
+          .filter(p => p.media_type !== 'video')
+          .map(p => p.media_url?.split(',')[0] || '');
+        const imageIndex = posts.filter((p, i) => p.media_type !== 'video' && i < postIndex).length;
+        
+        setMediaViewerImages(allImages);
+        setMediaViewerInitialIndex(imageIndex);
         setMediaViewerOriginRect(originRect);
         setMediaViewerOpen(true);
       }
     };
 
-    return (
-      <div className="grid grid-cols-3 gap-1">
-        {posts.map((post) => {
-          const mediaUrls = post.media_url?.split(',') || [];
-          const firstMedia = mediaUrls[0];
-          const isVideo = post.media_type === 'video';
-          const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
+      return (
+        <div className="grid grid-cols-3 gap-1">
+          {posts.map((post, index) => {
+            const mediaUrls = post.media_url?.split(',') || [];
+            const firstMedia = mediaUrls[0];
+            const isVideo = post.media_type === 'video';
+            const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
 
-          return (
-            <div 
-              key={post.id} 
-              ref={(el) => mediaGridItemRefs.current.set(post.id, el)}
-              className="aspect-square relative overflow-hidden rounded-sm bg-muted cursor-pointer"
-              onClick={() => handleMediaClick(post, mediaGridItemRefs.current.get(post.id) || null)}
-            >
+            return (
+              <div 
+                key={post.id} 
+                ref={(el) => mediaGridItemRefs.current.set(post.id, el)}
+                className="aspect-square relative overflow-hidden rounded-sm bg-muted cursor-pointer"
+                onClick={() => handleMediaClick(post, mediaGridItemRefs.current.get(post.id) || null, index)}
+              >
               {isVideo ? (
                 <video
                   src={firstMedia}
@@ -576,6 +591,7 @@ const Profile = () => {
       {/* Fullscreen Image Viewer for Photos/Videos tabs */}
       <FullscreenImageViewer
         images={mediaViewerImages}
+        initialIndex={mediaViewerInitialIndex}
         isOpen={mediaViewerOpen}
         onClose={() => setMediaViewerOpen(false)}
         originRect={mediaViewerOriginRect}
@@ -583,7 +599,8 @@ const Profile = () => {
 
       {/* Fullscreen Video Viewer for Videos tab */}
       <FullscreenVideoViewer
-        videoUrl={videoViewerUrl}
+        videos={videoViewerVideos}
+        initialIndex={videoViewerInitialIndex}
         isOpen={videoViewerOpen}
         onClose={() => setVideoViewerOpen(false)}
         originRect={videoViewerOriginRect}
