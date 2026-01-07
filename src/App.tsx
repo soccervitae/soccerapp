@@ -80,112 +80,108 @@ const LandingOrIndex = () => {
 };
 
 const AnimatedRoutes = () => {
-  const location = useLocation();
-
   return (
-    <AnimatePresence mode="sync" initial={false}>
-      <Routes location={location} key={location.pathname}>
-        {/* Landing page for unauthenticated users, feed for authenticated */}
-        <Route path="/" element={<LandingOrIndex />} />
-        
-        {/* Public auth routes */}
-        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/login" element={<Navigate to="/auth" replace />} />
-        <Route path="/signup" element={<Navigate to="/auth" replace />} />
-        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-        <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
-        
-        {/* Install page - public, no login required */}
-        <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
-        
-        {/* Complete profile route - requires login but not complete profile or onboarding */}
-        <Route path="/complete-profile" element={
-          <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
-            <PageTransition><CompleteProfile /></PageTransition>
-          </ProtectedRoute>
-        } />
-        
-        {/* Welcome/onboarding route - requires login and complete profile but not onboarding */}
-        <Route path="/welcome" element={
-          <ProtectedRoute requireCompleteProfile={true} requireOnboarding={false}>
-            <PageTransition><Welcome /></PageTransition>
-          </ProtectedRoute>
-        } />
-        
-        {/* Protected routes - require login and complete profile */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <PageTransition><Profile /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/followers" element={
-          <ProtectedRoute>
-            <PageTransition><FollowList /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/:username" element={
-          <ProtectedRoute>
-            <PageTransition><Profile /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/:username/followers" element={
-          <ProtectedRoute>
-            <PageTransition><FollowList /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/explore" element={
-          <ProtectedRoute>
-            <PageTransition><Explore /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <PageTransition><Settings /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings/profile" element={
-          <ProtectedRoute>
-            <PageTransition><EditProfile /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings/privacy" element={
-          <ProtectedRoute>
-            <PageTransition><Privacy /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings/security" element={
-          <ProtectedRoute>
-            <PageTransition><Security /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings/notifications" element={
-          <ProtectedRoute>
-            <PageTransition><Notifications /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings/saved" element={
-          <ProtectedRoute>
-            <PageTransition><Saved /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/messages" element={
-          <ProtectedRoute>
-            <PageTransition><Messages /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/messages/:conversationId" element={
-          <ProtectedRoute>
-            <PageTransition><Chat /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="/teams" element={
-          <ProtectedRoute>
-            <PageTransition><Teams /></PageTransition>
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <Routes>
+      {/* Landing page for unauthenticated users, feed for authenticated */}
+      <Route path="/" element={<LandingOrIndex />} />
+      
+      {/* Public auth routes */}
+      <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+      <Route path="/login" element={<Navigate to="/auth" replace />} />
+      <Route path="/signup" element={<Navigate to="/auth" replace />} />
+      <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+      <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
+      
+      {/* Install page - public, no login required */}
+      <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
+      
+      {/* Complete profile route - requires login but not complete profile or onboarding */}
+      <Route path="/complete-profile" element={
+        <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
+          <PageTransition><CompleteProfile /></PageTransition>
+        </ProtectedRoute>
+      } />
+      
+      {/* Welcome/onboarding route - requires login and complete profile but not onboarding */}
+      <Route path="/welcome" element={
+        <ProtectedRoute requireCompleteProfile={true} requireOnboarding={false}>
+          <PageTransition><Welcome /></PageTransition>
+        </ProtectedRoute>
+      } />
+      
+      {/* Protected routes - require login and complete profile */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <PageTransition><Profile /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/followers" element={
+        <ProtectedRoute>
+          <PageTransition><FollowList /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/:username" element={
+        <ProtectedRoute>
+          <PageTransition><Profile /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/:username/followers" element={
+        <ProtectedRoute>
+          <PageTransition><FollowList /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/explore" element={
+        <ProtectedRoute>
+          <PageTransition><Explore /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <PageTransition><Settings /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/profile" element={
+        <ProtectedRoute>
+          <PageTransition><EditProfile /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/privacy" element={
+        <ProtectedRoute>
+          <PageTransition><Privacy /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/security" element={
+        <ProtectedRoute>
+          <PageTransition><Security /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/notifications" element={
+        <ProtectedRoute>
+          <PageTransition><Notifications /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/saved" element={
+        <ProtectedRoute>
+          <PageTransition><Saved /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/messages" element={
+        <ProtectedRoute>
+          <PageTransition><Messages /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/messages/:conversationId" element={
+        <ProtectedRoute>
+          <PageTransition><Chat /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/teams" element={
+        <ProtectedRoute>
+          <PageTransition><Teams /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+    </Routes>
   );
 };
 
