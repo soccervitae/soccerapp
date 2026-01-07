@@ -44,15 +44,6 @@ const NavIcon = ({
     >
       {icon}
     </motion.span>
-    {isActive && (
-      <motion.div
-        className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-nav-active"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-      />
-    )}
     {badge !== undefined && badge > 0 && (
       <span className="absolute -top-0.5 right-0 min-w-5 h-5 px-1.5 bg-destructive rounded-full flex items-center justify-center text-[10px] font-bold text-destructive-foreground border-2 border-background">
         {badge > 99 ? "99+" : badge}
