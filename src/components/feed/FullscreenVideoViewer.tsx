@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoControls } from "./VideoControls";
 
 interface OriginRect {
@@ -12,32 +12,48 @@ interface OriginRect {
 }
 
 interface FullscreenVideoViewerProps {
-  videoUrl: string;
+  videos?: string[];
+  initialIndex?: number;
   isOpen: boolean;
   onClose: (currentTime?: number, isMuted?: boolean) => void;
   originRect?: OriginRect | null;
   initialTime?: number;
   initialMuted?: boolean;
+  /** @deprecated Use videos array instead */
+  videoUrl?: string;
 }
 
 export const FullscreenVideoViewer = ({
-  videoUrl,
+  videos = [],
+  initialIndex = 0,
   isOpen,
   onClose,
   originRect,
   initialTime = 0,
   initialMuted = true,
+  videoUrl,
 }: FullscreenVideoViewerProps) => {
+  // Support legacy single video prop
+  const videoList = videos.length > 0 ? videos : (videoUrl ? [videoUrl] : []);
+  
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showControls, setShowControls] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
+  
+  // Touch state for swipe
+  const swipeStartX = useRef<number | null>(null);
+  const swipeStartY = useRef<number | null>(null);
+  const isSwipingHorizontally = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
       setVideoLoaded(false);
       setIsExiting(false);
+      setCurrentIndex(initialIndex);
       if (videoRef.current) {
         videoRef.current.currentTime = initialTime;
         videoRef.current.muted = initialMuted;
@@ -49,7 +65,16 @@ export const FullscreenVideoViewer = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, initialTime, initialMuted]);
+  }, [isOpen, initialTime, initialMuted, initialIndex]);
+
+  // Reset video when changing index
+  useEffect(() => {
+    setVideoLoaded(false);
+    if (videoRef.current && isOpen) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+    }
+  }, [currentIndex, isOpen]);
 
   const currentTimeRef = useRef<number>(initialTime);
   const isMutedRef = useRef<boolean>(initialMuted);
@@ -70,6 +95,62 @@ export const FullscreenVideoViewer = ({
     }
   }, [isExiting, onClose]);
 
+  const goToPrevious = useCallback(() => {
+    if (currentIndex > 0) {
+      setSwipeDirection("right");
+      setCurrentIndex(prev => prev - 1);
+    }
+  }, [currentIndex]);
+
+  const goToNext = useCallback(() => {
+    if (currentIndex < videoList.length - 1) {
+      setSwipeDirection("left");
+      setCurrentIndex(prev => prev + 1);
+    }
+  }, [currentIndex, videoList.length]);
+
+  // Touch handlers for swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      swipeStartX.current = e.touches[0].clientX;
+      swipeStartY.current = e.touches[0].clientY;
+      isSwipingHorizontally.current = false;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1 || swipeStartX.current === null || swipeStartY.current === null) return;
+    
+    const deltaX = e.touches[0].clientX - swipeStartX.current;
+    const deltaY = e.touches[0].clientY - swipeStartY.current;
+    
+    // Determine swipe direction on first significant movement
+    if (!isSwipingHorizontally.current && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+      isSwipingHorizontally.current = Math.abs(deltaX) > Math.abs(deltaY);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeStartX.current === null) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartX.current;
+    const deltaY = touch.clientY - (swipeStartY.current || 0);
+    
+    // Only handle horizontal swipes
+    if (isSwipingHorizontally.current && Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        goToPrevious();
+      } else {
+        goToNext();
+      }
+    }
+    
+    swipeStartX.current = null;
+    swipeStartY.current = null;
+    isSwipingHorizontally.current = false;
+  }, [goToPrevious, goToNext]);
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
@@ -77,12 +158,16 @@ export const FullscreenVideoViewer = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         handleClose();
+      } else if (e.key === "ArrowLeft") {
+        goToPrevious();
+      } else if (e.key === "ArrowRight") {
+        goToNext();
       }
     };
     
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose]);
+  }, [isOpen, handleClose, goToPrevious, goToNext]);
 
   // Calculate animation values based on originRect
   const getInitialStyles = () => {
@@ -111,8 +196,9 @@ export const FullscreenVideoViewer = ({
   };
 
   const initialStyles = getInitialStyles();
+  const currentVideoUrl = videoList[currentIndex] || "";
 
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined" || videoList.length === 0) return null;
 
   return createPortal(
     <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
@@ -123,6 +209,9 @@ export const FullscreenVideoViewer = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Close button */}
           <motion.button
@@ -139,33 +228,107 @@ export const FullscreenVideoViewer = ({
             <X className="w-6 h-6 text-white" />
           </motion.button>
 
-          {/* Video with expansion animation */}
-          <motion.div
-            className="relative w-full h-full flex items-center justify-center"
-            initial={initialStyles}
-            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-            exit={initialStyles}
-            transition={{
-              type: "spring",
-              stiffness: 260,
-              damping: 25,
-            }}
-          >
-            <motion.video
-              ref={videoRef}
-              src={videoUrl}
-              className="w-full h-full object-contain"
-              playsInline
-              autoPlay
-              onClick={() => setShowControls(true)}
-              onLoadedData={() => setVideoLoaded(true)}
-              initial={{ filter: "blur(8px)" }}
-              animate={{
-                filter: videoLoaded ? "blur(0px)" : "blur(8px)",
+          {/* Video counter */}
+          {videoList.length > 1 && (
+            <motion.div
+              className="absolute top-4 left-4 z-20 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <span className="text-white text-sm font-medium">
+                {currentIndex + 1} / {videoList.length}
+              </span>
+            </motion.div>
+          )}
+
+          {/* Navigation arrows (desktop) */}
+          {videoList.length > 1 && currentIndex > 0 && (
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
               }}
-              transition={{ duration: 0.3 }}
-            />
-          </motion.div>
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm hidden md:flex"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ChevronLeft className="w-6 h-6 text-white" />
+            </motion.button>
+          )}
+          {videoList.length > 1 && currentIndex < videoList.length - 1 && (
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm hidden md:flex"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ChevronRight className="w-6 h-6 text-white" />
+            </motion.button>
+          )}
+
+          {/* Video with expansion animation */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              className="relative w-full h-full flex items-center justify-center"
+              initial={currentIndex === initialIndex ? initialStyles : { opacity: 0, x: swipeDirection === "left" ? 100 : -100 }}
+              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: swipeDirection === "left" ? -100 : 100 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 25,
+              }}
+            >
+              <motion.video
+                ref={videoRef}
+                src={currentVideoUrl}
+                className="w-full h-full object-contain"
+                playsInline
+                autoPlay
+                onClick={() => setShowControls(true)}
+                onLoadedData={() => setVideoLoaded(true)}
+                initial={{ filter: "blur(8px)" }}
+                animate={{
+                  filter: videoLoaded ? "blur(0px)" : "blur(8px)",
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Dot indicators */}
+          {videoList.length > 1 && (
+            <motion.div
+              className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-1.5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+            >
+              {videoList.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSwipeDirection(index > currentIndex ? "left" : "right");
+                    setCurrentIndex(index);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    index === currentIndex
+                      ? "bg-white scale-110"
+                      : "bg-white/40 hover:bg-white/60"
+                  }`}
+                />
+              ))}
+            </motion.div>
+          )}
 
           {/* Video Controls */}
           <VideoControls
