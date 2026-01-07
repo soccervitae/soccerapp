@@ -37,17 +37,40 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  // Reserved routes that should not be treated as username profiles
-  const reservedRoutes = ["/explore", "/messages", "/profile", "/settings", "/auth", "/install", "/welcome"];
-  const isReservedRoute = reservedRoutes.some(route => location.pathname.startsWith(route));
-  const isProfileRoute = !isReservedRoute && location.pathname !== "/" && location.pathname.split("/").length === 2;
+  // Detect current tab based on route
+  const getCurrentTab = (): "home" | "search" | "add" | "messages" | "profile" => {
+    const path = location.pathname;
+    
+    // Home - only root
+    if (path === "/") return "home";
+    
+    // Explore/Search
+    if (path === "/explore" || path.startsWith("/explore/")) return "search";
+    
+    // Messages - /messages and /chat/:id
+    if (path === "/messages" || path.startsWith("/messages/") || path.startsWith("/chat/")) return "messages";
+    
+    // Profile - /profile, /settings, /teams, or username routes (single segment like /rogergomes)
+    if (path === "/profile" || path.startsWith("/profile/") || 
+        path === "/settings" || path.startsWith("/settings/") ||
+        path === "/teams" || path.startsWith("/teams/")) {
+      return "profile";
+    }
+    
+    // Username routes - single path segment that's not a reserved route
+    const reservedRoutes = ["/explore", "/messages", "/chat", "/auth", "/install", "/welcome", "/login", "/forgot-password"];
+    const isReservedRoute = reservedRoutes.some(route => path === route || path.startsWith(route + "/"));
+    const isSingleSegmentRoute = path !== "/" && path.split("/").filter(Boolean).length === 1;
+    
+    if (!isReservedRoute && isSingleSegmentRoute) {
+      return "profile"; // Username profile route like /rogergomes
+    }
+    
+    // Default to home for unknown routes
+    return "home";
+  };
   
-  const currentTab = activeTab || (
-    location.pathname === "/profile" || isProfileRoute ? "profile" : 
-    location.pathname === "/explore" ? "search" : 
-    location.pathname === "/messages" ? "messages" : 
-    location.pathname === "/" ? "home" : "home"
-  );
+  const currentTab = activeTab || getCurrentTab();
 
   const handleHomeClick = () => {
     if (location.pathname === "/") {
