@@ -24,6 +24,8 @@ import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
+import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
@@ -37,6 +39,15 @@ const Profile = () => {
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
   const [feedSheetOriginRect, setFeedSheetOriginRect] = useState<DOMRect | null>(null);
   const gridItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Media viewer states
+  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
+  const [mediaViewerImages, setMediaViewerImages] = useState<string[]>([]);
+  const [mediaViewerOriginRect, setMediaViewerOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [videoViewerOpen, setVideoViewerOpen] = useState(false);
+  const [videoViewerUrl, setVideoViewerUrl] = useState("");
+  const [videoViewerOriginRect, setVideoViewerOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const mediaGridItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   
   useEffect(() => {
     // Check if navigated from welcome page (onboarding)
@@ -288,6 +299,23 @@ const Profile = () => {
       );
     }
 
+    const handleMediaClick = (post: typeof posts[0], element: HTMLDivElement | null) => {
+      const mediaUrls = post.media_url?.split(',') || [];
+      const isVideo = post.media_type === 'video';
+      const rect = element?.getBoundingClientRect();
+      const originRect = rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null;
+
+      if (isVideo) {
+        setVideoViewerUrl(mediaUrls[0]);
+        setVideoViewerOriginRect(originRect);
+        setVideoViewerOpen(true);
+      } else {
+        setMediaViewerImages(mediaUrls);
+        setMediaViewerOriginRect(originRect);
+        setMediaViewerOpen(true);
+      }
+    };
+
     return (
       <div className="grid grid-cols-3 gap-1">
         {posts.map((post) => {
@@ -297,11 +325,16 @@ const Profile = () => {
           const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
 
           return (
-            <div key={post.id} className="aspect-square relative overflow-hidden rounded-sm bg-muted">
+            <div 
+              key={post.id} 
+              ref={(el) => mediaGridItemRefs.current.set(post.id, el)}
+              className="aspect-square relative overflow-hidden rounded-sm bg-muted cursor-pointer"
+              onClick={() => handleMediaClick(post, mediaGridItemRefs.current.get(post.id) || null)}
+            >
               {isVideo ? (
                 <video
                   src={firstMedia}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                   muted
                   playsInline
                 />
@@ -309,7 +342,7 @@ const Profile = () => {
                 <img
                   src={firstMedia}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                   loading="lazy"
                 />
               )}
@@ -539,6 +572,22 @@ const Profile = () => {
           originRect={feedSheetOriginRect}
         />
       )}
+
+      {/* Fullscreen Image Viewer for Photos/Videos tabs */}
+      <FullscreenImageViewer
+        images={mediaViewerImages}
+        isOpen={mediaViewerOpen}
+        onClose={() => setMediaViewerOpen(false)}
+        originRect={mediaViewerOriginRect}
+      />
+
+      {/* Fullscreen Video Viewer for Videos tab */}
+      <FullscreenVideoViewer
+        videoUrl={videoViewerUrl}
+        isOpen={videoViewerOpen}
+        onClose={() => setVideoViewerOpen(false)}
+        originRect={videoViewerOriginRect}
+      />
     </ContentWrapper>
   );
 };
