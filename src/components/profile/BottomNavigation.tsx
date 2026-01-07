@@ -37,7 +37,17 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
+  // Reserved routes that should not be treated as username profiles
+  const reservedRoutes = ["/explore", "/messages", "/profile", "/settings", "/auth", "/install", "/welcome"];
+  const isReservedRoute = reservedRoutes.some(route => location.pathname.startsWith(route));
+  const isProfileRoute = !isReservedRoute && location.pathname !== "/" && location.pathname.split("/").length === 2;
+  
+  const currentTab = activeTab || (
+    location.pathname === "/profile" || isProfileRoute ? "profile" : 
+    location.pathname === "/explore" ? "search" : 
+    location.pathname === "/messages" ? "messages" : 
+    location.pathname === "/" ? "home" : "home"
+  );
 
   const handleHomeClick = () => {
     if (location.pathname === "/") {
@@ -45,6 +55,12 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
       window.dispatchEvent(new CustomEvent('home-tab-pressed'));
     } else {
       navigate("/");
+      // Fallback for PWA navigation issues
+      setTimeout(() => {
+        if (window.location.pathname !== "/") {
+          window.location.href = "/";
+        }
+      }, 100);
     }
   };
 
