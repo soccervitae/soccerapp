@@ -37,27 +37,14 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
-  // Reserved routes that are NOT profile pages
-  const reservedRoutes = ["/", "/explore", "/messages", "/settings", "/teams", "/install", "/auth", "/login", "/forgot-password", "/welcome", "/complete-profile", "/follow"];
-  const isProfileRoute = location.pathname === "/profile" || location.pathname.startsWith("/profile/") || 
-    (!reservedRoutes.some(route => location.pathname === route || location.pathname.startsWith(route + "/")) && location.pathname !== "/");
-  
-  const currentTab = activeTab || (isProfileRoute ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : location.pathname === "/" ? "home" : undefined);
+  const currentTab = activeTab || (location.pathname === "/profile" ? "profile" : location.pathname === "/explore" ? "search" : location.pathname === "/messages" ? "messages" : "home");
 
   const handleHomeClick = () => {
     if (location.pathname === "/") {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       window.dispatchEvent(new CustomEvent('home-tab-pressed'));
     } else {
-      // Force navigation with fallback for PWA edge cases
-      navigate("/", { replace: false });
-      
-      // Fallback: if SPA navigation doesn't work, force hard redirect
-      setTimeout(() => {
-        if (window.location.pathname !== "/") {
-          window.location.href = "/";
-        }
-      }, 100);
+      navigate("/");
     }
   };
 
@@ -122,25 +109,18 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
       <nav ref={ref} className="fixed bottom-0 w-full bg-background/95 backdrop-blur-md border-t border-border pb-6 pt-2 z-50">
         <div className="flex justify-around items-center">
           <button 
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleHomeClick();
-            }}
+            onClick={handleHomeClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "home" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "home" ? "fill-1" : ""}`}>home</span>
           </button>
           <button 
-            type="button"
             onClick={handleExploreClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "search" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
             <span className={`material-symbols-outlined text-[26px] ${currentTab === "search" ? "fill-1" : ""}`}>search</span>
           </button>
           <button 
-            type="button"
             onClick={() => setIsMenuOpen(true)}
             className="flex flex-col items-center gap-1 p-2 text-muted-foreground hover:text-nav-active transition-colors"
           >
@@ -149,7 +129,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             </div>
           </button>
           <button 
-            type="button"
             onClick={handleMessagesClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors relative ${currentTab === "messages" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
@@ -161,7 +140,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
             )}
           </button>
           <button 
-            type="button"
             onClick={handleProfileClick}
             className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentTab === "profile" ? "text-nav-active" : "text-muted-foreground hover:text-nav-active"}`}
           >
