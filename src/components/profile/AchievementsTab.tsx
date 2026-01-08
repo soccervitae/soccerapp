@@ -41,29 +41,11 @@ interface AchievementsTabProps {
   isOwnProfile?: boolean;
 }
 
-const getColorClasses = (color: string | null) => {
-  switch (color) {
-    case "gold":
-      return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
-    case "silver":
-      return "bg-gray-400/20 text-gray-400 border-gray-400/30";
-    case "bronze":
-      return "bg-orange-600/20 text-orange-600 border-orange-600/30";
-    case "blue":
-      return "bg-blue-500/20 text-blue-500 border-blue-500/30";
-    case "green":
-      return "bg-green-500/20 text-green-500 border-green-500/30";
-    case "purple":
-      return "bg-purple-500/20 text-purple-500 border-purple-500/30";
-    default:
-      return "bg-primary/20 text-primary border-primary/30";
-  }
-};
-
 export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile = false }: AchievementsTabProps) => {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showNoTeamsSheet, setShowNoTeamsSheet] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Achievement | null>(null);
   
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
@@ -73,14 +55,27 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
     if (userTeams.length === 0) {
       setShowNoTeamsSheet(true);
     } else {
+      setEditData(null);
       setShowAddSheet(true);
     }
+  };
+
+  const handleEditClick = (achievement: Achievement) => {
+    setEditData(achievement);
+    setShowAddSheet(true);
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     await deleteAchievement.mutateAsync(deleteId);
     setDeleteId(null);
+  };
+
+  const handleSheetClose = (open: boolean) => {
+    setShowAddSheet(open);
+    if (!open) {
+      setEditData(null);
+    }
   };
 
   if (isLoading) {
@@ -187,7 +182,10 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-popover">
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem 
+                          onClick={() => handleEditClick(achievement)}
+                          className="gap-2"
+                        >
                           <Pencil className="w-4 h-4" />
                           Editar
                         </DropdownMenuItem>
@@ -208,11 +206,12 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
         )}
       </div>
 
-      {/* Add Sheet */}
+      {/* Add/Edit Sheet */}
       <AddAchievementSheet 
         open={showAddSheet} 
-        onOpenChange={setShowAddSheet} 
+        onOpenChange={handleSheetClose} 
         userTeams={userTeams}
+        editData={editData}
       />
 
       {/* No Teams Warning Sheet */}

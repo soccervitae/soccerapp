@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -16,20 +16,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddAchievement, useAchievementTypes } from "@/hooks/useProfile";
+import { useAddAchievement, useUpdateAchievement, useAchievementTypes } from "@/hooks/useProfile";
 import { type Team } from "@/hooks/useTeams";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface AchievementData {
+  id: string;
+  year: number;
+  team_name: string | null;
+  championship_name: string | null;
+  custom_achievement_name: string | null;
+  description: string | null;
+  achievement_type_id?: string | null;
+  achievement_type?: {
+    id?: string;
+    name: string;
+    icon: string;
+    color: string | null;
+    category: string | null;
+  } | null;
+}
 
 interface AddAchievementSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userTeams: Team[];
+  editData?: AchievementData | null;
 }
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
 
-export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchievementSheetProps) => {
+export const AddAchievementSheet = ({ open, onOpenChange, userTeams, editData }: AddAchievementSheetProps) => {
   const [achievementTypeId, setAchievementTypeId] = useState("");
   const [customName, setCustomName] = useState("");
   const [championship, setChampionship] = useState("");
@@ -39,20 +57,54 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
 
   const { data: achievementTypes = [] } = useAchievementTypes();
   const addAchievement = useAddAchievement();
+  const updateAchievement = useUpdateAchievement();
+
+  const isEditing = !!editData;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editData && open) {
+      // Try to find the achievement type by name if we have one
+      const matchingType = achievementTypes.find(t => t.name === editData.achievement_type?.name);
+      setAchievementTypeId(matchingType?.id || editData.achievement_type_id || "");
+      setCustomName(editData.custom_achievement_name || "");
+      setChampionship(editData.championship_name || "");
+      setTeam(editData.team_name || "");
+      setYear(editData.year.toString());
+      setDescription(editData.description || "");
+    } else if (!open) {
+      // Reset form when closing
+      setAchievementTypeId("");
+      setCustomName("");
+      setChampionship("");
+      setTeam("");
+      setYear("");
+      setDescription("");
+    }
+  }, [editData, open, achievementTypes]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!year || (!achievementTypeId && !customName.trim())) return;
 
-    await addAchievement.mutateAsync({
+    const achievementData = {
       achievement_type_id: achievementTypeId || undefined,
       custom_achievement_name: !achievementTypeId ? customName.trim() : undefined,
       championship_name: championship.trim() || undefined,
       team_name: team || undefined,
       year: parseInt(year),
       description: description.trim() || undefined,
-    });
+    };
+
+    if (isEditing && editData) {
+      await updateAchievement.mutateAsync({
+        id: editData.id,
+        ...achievementData,
+      });
+    } else {
+      await addAchievement.mutateAsync(achievementData);
+    }
 
     // Reset form
     setAchievementTypeId("");
@@ -65,6 +117,7 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
   };
 
   const isValid = year && (achievementTypeId || customName.trim());
+  const isPending = addAchievement.isPending || updateAchievement.isPending;
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
@@ -72,7 +125,7 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
         <ResponsiveModalHeader className="pb-4">
           <ResponsiveModalTitle className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">military_tech</span>
-            Adicionar Conquista
+            {isEditing ? "Editar Conquista" : "Adicionar Conquista"}
           </ResponsiveModalTitle>
         </ResponsiveModalHeader>
 
@@ -172,9 +225,9 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
             <Button 
               type="submit" 
               className="w-full mt-6" 
-              disabled={!isValid || addAchievement.isPending}
+              disabled={!isValid || isPending}
             >
-              {addAchievement.isPending ? (
+              {isPending ? (
                 <>
                   <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
                   Salvando...
@@ -182,7 +235,7 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams }: AddAchiev
               ) : (
                 <>
                   <span className="material-symbols-outlined mr-2">save</span>
-                  Salvar Conquista
+                  {isEditing ? "Atualizar Conquista" : "Salvar Conquista"}
                 </>
               )}
             </Button>

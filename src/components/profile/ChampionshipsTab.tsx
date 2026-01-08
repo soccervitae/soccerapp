@@ -44,6 +44,7 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showNoTeamsSheet, setShowNoTeamsSheet] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Championship | null>(null);
   
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
@@ -53,14 +54,27 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
     if (userTeams.length === 0) {
       setShowNoTeamsSheet(true);
     } else {
+      setEditData(null);
       setShowAddSheet(true);
     }
+  };
+
+  const handleEditClick = (champ: Championship) => {
+    setEditData(champ);
+    setShowAddSheet(true);
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     await deleteChampionship.mutateAsync(deleteId);
     setDeleteId(null);
+  };
+
+  const handleSheetClose = (open: boolean) => {
+    setShowAddSheet(open);
+    if (!open) {
+      setEditData(null);
+    }
   };
 
   if (isLoading) {
@@ -163,7 +177,10 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-popover">
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem 
+                          onClick={() => handleEditClick(champ)}
+                          className="gap-2"
+                        >
                           <Pencil className="w-4 h-4" />
                           Editar
                         </DropdownMenuItem>
@@ -184,11 +201,12 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
         )}
       </div>
 
-      {/* Add Sheet */}
+      {/* Add/Edit Sheet */}
       <AddChampionshipSheet 
         open={showAddSheet} 
-        onOpenChange={setShowAddSheet} 
+        onOpenChange={handleSheetClose} 
         userTeams={userTeams}
+        editData={editData}
       />
 
       {/* No Teams Warning Sheet */}
