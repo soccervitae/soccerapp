@@ -155,6 +155,11 @@ export const ScrapeTeamsSheet = ({
       return;
     }
 
+    if (!user?.id) {
+      setImportResult({ success: false, count: 0, message: "Você precisa estar logado para importar times" });
+      return;
+    }
+
     setIsSaving(true);
     setImportResult(null);
 
@@ -165,10 +170,12 @@ export const ScrapeTeamsSheet = ({
         estado_id: selectedEstadoId,
         pais_id: selectedPaisId,
         selected_by_users: [],
-        user_id: user?.id,
+        user_id: user.id,
       }));
 
-      const { error } = await supabase.from("times").insert(teamsToInsert);
+      const { data, error } = await supabase.from("times").insert(teamsToInsert).select();
+      
+      console.log("Insert result:", { data, error, teamsToInsert });
 
       if (error) {
         if (error.code === "23505") {
