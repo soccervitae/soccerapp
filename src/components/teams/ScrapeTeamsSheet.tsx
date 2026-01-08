@@ -278,23 +278,33 @@ export const ScrapeTeamsSheet = ({
             </p>
           </div>
 
-          {/* Results */}
+          {/* Results Counter */}
+          {teams.length > 0 && (
+            <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">
+                  {teams.length} times encontrados
+                </span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {selectedCount} selecionados
+              </span>
+            </div>
+          )}
+
+          {/* Results Selection */}
           {teams.length > 0 && (
             <>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="selectAll"
-                    checked={selectAll}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                  <Label htmlFor="selectAll" className="text-sm">
-                    Selecionar todos ({teams.length})
-                  </Label>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {selectedCount} selecionados
-                </span>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="selectAll"
+                  checked={selectAll}
+                  onCheckedChange={toggleSelectAll}
+                />
+                <Label htmlFor="selectAll" className="text-sm">
+                  Selecionar todos
+                </Label>
               </div>
 
               <ScrollArea className="h-[calc(90vh-320px)]">
