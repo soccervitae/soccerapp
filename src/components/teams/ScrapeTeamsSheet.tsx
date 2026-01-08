@@ -7,9 +7,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Loader2, Search, Shield, Download, Globe, Check } from "lucide-react";
+import { Loader2, Search, Shield, Download, Globe, Check, CheckCircle2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ScrapedTeam {
   nome: string;
@@ -36,6 +36,8 @@ export const ScrapeTeamsSheet = ({
   const [selectAll, setSelectAll] = useState(false);
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
+  const [importResult, setImportResult] = useState<{ success: boolean; count: number; message: string } | null>(null);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
 
   // Fetch countries
   const { data: paises } = useQuery({
@@ -73,12 +75,13 @@ export const ScrapeTeamsSheet = ({
 
   const handleScrape = async () => {
     if (!url.trim()) {
-      toast.error("Informe a URL do site");
+      setScrapeError("Informe a URL do site");
       return;
     }
 
     setIsLoading(true);
     setTeams([]);
+    setScrapeError(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("scrape-teams", {
@@ -99,10 +102,9 @@ export const ScrapeTeamsSheet = ({
       }));
 
       setTeams(scrapedTeams);
-      toast.success(`${scrapedTeams.length} times encontrados!`);
     } catch (error) {
       console.error("Scrape error:", error);
-      toast.error(error instanceof Error ? error.message : "Erro ao extrair times");
+      setScrapeError(error instanceof Error ? error.message : "Erro ao extrair times");
     } finally {
       setIsLoading(false);
     }
@@ -125,11 +127,12 @@ export const ScrapeTeamsSheet = ({
   const handleImport = async () => {
     const selectedTeams = teams.filter((t) => t.selected);
     if (selectedTeams.length === 0) {
-      toast.error("Selecione pelo menos um time");
+      setImportResult({ success: false, count: 0, message: "Selecione pelo menos um time" });
       return;
     }
 
     setIsSaving(true);
+    setImportResult(null);
 
     try {
       const teamsToInsert = selectedTeams.map((t) => ({
@@ -143,22 +146,30 @@ export const ScrapeTeamsSheet = ({
       const { error } = await supabase.from("times").insert(teamsToInsert);
 
       if (error) {
-        // Check for duplicate key error
         if (error.code === "23505") {
-          toast.error("Alguns times já existem no banco de dados");
+          setImportResult({ success: false, count: 0, message: "Alguns times já existem no banco de dados" });
         } else {
           throw error;
         }
       } else {
-        toast.success(`${selectedTeams.length} times importados com sucesso!`);
+        setImportResult({ 
+          success: true, 
+          count: selectedTeams.length, 
+          message: `${selectedTeams.length} times importados com sucesso!` 
+        });
         onTeamsImported?.();
-        onOpenChange(false);
-        setTeams([]);
-        setSelectAll(false);
+        
+        // Auto close after showing success
+        setTimeout(() => {
+          onOpenChange(false);
+          setTeams([]);
+          setSelectAll(false);
+          setImportResult(null);
+        }, 2000);
       }
     } catch (error) {
       console.error("Import error:", error);
-      toast.error("Erro ao importar times");
+      setImportResult({ success: false, count: 0, message: "Erro ao importar times" });
     } finally {
       setIsSaving(false);
     }
@@ -335,8 +346,50 @@ export const ScrapeTeamsSheet = ({
             </>
           )}
 
+          {/* Success/Error Result Message */}
+          <AnimatePresence>
+            {importResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className={`flex items-center gap-3 p-4 rounded-xl ${
+                  importResult.success 
+                    ? "bg-green-500/10 border border-green-500/30" 
+                    : "bg-destructive/10 border border-destructive/30"
+                }`}
+              >
+                {importResult.success ? (
+                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
+                )}
+                <p className={`text-sm font-medium ${
+                  importResult.success ? "text-green-500" : "text-destructive"
+                }`}>
+                  {importResult.message}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Scrape Error Message */}
+          <AnimatePresence>
+            {scrapeError && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/30"
+              >
+                <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
+                <p className="text-sm font-medium text-destructive">{scrapeError}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Empty state */}
-          {!isLoading && teams.length === 0 && (
+          {!isLoading && teams.length === 0 && !scrapeError && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Globe className="w-16 h-16 text-muted-foreground/30 mb-4" />
               <p className="text-muted-foreground">
