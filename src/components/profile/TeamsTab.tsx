@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Plus } from "lucide-react";
 import { TeamSelector } from "@/components/profile/TeamSelector";
 import { SortableTeamItem } from "@/components/profile/SortableTeamItem";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
 interface TeamsTabProps {
   userId?: string;
@@ -33,6 +34,7 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
   const updateTeamOrder = useUpdateTeamOrder();
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [localTeams, setLocalTeams] = useState<Team[]>([]);
+  const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
 
   const isOwnProfile = user?.id === userId;
 
@@ -67,9 +69,11 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
     }
   };
 
-  const handleRemoveTeam = async (teamId: string) => {
+  const handleRemoveTeam = async () => {
+    if (!deleteTeamId) return;
     try {
-      await removeUserFromTeam.mutateAsync(teamId);
+      await removeUserFromTeam.mutateAsync(deleteTeamId);
+      setDeleteTeamId(null);
     } catch (error) {
       console.error("Error removing team:", error);
     }
@@ -139,7 +143,7 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
                 key={team.id}
                 team={team}
                 isOwnProfile={isOwnProfile}
-                onRemove={handleRemoveTeam}
+                onRemove={(teamId) => setDeleteTeamId(teamId)}
                 isRemoving={removeUserFromTeam.isPending}
               />
             ))}
@@ -186,6 +190,18 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
           selectedTeamIds={localTeams.map((t) => t.id)}
         />
       )}
+
+      {/* Delete Confirmation */}
+      <ResponsiveAlertModal
+        open={!!deleteTeamId}
+        onOpenChange={(open) => !open && setDeleteTeamId(null)}
+        title="Remover Time?"
+        description="Tem certeza que deseja remover este time do seu perfil?"
+        cancelText="Cancelar"
+        confirmText="Remover"
+        onConfirm={handleRemoveTeam}
+        confirmVariant="destructive"
+      />
     </div>
   );
 };
