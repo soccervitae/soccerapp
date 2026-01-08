@@ -144,9 +144,9 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground truncate">{achievementName}</h3>
-                      {achievement.achievement_type?.category && (
-                        <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
-                          {achievement.achievement_type.category}
+                      {achievement.championship_name && (
+                        <span className="text-sm text-muted-foreground truncate">
+                          • {achievement.championship_name}
                         </span>
                       )}
                     </div>
@@ -159,12 +159,6 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                         </>
                       )}
                       <span>{achievement.year}</span>
-                      {achievement.championship_name && (
-                        <>
-                          <span>•</span>
-                          <span className="truncate">{achievement.championship_name}</span>
-                        </>
-                      )}
                     </div>
                     
                     {achievement.description && (
