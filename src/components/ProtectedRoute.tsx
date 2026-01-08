@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
@@ -20,9 +21,10 @@ export const ProtectedRoute = ({
   const { user, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { shouldBlockAccess, isLoading: pwaLoading } = useRequirePwa();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const location = useLocation();
 
-  if (loading || profileLoading || pwaLoading) {
+  if (loading || profileLoading || pwaLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -32,6 +34,11 @@ export const ProtectedRoute = ({
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Redirect admin users to admin dashboard
+  if (isAdmin && !location.pathname.startsWith("/admin")) {
+    return <Navigate to="/admin" replace />;
   }
 
   // Redirect to install page if mobile and not PWA
