@@ -12,6 +12,13 @@ import {
   ResponsiveModalDescription,
 } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Championship {
   id: string;
@@ -101,7 +108,7 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
             return (
               <div 
                 key={champ.id} 
-                className="bg-card border border-border rounded-xl p-4 hover:bg-accent/50 transition-colors group"
+                className="bg-card border border-border rounded-xl p-4"
               >
                 <div className="flex gap-3">
                   {/* Team Logo */}
@@ -147,14 +154,28 @@ export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfil
                     </div>
                   </div>
 
-                  {/* Delete button */}
+                  {/* Options menu */}
                   {isOwnProfile && (
-                    <button
-                      onClick={() => setDeleteId(champ.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-muted-foreground hover:text-destructive"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover">
+                        <DropdownMenuItem className="gap-2">
+                          <Pencil className="w-4 h-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => setDeleteId(champ.id)}
+                          className="gap-2 text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Deletar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </div>
