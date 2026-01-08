@@ -131,15 +131,20 @@ export const ScrapeTeamsSheet = ({
     );
   };
 
-  const toggleSelectAll = () => {
-    const newValue = !selectAll;
-    setSelectAll(newValue);
-    setTeams((prev) => prev.map((t) => ({ ...t, selected: t.isDuplicate ? false : newValue })));
-  };
-
+  const availableTeams = teams.filter((t) => !t.isDuplicate);
   const selectedCount = teams.filter((t) => t.selected && !t.isDuplicate).length;
   const duplicateCount = teams.filter((t) => t.isDuplicate).length;
-  const availableCount = teams.length - duplicateCount;
+  const availableCount = availableTeams.length;
+  const allAvailableSelected = availableCount > 0 && availableTeams.every((t) => t.selected);
+
+  const toggleSelectAll = () => {
+    const shouldSelect = !allAvailableSelected;
+    setSelectAll(shouldSelect);
+    setTeams((prev) => prev.map((t) => ({ 
+      ...t, 
+      selected: t.isDuplicate ? false : shouldSelect 
+    })));
+  };
 
   const handleImport = async () => {
     const selectedTeams = teams.filter((t) => t.selected);
@@ -327,8 +332,8 @@ export const ScrapeTeamsSheet = ({
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="selectAll"
-                  checked={selectAll}
-                  onCheckedChange={toggleSelectAll}
+                  checked={allAvailableSelected}
+                  onCheckedChange={() => toggleSelectAll()}
                   disabled={availableCount === 0}
                 />
                 <Label htmlFor="selectAll" className="text-sm">
