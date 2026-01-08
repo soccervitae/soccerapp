@@ -142,16 +142,13 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                   
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground truncate">{achievementName}</h3>
-                      {achievement.championship_name && (
-                        <span className="text-sm text-muted-foreground truncate">
-                          • {achievement.championship_name}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    <h3 className="font-semibold text-foreground truncate">{achievementName}</h3>
+                    {achievement.championship_name && (
+                      <p className="text-sm text-muted-foreground truncate mt-0.5">
+                        {achievement.championship_name}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                       {achievement.team_name && (
                         <>
                           <span className="truncate">{achievement.team_name}</span>
