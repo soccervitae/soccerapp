@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Search, Shield, Download, Globe, Check } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface ScrapedTeam {
   nome: string;
@@ -19,16 +21,12 @@ interface ScrapedTeam {
 interface ScrapeTeamsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  estadoId?: number | null;
-  paisId?: number | null;
   onTeamsImported?: () => void;
 }
 
 export const ScrapeTeamsSheet = ({
   open,
   onOpenChange,
-  estadoId,
-  paisId,
   onTeamsImported,
 }: ScrapeTeamsSheetProps) => {
   const [url, setUrl] = useState("https://escudosfc.com.br/pe.htm");
@@ -36,6 +34,42 @@ export const ScrapeTeamsSheet = ({
   const [isSaving, setIsSaving] = useState(false);
   const [teams, setTeams] = useState<ScrapedTeam[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
+  const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
+
+  // Fetch countries
+  const { data: paises } = useQuery({
+    queryKey: ["paises"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paises")
+        .select("id, nome, sigla, bandeira_url")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch states based on selected country
+  const { data: estados } = useQuery({
+    queryKey: ["estados", selectedPaisId],
+    queryFn: async () => {
+      if (!selectedPaisId) return [];
+      const { data, error } = await supabase
+        .from("estados")
+        .select("id, nome, uf, bandeira_url")
+        .eq("pais_id", selectedPaisId)
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPaisId,
+  });
+
+  // Reset estado when pais changes
+  useEffect(() => {
+    setSelectedEstadoId(null);
+  }, [selectedPaisId]);
 
   const handleScrape = async () => {
     if (!url.trim()) {
@@ -48,7 +82,7 @@ export const ScrapeTeamsSheet = ({
 
     try {
       const { data, error } = await supabase.functions.invoke("scrape-teams", {
-        body: { url, estadoId, paisId },
+        body: { url, estadoId: selectedEstadoId, paisId: selectedPaisId },
       });
 
       if (error) {
@@ -101,8 +135,8 @@ export const ScrapeTeamsSheet = ({
       const teamsToInsert = selectedTeams.map((t) => ({
         nome: t.nome,
         escudo_url: t.escudo_url,
-        estado_id: estadoId,
-        pais_id: paisId,
+        estado_id: selectedEstadoId,
+        pais_id: selectedPaisId,
         selected_by_users: [],
       }));
 
@@ -141,6 +175,57 @@ export const ScrapeTeamsSheet = ({
         </SheetHeader>
 
         <div className="space-y-4">
+          {/* Country & State Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>País</Label>
+              <Select
+                value={selectedPaisId?.toString() || ""}
+                onValueChange={(v) => setSelectedPaisId(v ? parseInt(v) : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o país" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paises?.map((pais) => (
+                    <SelectItem key={pais.id} value={pais.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        {pais.bandeira_url && (
+                          <img src={pais.bandeira_url} alt="" className="w-4 h-3 object-cover" />
+                        )}
+                        {pais.nome}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Estado</Label>
+              <Select
+                value={selectedEstadoId?.toString() || ""}
+                onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
+                disabled={!selectedPaisId || !estados?.length}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!selectedPaisId ? "Selecione o país" : "Selecione o estado"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {estados?.map((estado) => (
+                    <SelectItem key={estado.id} value={estado.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        {estado.bandeira_url && (
+                          <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
+                        )}
+                        {estado.nome} ({estado.uf})
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* URL Input */}
           <div className="space-y-2">
             <Label htmlFor="url">URL do site</Label>
@@ -153,7 +238,7 @@ export const ScrapeTeamsSheet = ({
                 placeholder="https://escudosfc.com.br/pe.htm"
                 className="flex-1"
               />
-              <Button onClick={handleScrape} disabled={isLoading}>
+              <Button onClick={handleScrape} disabled={isLoading || !selectedPaisId}>
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
