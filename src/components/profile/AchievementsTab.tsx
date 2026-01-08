@@ -126,7 +126,7 @@ export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile 
                 key={achievement.id} 
                 className="bg-card border border-border rounded-xl p-4"
               >
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
                   {/* Team Logo */}
                   <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                     {teamData?.escudo_url ? (
