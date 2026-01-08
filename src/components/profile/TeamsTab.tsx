@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useUserTeams, useRemoveUserFromTeam } from "@/hooks/useTeams";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import { TeamSelector } from "@/components/profile/TeamSelector";
 
 interface TeamsTabProps {
   userId?: string;
@@ -12,6 +14,7 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
   const { user } = useAuth();
   const { data: teams = [], isLoading: teamsLoading } = useUserTeams(userId);
   const removeUserFromTeam = useRemoveUserFromTeam();
+  const [selectorOpen, setSelectorOpen] = useState(false);
 
   const isOwnProfile = user?.id === userId;
 
@@ -40,12 +43,38 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
           shield
         </span>
         <p className="text-muted-foreground text-sm mt-2">Nenhum time ainda</p>
+        {isOwnProfile && (
+          <>
+            <button
+              onClick={() => setSelectorOpen(true)}
+              className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Adicionar time
+            </button>
+            <TeamSelector
+              open={selectorOpen}
+              onOpenChange={setSelectorOpen}
+              selectedTeamIds={[]}
+            />
+          </>
+        )}
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-2 mb-8">
+      {isOwnProfile && (
+        <button
+          onClick={() => setSelectorOpen(true)}
+          className="bg-card border border-dashed border-border rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          <span className="text-sm font-medium">Adicionar time</span>
+        </button>
+      )}
+      
       {teams.map((team) => (
         <div
           key={team.id}
@@ -86,6 +115,14 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
           )}
         </div>
       ))}
+
+      {isOwnProfile && (
+        <TeamSelector
+          open={selectorOpen}
+          onOpenChange={setSelectorOpen}
+          selectedTeamIds={teams.map(t => t.id)}
+        />
+      )}
     </div>
   );
 };
