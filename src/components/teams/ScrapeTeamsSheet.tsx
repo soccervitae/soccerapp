@@ -41,6 +41,8 @@ export const ScrapeTeamsSheet = ({
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
   const [importResult, setImportResult] = useState<{ success: boolean; count: number; message: string } | null>(null);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
+  const [showSuccessSheet, setShowSuccessSheet] = useState(false);
+  const [successData, setSuccessData] = useState<{ count: number } | null>(null);
 
   // Fetch countries
   const { data: paises } = useQuery({
@@ -184,20 +186,16 @@ export const ScrapeTeamsSheet = ({
           throw error;
         }
       } else {
-        setImportResult({ 
-          success: true, 
-          count: selectedTeams.length, 
-          message: `${selectedTeams.length} times importados com sucesso!` 
-        });
+        // Store success data and close main sheet
+        setSuccessData({ count: selectedTeams.length });
         onTeamsImported?.();
+        onOpenChange(false);
+        setTeams([]);
+        setSelectAll(false);
+        setImportResult(null);
         
-        // Auto close after showing success
-        setTimeout(() => {
-          onOpenChange(false);
-          setTeams([]);
-          setSelectAll(false);
-          setImportResult(null);
-        }, 2000);
+        // Show success confirmation sheet
+        setShowSuccessSheet(true);
       }
     } catch (error) {
       console.error("Import error:", error);
@@ -208,266 +206,309 @@ export const ScrapeTeamsSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl">
-        <SheetHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5" />
-              Importar Times do Site
-            </SheetTitle>
-            {selectedCount > 0 && (
-              <Button
-                onClick={handleImport}
-                disabled={isSaving}
-                size="sm"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
-                Importar ({selectedCount})
-              </Button>
-            )}
-          </div>
-        </SheetHeader>
-
-        <div className="space-y-4">
-          {/* Country & State Selection */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>País</Label>
-              <Select
-                value={selectedPaisId?.toString() || ""}
-                onValueChange={(v) => setSelectedPaisId(v ? parseInt(v) : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o país" />
-                </SelectTrigger>
-                <SelectContent>
-                  {paises?.map((pais) => (
-                    <SelectItem key={pais.id} value={pais.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        {pais.bandeira_url && (
-                          <img src={pais.bandeira_url} alt="" className="w-4 h-3 object-cover" />
-                        )}
-                        {pais.nome}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Estado</Label>
-              <Select
-                value={selectedEstadoId?.toString() || ""}
-                onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
-                disabled={!selectedPaisId || !estados?.length}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!selectedPaisId ? "Selecione o país" : "Selecione o estado"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {estados?.map((estado) => (
-                    <SelectItem key={estado.id} value={estado.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        {estado.bandeira_url && (
-                          <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
-                        )}
-                        {estado.nome} ({estado.uf})
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* URL Input */}
-          <div className="space-y-2">
-            <Label htmlFor="url">URL do site</Label>
-            <div className="flex gap-2">
-              <Input
-                id="url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://escudosfc.com.br/pe.htm"
-                className="flex-1"
-              />
-              <Button onClick={handleScrape} disabled={isLoading || !selectedPaisId}>
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Cole a URL de uma página do escudosfc.com.br (ex: pe.htm para Pernambuco)
-            </p>
-          </div>
-
-          {/* Results Counter */}
-          {teams.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium">
-                    {availableCount} times disponíveis
-                  </span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {selectedCount} selecionados
-                </span>
-              </div>
-              
-              {duplicateCount > 0 && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
-                  <Ban className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm text-amber-600 dark:text-amber-400">
-                    {duplicateCount} {duplicateCount === 1 ? "time já existe" : "times já existem"} e {duplicateCount === 1 ? "será ignorado" : "serão ignorados"}
-                  </span>
-                </div>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl">
+          <SheetHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <SheetTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Importar Times do Site
+              </SheetTitle>
+              {selectedCount > 0 && (
+                <Button
+                  onClick={handleImport}
+                  disabled={isSaving}
+                  size="sm"
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Importar ({selectedCount})
+                </Button>
               )}
             </div>
-          )}
+          </SheetHeader>
 
-          {/* Results Selection */}
-          {teams.length > 0 && (
-            <>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="selectAll"
-                  checked={allAvailableSelected}
-                  onCheckedChange={() => toggleSelectAll()}
-                  disabled={availableCount === 0}
-                />
-                <Label htmlFor="selectAll" className="text-sm">
-                  Selecionar todos disponíveis
-                </Label>
-              </div>
-
-              <ScrollArea className="h-[50vh] flex-1">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-4">
-                  {teams.map((team, index) => (
-                    <div
-                      key={`${team.nome}-${index}`}
-                      onClick={() => toggleTeam(index)}
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
-                        team.isDuplicate
-                          ? "bg-muted/20 border-amber-500/30 opacity-60 cursor-not-allowed"
-                          : team.selected
-                            ? "bg-primary/10 border-primary cursor-pointer"
-                            : "bg-muted/30 border-transparent hover:bg-muted/50 cursor-pointer"
-                      }`}
-                    >
-                      <div className="relative">
-                        <div className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
-                          team.isDuplicate ? "grayscale" : ""
-                        }`}>
-                          {team.escudo_url ? (
-                            <img
-                              src={team.escudo_url}
-                              alt={team.nome}
-                              className="w-10 h-10 object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <Shield className="w-6 h-6 text-muted-foreground" />
+          <div className="space-y-4">
+            {/* Country & State Selection */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>País</Label>
+                <Select
+                  value={selectedPaisId?.toString() || ""}
+                  onValueChange={(v) => setSelectedPaisId(v ? parseInt(v) : null)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paises?.map((pais) => (
+                      <SelectItem key={pais.id} value={pais.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          {pais.bandeira_url && (
+                            <img src={pais.bandeira_url} alt="" className="w-4 h-3 object-cover" />
                           )}
+                          {pais.nome}
                         </div>
-                        {team.isDuplicate && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                            <Ban className="w-3 h-3 text-white" />
-                          </div>
-                        )}
-                        {team.selected && !team.isDuplicate && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-primary-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${team.isDuplicate ? "line-through text-muted-foreground" : ""}`}>
-                          {team.nome}
-                        </p>
-                        {team.isDuplicate ? (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 truncate">
-                            Já existe
-                          </p>
-                        ) : team.cidade ? (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {team.cidade}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Estado</Label>
+                <Select
+                  value={selectedEstadoId?.toString() || ""}
+                  onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
+                  disabled={!selectedPaisId || !estados?.length}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedPaisId ? "Selecione o país" : "Selecione o estado"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {estados?.map((estado) => (
+                      <SelectItem key={estado.id} value={estado.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          {estado.bandeira_url && (
+                            <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
+                          )}
+                          {estado.nome} ({estado.uf})
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-            </>
-          )}
-
-          {/* Success/Error Result Message */}
-          <AnimatePresence>
-            {importResult && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={`flex items-center gap-3 p-4 rounded-xl ${
-                  importResult.success 
-                    ? "bg-green-500/10 border border-green-500/30" 
-                    : "bg-destructive/10 border border-destructive/30"
-                }`}
-              >
-                {importResult.success ? (
-                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
-                )}
-                <p className={`text-sm font-medium ${
-                  importResult.success ? "text-green-500" : "text-destructive"
-                }`}>
-                  {importResult.message}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Scrape Error Message */}
-          <AnimatePresence>
-            {scrapeError && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/30"
-              >
-                <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
-                <p className="text-sm font-medium text-destructive">{scrapeError}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Empty state */}
-          {!isLoading && teams.length === 0 && !scrapeError && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Globe className="w-16 h-16 text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground">
-                Informe a URL e clique em buscar para extrair times
+            {/* URL Input */}
+            <div className="space-y-2">
+              <Label htmlFor="url">URL do site</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="url"
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://escudosfc.com.br/pe.htm"
+                  className="flex-1"
+                />
+                <Button onClick={handleScrape} disabled={isLoading || !selectedPaisId}>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Cole a URL de uma página do escudosfc.com.br (ex: pe.htm para Pernambuco)
               </p>
             </div>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
+
+            {/* Results Counter */}
+            {teams.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-medium">
+                      {availableCount} times disponíveis
+                    </span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedCount} selecionados
+                  </span>
+                </div>
+                
+                {duplicateCount > 0 && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <Ban className="w-5 h-5 text-amber-500" />
+                    <span className="text-sm text-amber-600 dark:text-amber-400">
+                      {duplicateCount} {duplicateCount === 1 ? "time já existe" : "times já existem"} e {duplicateCount === 1 ? "será ignorado" : "serão ignorados"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Results Selection */}
+            {teams.length > 0 && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="selectAll"
+                    checked={allAvailableSelected}
+                    onCheckedChange={() => toggleSelectAll()}
+                    disabled={availableCount === 0}
+                  />
+                  <Label htmlFor="selectAll" className="text-sm">
+                    Selecionar todos disponíveis
+                  </Label>
+                </div>
+
+                <ScrollArea className="h-[50vh] flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-4">
+                    {teams.map((team, index) => (
+                      <div
+                        key={`${team.nome}-${index}`}
+                        onClick={() => toggleTeam(index)}
+                        className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
+                          team.isDuplicate
+                            ? "bg-muted/20 border-amber-500/30 opacity-60 cursor-not-allowed"
+                            : team.selected
+                              ? "bg-primary/10 border-primary cursor-pointer"
+                              : "bg-muted/30 border-transparent hover:bg-muted/50 cursor-pointer"
+                        }`}
+                      >
+                        <div className="relative">
+                          <div className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
+                            team.isDuplicate ? "grayscale" : ""
+                          }`}>
+                            {team.escudo_url ? (
+                              <img
+                                src={team.escudo_url}
+                                alt={team.nome}
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <Shield className="w-6 h-6 text-muted-foreground" />
+                            )}
+                          </div>
+                          {team.isDuplicate && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                              <Ban className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                          {team.selected && !team.isDuplicate && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                              <Check className="w-3 h-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${team.isDuplicate ? "line-through text-muted-foreground" : ""}`}>
+                            {team.nome}
+                          </p>
+                          {team.isDuplicate ? (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 truncate">
+                              Já existe
+                            </p>
+                          ) : team.cidade ? (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {team.cidade}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+              </>
+            )}
+
+            {/* Success/Error Result Message */}
+            <AnimatePresence>
+              {importResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className={`flex items-center gap-3 p-4 rounded-xl ${
+                    importResult.success 
+                      ? "bg-green-500/10 border border-green-500/30" 
+                      : "bg-destructive/10 border border-destructive/30"
+                  }`}
+                >
+                  {importResult.success ? (
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
+                  )}
+                  <p className={`text-sm font-medium ${
+                    importResult.success ? "text-green-500" : "text-destructive"
+                  }`}>
+                    {importResult.message}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Scrape Error Message */}
+            <AnimatePresence>
+              {scrapeError && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/30"
+                >
+                  <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
+                  <p className="text-sm font-medium text-destructive">{scrapeError}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Empty state */}
+            {!isLoading && teams.length === 0 && !scrapeError && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Globe className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground">
+                  Informe a URL e clique em buscar para extrair times
+                </p>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Success Confirmation Sheet */}
+      <Sheet open={showSuccessSheet} onOpenChange={setShowSuccessSheet}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6"
+            >
+              <CheckCircle2 className="w-10 h-10 text-green-500" />
+            </motion.div>
+            <motion.h3
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl font-semibold mb-2"
+            >
+              Times importados!
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-muted-foreground mb-6"
+            >
+              {successData?.count} {successData?.count === 1 ? "time foi adicionado" : "times foram adicionados"} com sucesso.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Button onClick={() => setShowSuccessSheet(false)}>
+                Fechar
+              </Button>
+            </motion.div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 };
