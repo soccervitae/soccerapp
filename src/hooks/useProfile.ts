@@ -592,6 +592,44 @@ export const useDeleteChampionship = () => {
   });
 };
 
+// Update championship
+export const useUpdateChampionship = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, ...championship }: {
+      id: string;
+      custom_championship_name: string;
+      year: number;
+      team_name?: string;
+      position_achieved?: string;
+      games_played?: number;
+      goals_scored?: number;
+    }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_championships")
+        .update(championship)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-championships"] });
+      toast.success("Campeonato atualizado!");
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar campeonato");
+    },
+  });
+};
+
 // Add achievement
 export const useAddAchievement = () => {
   const queryClient = useQueryClient();
@@ -653,6 +691,44 @@ export const useDeleteAchievement = () => {
     },
     onError: () => {
       toast.error("Erro ao remover conquista");
+    },
+  });
+};
+
+// Update achievement
+export const useUpdateAchievement = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, ...achievement }: {
+      id: string;
+      achievement_type_id?: string;
+      custom_achievement_name?: string;
+      championship_name?: string;
+      team_name?: string;
+      year: number;
+      description?: string;
+    }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("user_achievements")
+        .update(achievement)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      toast.success("Conquista atualizada!");
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar conquista");
     },
   });
 };

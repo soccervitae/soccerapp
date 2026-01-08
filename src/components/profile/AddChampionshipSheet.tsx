@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -15,22 +15,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddChampionship } from "@/hooks/useProfile";
-import { useUserTeams, type Team } from "@/hooks/useTeams";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAddChampionship, useUpdateChampionship } from "@/hooks/useProfile";
+import { type Team } from "@/hooks/useTeams";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface ChampionshipData {
+  id: string;
+  year: number;
+  team_name: string | null;
+  position_achieved: string | null;
+  games_played: number | null;
+  goals_scored: number | null;
+  custom_championship_name: string | null;
+}
 
 interface AddChampionshipSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userTeams: Team[];
+  editData?: ChampionshipData | null;
 }
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
 
 
-export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChampionshipSheetProps) => {
+export const AddChampionshipSheet = ({ open, onOpenChange, userTeams, editData }: AddChampionshipSheetProps) => {
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
   const [team, setTeam] = useState("");
@@ -38,19 +48,49 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
   const [goals, setGoals] = useState("");
 
   const addChampionship = useAddChampionship();
+  const updateChampionship = useUpdateChampionship();
+
+  const isEditing = !!editData;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editData && open) {
+      setName(editData.custom_championship_name || "");
+      setYear(editData.year.toString());
+      setTeam(editData.team_name || "");
+      setGames(editData.games_played?.toString() || "");
+      setGoals(editData.goals_scored?.toString() || "");
+    } else if (!open) {
+      // Reset form when closing
+      setName("");
+      setYear("");
+      setTeam("");
+      setGames("");
+      setGoals("");
+    }
+  }, [editData, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim() || !year) return;
 
-    await addChampionship.mutateAsync({
+    const championshipData = {
       custom_championship_name: name.trim(),
       year: parseInt(year),
       team_name: team || undefined,
       games_played: games ? parseInt(games) : undefined,
       goals_scored: goals ? parseInt(goals) : undefined,
-    });
+    };
+
+    if (isEditing && editData) {
+      await updateChampionship.mutateAsync({
+        id: editData.id,
+        ...championshipData,
+      });
+    } else {
+      await addChampionship.mutateAsync(championshipData);
+    }
 
     // Reset form
     setName("");
@@ -61,13 +101,15 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
     onOpenChange(false);
   };
 
+  const isPending = addChampionship.isPending || updateChampionship.isPending;
+
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
       <ResponsiveModalContent className="sm:max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] flex flex-col">
         <ResponsiveModalHeader className="pb-4">
           <ResponsiveModalTitle className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">emoji_events</span>
-            Adicionar Campeonato
+            {isEditing ? "Editar Campeonato" : "Adicionar Campeonato"}
           </ResponsiveModalTitle>
         </ResponsiveModalHeader>
 
@@ -152,9 +194,9 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
             <Button 
               type="submit" 
               className="w-full mt-6" 
-              disabled={!name.trim() || !year || addChampionship.isPending}
+              disabled={!name.trim() || !year || isPending}
             >
-              {addChampionship.isPending ? (
+              {isPending ? (
                 <>
                   <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
                   Salvando...
@@ -162,7 +204,7 @@ export const AddChampionshipSheet = ({ open, onOpenChange, userTeams }: AddChamp
               ) : (
                 <>
                   <span className="material-symbols-outlined mr-2">save</span>
-                  Salvar Campeonato
+                  {isEditing ? "Atualizar Campeonato" : "Salvar Campeonato"}
                 </>
               )}
             </Button>
