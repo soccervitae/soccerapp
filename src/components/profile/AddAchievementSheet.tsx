@@ -16,10 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddAchievement, useUpdateAchievement, useAchievementTypes } from "@/hooks/useProfile";
+import { useAddAchievement, useUpdateAchievement, useAchievementTypes, useUserChampionships } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
 import { type Team } from "@/hooks/useTeams";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface AchievementData {
   id: string;
   year: number;
@@ -55,7 +55,9 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams, editData }:
   const [year, setYear] = useState<string>("");
   const [description, setDescription] = useState("");
 
+  const { user } = useAuth();
   const { data: achievementTypes = [] } = useAchievementTypes();
+  const { data: userChampionships = [] } = useUserChampionships(user?.id);
   const addAchievement = useAddAchievement();
   const updateAchievement = useUpdateAchievement();
 
@@ -180,12 +182,18 @@ export const AddAchievementSheet = ({ open, onOpenChange, userTeams, editData }:
 
             <div className="space-y-2">
               <Label htmlFor="championship">Campeonato</Label>
-              <Input
-                id="championship"
-                placeholder="Ex: Copa do Brasil"
-                value={championship}
-                onChange={(e) => setChampionship(e.target.value)}
-              />
+              <Select value={championship} onValueChange={setChampionship}>
+                <SelectTrigger id="championship">
+                  <SelectValue placeholder="Selecione o campeonato" />
+                </SelectTrigger>
+                <SelectContent>
+                  {userChampionships.map((c) => (
+                    <SelectItem key={c.id} value={c.championship?.name || c.custom_championship_name || ""}>
+                      {c.championship?.name || c.custom_championship_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
