@@ -73,25 +73,82 @@ export const useUserTeams = (userId?: string) => {
     queryFn: async () => {
       if (!userId) return [];
 
-      const { data, error } = await supabase
-        .from("times")
-        .select(`
-          id,
-          nome,
-          escudo_url,
-          estado_id,
-          pais_id,
-          selected_by_users,
-          estado:estados(id, nome, uf),
-          pais:paises(id, nome, bandeira_url)
-        `)
-        .contains("selected_by_users", [userId])
-        .order("nome");
+      // Get teams and their order
+      const [teamsResult, orderResult] = await Promise.all([
+        supabase
+          .from("times")
+          .select(`
+            id,
+            nome,
+            escudo_url,
+            estado_id,
+            pais_id,
+            selected_by_users,
+            estado:estados(id, nome, uf),
+            pais:paises(id, nome, bandeira_url)
+          `)
+          .contains("selected_by_users", [userId]),
+        supabase
+          .from("user_team_order")
+          .select("team_id, display_order")
+          .eq("user_id", userId)
+      ]);
 
-      if (error) throw error;
-      return data as Team[];
+      if (teamsResult.error) throw teamsResult.error;
+
+      const teams = teamsResult.data as Team[];
+      const orderMap = new Map<string, number>();
+      
+      if (orderResult.data) {
+        orderResult.data.forEach((o: { team_id: string; display_order: number }) => {
+          orderMap.set(o.team_id, o.display_order);
+        });
+      }
+
+      // Sort teams by display_order, then by name for unordered teams
+      return teams.sort((a, b) => {
+        const orderA = orderMap.get(a.id) ?? 9999;
+        const orderB = orderMap.get(b.id) ?? 9999;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.nome.localeCompare(b.nome);
+      });
     },
     enabled: !!userId,
+  });
+};
+
+export const useUpdateTeamOrder = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (teamIds: string[]) => {
+      if (!user) throw new Error("User not authenticated");
+
+      // Delete existing order entries for this user
+      await supabase
+        .from("user_team_order")
+        .delete()
+        .eq("user_id", user.id);
+
+      // Insert new order entries
+      if (teamIds.length > 0) {
+        const orderEntries = teamIds.map((teamId, index) => ({
+          user_id: user.id,
+          team_id: teamId,
+          display_order: index,
+        }));
+
+        const { error } = await supabase
+          .from("user_team_order")
+          .insert(orderEntries);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-teams"] });
+    },
   });
 };
 
@@ -125,12 +182,20 @@ export const useRemoveUserFromTeam = () => {
     mutationFn: async (teamId: string) => {
       if (!user) throw new Error("User not authenticated");
 
+      // Remove from team
       const { error } = await supabase.rpc("remove_user_from_team", {
         p_team_id: teamId,
         p_user_id: user.id,
       });
 
       if (error) throw error;
+
+      // Also remove from order table
+      await supabase
+        .from("user_team_order")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("team_id", teamId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-teams"] });
