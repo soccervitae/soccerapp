@@ -168,10 +168,26 @@ export const ScrapeTeamsSheet = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl">
         <SheetHeader className="pb-4">
-          <SheetTitle className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            Importar Times do Site
-          </SheetTitle>
+          <div className="flex items-center justify-between">
+            <SheetTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Importar Times do Site
+            </SheetTitle>
+            {selectedCount > 0 && (
+              <Button
+                onClick={handleImport}
+                disabled={isSaving}
+                size="sm"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                Importar ({selectedCount})
+              </Button>
+            )}
+          </div>
         </SheetHeader>
 
         <div className="space-y-4">
@@ -316,18 +332,6 @@ export const ScrapeTeamsSheet = ({
                 </div>
               </ScrollArea>
 
-              <Button
-                onClick={handleImport}
-                disabled={selectedCount === 0 || isSaving}
-                className="w-full"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
-                Importar {selectedCount} {selectedCount === 1 ? "time" : "times"}
-              </Button>
             </>
           )}
 
