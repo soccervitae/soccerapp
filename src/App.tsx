@@ -38,6 +38,15 @@ import Teams from "./pages/Teams";
 import Install from "./pages/Install";
 import Landing from "./pages/Landing";
 
+import AdminDashboard from "./pages/admin/Index";
+import AdminUsers from "./pages/admin/Users";
+import AdminPosts from "./pages/admin/Posts";
+import AdminReports from "./pages/admin/Reports";
+import AdminTeams from "./pages/admin/Teams";
+import AdminChampionships from "./pages/admin/Championships";
+import AdminSettings from "./pages/admin/Settings";
+import { AdminRoute } from "@/components/admin/AdminRoute";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
