@@ -479,7 +479,8 @@ const Profile = () => {
             <ChampionshipsTab 
               championships={championships || []} 
               isLoading={championshipsLoading} 
-              isOwnProfile={isOwnProfile} 
+              isOwnProfile={isOwnProfile}
+              userId={targetUserId}
             />
           )}
         </TabsContent>
@@ -489,7 +490,8 @@ const Profile = () => {
             <AchievementsTab 
               achievements={achievements || []} 
               isLoading={achievementsLoading} 
-              isOwnProfile={isOwnProfile} 
+              isOwnProfile={isOwnProfile}
+              userId={targetUserId}
             />
           )}
         </TabsContent>

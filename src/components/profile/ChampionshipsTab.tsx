@@ -38,16 +38,17 @@ interface ChampionshipsTabProps {
   championships: Championship[];
   isLoading?: boolean;
   isOwnProfile?: boolean;
+  userId?: string;
 }
 
-export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfile = false }: ChampionshipsTabProps) => {
+export const ChampionshipsTab = ({ championships, isLoading = false, isOwnProfile = false, userId }: ChampionshipsTabProps) => {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showNoTeamsSheet, setShowNoTeamsSheet] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Championship | null>(null);
   
   const { user } = useAuth();
-  const { data: userTeams = [] } = useUserTeams(user?.id);
+  const { data: userTeams = [] } = useUserTeams(userId || user?.id);
   const deleteChampionship = useDeleteChampionship();
 
   const handleAddClick = () => {
