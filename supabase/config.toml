@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.send-delete-account-code]
 verify_jwt = false
+
+[functions.scrape-teams]
+verify_jwt = false

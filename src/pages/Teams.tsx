@@ -1,9 +1,10 @@
 import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeams } from "@/hooks/useTeams";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -12,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowLeft, Shield, Globe, MapPin } from "lucide-react";
+import { Search, ArrowLeft, Shield, Globe, MapPin, Download } from "lucide-react";
+import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
 import type { Team } from "@/hooks/useTeams";
 
 // Componente separado para o card do time com estado próprio para controlar erro de imagem
@@ -42,10 +44,11 @@ const TeamCard = memo(({ team }: { team: Team }) => {
 
 const Teams = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(26); // Default Brasil
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(17); // Default Pernambuco
   const [search, setSearch] = useState("");
-
+  const [scrapeSheetOpen, setScrapeSheetOpen] = useState(false);
   // Fetch countries
   const { data: paises, isLoading: paisesLoading } = useQuery({
     queryKey: ["paises"],
@@ -117,6 +120,11 @@ const Teams = () => {
     setSelectedEstadoId(parseInt(value));
   };
 
+  const handleTeamsImported = () => {
+    queryClient.invalidateQueries({ queryKey: ["teams"] });
+    queryClient.invalidateQueries({ queryKey: ["estados-with-counts"] });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -128,12 +136,20 @@ const Teams = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-lg font-semibold">Times</h1>
             <p className="text-xs text-muted-foreground">
               {teamsLoading ? "Carregando..." : `${teams?.length || 0} times`}
             </p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setScrapeSheetOpen(true)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Download className="w-5 h-5" />
+          </Button>
         </div>
 
         {/* Filters */}
@@ -252,6 +268,15 @@ const Teams = () => {
           </div>
         )}
       </main>
+
+      {/* Scrape Teams Sheet */}
+      <ScrapeTeamsSheet
+        open={scrapeSheetOpen}
+        onOpenChange={setScrapeSheetOpen}
+        estadoId={selectedEstadoId}
+        paisId={selectedPaisId}
+        onTeamsImported={handleTeamsImported}
+      />
     </div>
   );
 };
