@@ -380,7 +380,7 @@ const Profile = () => {
   };
 
   // Tab order for swipe navigation
-  const tabOrder = ["profile", "videos", "teams", "championships", "achievements", "photos"];
+  const tabOrder = ["profile", "teams", "videos", "championships", "achievements", "photos"];
   
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
@@ -407,18 +407,18 @@ const Profile = () => {
           Posts
         </TabsTrigger>
         <TabsTrigger 
-          value="videos" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
-        >
-          <span className="material-symbols-outlined text-[20px]">play_circle</span>
-          Vídeos
-        </TabsTrigger>
-        <TabsTrigger 
           value="teams" 
           className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
           <span className="material-symbols-outlined text-[20px]">shield</span>
           Times
+        </TabsTrigger>
+        <TabsTrigger 
+          value="videos" 
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+        >
+          <span className="material-symbols-outlined text-[20px]">play_circle</span>
+          Vídeos
         </TabsTrigger>
         <TabsTrigger 
           value="championships" 
