@@ -273,8 +273,6 @@ const Teams = () => {
       <ScrapeTeamsSheet
         open={scrapeSheetOpen}
         onOpenChange={setScrapeSheetOpen}
-        estadoId={selectedEstadoId}
-        paisId={selectedPaisId}
         onTeamsImported={handleTeamsImported}
       />
     </div>
