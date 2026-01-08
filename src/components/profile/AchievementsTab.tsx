@@ -39,16 +39,17 @@ interface AchievementsTabProps {
   achievements: Achievement[];
   isLoading?: boolean;
   isOwnProfile?: boolean;
+  userId?: string;
 }
 
-export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile = false }: AchievementsTabProps) => {
+export const AchievementsTab = ({ achievements, isLoading = false, isOwnProfile = false, userId }: AchievementsTabProps) => {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showNoTeamsSheet, setShowNoTeamsSheet] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Achievement | null>(null);
   
   const { user } = useAuth();
-  const { data: userTeams = [] } = useUserTeams(user?.id);
+  const { data: userTeams = [] } = useUserTeams(userId || user?.id);
   const deleteAchievement = useDeleteAchievement();
 
   const handleAddClick = () => {
