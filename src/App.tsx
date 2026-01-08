@@ -189,6 +189,16 @@ const AnimatedRoutes = () => {
           <PageTransition><Teams /></PageTransition>
         </ProtectedRoute>
       } />
+      
+      {/* Admin routes */}
+      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+      <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
+      <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+      <Route path="/admin/teams" element={<AdminRoute><AdminTeams /></AdminRoute>} />
+      <Route path="/admin/championships" element={<AdminRoute><AdminChampionships /></AdminRoute>} />
+      <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+      
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );
