@@ -3,6 +3,7 @@ import { ProfileInfo } from "@/components/profile/ProfileInfo";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
 import { ChampionshipsTab } from "@/components/profile/ChampionshipsTab";
 import { AchievementsTab } from "@/components/profile/AchievementsTab";
+import { TeamsTab } from "@/components/profile/TeamsTab";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { useUserChampionships, useUserAchievements, useUserPosts } from "@/hooks/useProfile";
@@ -379,7 +380,7 @@ const Profile = () => {
   };
 
   // Tab order for swipe navigation
-  const tabOrder = ["profile", "videos", "championships", "achievements", "photos"];
+  const tabOrder = ["profile", "videos", "teams", "championships", "achievements", "photos"];
   
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
@@ -411,6 +412,13 @@ const Profile = () => {
         >
           <span className="material-symbols-outlined text-[20px]">play_circle</span>
           Vídeos
+        </TabsTrigger>
+        <TabsTrigger 
+          value="teams" 
+          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+        >
+          <span className="material-symbols-outlined text-[20px]">shield</span>
+          Times
         </TabsTrigger>
         <TabsTrigger 
           value="championships" 
@@ -458,6 +466,12 @@ const Profile = () => {
 
         <TabsContent value="videos" className="mt-4 px-1" forceMount={activeTab === "videos" ? true : undefined}>
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
+        </TabsContent>
+
+        <TabsContent value="teams" className="mt-4 px-4" forceMount={activeTab === "teams" ? true : undefined}>
+          {activeTab === "teams" && (
+            <TeamsTab userId={targetUserId} />
+          )}
         </TabsContent>
 
         <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
