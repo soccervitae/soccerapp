@@ -341,7 +341,7 @@ export const ScrapeTeamsSheet = ({
                 </Label>
               </div>
 
-              <ScrollArea className="h-[calc(90vh-320px)]">
+              <ScrollArea className="h-[50vh] flex-1">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-4">
                   {teams.map((team, index) => (
                     <div
