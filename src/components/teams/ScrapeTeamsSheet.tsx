@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, Shield, Download, Globe, Check, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Search, Shield, Download, Globe, Check, CheckCircle2, AlertCircle, Ban } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,6 +16,7 @@ interface ScrapedTeam {
   escudo_url: string;
   cidade?: string;
   selected?: boolean;
+  isDuplicate?: boolean;
 }
 
 interface ScrapeTeamsSheetProps {
@@ -96,9 +97,21 @@ export const ScrapeTeamsSheet = ({
         throw new Error(data.error || "Erro ao extrair times");
       }
 
+      // Check for duplicates in the database
+      const teamNames = data.teams.map((t: ScrapedTeam) => t.nome);
+      const { data: existingTeams } = await supabase
+        .from("times")
+        .select("nome")
+        .in("nome", teamNames)
+        .eq("pais_id", selectedPaisId)
+        .eq("estado_id", selectedEstadoId || -1);
+
+      const existingNames = new Set(existingTeams?.map((t) => t.nome) || []);
+
       const scrapedTeams = data.teams.map((t: ScrapedTeam) => ({
         ...t,
         selected: false,
+        isDuplicate: existingNames.has(t.nome),
       }));
 
       setTeams(scrapedTeams);
@@ -111,6 +124,8 @@ export const ScrapeTeamsSheet = ({
   };
 
   const toggleTeam = (index: number) => {
+    const team = teams[index];
+    if (team.isDuplicate) return; // Don't allow selecting duplicates
     setTeams((prev) =>
       prev.map((t, i) => (i === index ? { ...t, selected: !t.selected } : t))
     );
@@ -119,10 +134,12 @@ export const ScrapeTeamsSheet = ({
   const toggleSelectAll = () => {
     const newValue = !selectAll;
     setSelectAll(newValue);
-    setTeams((prev) => prev.map((t) => ({ ...t, selected: newValue })));
+    setTeams((prev) => prev.map((t) => ({ ...t, selected: t.isDuplicate ? false : newValue })));
   };
 
-  const selectedCount = teams.filter((t) => t.selected).length;
+  const selectedCount = teams.filter((t) => t.selected && !t.isDuplicate).length;
+  const duplicateCount = teams.filter((t) => t.isDuplicate).length;
+  const availableCount = teams.length - duplicateCount;
 
   const handleImport = async () => {
     const selectedTeams = teams.filter((t) => t.selected);
@@ -280,16 +297,27 @@ export const ScrapeTeamsSheet = ({
 
           {/* Results Counter */}
           {teams.length > 0 && (
-            <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">
-                  {teams.length} times encontrados
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium">
+                    {availableCount} times disponíveis
+                  </span>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {selectedCount} selecionados
                 </span>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {selectedCount} selecionados
-              </span>
+              
+              {duplicateCount > 0 && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                  <Ban className="w-5 h-5 text-amber-500" />
+                  <span className="text-sm text-amber-600 dark:text-amber-400">
+                    {duplicateCount} {duplicateCount === 1 ? "time já existe" : "times já existem"} e {duplicateCount === 1 ? "será ignorado" : "serão ignorados"}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -301,9 +329,10 @@ export const ScrapeTeamsSheet = ({
                   id="selectAll"
                   checked={selectAll}
                   onCheckedChange={toggleSelectAll}
+                  disabled={availableCount === 0}
                 />
                 <Label htmlFor="selectAll" className="text-sm">
-                  Selecionar todos
+                  Selecionar todos disponíveis
                 </Label>
               </div>
 
@@ -313,14 +342,18 @@ export const ScrapeTeamsSheet = ({
                     <div
                       key={`${team.nome}-${index}`}
                       onClick={() => toggleTeam(index)}
-                      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                        team.selected
-                          ? "bg-primary/10 border-primary"
-                          : "bg-muted/30 border-transparent hover:bg-muted/50"
+                      className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
+                        team.isDuplicate
+                          ? "bg-muted/20 border-amber-500/30 opacity-60 cursor-not-allowed"
+                          : team.selected
+                            ? "bg-primary/10 border-primary cursor-pointer"
+                            : "bg-muted/30 border-transparent hover:bg-muted/50 cursor-pointer"
                       }`}
                     >
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                        <div className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden ${
+                          team.isDuplicate ? "grayscale" : ""
+                        }`}>
                           {team.escudo_url ? (
                             <img
                               src={team.escudo_url}
@@ -334,19 +367,30 @@ export const ScrapeTeamsSheet = ({
                             <Shield className="w-6 h-6 text-muted-foreground" />
                           )}
                         </div>
-                        {team.selected && (
+                        {team.isDuplicate && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                            <Ban className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                        {team.selected && !team.isDuplicate && (
                           <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                             <Check className="w-3 h-3 text-primary-foreground" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{team.nome}</p>
-                        {team.cidade && (
+                        <p className={`text-sm font-medium truncate ${team.isDuplicate ? "line-through text-muted-foreground" : ""}`}>
+                          {team.nome}
+                        </p>
+                        {team.isDuplicate ? (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 truncate">
+                            Já existe
+                          </p>
+                        ) : team.cidade ? (
                           <p className="text-xs text-muted-foreground truncate">
                             {team.cidade}
                           </p>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   ))}
