@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, Shield, Download, Globe, Check, CheckCircle2, AlertCircle, Ban } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ScrapedTeam {
   nome: string;
@@ -30,6 +31,7 @@ export const ScrapeTeamsSheet = ({
   onOpenChange,
   onTeamsImported,
 }: ScrapeTeamsSheetProps) => {
+  const { user } = useAuth();
   const [url, setUrl] = useState("https://escudosfc.com.br/pe.htm");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -163,6 +165,7 @@ export const ScrapeTeamsSheet = ({
         estado_id: selectedEstadoId,
         pais_id: selectedPaisId,
         selected_by_users: [],
+        user_id: user?.id,
       }));
 
       const { error } = await supabase.from("times").insert(teamsToInsert);
