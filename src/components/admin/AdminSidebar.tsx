@@ -8,9 +8,11 @@ import {
   Shield,
   Trophy,
   Settings,
-  ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
@@ -24,6 +26,16 @@ const menuItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logout realizado com sucesso");
+    } catch (error) {
+      toast.error("Erro ao fazer logout");
+    }
+  };
 
   return (
     <aside className="w-64 bg-card border-r border-border min-h-screen p-4 flex flex-col">
@@ -59,11 +71,13 @@ export function AdminSidebar() {
       </nav>
 
       <div className="pt-4 border-t border-border">
-        <Button variant="ghost" className="w-full justify-start gap-3" asChild>
-          <Link to="/">
-            <ArrowLeft className="h-5 w-5" />
-            Voltar ao site
-          </Link>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5" />
+          Sair
         </Button>
       </div>
     </aside>
