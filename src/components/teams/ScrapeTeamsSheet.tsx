@@ -181,7 +181,7 @@ export const ScrapeTeamsSheet = ({
 
       for (let i = 0; i < teamsToInsert.length; i += BATCH_SIZE) {
         const batch = teamsToInsert.slice(i, i + BATCH_SIZE);
-        const { error } = await supabase.from("times").insert(batch);
+        const { data, error } = await supabase.from("times").insert(batch).select("id");
 
         if (error) {
           // Unique constraint violation (duplicate)
@@ -204,10 +204,24 @@ export const ScrapeTeamsSheet = ({
             return;
           }
 
-          throw error;
+          setImportResult({
+            success: false,
+            count: insertedCount,
+            message: `Erro ao inserir lote: ${error.code ?? ""} ${error.message}`.trim(),
+          });
+          return;
         }
 
-        insertedCount += batch.length;
+        insertedCount += data?.length ?? 0;
+      }
+
+      if (insertedCount === 0) {
+        setImportResult({
+          success: false,
+          count: 0,
+          message: "Nenhum time foi inserido. Verifique duplicados e permissões.",
+        });
+        return;
       }
 
       // Store success data and close main sheet
