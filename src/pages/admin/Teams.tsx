@@ -29,15 +29,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2, Users } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Users, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
 
 export default function AdminTeams() {
   const [search, setSearch] = useState("");
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: teams, isLoading } = useQuery({
@@ -98,6 +100,10 @@ export default function AdminTeams() {
               className="pl-10"
             />
           </div>
+          <Button onClick={() => setShowAddSheet(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Times
+          </Button>
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -226,6 +232,12 @@ export default function AdminTeams() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ScrapeTeamsSheet
+        open={showAddSheet}
+        onOpenChange={setShowAddSheet}
+        onTeamsImported={() => queryClient.invalidateQueries({ queryKey: ["adminTeams"] })}
+      />
     </AdminLayout>
   );
 }
