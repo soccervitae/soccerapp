@@ -44,6 +44,7 @@ export const ScrapeTeamsSheet = ({
   const [showSuccessSheet, setShowSuccessSheet] = useState(false);
   const [successData, setSuccessData] = useState<{ count: number } | null>(null);
   const [batchLogs, setBatchLogs] = useState<string[]>([]);
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   // Fetch countries
   const { data: paises } = useQuery({
@@ -372,9 +373,21 @@ export const ScrapeTeamsSheet = ({
                       {availableCount} times disponíveis
                     </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {selectedCount} selecionados
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-primary">
+                      Selecionados: {selectedCount}
+                    </span>
+                    {selectedCount > 0 && (
+                      <Button
+                        variant={showOnlySelected ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowOnlySelected(!showOnlySelected)}
+                        className="h-7 text-xs"
+                      >
+                        {showOnlySelected ? "Ver todos" : "Ver selecionados"}
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 
                 {duplicateCount > 0 && (
@@ -405,7 +418,10 @@ export const ScrapeTeamsSheet = ({
 
                 <ScrollArea className="h-[50vh] flex-1">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-4">
-                    {teams.map((team, index) => (
+                    {teams
+                      .map((team, index) => ({ team, index }))
+                      .filter(({ team }) => !showOnlySelected || team.selected)
+                      .map(({ team, index }) => (
                       <div
                         key={`${team.nome}-${index}`}
                         onClick={() => toggleTeam(index)}
