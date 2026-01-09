@@ -175,31 +175,58 @@ export const ScrapeTeamsSheet = ({
         user_id: user.id,
       }));
 
-      const { data, error } = await supabase.from("times").insert(teamsToInsert).select();
-      
-      console.log("Insert result:", { data, error, teamsToInsert });
+      // Insert in batches to avoid payload/time limits when importing many teams
+      const BATCH_SIZE = 50;
+      let insertedCount = 0;
 
-      if (error) {
-        if (error.code === "23505") {
-          setImportResult({ success: false, count: 0, message: "Alguns times já existem no banco de dados" });
-        } else {
+      for (let i = 0; i < teamsToInsert.length; i += BATCH_SIZE) {
+        const batch = teamsToInsert.slice(i, i + BATCH_SIZE);
+        const { error } = await supabase.from("times").insert(batch);
+
+        if (error) {
+          // Unique constraint violation (duplicate)
+          if (error.code === "23505") {
+            setImportResult({
+              success: false,
+              count: insertedCount,
+              message: "Alguns times já existem no banco de dados (duplicados)",
+            });
+            return;
+          }
+
+          // Common RLS failure
+          if (error.message?.toLowerCase().includes("row-level security")) {
+            setImportResult({
+              success: false,
+              count: insertedCount,
+              message: "Permissão negada (RLS). Confirme se você está logado como admin.",
+            });
+            return;
+          }
+
           throw error;
         }
-      } else {
-        // Store success data and close main sheet
-        setSuccessData({ count: selectedTeams.length });
-        onTeamsImported?.();
-        onOpenChange(false);
-        setTeams([]);
-        setSelectAll(false);
-        setImportResult(null);
-        
-        // Show success confirmation sheet
-        setShowSuccessSheet(true);
+
+        insertedCount += batch.length;
       }
+
+      // Store success data and close main sheet
+      setSuccessData({ count: insertedCount });
+      onTeamsImported?.();
+      onOpenChange(false);
+      setTeams([]);
+      setSelectAll(false);
+      setImportResult(null);
+
+      // Show success confirmation sheet
+      setShowSuccessSheet(true);
     } catch (error) {
       console.error("Import error:", error);
-      setImportResult({ success: false, count: 0, message: "Erro ao importar times" });
+      const message =
+        error && typeof error === "object" && "message" in error
+          ? String((error as any).message)
+          : "Erro ao importar times";
+      setImportResult({ success: false, count: 0, message });
     } finally {
       setIsSaving(false);
     }
