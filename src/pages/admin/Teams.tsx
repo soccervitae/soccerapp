@@ -36,12 +36,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MoreHorizontal, Trash2, Users, Plus, X } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Users, Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
+
+const ITEMS_PER_PAGE = 20;
 
 export default function AdminTeams() {
   const [search, setSearch] = useState("");
@@ -49,6 +51,7 @@ export default function AdminTeams() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
   // Fetch countries
@@ -80,14 +83,49 @@ export default function AdminTeams() {
     enabled: !!selectedPaisId,
   });
 
-  // Reset estado when pais changes
+  // Reset estado and page when pais changes
   useEffect(() => {
     setSelectedEstadoId(null);
+    setCurrentPage(1);
   }, [selectedPaisId]);
 
-  const { data: teams, isLoading } = useQuery({
-    queryKey: ["adminTeams", search, selectedPaisId, selectedEstadoId],
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedEstadoId]);
+
+  // Fetch total count for pagination
+  const { data: totalCount } = useQuery({
+    queryKey: ["adminTeamsCount", search, selectedPaisId, selectedEstadoId],
     queryFn: async () => {
+      let query = supabase
+        .from("times")
+        .select("id", { count: "exact", head: true });
+
+      if (search) {
+        query = query.ilike("nome", `%${search}%`);
+      }
+
+      if (selectedPaisId) {
+        query = query.eq("pais_id", selectedPaisId);
+      }
+
+      if (selectedEstadoId) {
+        query = query.eq("estado_id", selectedEstadoId);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const { data: teams, isLoading } = useQuery({
+    queryKey: ["adminTeams", search, selectedPaisId, selectedEstadoId, currentPage],
+    queryFn: async () => {
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from("times")
         .select(`
@@ -96,7 +134,7 @@ export default function AdminTeams() {
           estado:estado_id(nome, uf)
         `)
         .order("nome", { ascending: true })
-        .limit(100);
+        .range(from, to);
 
       if (search) {
         query = query.ilike("nome", `%${search}%`);
@@ -123,6 +161,7 @@ export default function AdminTeams() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminTeams"] });
+      queryClient.invalidateQueries({ queryKey: ["adminTeamsCount"] });
       toast.success("Time deletado com sucesso");
       setDeleteTeamId(null);
     },
@@ -135,9 +174,14 @@ export default function AdminTeams() {
     setSelectedPaisId(null);
     setSelectedEstadoId(null);
     setSearch("");
+    setCurrentPage(1);
   };
 
   const hasFilters = !!selectedPaisId || !!selectedEstadoId || !!search;
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+  const canGoPrevious = currentPage > 1;
+  const canGoNext = currentPage < totalPages;
 
   return (
     <AdminLayout>
@@ -320,6 +364,38 @@ export default function AdminTeams() {
               )}
             </TableBody>
           </Table>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, totalCount || 0)} de {totalCount} times
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => p - 1)}
+                  disabled={!canGoPrevious}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <span className="text-sm text-muted-foreground px-2">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  disabled={!canGoNext}
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -346,7 +422,10 @@ export default function AdminTeams() {
       <ScrapeTeamsSheet
         open={showAddSheet}
         onOpenChange={setShowAddSheet}
-        onTeamsImported={() => queryClient.invalidateQueries({ queryKey: ["adminTeams"] })}
+        onTeamsImported={() => {
+          queryClient.invalidateQueries({ queryKey: ["adminTeams"] });
+          queryClient.invalidateQueries({ queryKey: ["adminTeamsCount"] });
+        }}
       />
     </AdminLayout>
   );
