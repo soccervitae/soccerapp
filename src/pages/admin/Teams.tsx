@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +29,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2, Users, Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, MoreHorizontal, Trash2, Users, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -40,10 +47,46 @@ export default function AdminTeams() {
   const [search, setSearch] = useState("");
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
+  const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
+  // Fetch countries
+  const { data: paises } = useQuery({
+    queryKey: ["paises"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paises")
+        .select("id, nome, sigla, bandeira_url")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch states based on selected country
+  const { data: estados } = useQuery({
+    queryKey: ["estados", selectedPaisId],
+    queryFn: async () => {
+      if (!selectedPaisId) return [];
+      const { data, error } = await supabase
+        .from("estados")
+        .select("id, nome, uf, bandeira_url")
+        .eq("pais_id", selectedPaisId)
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPaisId,
+  });
+
+  // Reset estado when pais changes
+  useEffect(() => {
+    setSelectedEstadoId(null);
+  }, [selectedPaisId]);
+
   const { data: teams, isLoading } = useQuery({
-    queryKey: ["adminTeams", search],
+    queryKey: ["adminTeams", search, selectedPaisId, selectedEstadoId],
     queryFn: async () => {
       let query = supabase
         .from("times")
@@ -57,6 +100,14 @@ export default function AdminTeams() {
 
       if (search) {
         query = query.ilike("nome", `%${search}%`);
+      }
+
+      if (selectedPaisId) {
+        query = query.eq("pais_id", selectedPaisId);
+      }
+
+      if (selectedEstadoId) {
+        query = query.eq("estado_id", selectedEstadoId);
       }
 
       const { data, error } = await query;
@@ -80,6 +131,14 @@ export default function AdminTeams() {
     },
   });
 
+  const clearFilters = () => {
+    setSelectedPaisId(null);
+    setSelectedEstadoId(null);
+    setSearch("");
+  };
+
+  const hasFilters = !!selectedPaisId || !!selectedEstadoId || !!search;
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -90,8 +149,8 @@ export default function AdminTeams() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por nome..."
@@ -100,7 +159,58 @@ export default function AdminTeams() {
               className="pl-10"
             />
           </div>
-          <Button onClick={() => setShowAddSheet(true)}>
+
+          <Select
+            value={selectedPaisId?.toString() || ""}
+            onValueChange={(v) => setSelectedPaisId(v ? parseInt(v) : null)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrar por país" />
+            </SelectTrigger>
+            <SelectContent>
+              {paises?.map((pais) => (
+                <SelectItem key={pais.id} value={pais.id.toString()}>
+                  <div className="flex items-center gap-2">
+                    {pais.bandeira_url && (
+                      <img src={pais.bandeira_url} alt="" className="w-4 h-3 object-cover rounded" />
+                    )}
+                    {pais.nome}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={selectedEstadoId?.toString() || ""}
+            onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
+            disabled={!selectedPaisId || !estados?.length}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={!selectedPaisId ? "Selecione o país" : "Filtrar por estado"} />
+            </SelectTrigger>
+            <SelectContent>
+              {estados?.map((estado) => (
+                <SelectItem key={estado.id} value={estado.id.toString()}>
+                  <div className="flex items-center gap-2">
+                    {estado.bandeira_url && (
+                      <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover rounded" />
+                    )}
+                    {estado.nome} ({estado.uf})
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <X className="h-4 w-4 mr-1" />
+              Limpar
+            </Button>
+          )}
+
+          <Button onClick={() => setShowAddSheet(true)} className="ml-auto">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Times
           </Button>
