@@ -183,14 +183,54 @@ export default function AdminTeams() {
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
 
+  // Get selected country and state names for display
+  const selectedPais = paises?.find(p => p.id === selectedPaisId);
+  const selectedEstado = estados?.find(e => e.id === selectedEstadoId);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Times</h1>
-          <p className="text-muted-foreground">
-            Gerencie todos os times cadastrados
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Times</h1>
+            <p className="text-muted-foreground">
+              Gerencie todos os times cadastrados
+            </p>
+          </div>
+          
+          {/* Stats Cards */}
+          <div className="flex items-center gap-3">
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[100px]">
+              <p className="text-2xl font-bold text-foreground">{totalCount ?? 0}</p>
+              <p className="text-xs text-muted-foreground">
+                {hasFilters ? "Filtrados" : "Total"}
+              </p>
+            </div>
+            
+            {selectedPais && (
+              <div className="bg-card border border-border rounded-lg px-4 py-2 flex items-center gap-2">
+                {selectedPais.bandeira_url && (
+                  <img src={selectedPais.bandeira_url} alt="" className="w-6 h-4 object-cover rounded" />
+                )}
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-foreground">{totalCount ?? 0}</p>
+                  <p className="text-xs text-muted-foreground">{selectedPais.nome}</p>
+                </div>
+              </div>
+            )}
+            
+            {selectedEstado && (
+              <div className="bg-card border border-border rounded-lg px-4 py-2 flex items-center gap-2">
+                {selectedEstado.bandeira_url && (
+                  <img src={selectedEstado.bandeira_url} alt="" className="w-6 h-4 object-cover rounded" />
+                )}
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-foreground">{totalCount ?? 0}</p>
+                  <p className="text-xs text-muted-foreground">{selectedEstado.uf}</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
