@@ -43,6 +43,7 @@ export const ScrapeTeamsSheet = ({
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [showSuccessSheet, setShowSuccessSheet] = useState(false);
   const [successData, setSuccessData] = useState<{ count: number } | null>(null);
+  const [batchLogs, setBatchLogs] = useState<string[]>([]);
 
   // Fetch countries
   const { data: paises } = useQuery({
@@ -164,6 +165,7 @@ export const ScrapeTeamsSheet = ({
 
     setIsSaving(true);
     setImportResult(null);
+    setBatchLogs([]);
 
     try {
       const teamsToInsert = selectedTeams.map((t) => ({
@@ -178,12 +180,20 @@ export const ScrapeTeamsSheet = ({
       // Insert in batches to avoid payload/time limits when importing many teams
       const BATCH_SIZE = 50;
       let insertedCount = 0;
+      const totalBatches = Math.ceil(teamsToInsert.length / BATCH_SIZE);
 
       for (let i = 0; i < teamsToInsert.length; i += BATCH_SIZE) {
+        const batchNum = Math.floor(i / BATCH_SIZE) + 1;
         const batch = teamsToInsert.slice(i, i + BATCH_SIZE);
+        
+        setBatchLogs(prev => [...prev, `Lote ${batchNum}/${totalBatches}: Inserindo ${batch.length} times...`]);
+        
         const { data, error } = await supabase.from("times").insert(batch).select("id");
 
         if (error) {
+          const errorMsg = `Lote ${batchNum}/${totalBatches} erro: ${error.code ?? ""} ${error.message}`.trim();
+          setBatchLogs(prev => [...prev.slice(0, -1), `❌ ${errorMsg}`]);
+          
           // Unique constraint violation (duplicate)
           if (error.code === "23505") {
             setImportResult({
@@ -207,12 +217,14 @@ export const ScrapeTeamsSheet = ({
           setImportResult({
             success: false,
             count: insertedCount,
-            message: `Erro ao inserir lote: ${error.code ?? ""} ${error.message}`.trim(),
+            message: errorMsg,
           });
           return;
         }
 
-        insertedCount += data?.length ?? 0;
+        const inserted = data?.length ?? 0;
+        insertedCount += inserted;
+        setBatchLogs(prev => [...prev.slice(0, -1), `✅ Lote ${batchNum}/${totalBatches}: ${inserted} times inseridos`]);
       }
 
       if (insertedCount === 0) {
@@ -453,6 +465,20 @@ export const ScrapeTeamsSheet = ({
                 </ScrollArea>
 
               </>
+            )}
+
+            {/* Batch Logs */}
+            {batchLogs.length > 0 && (
+              <div className="p-3 rounded-xl bg-muted/30 border max-h-32 overflow-y-auto">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Log de importação:</p>
+                <div className="space-y-1">
+                  {batchLogs.map((log, idx) => (
+                    <p key={idx} className="text-xs font-mono text-foreground/80">
+                      {log}
+                    </p>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* Success/Error Result Message */}
