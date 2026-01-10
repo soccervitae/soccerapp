@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
@@ -8,6 +8,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCommentLikes, useLikeComment } from "@/hooks/useCommentLikes";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { CommentLikesSheet } from "./CommentLikesSheet";
+import { MentionAutocomplete } from "./MentionAutocomplete";
+import type { MentionUser } from "@/hooks/useMentionSearch";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -48,6 +50,9 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
   const [editingComment, setEditingComment] = useState<{ id: string; content: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionStartIndex, setMentionStartIndex] = useState<number | null>(null);
+  const [showMentionAutocomplete, setShowMentionAutocomplete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const { data: comments, isLoading } = usePostComments(post.id);
@@ -55,6 +60,52 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   const updateComment = useUpdateComment();
   const deleteComment = useDeleteComment();
   const likeComment = useLikeComment();
+
+  // Handle comment input changes with mention detection
+  const handleCommentChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart || 0;
+    setComment(value);
+
+    // Find @ symbol before cursor
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf("@");
+
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      // Check if there's no space between @ and cursor (valid mention in progress)
+      if (!textAfterAt.includes(" ")) {
+        setMentionQuery(textAfterAt);
+        setMentionStartIndex(lastAtIndex);
+        setShowMentionAutocomplete(true);
+        return;
+      }
+    }
+
+    // No valid mention detected
+    setShowMentionAutocomplete(false);
+    setMentionQuery("");
+    setMentionStartIndex(null);
+  }, []);
+
+  // Handle mention selection
+  const handleMentionSelect = useCallback((user: MentionUser) => {
+    if (mentionStartIndex === null) return;
+
+    const beforeMention = comment.substring(0, mentionStartIndex);
+    const afterCursor = comment.substring(mentionStartIndex + mentionQuery.length + 1);
+    const newComment = `${beforeMention}@${user.username} ${afterCursor}`;
+    
+    setComment(newComment);
+    setShowMentionAutocomplete(false);
+    setMentionQuery("");
+    setMentionStartIndex(null);
+
+    // Focus back on input
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  }, [comment, mentionStartIndex, mentionQuery]);
 
   // Get all comment IDs including replies for fetching likes
   const allCommentIds = useMemo(() => {
@@ -376,7 +427,14 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
         </ScrollArea>
 
         {/* Comment input */}
-        <div className="border-t border-border bg-background p-4 mt-auto">
+        <div className="border-t border-border bg-background p-4 mt-auto relative">
+          {/* Mention Autocomplete */}
+          <MentionAutocomplete
+            query={mentionQuery}
+            onSelect={handleMentionSelect}
+            visible={showMentionAutocomplete}
+          />
+          
           {/* Reply indicator */}
           {replyingTo && (
             <div className="flex items-center justify-between mb-2 px-1">
@@ -408,8 +466,16 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
               type="text"
               placeholder={replyingTo ? `Responder a @${replyingTo.username}...` : "Adicione um comentário..."}
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleComment()}
+              onChange={handleCommentChange}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && !showMentionAutocomplete) {
+                  handleComment();
+                }
+              }}
+              onBlur={() => {
+                // Delay to allow click on autocomplete
+                setTimeout(() => setShowMentionAutocomplete(false), 150);
+              }}
               className="flex-1 bg-muted rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
             />
             {comment && (
