@@ -18,7 +18,7 @@ import {
   useMarkAllNotificationsRead,
   type Notification,
 } from "@/hooks/useNotifications";
-import { Bell, MessageCircle, UserPlus, Check } from "lucide-react";
+import { Bell, MessageCircle, UserPlus, Check, AtSign } from "lucide-react";
 import { useState } from "react";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 
@@ -34,6 +34,8 @@ const NotificationIcon = ({ type }: { type: string }) => {
       return <MessageCircle className="w-4 h-4 text-blue-500" />;
     case "follow":
       return <UserPlus className="w-4 h-4 text-primary" />;
+    case "mention":
+      return <AtSign className="w-4 h-4 text-orange-500" />;
     default:
       return <Bell className="w-4 h-4 text-muted-foreground" />;
   }
@@ -49,6 +51,8 @@ const getNotificationText = (notification: Notification) => {
       return `${actorName} comentou: "${notification.content?.slice(0, 50)}${(notification.content?.length || 0) > 50 ? '...' : ''}"`;
     case "follow":
       return `${actorName} começou a torcer por você`;
+    case "mention":
+      return `${actorName} mencionou você em um comentário`;
     default:
       return notification.content || "Nova notificação";
   }
