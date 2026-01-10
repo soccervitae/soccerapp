@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2 } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Trophy, Users, Flag, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -72,6 +72,34 @@ export default function AdminChampionships() {
     },
   });
 
+  // Query for statistics
+  const { data: stats } = useQuery({
+    queryKey: ["adminChampionshipsStats"],
+    queryFn: async () => {
+      const [
+        totalResult,
+        activeResult,
+        inactiveResult,
+        countriesResult,
+      ] = await Promise.all([
+        supabase.from("championships").select("id", { count: "exact", head: true }),
+        supabase.from("championships").select("id", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("championships").select("id", { count: "exact", head: true }).eq("is_active", false),
+        supabase.from("championships").select("country_id").not("country_id", "is", null),
+      ]);
+
+      const uniqueCountries = new Set(countriesResult.data?.map(c => c.country_id) || []);
+
+      return {
+        total: totalResult.count || 0,
+        active: activeResult.count || 0,
+        inactive: inactiveResult.count || 0,
+        countries: uniqueCountries.size,
+        userAdded: userChampionshipsCount || 0,
+      };
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("championships").delete().eq("id", id);
@@ -95,11 +123,40 @@ export default function AdminChampionships() {
           <p className="text-muted-foreground">
             Gerencie todos os campeonatos cadastrados
           </p>
-          {userChampionshipsCount !== undefined && userChampionshipsCount > 0 && (
-            <Badge variant="secondary" className="mt-2">
-              {userChampionshipsCount} campeonatos adicionados por usuários
-            </Badge>
-          )}
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-foreground">{stats?.total || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Trophy className="h-3 w-3" /> Total
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-green-500">{stats?.active || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <CheckCircle className="h-3 w-3" /> Ativos
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-muted-foreground">{stats?.inactive || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <XCircle className="h-3 w-3" /> Inativos
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-blue-500">{stats?.countries || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Flag className="h-3 w-3" /> Países
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-purple-500">{stats?.userAdded || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Users className="h-3 w-3" /> Por Usuários
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
