@@ -1,6 +1,7 @@
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileInfo } from "@/components/profile/ProfileInfo";
 import { HighlightsSection } from "@/components/profile/HighlightsSection";
+import { OfficialHighlightsSection } from "@/components/profile/OfficialHighlightsSection";
 import { ChampionshipsTab } from "@/components/profile/ChampionshipsTab";
 import { AchievementsTab } from "@/components/profile/AchievementsTab";
 import { TeamsTab } from "@/components/profile/TeamsTab";
@@ -530,15 +531,24 @@ const Profile = () => {
           followStats={followStats}
           isOwnProfile={isOwnProfile}
         />
-        <div className="px-4">
-          <HighlightsSection 
+        {isOfficialAccount ? (
+          <OfficialHighlightsSection 
             highlights={highlights || []} 
             isLoading={highlightsLoading}
-            isOwnProfile={isOwnProfile}
             profileUsername={profile.username}
             profileAvatarUrl={profile.avatar_url}
           />
-        </div>
+        ) : (
+          <div className="px-4">
+            <HighlightsSection 
+              highlights={highlights || []} 
+              isLoading={highlightsLoading}
+              isOwnProfile={isOwnProfile}
+              profileUsername={profile.username}
+              profileAvatarUrl={profile.avatar_url}
+            />
+          </div>
+        )}
         <ProfileTabs />
       </div>
     </>
@@ -570,17 +580,28 @@ const Profile = () => {
                 isOwnProfile={isOwnProfile}
               />
             </motion.div>
-            <div className="px-4">
+            {isOfficialAccount ? (
               <motion.div variants={itemVariants}>
-                <HighlightsSection 
+                <OfficialHighlightsSection 
                   highlights={highlights || []} 
                   isLoading={highlightsLoading}
-                  isOwnProfile={isOwnProfile}
                   profileUsername={profile.username}
                   profileAvatarUrl={profile.avatar_url}
                 />
               </motion.div>
-            </div>
+            ) : (
+              <div className="px-4">
+                <motion.div variants={itemVariants}>
+                  <HighlightsSection 
+                    highlights={highlights || []} 
+                    isLoading={highlightsLoading}
+                    isOwnProfile={isOwnProfile}
+                    profileUsername={profile.username}
+                    profileAvatarUrl={profile.avatar_url}
+                  />
+                </motion.div>
+              </div>
+            )}
             <motion.div variants={itemVariants}>
               <ProfileTabs />
             </motion.div>
