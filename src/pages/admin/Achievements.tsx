@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy, Users, Tag, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddAchievementTypeSheet } from "@/components/admin/AddAchievementTypeSheet";
@@ -80,6 +80,28 @@ export default function AdminAchievements() {
     },
   });
 
+  // Query for statistics
+  const { data: stats } = useQuery({
+    queryKey: ["adminAchievementsStats"],
+    queryFn: async () => {
+      const [
+        typesResult,
+        categoriesResult,
+      ] = await Promise.all([
+        supabase.from("achievement_types").select("id", { count: "exact", head: true }),
+        supabase.from("achievement_types").select("category").not("category", "is", null),
+      ]);
+
+      const uniqueCategories = new Set(categoriesResult.data?.map(c => c.category) || []);
+
+      return {
+        totalTypes: typesResult.count || 0,
+        categories: uniqueCategories.size,
+        userAdded: userAchievementsCount || 0,
+      };
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("achievement_types").delete().eq("id", id);
@@ -114,16 +136,39 @@ export default function AdminAchievements() {
             <p className="text-muted-foreground">
               Gerencie os tipos de conquistas disponíveis
             </p>
-            {userAchievementsCount !== undefined && userAchievementsCount > 0 && (
-              <Badge variant="secondary" className="mt-2">
-                {userAchievementsCount} conquistas adicionadas por usuários
-              </Badge>
-            )}
           </div>
           <Button onClick={() => setIsAddOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Adicionar Tipo
           </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-foreground">{stats?.totalTypes || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Trophy className="h-3 w-3" /> Tipos
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-blue-500">{stats?.categories || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Tag className="h-3 w-3" /> Categorias
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-purple-500">{stats?.userAdded || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Users className="h-3 w-3" /> Por Usuários
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-orange-500">{achievementTypes?.length || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Palette className="h-3 w-3" /> Listados
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
