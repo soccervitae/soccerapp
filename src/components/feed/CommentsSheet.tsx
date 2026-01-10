@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useCommentLikes, useLikeComment } from "@/hooks/useCommentLikes";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
+import { CommentLikesSheet } from "./CommentLikesSheet";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -25,6 +26,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   const { user } = useAuth();
   const { data: currentUserProfile } = useProfile(user?.id);
   const [comment, setComment] = useState("");
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const { data: comments, isLoading } = usePostComments(post.id);
   const createComment = useCreateComment();
   const likeComment = useLikeComment();
@@ -116,11 +118,14 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
                       <p className="text-sm text-foreground mt-0.5 break-words">
                         {c.content}
                       </p>
-                      {/* Like count */}
+                      {/* Like count - clickable to show likers */}
                       {likesCount > 0 && (
-                        <span className="text-xs text-muted-foreground mt-1 inline-block">
+                        <button
+                          onClick={() => setSelectedCommentId(c.id)}
+                          className="text-xs text-muted-foreground mt-1 inline-block hover:underline"
+                        >
                           {likesCount} {likesCount === 1 ? "aplauso" : "aplausos"}
-                        </span>
+                        </button>
                       )}
                     </div>
                     {/* Like button */}
@@ -192,6 +197,15 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
           </div>
         </div>
       </ResponsiveModalContent>
+
+      {/* Comment Likes Sheet */}
+      <CommentLikesSheet
+        commentId={selectedCommentId || ""}
+        open={!!selectedCommentId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedCommentId(null);
+        }}
+      />
     </ResponsiveModal>
   );
 };
