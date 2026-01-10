@@ -20,12 +20,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X, Eye } from "lucide-react";
+import { MoreHorizontal, Check, X, Eye, Ban } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ViewReportedPostSheet } from "@/components/admin/ViewReportedPostSheet";
+import { ViewReportedProfileSheet } from "@/components/admin/ViewReportedProfileSheet";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
@@ -44,7 +45,9 @@ const statusLabels: Record<string, string> = {
 export default function AdminReports() {
   const [tab, setTab] = useState("posts");
   const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [selectedProfileReport, setSelectedProfileReport] = useState<any>(null);
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
+  const [viewProfileSheetOpen, setViewProfileSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: postReports, isLoading: loadingPostReports } = useQuery({
@@ -81,7 +84,20 @@ export default function AdminReports() {
       const { data, error } = await supabase
         .from("profile_reports")
         .select(`
-          *
+          *,
+          reporter:profiles!profile_reports_reporter_id_fkey(username, avatar_url),
+          profile:profiles!profile_reports_profile_id_fkey(
+            id,
+            username,
+            full_name,
+            avatar_url,
+            bio,
+            created_at,
+            banned_at,
+            ban_reason,
+            conta_verificada,
+            is_official_account
+          )
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -137,9 +153,58 @@ export default function AdminReports() {
     },
   });
 
+  const banProfileMutation = useMutation({
+    mutationFn: async ({ profileId, reason }: { profileId: string; reason: string }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ 
+          banned_at: new Date().toISOString(),
+          ban_reason: reason 
+        })
+        .eq("id", profileId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminProfileReports"] });
+      queryClient.invalidateQueries({ queryKey: ["adminStats"] });
+      toast.success("Conta banida com sucesso");
+      setViewProfileSheetOpen(false);
+    },
+    onError: () => {
+      toast.error("Erro ao banir conta");
+    },
+  });
+
+  const unbanProfileMutation = useMutation({
+    mutationFn: async (profileId: string) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ 
+          banned_at: null,
+          ban_reason: null 
+        })
+        .eq("id", profileId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminProfileReports"] });
+      queryClient.invalidateQueries({ queryKey: ["adminStats"] });
+      toast.success("Banimento removido");
+      setViewProfileSheetOpen(false);
+    },
+    onError: () => {
+      toast.error("Erro ao remover banimento");
+    },
+  });
+
   const handleViewReport = (report: any) => {
     setSelectedReport(report);
     setViewSheetOpen(true);
+  };
+
+  const handleViewProfileReport = (report: any) => {
+    setSelectedProfileReport(report);
+    setViewProfileSheetOpen(true);
   };
 
   const handleResolve = () => {
@@ -165,6 +230,41 @@ export default function AdminReports() {
   const handleDeletePost = () => {
     if (selectedReport?.post?.id) {
       deletePostMutation.mutate(selectedReport.post.id);
+    }
+  };
+
+  const handleProfileResolve = () => {
+    if (selectedProfileReport) {
+      updateReportMutation.mutate({
+        id: selectedProfileReport.id,
+        status: "resolved",
+        type: "profile",
+      });
+    }
+  };
+
+  const handleProfileReject = () => {
+    if (selectedProfileReport) {
+      updateReportMutation.mutate({
+        id: selectedProfileReport.id,
+        status: "rejected",
+        type: "profile",
+      });
+    }
+  };
+
+  const handleBanProfile = (reason: string) => {
+    if (selectedProfileReport?.profile?.id) {
+      banProfileMutation.mutate({ 
+        profileId: selectedProfileReport.profile.id, 
+        reason 
+      });
+    }
+  };
+
+  const handleUnbanProfile = () => {
+    if (selectedProfileReport?.profile?.id) {
+      unbanProfileMutation.mutate(selectedProfileReport.profile.id);
     }
   };
 
@@ -309,14 +409,46 @@ export default function AdminReports() {
           profileReports?.map((report) => (
             <TableRow key={report.id}>
               <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  ID: {report.reporter_id.slice(0, 8)}...
-                </span>
+                {report.reporter ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={report.reporter?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {report.reporter?.username?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">@{report.reporter?.username}</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    ID: {report.reporter_id.slice(0, 8)}...
+                  </span>
+                )}
               </TableCell>
               <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  ID: {report.profile_id.slice(0, 8)}...
-                </span>
+                {report.profile ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={report.profile?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {report.profile?.username?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <span className="text-sm">@{report.profile?.username}</span>
+                      {report.profile?.banned_at && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          <Ban className="h-3 w-3 mr-1" />
+                          Banido
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    ID: {report.profile_id.slice(0, 8)}...
+                  </span>
+                )}
               </TableCell>
               <TableCell className="text-sm">{report.reason}</TableCell>
               <TableCell>
@@ -335,6 +467,10 @@ export default function AdminReports() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleViewProfileReport(report)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver detalhes
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
                         updateReportMutation.mutate({
@@ -411,6 +547,17 @@ export default function AdminReports() {
         onReject={handleReject}
         onDeletePost={handleDeletePost}
         isDeleting={deletePostMutation.isPending}
+      />
+
+      <ViewReportedProfileSheet
+        open={viewProfileSheetOpen}
+        onOpenChange={setViewProfileSheetOpen}
+        report={selectedProfileReport}
+        onResolve={handleProfileResolve}
+        onReject={handleProfileReject}
+        onBanProfile={handleBanProfile}
+        onUnbanProfile={handleUnbanProfile}
+        isBanning={banProfileMutation.isPending || unbanProfileMutation.isPending}
       />
     </AdminLayout>
   );
