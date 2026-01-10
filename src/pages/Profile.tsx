@@ -379,8 +379,13 @@ const Profile = () => {
     );
   };
 
-  // Tab order for swipe navigation
-  const tabOrder = ["profile", "teams", "videos", "championships", "achievements", "photos"];
+  // Check if official account (simplified layout without championships/achievements)
+  const isOfficialAccount = (profile as any)?.is_official_account === true;
+
+  // Tab order for swipe navigation (exclude championships/achievements for official accounts)
+  const tabOrder = isOfficialAccount 
+    ? ["profile", "teams", "videos", "photos"]
+    : ["profile", "teams", "videos", "championships", "achievements", "photos"];
   
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
@@ -420,20 +425,24 @@ const Profile = () => {
           <span className="material-symbols-outlined text-[20px]">play_circle</span>
           Vídeos
         </TabsTrigger>
-        <TabsTrigger 
-          value="championships" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
-        >
-          <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
-          Campeonatos
-        </TabsTrigger>
-        <TabsTrigger 
-          value="achievements" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
-        >
-          <span className="material-symbols-outlined text-[20px]">trophy</span>
-          Conquistas
-        </TabsTrigger>
+        {!isOfficialAccount && (
+          <TabsTrigger 
+            value="championships" 
+            className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          >
+            <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
+            Campeonatos
+          </TabsTrigger>
+        )}
+        {!isOfficialAccount && (
+          <TabsTrigger 
+            value="achievements" 
+            className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          >
+            <span className="material-symbols-outlined text-[20px]">trophy</span>
+            Conquistas
+          </TabsTrigger>
+        )}
         <TabsTrigger 
           value="photos" 
           className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
@@ -474,27 +483,31 @@ const Profile = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
-          {activeTab === "championships" && (
-            <ChampionshipsTab 
-              championships={championships || []} 
-              isLoading={championshipsLoading} 
-              isOwnProfile={isOwnProfile}
-              userId={targetUserId}
-            />
-          )}
-        </TabsContent>
+        {!isOfficialAccount && (
+          <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
+            {activeTab === "championships" && (
+              <ChampionshipsTab 
+                championships={championships || []} 
+                isLoading={championshipsLoading} 
+                isOwnProfile={isOwnProfile}
+                userId={targetUserId}
+              />
+            )}
+          </TabsContent>
+        )}
 
-        <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
-          {activeTab === "achievements" && (
-            <AchievementsTab 
-              achievements={achievements || []} 
-              isLoading={achievementsLoading} 
-              isOwnProfile={isOwnProfile}
-              userId={targetUserId}
-            />
-          )}
-        </TabsContent>
+        {!isOfficialAccount && (
+          <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
+            {activeTab === "achievements" && (
+              <AchievementsTab 
+                achievements={achievements || []} 
+                isLoading={achievementsLoading} 
+                isOwnProfile={isOwnProfile}
+                userId={targetUserId}
+              />
+            )}
+          </TabsContent>
+        )}
 
         <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
