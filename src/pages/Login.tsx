@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted } from "@/services/deviceService";
-
+import { toast } from "sonner";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +23,12 @@ const Login = () => {
     const { error } = await signIn(email, password);
 
     if (error) {
+      // Check if it's a ban error
+      if (error.message.includes("banida") || error.message.includes("banned")) {
+        toast.error(error.message, { duration: 8000 });
+      } else {
+        toast.error("Email ou senha incorretos");
+      }
       setLoading(false);
       return;
     }
