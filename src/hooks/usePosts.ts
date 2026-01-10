@@ -400,10 +400,26 @@ export const useSavePost = () => {
   });
 };
 
+export interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  parent_id: string | null;
+  created_at: string;
+  likes_count: number | null;
+  profile: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+  } | null;
+  replies?: Comment[];
+}
+
 export const usePostComments = (postId: string) => {
   return useQuery({
     queryKey: ["comments", postId],
-    queryFn: async () => {
+    queryFn: async (): Promise<Comment[]> => {
       const { data, error } = await supabase
         .from("comments")
         .select(`
@@ -418,7 +434,29 @@ export const usePostComments = (postId: string) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+      
+      // Organize comments into parent/child structure
+      const commentsMap = new Map<string, Comment>();
+      const rootComments: Comment[] = [];
+      
+      // First pass: create map of all comments
+      for (const comment of data || []) {
+        commentsMap.set(comment.id, { ...comment, replies: [] });
+      }
+      
+      // Second pass: organize into tree structure
+      for (const comment of data || []) {
+        const commentWithReplies = commentsMap.get(comment.id)!;
+        if (comment.parent_id && commentsMap.has(comment.parent_id)) {
+          // This is a reply - add to parent's replies
+          commentsMap.get(comment.parent_id)!.replies!.push(commentWithReplies);
+        } else {
+          // This is a root comment
+          rootComments.push(commentWithReplies);
+        }
+      }
+      
+      return rootComments;
     },
     enabled: !!postId,
   });
@@ -429,7 +467,7 @@ export const useCreateComment = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
+    mutationFn: async ({ postId, content, parentId }: { postId: string; content: string; parentId?: string }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
       const { data, error } = await supabase
@@ -438,6 +476,7 @@ export const useCreateComment = () => {
           post_id: postId,
           user_id: user.id,
           content,
+          parent_id: parentId || null,
         })
         .select()
         .single();
