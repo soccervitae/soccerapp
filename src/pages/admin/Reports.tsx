@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ViewReportedPostSheet } from "@/components/admin/ViewReportedPostSheet";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
@@ -42,6 +43,8 @@ const statusLabels: Record<string, string> = {
 
 export default function AdminReports() {
   const [tab, setTab] = useState("posts");
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [viewSheetOpen, setViewSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: postReports, isLoading: loadingPostReports } = useQuery({
@@ -52,7 +55,19 @@ export default function AdminReports() {
         .select(`
           *,
           reporter:reporter_id(username, avatar_url),
-          post:post_id(content, user_id, profiles:user_id(username))
+          post:post_id(
+            id,
+            content, 
+            user_id, 
+            media_url,
+            media_type,
+            location_name,
+            likes_count,
+            comments_count,
+            shares_count,
+            created_at,
+            profiles:user_id(username, avatar_url)
+          )
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -101,6 +116,57 @@ export default function AdminReports() {
       toast.error("Erro ao atualizar status");
     },
   });
+
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminPostReports"] });
+      queryClient.invalidateQueries({ queryKey: ["adminStats"] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post excluído com sucesso");
+      setViewSheetOpen(false);
+    },
+    onError: () => {
+      toast.error("Erro ao excluir post");
+    },
+  });
+
+  const handleViewReport = (report: any) => {
+    setSelectedReport(report);
+    setViewSheetOpen(true);
+  };
+
+  const handleResolve = () => {
+    if (selectedReport) {
+      updateReportMutation.mutate({
+        id: selectedReport.id,
+        status: "resolved",
+        type: "post",
+      });
+    }
+  };
+
+  const handleReject = () => {
+    if (selectedReport) {
+      updateReportMutation.mutate({
+        id: selectedReport.id,
+        status: "rejected",
+        type: "post",
+      });
+    }
+  };
+
+  const handleDeletePost = () => {
+    if (selectedReport?.post?.id) {
+      deletePostMutation.mutate(selectedReport.post.id);
+    }
+  };
 
   const renderPostReports = () => (
     <Table>
@@ -171,9 +237,9 @@ export default function AdminReports() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleViewReport(report)}>
                       <Eye className="h-4 w-4 mr-2" />
-                      Ver post
+                      Ver detalhes
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
@@ -336,6 +402,16 @@ export default function AdminReports() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ViewReportedPostSheet
+        open={viewSheetOpen}
+        onOpenChange={setViewSheetOpen}
+        report={selectedReport}
+        onResolve={handleResolve}
+        onReject={handleReject}
+        onDeletePost={handleDeletePost}
+        isDeleting={deletePostMutation.isPending}
+      />
     </AdminLayout>
   );
 }
