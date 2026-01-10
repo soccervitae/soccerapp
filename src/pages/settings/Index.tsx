@@ -128,6 +128,16 @@ export default function Settings() {
               onClick={() => navigate("/guidelines")}
             />
             <SettingsItem 
+              icon="description"
+              label="Termos de Uso"
+              onClick={() => navigate("/terms")}
+            />
+            <SettingsItem 
+              icon="policy"
+              label="Política de Privacidade"
+              onClick={() => navigate("/privacy-policy")}
+            />
+            <SettingsItem 
               icon="info"
               label="Sobre o Soccer Vitae"
               onClick={() => {}}
