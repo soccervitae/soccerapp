@@ -2,6 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+export interface CommentLiker {
+  user_id: string;
+  username: string;
+  full_name: string | null;
+  nickname: string | null;
+  avatar_url: string | null;
+  conta_verificada: boolean;
+}
+
 export const useCommentLikes = (commentIds: string[]) => {
   const { user } = useAuth();
 
@@ -46,6 +55,42 @@ export const useCommentLikes = (commentIds: string[]) => {
   });
 };
 
+// Hook to fetch users who liked a specific comment
+export const useCommentLikers = (commentId: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ["comment-likers", commentId],
+    queryFn: async (): Promise<CommentLiker[]> => {
+      const { data, error } = await supabase
+        .from("comment_likes")
+        .select(`
+          user_id,
+          profiles:user_id (
+            id,
+            username,
+            full_name,
+            nickname,
+            avatar_url,
+            conta_verificada
+          )
+        `)
+        .eq("comment_id", commentId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return (data || []).map((item: any) => ({
+        user_id: item.user_id,
+        username: item.profiles?.username || "",
+        full_name: item.profiles?.full_name || null,
+        nickname: item.profiles?.nickname || null,
+        avatar_url: item.profiles?.avatar_url || null,
+        conta_verificada: item.profiles?.conta_verificada || false,
+      }));
+    },
+    enabled: enabled && !!commentId,
+  });
+};
+
 export const useLikeComment = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -74,6 +119,7 @@ export const useLikeComment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comment-likes"] });
+      queryClient.invalidateQueries({ queryKey: ["comment-likers"] });
     },
   });
 };
