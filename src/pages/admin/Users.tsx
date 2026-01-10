@@ -20,7 +20,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight, Filter, X, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -32,12 +39,26 @@ const ITEMS_PER_PAGE = 20;
 
 type UserFilter = "all" | "admin" | "verified" | "unverified" | "banned";
 
+interface FilterState {
+  status: UserFilter;
+  gender: string;
+  profileType: string;
+  country: string;
+  state: string;
+}
+
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<UserFilter>("all");
+  const [filters, setFilters] = useState<FilterState>({
+    status: "all",
+    gender: "all",
+    profileType: "all",
+    country: "all",
+    state: "all",
+  });
   const queryClient = useQueryClient();
 
   // Fetch all admin user IDs for filtering
@@ -52,42 +73,142 @@ export default function AdminUsers() {
     },
   });
 
+  // Fetch profile types
+  const { data: profileTypes } = useQuery({
+    queryKey: ["profileTypes"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("funcaoperfil")
+        .select("id, name")
+        .order("name");
+      return data || [];
+    },
+  });
+
+  // Fetch countries
+  const { data: countries } = useQuery({
+    queryKey: ["countries"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("paises")
+        .select("id, nome")
+        .order("nome");
+      return data || [];
+    },
+  });
+
+  // Fetch states based on selected country
+  const { data: states } = useQuery({
+    queryKey: ["states", filters.country],
+    queryFn: async () => {
+      if (filters.country === "all") return [];
+      const { data } = await supabase
+        .from("estados")
+        .select("id, nome")
+        .eq("pais_id", parseInt(filters.country))
+        .order("nome");
+      return data || [];
+    },
+    enabled: filters.country !== "all",
+  });
+
+  // Build filter query helper
+  const applyFilters = (query: any) => {
+    if (search) {
+      query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
+    }
+
+    // Status filter
+    if (filters.status === "banned") {
+      query = query.not("banned_at", "is", null);
+    } else if (filters.status === "verified") {
+      query = query.eq("conta_verificada", true).is("banned_at", null);
+    } else if (filters.status === "unverified") {
+      query = query.eq("conta_verificada", false).is("banned_at", null);
+    } else if (filters.status === "admin" && adminUserIds && adminUserIds.length > 0) {
+      query = query.in("id", adminUserIds);
+    }
+
+    // Gender filter
+    if (filters.gender !== "all") {
+      query = query.eq("gender", filters.gender);
+    }
+
+    // Profile type filter (funcao column references funcaoperfil)
+    if (filters.profileType !== "all") {
+      query = query.eq("funcao", parseInt(filters.profileType));
+    }
+
+    // Country filter
+    if (filters.country !== "all") {
+      query = query.eq("nationality", parseInt(filters.country));
+    }
+
+    // State filter
+    if (filters.state !== "all") {
+      query = query.eq("estado_id", parseInt(filters.state));
+    }
+
+    return query;
+  };
+
   // Query for total count with filters
   const { data: totalCount } = useQuery({
-    queryKey: ["adminUsersCount", search, activeFilter, adminUserIds],
+    queryKey: ["adminUsersCount", search, filters, adminUserIds],
     queryFn: async () => {
+      if (filters.status === "admin" && (!adminUserIds || adminUserIds.length === 0)) {
+        return 0;
+      }
+
       let query = supabase
         .from("profiles")
         .select("id", { count: "exact", head: true });
 
-      if (search) {
-        query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
-      }
-
-      // Apply filters
-      if (activeFilter === "banned") {
-        query = query.not("banned_at", "is", null);
-      } else if (activeFilter === "verified") {
-        query = query.eq("conta_verificada", true).is("banned_at", null);
-      } else if (activeFilter === "unverified") {
-        query = query.eq("conta_verificada", false).is("banned_at", null);
-      } else if (activeFilter === "admin" && adminUserIds && adminUserIds.length > 0) {
-        query = query.in("id", adminUserIds);
-      } else if (activeFilter === "admin") {
-        // No admins exist
-        return 0;
-      }
+      query = applyFilters(query);
 
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
     },
-    enabled: activeFilter !== "admin" || adminUserIds !== undefined,
+    enabled: filters.status !== "admin" || adminUserIds !== undefined,
+  });
+
+  // Query for filter counts (statistics)
+  const { data: filterStats } = useQuery({
+    queryKey: ["adminUsersStats"],
+    queryFn: async () => {
+      const [
+        totalResult,
+        maleResult,
+        femaleResult,
+        bannedResult,
+        verifiedResult,
+      ] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "male"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "female"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).not("banned_at", "is", null),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("conta_verificada", true),
+      ]);
+
+      return {
+        total: totalResult.count || 0,
+        male: maleResult.count || 0,
+        female: femaleResult.count || 0,
+        banned: bannedResult.count || 0,
+        verified: verifiedResult.count || 0,
+        admins: adminUserIds?.length || 0,
+      };
+    },
   });
 
   const { data: users, isLoading } = useQuery({
-    queryKey: ["adminUsers", search, currentPage, activeFilter, adminUserIds],
+    queryKey: ["adminUsers", search, currentPage, filters, adminUserIds],
     queryFn: async () => {
+      if (filters.status === "admin" && (!adminUserIds || adminUserIds.length === 0)) {
+        return [];
+      }
+
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
@@ -96,23 +217,7 @@ export default function AdminUsers() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (search) {
-        query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
-      }
-
-      // Apply filters
-      if (activeFilter === "banned") {
-        query = query.not("banned_at", "is", null);
-      } else if (activeFilter === "verified") {
-        query = query.eq("conta_verificada", true).is("banned_at", null);
-      } else if (activeFilter === "unverified") {
-        query = query.eq("conta_verificada", false).is("banned_at", null);
-      } else if (activeFilter === "admin" && adminUserIds && adminUserIds.length > 0) {
-        query = query.in("id", adminUserIds);
-      } else if (activeFilter === "admin") {
-        return [];
-      }
-
+      query = applyFilters(query);
       query = query.range(from, to);
 
       const { data: profiles, error } = await query;
@@ -135,7 +240,7 @@ export default function AdminUsers() {
       
       return profiles || [];
     },
-    enabled: activeFilter !== "admin" || adminUserIds !== undefined,
+    enabled: filters.status !== "admin" || adminUserIds !== undefined,
   });
 
   const toggleAdminMutation = useMutation({
@@ -216,34 +321,93 @@ export default function AdminUsers() {
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (filter: UserFilter) => {
-    setActiveFilter(filter);
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    setFilters(prev => {
+      const newFilters = { ...prev, [key]: value };
+      // Reset state when country changes
+      if (key === "country" && value !== prev.country) {
+        newFilters.state = "all";
+      }
+      return newFilters;
+    });
     setCurrentPage(1);
   };
 
-  const filterOptions: { value: UserFilter; label: string; color?: string }[] = [
-    { value: "all", label: "Todos" },
-    { value: "admin", label: "Administradores", color: "bg-primary text-primary-foreground" },
-    { value: "verified", label: "Verificados", color: "border-green-500 text-green-500" },
-    { value: "unverified", label: "Não verificados", color: "bg-secondary text-secondary-foreground" },
-    { value: "banned", label: "Banidos", color: "bg-destructive text-destructive-foreground" },
+  const clearAllFilters = () => {
+    setFilters({
+      status: "all",
+      gender: "all",
+      profileType: "all",
+      country: "all",
+      state: "all",
+    });
+    setSearch("");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = filters.status !== "all" || 
+    filters.gender !== "all" || 
+    filters.profileType !== "all" || 
+    filters.country !== "all" || 
+    filters.state !== "all" ||
+    search !== "";
+
+  const statusOptions: { value: UserFilter; label: string }[] = [
+    { value: "all", label: "Todos os status" },
+    { value: "admin", label: `Administradores (${filterStats?.admins || 0})` },
+    { value: "verified", label: `Verificados (${filterStats?.verified || 0})` },
+    { value: "unverified", label: "Não verificados" },
+    { value: "banned", label: `Banidos (${filterStats?.banned || 0})` },
   ];
 
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Header with stats */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Usuários</h1>
             <p className="text-muted-foreground">
-              Gerencie todos os usuários da plataforma ({totalCount || 0} usuários)
+              Gerencie todos os usuários da plataforma
             </p>
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Users className="h-4 w-4" />
+              Total
+            </div>
+            <p className="text-2xl font-bold text-foreground">{filterStats?.total || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-muted-foreground text-sm">Masculino</div>
+            <p className="text-2xl font-bold text-blue-500">{filterStats?.male || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-muted-foreground text-sm">Feminino</div>
+            <p className="text-2xl font-bold text-pink-500">{filterStats?.female || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-muted-foreground text-sm">Verificados</div>
+            <p className="text-2xl font-bold text-green-500">{filterStats?.verified || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-muted-foreground text-sm">Administradores</div>
+            <p className="text-2xl font-bold text-primary">{filterStats?.admins || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-muted-foreground text-sm">Banidos</div>
+            <p className="text-2xl font-bold text-destructive">{filterStats?.banned || 0}</p>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome ou username..."
@@ -252,33 +416,100 @@ export default function AdminUsers() {
                 className="pl-10"
               />
             </div>
-          </div>
-          
-          {/* Filter Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            {filterOptions.map((filter) => (
-              <Button
-                key={filter.value}
-                variant={activeFilter === filter.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleFilterChange(filter.value)}
-                className={activeFilter === filter.value ? "" : "hover:bg-muted"}
-              >
-                {filter.label}
-              </Button>
-            ))}
-            {activeFilter !== "all" && (
+            
+            {/* Status Filter */}
+            <Select value={filters.status} onValueChange={(v) => handleFilterChange("status", v as UserFilter)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Gender Filter */}
+            <Select value={filters.gender} onValueChange={(v) => handleFilterChange("gender", v)}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Sexo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os sexos</SelectItem>
+                <SelectItem value="male">Masculino ({filterStats?.male || 0})</SelectItem>
+                <SelectItem value="female">Feminino ({filterStats?.female || 0})</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Profile Type Filter */}
+            <Select value={filters.profileType} onValueChange={(v) => handleFilterChange("profileType", v)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Tipo de perfil" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                {profileTypes?.map((type) => (
+                  <SelectItem key={type.id} value={type.id.toString()}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Country Filter */}
+            <Select value={filters.country} onValueChange={(v) => handleFilterChange("country", v)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="País" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os países</SelectItem>
+                {countries?.map((country) => (
+                  <SelectItem key={country.id} value={country.id.toString()}>
+                    {country.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* State Filter (only show if country is selected) */}
+            {filters.country !== "all" && states && states.length > 0 && (
+              <Select value={filters.state} onValueChange={(v) => handleFilterChange("state", v)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os estados</SelectItem>
+                  {states.map((state) => (
+                    <SelectItem key={state.id} value={state.id.toString()}>
+                      {state.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {hasActiveFilters && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleFilterChange("all")}
+                onClick={clearAllFilters}
                 className="text-muted-foreground"
               >
                 <X className="h-4 w-4 mr-1" />
-                Limpar
+                Limpar filtros
               </Button>
             )}
+          </div>
+          
+          {/* Active filters summary */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Filter className="h-4 w-4" />
+            <span>
+              Mostrando <strong className="text-foreground">{totalCount || 0}</strong> usuários
+              {hasActiveFilters && " (filtrado)"}
+            </span>
           </div>
         </div>
 
