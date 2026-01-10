@@ -4,6 +4,8 @@ import {
   ResponsiveModalHeader,
   ResponsiveModalTitle,
 } from "@/components/ui/responsive-modal";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useProfile } from "@/hooks/useProfile";
 
 type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
 
@@ -13,13 +15,14 @@ interface CreateMenuSheetProps {
   onSelectOption: (option: CreateOption) => void;
 }
 
-const menuOptions = [
+const allMenuOptions = [
   {
     id: "post" as CreateOption,
     label: "Post",
     description: "Compartilhe uma foto ou vídeo",
     icon: "add_photo_alternate",
     colorClass: "bg-blue-500/20 text-blue-500",
+    adminOnly: false,
   },
   {
     id: "replay" as CreateOption,
@@ -27,6 +30,7 @@ const menuOptions = [
     description: "Adicione um replay de 24h",
     icon: "slow_motion_video",
     colorClass: "bg-purple-500/20 text-purple-500",
+    adminOnly: false,
   },
   {
     id: "highlight" as CreateOption,
@@ -34,6 +38,7 @@ const menuOptions = [
     description: "Adicione aos seus destaques",
     icon: "auto_awesome",
     colorClass: "bg-amber-500/20 text-amber-500",
+    adminOnly: false,
   },
   {
     id: "times" as CreateOption,
@@ -41,6 +46,7 @@ const menuOptions = [
     description: "Selecione seus times",
     icon: "shield",
     colorClass: "bg-red-500/20 text-red-500",
+    adminOnly: false,
   },
   {
     id: "championship" as CreateOption,
@@ -48,6 +54,7 @@ const menuOptions = [
     description: "Adicione ao seu currículo",
     icon: "emoji_events",
     colorClass: "bg-yellow-500/20 text-yellow-500",
+    adminOnly: false,
   },
   {
     id: "achievement" as CreateOption,
@@ -55,14 +62,32 @@ const menuOptions = [
     description: "Registre suas conquistas",
     icon: "military_tech",
     colorClass: "bg-emerald-500/20 text-emerald-500",
+    adminOnly: false,
   },
 ];
+
+// Options blocked for non-official admin accounts (they should use admin page)
+const contentCreationOptions: CreateOption[] = ["post", "replay", "highlight"];
 
 export const CreateMenuSheet = ({
   open,
   onOpenChange,
   onSelectOption,
 }: CreateMenuSheetProps) => {
+  const { isAdmin } = useIsAdmin();
+  const { data: profile } = useProfile();
+  
+  // Check if user is official account (can create content anywhere)
+  const isOfficialAccount = profile?.is_official_account === true;
+  
+  // Admin users (except official account) can't create posts/replays/highlights from public app
+  const filteredOptions = allMenuOptions.filter(option => {
+    if (isAdmin && !isOfficialAccount && contentCreationOptions.includes(option.id)) {
+      return false;
+    }
+    return true;
+  });
+
   const handleSelect = (option: CreateOption) => {
     onOpenChange(false);
     // Small delay to allow sheet close animation
@@ -79,7 +104,7 @@ export const CreateMenuSheet = ({
         </ResponsiveModalHeader>
 
         <div className="flex flex-col gap-2 px-2">
-          {menuOptions.map((option) => (
+          {filteredOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
@@ -96,6 +121,16 @@ export const CreateMenuSheet = ({
               </div>
             </button>
           ))}
+          
+          {/* Show message for admin users */}
+          {isAdmin && !isOfficialAccount && (
+            <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
+                Para criar posts e destaques, acesse a{" "}
+                <span className="font-semibold">área administrativa</span>.
+              </p>
+            </div>
+          )}
         </div>
       </ResponsiveModalContent>
     </ResponsiveModal>
