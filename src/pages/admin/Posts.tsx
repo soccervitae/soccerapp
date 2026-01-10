@@ -160,50 +160,48 @@ export default function AdminPosts() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Posts</h1>
-            <p className="text-muted-foreground">
-              Gerencie todos os posts da plataforma
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Posts</h1>
+          <p className="text-muted-foreground">
+            Gerencie todos os posts da plataforma
+          </p>
+        </div>
+        
+        {/* Stats Cards */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-foreground">{engagementStats?.totalPosts || 0}</p>
+            <p className="text-xs text-muted-foreground">Posts</p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-red-500">{engagementStats?.totalLikes || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Heart className="h-3 w-3" /> Likes
             </p>
           </div>
-          
-          {/* Stats Cards - Same style as Teams page */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-foreground">{engagementStats?.totalPosts || 0}</p>
-              <p className="text-xs text-muted-foreground">Posts</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-red-500">{engagementStats?.totalLikes || 0}</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Heart className="h-3 w-3" /> Likes
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-blue-500">{engagementStats?.totalComments || 0}</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <MessageCircle className="h-3 w-3" /> Comentários
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-green-500">{engagementStats?.totalShares || 0}</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Share2 className="h-3 w-3" /> Shares
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-purple-500">{engagementStats?.postsWithImage || 0}</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Image className="h-3 w-3" /> Imagens
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
-              <p className="text-2xl font-bold text-orange-500">{engagementStats?.postsWithVideo || 0}</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Video className="h-3 w-3" /> Vídeos
-              </p>
-            </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-blue-500">{engagementStats?.totalComments || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <MessageCircle className="h-3 w-3" /> Comentários
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-green-500">{engagementStats?.totalShares || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Share2 className="h-3 w-3" /> Shares
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-purple-500">{engagementStats?.postsWithImage || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Image className="h-3 w-3" /> Imagens
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+            <p className="text-2xl font-bold text-orange-500">{engagementStats?.postsWithVideo || 0}</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Video className="h-3 w-3" /> Vídeos
+            </p>
           </div>
         </div>
 
