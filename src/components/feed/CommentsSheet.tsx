@@ -195,28 +195,33 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
               </button>
             )}
           </div>
-          {/* Like button */}
-          <button
-            onClick={() => handleLikeComment(c.id)}
-            disabled={likeComment.isPending}
-            className="flex-shrink-0 p-1 transition-all active:scale-110 self-start mt-2"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={isLiked ? "liked" : "unliked"}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-              >
-                <ClappingHandsIcon 
-                  className="w-4 h-4" 
-                  filled={isLiked} 
-                  variant="green" 
-                />
-              </motion.div>
-            </AnimatePresence>
-          </button>
+          {/* Like button with count */}
+          <div className="flex items-center gap-1 flex-shrink-0 self-start mt-2">
+            <button
+              onClick={() => handleLikeComment(c.id)}
+              disabled={likeComment.isPending}
+              className="p-1 transition-all active:scale-110"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={isLiked ? "liked" : "unliked"}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <ClappingHandsIcon 
+                    className="w-4 h-4" 
+                    filled={isLiked} 
+                    variant="green" 
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </button>
+            {likesCount > 0 && (
+              <span className="text-xs text-muted-foreground">{likesCount}</span>
+            )}
+          </div>
         </div>
         {/* Render replies if expanded */}
         {!isReply && isExpanded && c.replies && c.replies.length > 0 && (
