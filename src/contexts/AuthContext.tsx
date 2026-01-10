@@ -149,11 +149,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    return { error };
+    
+    if (error) {
+      return { error };
+    }
+
+    // Check if user is banned
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("banned_at, ban_reason")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profile?.banned_at) {
+        // Sign out the banned user immediately
+        await supabase.auth.signOut();
+        const banError = new Error(
+          profile.ban_reason 
+            ? `Sua conta foi banida. Motivo: ${profile.ban_reason}`
+            : "Sua conta foi banida permanentemente."
+        );
+        return { error: banError };
+      }
+    }
+
+    return { error: null };
   };
 
   const signOut = async () => {
