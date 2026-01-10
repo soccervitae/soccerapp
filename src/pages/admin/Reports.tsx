@@ -274,6 +274,7 @@ export default function AdminReports() {
         <TableRow>
           <TableHead>Denunciante</TableHead>
           <TableHead>Post</TableHead>
+          <TableHead>Mídia</TableHead>
           <TableHead>Motivo</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Data</TableHead>
@@ -286,6 +287,7 @@ export default function AdminReports() {
             <TableRow key={i}>
               <TableCell><Skeleton className="h-10 w-32" /></TableCell>
               <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+              <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
               <TableCell><Skeleton className="h-6 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
@@ -294,7 +296,7 @@ export default function AdminReports() {
           ))
         ) : postReports?.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
               Nenhuma denúncia de post encontrada
             </TableCell>
           </TableRow>
@@ -319,6 +321,27 @@ export default function AdminReports() {
                 <p className="text-xs text-muted-foreground">
                   por @{report.post?.profiles?.username}
                 </p>
+              </TableCell>
+              <TableCell>
+                {report.post?.media_url ? (
+                  <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                    {report.post?.media_type === "video" ? (
+                      <video 
+                        src={report.post.media_url} 
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                    ) : (
+                      <img 
+                        src={report.post.media_url} 
+                        alt="Post media"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground text-sm">-</span>
+                )}
               </TableCell>
               <TableCell className="text-sm">{report.reason}</TableCell>
               <TableCell>
