@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -29,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy, Users, Tag, List } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy, Users, List } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddAchievementTypeSheet } from "@/components/admin/AddAchievementTypeSheet";
@@ -91,22 +90,13 @@ export default function AdminAchievements() {
 
   // Query for statistics
   const { data: stats } = useQuery({
-    queryKey: ["adminAchievementsStats", userAchievementsCount],
+    queryKey: ["adminAchievementsStats"],
     queryFn: async () => {
-      const [
-        typesResult,
-        categoriesResult,
-      ] = await Promise.all([
-        supabase.from("achievement_types").select("id", { count: "exact", head: true }),
-        supabase.from("achievement_types").select("category").not("category", "is", null),
-      ]);
-
-      const uniqueCategories = new Set(categoriesResult.data?.map(c => c.category) || []);
-
-      return {
-        totalTypes: typesResult.count || 0,
-        categories: uniqueCategories.size,
-      };
+      const { count, error } = await supabase
+        .from("achievement_types")
+        .select("id", { count: "exact", head: true });
+      if (error) throw error;
+      return { totalTypes: count || 0 };
     },
   });
 
@@ -152,17 +142,11 @@ export default function AdminAchievements() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
             <p className="text-2xl font-bold text-foreground">{stats?.totalTypes || 0}</p>
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
               <Trophy className="h-3 w-3" /> Tipos
-            </p>
-          </div>
-          <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
-            <p className="text-2xl font-bold text-blue-500">{stats?.categories || 0}</p>
-            <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-              <Tag className="h-3 w-3" /> Categorias
             </p>
           </div>
           <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
@@ -196,7 +180,6 @@ export default function AdminAchievements() {
             <TableHeader>
               <TableRow>
                 <TableHead>Tipo de Conquista</TableHead>
-                <TableHead>Categoria</TableHead>
                 <TableHead>Usuários</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
@@ -206,14 +189,13 @@ export default function AdminAchievements() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : achievementTypes?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                     Nenhum tipo de conquista encontrado
                   </TableCell>
                 </TableRow>
@@ -231,15 +213,6 @@ export default function AdminAchievements() {
                           </span>
                         )}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {achievement.category ? (
-                        <Badge variant="outline">
-                          {achievement.category}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
