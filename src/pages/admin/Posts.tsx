@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Eye, Heart, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Heart, MessageCircle, ChevronLeft, ChevronRight, Share2, FileText, Image, Video } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -68,6 +68,44 @@ export default function AdminPosts() {
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
+    },
+  });
+
+  // Query for engagement stats
+  const { data: engagementStats } = useQuery({
+    queryKey: ["adminPostsEngagementStats"],
+    queryFn: async () => {
+      const { data: posts, error } = await supabase
+        .from("posts")
+        .select("likes_count, comments_count, shares_count, media_type");
+      
+      if (error) throw error;
+
+      const stats = {
+        totalPosts: posts?.length || 0,
+        totalLikes: 0,
+        totalComments: 0,
+        totalShares: 0,
+        postsWithImage: 0,
+        postsWithVideo: 0,
+        postsTextOnly: 0,
+      };
+
+      posts?.forEach((post) => {
+        stats.totalLikes += post.likes_count || 0;
+        stats.totalComments += post.comments_count || 0;
+        stats.totalShares += post.shares_count || 0;
+        
+        if (post.media_type === "video") {
+          stats.postsWithVideo++;
+        } else if (post.media_type === "image" || post.media_type === "carousel") {
+          stats.postsWithImage++;
+        } else {
+          stats.postsTextOnly++;
+        }
+      });
+
+      return stats;
     },
   });
 
@@ -125,8 +163,61 @@ export default function AdminPosts() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Posts</h1>
           <p className="text-muted-foreground">
-            Gerencie todos os posts da plataforma ({totalCount || 0} posts)
+            Gerencie todos os posts da plataforma
           </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <FileText className="h-4 w-4" />
+              Total Posts
+            </div>
+            <p className="text-2xl font-bold text-foreground">{engagementStats?.totalPosts || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Heart className="h-4 w-4 text-red-500" />
+              Likes
+            </div>
+            <p className="text-2xl font-bold text-red-500">{engagementStats?.totalLikes || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <MessageCircle className="h-4 w-4 text-blue-500" />
+              Comentários
+            </div>
+            <p className="text-2xl font-bold text-blue-500">{engagementStats?.totalComments || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Share2 className="h-4 w-4 text-green-500" />
+              Compartilhamentos
+            </div>
+            <p className="text-2xl font-bold text-green-500">{engagementStats?.totalShares || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Image className="h-4 w-4 text-purple-500" />
+              Com Imagem
+            </div>
+            <p className="text-2xl font-bold text-purple-500">{engagementStats?.postsWithImage || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Video className="h-4 w-4 text-orange-500" />
+              Com Vídeo
+            </div>
+            <p className="text-2xl font-bold text-orange-500">{engagementStats?.postsWithVideo || 0}</p>
+          </div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              Só Texto
+            </div>
+            <p className="text-2xl font-bold text-muted-foreground">{engagementStats?.postsTextOnly || 0}</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
