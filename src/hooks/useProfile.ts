@@ -465,7 +465,7 @@ export const useUserAchievements = (userId?: string) => {
         .from("user_achievements")
         .select(`
           *,
-          achievement_type:achievement_types(name, icon, color, category)
+          achievement_type:achievement_types(name, color, category)
         `)
         .eq("user_id", targetUserId)
         .order("year", { ascending: false });
