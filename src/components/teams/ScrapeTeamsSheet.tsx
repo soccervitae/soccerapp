@@ -153,7 +153,7 @@ export const ScrapeTeamsSheet = ({
   };
 
   const handleImport = async () => {
-    const selectedTeams = teams.filter((t) => t.selected);
+    const selectedTeams = teams.filter((t) => t.selected && !t.isDuplicate);
     if (selectedTeams.length === 0) {
       setImportResult({ success: false, count: 0, message: "Selecione pelo menos um time" });
       return;
@@ -178,7 +178,8 @@ export const ScrapeTeamsSheet = ({
         user_id: user.id,
       }));
 
-      // Insert in batches to avoid payload/time limits when importing many teams
+      // Upsert in batches to avoid payload/time limits.
+      // We ignore duplicates so one repeated team doesn't prevent the whole batch from being saved.
       const BATCH_SIZE = 50;
       let insertedCount = 0;
       const totalBatches = Math.ceil(teamsToInsert.length / BATCH_SIZE);
@@ -186,24 +187,23 @@ export const ScrapeTeamsSheet = ({
       for (let i = 0; i < teamsToInsert.length; i += BATCH_SIZE) {
         const batchNum = Math.floor(i / BATCH_SIZE) + 1;
         const batch = teamsToInsert.slice(i, i + BATCH_SIZE);
-        
-        setBatchLogs(prev => [...prev, `Lote ${batchNum}/${totalBatches}: Inserindo ${batch.length} times...`]);
-        
-        const { data, error } = await supabase.from("times").insert(batch).select("id");
+
+        setBatchLogs((prev) => [
+          ...prev,
+          `Lote ${batchNum}/${totalBatches}: Salvando ${batch.length} times...`,
+        ]);
+
+        const { data, error } = await supabase
+          .from("times")
+          .upsert(batch, {
+            onConflict: "nome,estado_id,pais_id",
+            ignoreDuplicates: true,
+          })
+          .select("id");
 
         if (error) {
           const errorMsg = `Lote ${batchNum}/${totalBatches} erro: ${error.code ?? ""} ${error.message}`.trim();
-          setBatchLogs(prev => [...prev.slice(0, -1), `❌ ${errorMsg}`]);
-          
-          // Unique constraint violation (duplicate)
-          if (error.code === "23505") {
-            setImportResult({
-              success: false,
-              count: insertedCount,
-              message: "Alguns times já existem no banco de dados (duplicados)",
-            });
-            return;
-          }
+          setBatchLogs((prev) => [...prev.slice(0, -1), `❌ ${errorMsg}`]);
 
           // Common RLS failure
           if (error.message?.toLowerCase().includes("row-level security")) {
@@ -225,14 +225,17 @@ export const ScrapeTeamsSheet = ({
 
         const inserted = data?.length ?? 0;
         insertedCount += inserted;
-        setBatchLogs(prev => [...prev.slice(0, -1), `✅ Lote ${batchNum}/${totalBatches}: ${inserted} times inseridos`]);
+        setBatchLogs((prev) => [
+          ...prev.slice(0, -1),
+          `✅ Lote ${batchNum}/${totalBatches}: ${inserted} novos times inseridos`,
+        ]);
       }
 
       if (insertedCount === 0) {
         setImportResult({
           success: false,
           count: 0,
-          message: "Nenhum time foi inserido. Verifique duplicados e permissões.",
+          message: "Nenhum time novo foi inserido (provavelmente todos já existiam).",
         });
         return;
       }
