@@ -10,6 +10,7 @@ import {
   Trophy,
   Settings,
   LogOut,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +19,7 @@ import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
+  { icon: Sparkles, label: "Conteúdo", path: "/admin/content" },
   { icon: Users, label: "Usuários", path: "/admin/users" },
   { icon: FileText, label: "Posts", path: "/admin/posts" },
   { icon: Flag, label: "Denúncias", path: "/admin/reports" },
