@@ -31,6 +31,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { formatDuration } from "@/hooks/useVideoDuration";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useProfile } from "@/hooks/useProfile";
 
 
 interface HighlightsSectionProps {
@@ -180,6 +182,8 @@ export const HighlightsSection = ({
   profileAvatarUrl,
 }: HighlightsSectionProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const { data: currentUserProfile } = useProfile();
   const [selectSheetOpen, setSelectSheetOpen] = useState(false);
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -542,6 +546,10 @@ export const HighlightsSection = ({
   const hasHighlights = displayHighlights.length > 0;
   const canAddMore = displayHighlights.length < 10;
 
+  // Admin users (except official account) cannot add highlights from public profile
+  const isOfficialAccount = currentUserProfile?.is_official_account === true;
+  const canAddHighlights = isOwnProfile && canAddMore && (!isAdmin || isOfficialAccount);
+
   if (!hasHighlights && !isOwnProfile) {
     return null;
   }
@@ -563,7 +571,7 @@ export const HighlightsSection = ({
       <h3 className="text-sm font-semibold text-foreground mb-3">Destaques</h3>
       
       <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
-        {isOwnProfile && canAddMore && (
+        {canAddHighlights && (
           <div 
             className="flex-none w-20 flex flex-col gap-2 items-center cursor-pointer"
             onClick={() => setSelectSheetOpen(true)}
