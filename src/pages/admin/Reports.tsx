@@ -20,7 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X, Eye, Ban, Filter } from "lucide-react";
+import { MoreHorizontal, Check, X, Eye, Ban, Filter, Flag, FileWarning, User, Clock, CheckCircle, XCircle } from "lucide-react";
+import { StatsCard } from "@/components/admin/StatsCard";
 import {
   Select,
   SelectContent,
@@ -568,6 +569,39 @@ export default function AdminReports() {
           <p className="text-muted-foreground">
             Gerencie denúncias de posts e perfis
           </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <StatsCard
+            title="Total Posts"
+            value={postReports?.length || 0}
+            icon={FileWarning}
+          />
+          <StatsCard
+            title="Posts Pendentes"
+            value={postReports?.filter(r => r.status === "pending").length || 0}
+            icon={Clock}
+          />
+          <StatsCard
+            title="Posts Resolvidas"
+            value={postReports?.filter(r => r.status === "resolved").length || 0}
+            icon={CheckCircle}
+          />
+          <StatsCard
+            title="Total Perfis"
+            value={profileReports?.length || 0}
+            icon={User}
+          />
+          <StatsCard
+            title="Perfis Pendentes"
+            value={profileReports?.filter(r => r.status === "pending").length || 0}
+            icon={Clock}
+          />
+          <StatsCard
+            title="Perfis Resolvidas"
+            value={profileReports?.filter(r => r.status === "resolved").length || 0}
+            icon={CheckCircle}
+          />
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
