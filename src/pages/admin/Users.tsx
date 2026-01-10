@@ -63,10 +63,7 @@ export default function AdminUsers() {
 
       let query = supabase
         .from("profiles")
-        .select(`
-          *,
-          user_roles(role)
-        `)
+        .select("*")
         .order("created_at", { ascending: false })
         .range(from, to);
 
@@ -74,9 +71,25 @@ export default function AdminUsers() {
         query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
       }
 
-      const { data, error } = await query;
+      const { data: profiles, error } = await query;
       if (error) throw error;
-      return data;
+      
+      // Fetch roles separately for all users
+      if (profiles && profiles.length > 0) {
+        const userIds = profiles.map(p => p.id);
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", userIds);
+        
+        // Merge roles into profiles
+        return profiles.map(profile => ({
+          ...profile,
+          user_roles: roles?.filter(r => r.user_id === profile.id) || []
+        }));
+      }
+      
+      return profiles || [];
     },
   });
 
