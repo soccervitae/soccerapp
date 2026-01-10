@@ -39,6 +39,7 @@ import Install from "./pages/Install";
 import Landing from "./pages/Landing";
 
 import AdminDashboard from "./pages/admin/Index";
+import AdminContent from "./pages/admin/Content";
 import AdminUsers from "./pages/admin/Users";
 import AdminPosts from "./pages/admin/Posts";
 import AdminReports from "./pages/admin/Reports";
@@ -192,6 +193,7 @@ const AnimatedRoutes = () => {
       
       {/* Admin routes */}
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/content" element={<AdminRoute><AdminContent /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
       <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
