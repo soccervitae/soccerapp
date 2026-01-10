@@ -20,25 +20,35 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Search, MoreHorizontal, Eye, Trash2, Heart, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EditPostSheet } from "@/components/admin/EditPostSheet";
+
+interface Post {
+  id: string;
+  content: string;
+  media_url: string | null;
+  media_type: string | null;
+  likes_count: number | null;
+  comments_count: number | null;
+  shares_count: number | null;
+  location_name: string | null;
+  created_at: string;
+  is_published: boolean | null;
+  scheduled_at: string | null;
+  profiles: {
+    username: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
 
 export default function AdminPosts() {
   const [search, setSearch] = useState("");
-  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const queryClient = useQueryClient();
 
   const { data: posts, isLoading } = useQuery({
@@ -71,7 +81,7 @@ export default function AdminPosts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminPosts"] });
       toast.success("Post deletado com sucesso");
-      setDeletePostId(null);
+      setSelectedPost(null);
     },
     onError: () => {
       toast.error("Erro ao deletar post");
@@ -190,16 +200,9 @@ export default function AdminPosts() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedPost(post as Post)}>
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver post
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeletePostId(post.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Deletar post
+                            Ver / Editar
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -212,25 +215,13 @@ export default function AdminPosts() {
         </div>
       </div>
 
-      <AlertDialog open={!!deletePostId} onOpenChange={() => setDeletePostId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Deletar post?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O post será permanentemente removido.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deletePostId && deletePostMutation.mutate(deletePostId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Deletar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <EditPostSheet
+        open={!!selectedPost}
+        onOpenChange={(open) => !open && setSelectedPost(null)}
+        post={selectedPost}
+        onDelete={(postId) => deletePostMutation.mutate(postId)}
+        isDeleting={deletePostMutation.isPending}
+      />
     </AdminLayout>
   );
 }
