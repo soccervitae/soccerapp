@@ -26,12 +26,15 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
 
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [viewSheetOpen, setViewSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Query for total count
@@ -268,10 +271,19 @@ export default function AdminUsers() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUserId(user.id);
+                              setViewSheetOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver detalhes
+                          </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/profile/${user.username}`}>
                               <Eye className="h-4 w-4 mr-2" />
-                              Ver perfil
+                              Ver perfil público
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -365,6 +377,24 @@ export default function AdminUsers() {
           </div>
         )}
       </div>
+
+      <ViewUserSheet
+        open={viewSheetOpen}
+        onOpenChange={setViewSheetOpen}
+        userId={selectedUserId}
+        onBan={(userId) => {
+          banUserMutation.mutate(userId);
+          setViewSheetOpen(false);
+        }}
+        onUnban={(userId) => {
+          unbanUserMutation.mutate(userId);
+          setViewSheetOpen(false);
+        }}
+        onToggleAdmin={(userId, isAdmin) => {
+          toggleAdminMutation.mutate({ userId, isAdmin });
+        }}
+        isBanning={banUserMutation.isPending || unbanUserMutation.isPending}
+      />
     </AdminLayout>
   );
 }
