@@ -384,7 +384,7 @@ const Profile = () => {
 
   // Tab order for swipe navigation (exclude championships/achievements for official accounts)
   const tabOrder = isOfficialAccount 
-    ? ["profile", "teams", "videos", "photos"]
+    ? ["profile", "videos", "photos"]
     : ["profile", "teams", "videos", "championships", "achievements", "photos"];
   
   // Handle swipe gesture
@@ -411,13 +411,15 @@ const Profile = () => {
           <span className="material-symbols-outlined text-[20px]">grid_on</span>
           Posts
         </TabsTrigger>
-        <TabsTrigger 
-          value="teams" 
-          className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
-        >
-          <span className="material-symbols-outlined text-[20px]">shield</span>
-          Times
-        </TabsTrigger>
+        {!isOfficialAccount && (
+          <TabsTrigger 
+            value="teams" 
+            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          >
+            <span className="material-symbols-outlined text-[20px]">shield</span>
+            Times
+          </TabsTrigger>
+        )}
         <TabsTrigger 
           value="videos" 
           className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
@@ -477,11 +479,13 @@ const Profile = () => {
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
         </TabsContent>
 
-        <TabsContent value="teams" className="mt-4 px-4" forceMount={activeTab === "teams" ? true : undefined}>
-          {activeTab === "teams" && (
-            <TeamsTab userId={targetUserId} />
-          )}
-        </TabsContent>
+        {!isOfficialAccount && (
+          <TabsContent value="teams" className="mt-4 px-4" forceMount={activeTab === "teams" ? true : undefined}>
+            {activeTab === "teams" && (
+              <TeamsTab userId={targetUserId} />
+            )}
+          </TabsContent>
+        )}
 
         {!isOfficialAccount && (
           <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
