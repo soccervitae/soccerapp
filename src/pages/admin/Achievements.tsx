@@ -69,6 +69,17 @@ export default function AdminAchievements() {
     },
   });
 
+  const { data: userAchievementsCount } = useQuery({
+    queryKey: ["adminUserAchievementsCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("user_achievements")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("achievement_types").delete().eq("id", id);
@@ -103,6 +114,11 @@ export default function AdminAchievements() {
             <p className="text-muted-foreground">
               Gerencie os tipos de conquistas disponíveis
             </p>
+            {userAchievementsCount !== undefined && userAchievementsCount > 0 && (
+              <Badge variant="secondary" className="mt-2">
+                {userAchievementsCount} conquistas adicionadas por usuários
+              </Badge>
+            )}
           </div>
           <Button onClick={() => setIsAddOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />

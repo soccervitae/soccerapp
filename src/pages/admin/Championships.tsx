@@ -61,6 +61,17 @@ export default function AdminChampionships() {
     },
   });
 
+  const { data: userChampionshipsCount } = useQuery({
+    queryKey: ["adminUserChampionshipsCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("user_championships")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("championships").delete().eq("id", id);
@@ -84,6 +95,11 @@ export default function AdminChampionships() {
           <p className="text-muted-foreground">
             Gerencie todos os campeonatos cadastrados
           </p>
+          {userChampionshipsCount !== undefined && userChampionshipsCount > 0 && (
+            <Badge variant="secondary" className="mt-2">
+              {userChampionshipsCount} campeonatos adicionados por usuários
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
