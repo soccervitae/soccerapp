@@ -20,7 +20,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X, Eye, Ban } from "lucide-react";
+import { MoreHorizontal, Check, X, Eye, Ban, Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -48,6 +55,8 @@ export default function AdminReports() {
   const [selectedProfileReport, setSelectedProfileReport] = useState<any>(null);
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
   const [viewProfileSheetOpen, setViewProfileSheetOpen] = useState(false);
+  const [postStatusFilter, setPostStatusFilter] = useState<string>("all");
+  const [profileStatusFilter, setProfileStatusFilter] = useState<string>("all");
   const queryClient = useQueryClient();
 
   const { data: postReports, isLoading: loadingPostReports } = useQuery({
@@ -268,6 +277,15 @@ export default function AdminReports() {
     }
   };
 
+  // Filter reports based on selected status
+  const filteredPostReports = postReports?.filter(
+    (report) => postStatusFilter === "all" || report.status === postStatusFilter
+  );
+  
+  const filteredProfileReports = profileReports?.filter(
+    (report) => profileStatusFilter === "all" || report.status === profileStatusFilter
+  );
+
   const renderPostReports = () => (
     <Table>
       <TableHeader>
@@ -296,14 +314,14 @@ export default function AdminReports() {
               <TableCell><Skeleton className="h-8 w-8" /></TableCell>
             </TableRow>
           ))
-        ) : postReports?.length === 0 ? (
+        ) : filteredPostReports?.length === 0 ? (
           <TableRow>
             <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
               Nenhuma denúncia de post encontrada
             </TableCell>
           </TableRow>
         ) : (
-          postReports?.map((report) => (
+          filteredPostReports?.map((report) => (
             <TableRow key={report.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -436,14 +454,14 @@ export default function AdminReports() {
               <TableCell><Skeleton className="h-8 w-8" /></TableCell>
             </TableRow>
           ))
-        ) : profileReports?.length === 0 ? (
+        ) : filteredProfileReports?.length === 0 ? (
           <TableRow>
             <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
               Nenhuma denúncia de perfil encontrada
             </TableCell>
           </TableRow>
         ) : (
-          profileReports?.map((report) => (
+          filteredProfileReports?.map((report) => (
             <TableRow key={report.id}>
               <TableCell>
                 {report.reporter ? (
@@ -562,13 +580,47 @@ export default function AdminReports() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="posts" className="mt-4">
+          <TabsContent value="posts" className="mt-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={postStatusFilter} onValueChange={setPostStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="resolved">Resolvida</SelectItem>
+                  <SelectItem value="rejected">Rejeitada</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">
+                {filteredPostReports?.length || 0} denúncia(s)
+              </span>
+            </div>
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               {renderPostReports()}
             </div>
           </TabsContent>
 
-          <TabsContent value="profiles" className="mt-4">
+          <TabsContent value="profiles" className="mt-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={profileStatusFilter} onValueChange={setProfileStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="resolved">Resolvida</SelectItem>
+                  <SelectItem value="rejected">Rejeitada</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">
+                {filteredProfileReports?.length || 0} denúncia(s)
+              </span>
+            </div>
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               {renderProfileReports()}
             </div>
