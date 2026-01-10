@@ -491,6 +491,55 @@ export const useCreateComment = () => {
   });
 };
 
+export const useUpdateComment = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ commentId, content, postId }: { commentId: string; content: string; postId: string }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ content })
+        .eq("id", commentId)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, postId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["comments", result.postId] });
+    },
+  });
+};
+
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ commentId, postId }: { commentId: string; postId: string }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("comments")
+        .delete()
+        .eq("id", commentId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return { commentId, postId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["comments", result.postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+};
+
 export const useUpdatePost = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
