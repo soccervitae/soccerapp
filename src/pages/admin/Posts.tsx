@@ -160,63 +160,50 @@ export default function AdminPosts() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Posts</h1>
-          <p className="text-muted-foreground">
-            Gerencie todos os posts da plataforma
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <FileText className="h-4 w-4" />
-              Total Posts
-            </div>
-            <p className="text-2xl font-bold text-foreground">{engagementStats?.totalPosts || 0}</p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Posts</h1>
+            <p className="text-muted-foreground">
+              Gerencie todos os posts da plataforma
+            </p>
           </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Heart className="h-4 w-4 text-red-500" />
-              Likes
+          
+          {/* Stats Cards - Same style as Teams page */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-foreground">{engagementStats?.totalPosts || 0}</p>
+              <p className="text-xs text-muted-foreground">Posts</p>
             </div>
-            <p className="text-2xl font-bold text-red-500">{engagementStats?.totalLikes || 0}</p>
-          </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <MessageCircle className="h-4 w-4 text-blue-500" />
-              Comentários
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-red-500">{engagementStats?.totalLikes || 0}</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <Heart className="h-3 w-3" /> Likes
+              </p>
             </div>
-            <p className="text-2xl font-bold text-blue-500">{engagementStats?.totalComments || 0}</p>
-          </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Share2 className="h-4 w-4 text-green-500" />
-              Compartilhamentos
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-blue-500">{engagementStats?.totalComments || 0}</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <MessageCircle className="h-3 w-3" /> Comentários
+              </p>
             </div>
-            <p className="text-2xl font-bold text-green-500">{engagementStats?.totalShares || 0}</p>
-          </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Image className="h-4 w-4 text-purple-500" />
-              Com Imagem
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-green-500">{engagementStats?.totalShares || 0}</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <Share2 className="h-3 w-3" /> Shares
+              </p>
             </div>
-            <p className="text-2xl font-bold text-purple-500">{engagementStats?.postsWithImage || 0}</p>
-          </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Video className="h-4 w-4 text-orange-500" />
-              Com Vídeo
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-purple-500">{engagementStats?.postsWithImage || 0}</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <Image className="h-3 w-3" /> Imagens
+              </p>
             </div>
-            <p className="text-2xl font-bold text-orange-500">{engagementStats?.postsWithVideo || 0}</p>
-          </div>
-          <div className="bg-card rounded-lg border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              Só Texto
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-center min-w-[80px]">
+              <p className="text-2xl font-bold text-orange-500">{engagementStats?.postsWithVideo || 0}</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <Video className="h-3 w-3" /> Vídeos
+              </p>
             </div>
-            <p className="text-2xl font-bold text-muted-foreground">{engagementStats?.postsTextOnly || 0}</p>
           </div>
         </div>
 
