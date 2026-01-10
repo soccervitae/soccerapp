@@ -171,7 +171,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
                   onClick={() => setSelectedCommentId(c.id)}
                   className="text-xs text-muted-foreground hover:underline"
                 >
-                  {likesCount} {likesCount === 1 ? "aplauso" : "aplausos"}
+                  {likesCount}
                 </button>
               )}
               {/* Reply button - only for parent comments */}
