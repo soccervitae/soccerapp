@@ -745,11 +745,13 @@ export const PostMediaViewer = ({
                 />
               )}
 
-              {/* Footer - overlaid - hidden for video and when info is hidden */}
+              {/* Footer - overlaid */}
               <AnimatePresence>
-                {!isVideo && showInfo && (
+                {showInfo && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3"
+                    className={`absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3 ${
+                      isVideo ? "bg-gradient-to-t from-black/80 via-black/50 to-transparent" : ""
+                    }`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
@@ -757,7 +759,7 @@ export const PostMediaViewer = ({
                   >
                     {/* Caption */}
                     {post.content && (
-                      <p className="text-sm text-gray-900 line-clamp-2">{post.content}</p>
+                      <p className={`text-sm line-clamp-2 ${isVideo ? "text-white" : "text-gray-900"}`}>{post.content}</p>
                     )}
 
                     {/* Location */}
@@ -766,7 +768,9 @@ export const PostMediaViewer = ({
                         href={`https://www.google.com/maps/search/?api=1&query=${post.location_lat},${post.location_lng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
+                        className={`flex items-center gap-1 text-xs transition-colors ${
+                          isVideo ? "text-white/80 hover:text-white" : "text-gray-600 hover:text-gray-900"
+                        }`}
                       >
                         <span className="material-symbols-outlined text-[14px]">location_on</span>
                         <span className="truncate">{post.location_name}</span>
@@ -794,7 +798,7 @@ export const PostMediaViewer = ({
                           </div>
 
                           {/* Text */}
-                          <p className="text-sm text-foreground">
+                          <p className={`text-sm ${isVideo ? "text-white" : "text-foreground"}`}>
                             Aplaudido por{" "}
                             <span
                               className="font-semibold group-hover:underline"
@@ -826,7 +830,9 @@ export const PostMediaViewer = ({
                       <button
                         onClick={handleLike}
                         disabled={likePost.isPending}
-                        className="flex items-center justify-center p-3 gap-1.5 text-foreground transition-all active:scale-110"
+                        className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 ${
+                          isVideo ? "text-white" : "text-foreground"
+                        }`}
                       >
                         <AnimatePresence mode="wait" initial={false}>
                           <motion.div
@@ -844,7 +850,7 @@ export const PostMediaViewer = ({
                           </motion.div>
                         </AnimatePresence>
                         {likesCountLocal > 0 && (
-                          <span className="text-xs font-medium text-foreground">
+                          <span className={`text-xs font-medium ${isVideo ? "text-white" : "text-foreground"}`}>
                             {formatNumber(likesCountLocal)}
                           </span>
                         )}
@@ -852,10 +858,12 @@ export const PostMediaViewer = ({
 
                       {/* Comment button */}
                       <div className="flex items-center justify-center relative">
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px ${isVideo ? "bg-white/30" : "bg-border"}`}></div>
                         <button
                           onClick={() => setShowCommentsSheet(true)}
-                          className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
+                          className={`flex items-center justify-center p-3 gap-1.5 transition-colors ${
+                            isVideo ? "text-white hover:text-white/80" : "text-foreground hover:text-muted-foreground"
+                          }`}
                         >
                           <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
                           {post.comments_count > 0 && (
@@ -868,10 +876,12 @@ export const PostMediaViewer = ({
 
                       {/* Share button */}
                       <div className="flex items-center justify-center relative">
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px ${isVideo ? "bg-white/30" : "bg-border"}`}></div>
                         <button
                           onClick={() => setShowShareSheet(true)}
-                          className="flex items-center justify-center p-3 gap-1.5 text-foreground hover:text-muted-foreground transition-colors"
+                          className={`flex items-center justify-center p-3 gap-1.5 transition-colors ${
+                            isVideo ? "text-white hover:text-white/80" : "text-foreground hover:text-muted-foreground"
+                          }`}
                         >
                           <Send className="w-6 h-6" strokeWidth={1.5} />
                           {(post.shares_count ?? 0) > 0 && (
@@ -884,12 +894,16 @@ export const PostMediaViewer = ({
 
                       {/* Save button */}
                       <div className="flex items-center justify-center relative">
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border"></div>
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px ${isVideo ? "bg-white/30" : "bg-border"}`}></div>
                         <button
                           onClick={handleSave}
                           disabled={savePost.isPending}
                           className={`flex items-center justify-center p-3 transition-colors ${
-                            isSavedLocal ? "text-primary" : "text-foreground hover:text-muted-foreground"
+                            isSavedLocal 
+                              ? "text-primary" 
+                              : isVideo 
+                                ? "text-white hover:text-white/80" 
+                                : "text-foreground hover:text-muted-foreground"
                           }`}
                         >
                           <Bookmark
