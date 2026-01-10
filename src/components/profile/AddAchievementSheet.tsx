@@ -31,7 +31,6 @@ interface AchievementData {
   achievement_type?: {
     id?: string;
     name: string;
-    icon: string;
     color: string | null;
     category: string | null;
   } | null;

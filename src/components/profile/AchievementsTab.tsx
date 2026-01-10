@@ -29,7 +29,6 @@ interface Achievement {
   description: string | null;
   achievement_type: {
     name: string;
-    icon: string;
     color: string | null;
     category: string | null;
   } | null;

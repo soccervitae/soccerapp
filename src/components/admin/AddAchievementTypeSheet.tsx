@@ -17,7 +17,6 @@ import { Loader2 } from "lucide-react";
 interface AchievementType {
   id: string;
   name: string;
-  icon: string;
   description: string | null;
   category: string | null;
   color: string | null;
@@ -35,7 +34,6 @@ export function AddAchievementTypeSheet({
   editData,
 }: AddAchievementTypeSheetProps) {
   const [name, setName] = useState("");
-  const [icon, setIcon] = useState("🏆");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [color, setColor] = useState("#6366f1");
@@ -44,13 +42,11 @@ export function AddAchievementTypeSheet({
   useEffect(() => {
     if (editData) {
       setName(editData.name);
-      setIcon(editData.icon);
       setDescription(editData.description || "");
       setCategory(editData.category || "");
       setColor(editData.color || "#6366f1");
     } else {
       setName("");
-      setIcon("🏆");
       setDescription("");
       setCategory("");
       setColor("#6366f1");
@@ -61,7 +57,6 @@ export function AddAchievementTypeSheet({
     mutationFn: async () => {
       const { error } = await supabase.from("achievement_types").insert({
         name,
-        icon,
         description: description || null,
         category: category || null,
         color: color || null,
@@ -85,7 +80,6 @@ export function AddAchievementTypeSheet({
         .from("achievement_types")
         .update({
           name,
-          icon,
           description: description || null,
           category: category || null,
           color: color || null,
@@ -104,8 +98,8 @@ export function AddAchievementTypeSheet({
   });
 
   const handleSubmit = () => {
-    if (!name.trim() || !icon.trim()) {
-      toast.error("Nome e ícone são obrigatórios");
+    if (!name.trim()) {
+      toast.error("Nome é obrigatório");
       return;
     }
 
@@ -135,17 +129,6 @@ export function AddAchievementTypeSheet({
               placeholder="Ex: Campeão"
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="icon">Ícone (emoji) *</Label>
-            <Input
-              id="icon"
-              placeholder="🏆"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              maxLength={10}
             />
           </div>
 
@@ -191,7 +174,7 @@ export function AddAchievementTypeSheet({
 
           <Button
             onClick={handleSubmit}
-            disabled={isPending || !name.trim() || !icon.trim()}
+            disabled={isPending || !name.trim()}
             className="w-full"
           >
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

@@ -37,7 +37,6 @@ import { AddAchievementTypeSheet } from "@/components/admin/AddAchievementTypeSh
 interface AchievementType {
   id: string;
   name: string;
-  icon: string;
   description: string | null;
   category: string | null;
   color: string | null;
@@ -128,7 +127,6 @@ export default function AdminAchievements() {
             <TableHeader>
               <TableRow>
                 <TableHead>Tipo de Conquista</TableHead>
-                <TableHead>Ícone</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Cor</TableHead>
                 <TableHead className="w-10"></TableHead>
@@ -152,7 +150,7 @@ export default function AdminAchievements() {
                 ))
               ) : achievementTypes?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     Nenhum tipo de conquista encontrado
                   </TableCell>
                 </TableRow>
@@ -178,9 +176,6 @@ export default function AdminAchievements() {
                           )}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {achievement.icon}
                     </TableCell>
                     <TableCell>
                       {achievement.category ? (
