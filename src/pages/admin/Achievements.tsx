@@ -56,7 +56,6 @@ export default function AdminAchievements() {
       let query = supabase
         .from("achievement_types")
         .select("*, user_achievements(count)")
-        .order("name", { ascending: true })
         .limit(100);
 
       if (search) {
@@ -65,7 +64,17 @@ export default function AdminAchievements() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as (AchievementType & { user_achievements: { count: number }[] })[];
+      
+      // Sort by user count (most used first), then by name
+      const sorted = (data as (AchievementType & { user_achievements: { count: number }[] })[])
+        .sort((a, b) => {
+          const countA = a.user_achievements?.[0]?.count || 0;
+          const countB = b.user_achievements?.[0]?.count || 0;
+          if (countB !== countA) return countB - countA;
+          return a.name.localeCompare(b.name);
+        });
+      
+      return sorted;
     },
   });
 
