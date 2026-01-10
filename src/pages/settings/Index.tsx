@@ -123,6 +123,11 @@ export default function Settings() {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Preferências</p>
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <SettingsItem 
+              icon="gavel"
+              label="Diretrizes da comunidade"
+              onClick={() => navigate("/guidelines")}
+            />
+            <SettingsItem 
               icon="info"
               label="Sobre o Soccer Vitae"
               onClick={() => {}}
