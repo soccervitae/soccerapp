@@ -878,6 +878,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_published: boolean | null
           likes_count: number | null
           location_lat: number | null
           location_lng: number | null
@@ -887,6 +888,8 @@ export type Database = {
           music_end_seconds: number | null
           music_start_seconds: number | null
           music_track_id: string | null
+          published_at: string | null
+          scheduled_at: string | null
           shares_count: number | null
           updated_at: string | null
           user_id: string
@@ -896,6 +899,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_published?: boolean | null
           likes_count?: number | null
           location_lat?: number | null
           location_lng?: number | null
@@ -905,6 +909,8 @@ export type Database = {
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
           shares_count?: number | null
           updated_at?: string | null
           user_id: string
@@ -914,6 +920,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_published?: boolean | null
           likes_count?: number | null
           location_lat?: number | null
           location_lng?: number | null
@@ -923,6 +930,8 @@ export type Database = {
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
           shares_count?: number | null
           updated_at?: string | null
           user_id?: string

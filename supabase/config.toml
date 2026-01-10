@@ -33,3 +33,6 @@ verify_jwt = false
 
 [functions.scrape-teams]
 verify_jwt = false
+
+[functions.publish-scheduled-posts]
+verify_jwt = false

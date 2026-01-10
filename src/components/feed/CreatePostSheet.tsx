@@ -42,6 +42,9 @@ import { PhotoTag, useCreatePostTags } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { MusicPicker } from "@/components/feed/MusicPicker";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
+import { SchedulePostPicker } from "@/components/feed/SchedulePostPicker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -49,7 +52,7 @@ interface CreatePostSheetProps {
 }
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker" | "music-picker";
+type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker" | "music-picker" | "schedule-picker";
 
 interface MediaItem {
   url: string;
@@ -104,6 +107,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [allTags, setAllTags] = useState<PhotoTag[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (error) {
@@ -310,6 +314,8 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         musicTrackId: selectedMusic?.track.id,
         musicStartSeconds: selectedMusic?.startSeconds,
         musicEndSeconds: selectedMusic?.endSeconds,
+        scheduledAt: scheduledDate?.toISOString(),
+        isPublished: !scheduledDate,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -327,6 +333,10 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setAllTags([]);
       setSelectedLocation(null);
       setSelectedMusic(null);
+      setScheduledDate(null);
+      if (scheduledDate) {
+        toast.success("Post agendado com sucesso!");
+      }
       onOpenChange(false);
     } catch (err) {
       console.error("Error publishing post:", err);
@@ -347,6 +357,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
     setAllTags([]);
     setSelectedLocation(null);
     setSelectedMusic(null);
+    setScheduledDate(null);
     clearGallery();
     onOpenChange(false);
   };
@@ -507,6 +518,16 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             }
           }}
           maxTrimDuration={30}
+        />
+      );
+    }
+
+    if (viewMode === "schedule-picker") {
+      return (
+        <SchedulePostPicker
+          scheduledDate={scheduledDate}
+          onScheduleChange={setScheduledDate}
+          onClose={() => setViewMode("default")}
         />
       );
     }
@@ -693,7 +714,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
             }`}
             disabled={isButtonDisabled}
           >
-            {isPublishing ? "Publicando..." : "Publicar"}
+            {isPublishing ? (scheduledDate ? "Agendando..." : "Publicando...") : (scheduledDate ? "Agendar" : "Publicar")}
           </button>
         </div>
       </div>
@@ -926,6 +947,40 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
                     e.stopPropagation();
                     setSelectedMusic(null);
                     toast.success("Música removida");
+                  }}
+                  className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                </button>
+              )}
+              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+            </div>
+          </button>
+          <button 
+            onClick={() => setViewMode("schedule-picker")}
+            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+            disabled={isPublishing}
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[22px] text-foreground">schedule</span>
+              <div className="flex flex-col items-start">
+                <span className="text-sm text-foreground">
+                  {scheduledDate ? "Agendado para" : "Agendar publicação"}
+                </span>
+                {scheduledDate && (
+                  <span className="text-xs text-muted-foreground">
+                    {format(scheduledDate, "dd MMM yyyy, HH:mm", { locale: ptBR })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {scheduledDate && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setScheduledDate(null);
+                    toast.success("Agendamento removido");
                   }}
                   className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
                 >
