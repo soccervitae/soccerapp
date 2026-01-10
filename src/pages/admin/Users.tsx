@@ -20,20 +20,44 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Shield, Eye, Ban, UserX } from "lucide-react";
+import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 
+const ITEMS_PER_PAGE = 20;
+
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["adminUsers", search],
+  // Query for total count
+  const { data: totalCount } = useQuery({
+    queryKey: ["adminUsersCount", search],
     queryFn: async () => {
+      let query = supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true });
+
+      if (search) {
+        query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["adminUsers", search, currentPage],
+    queryFn: async () => {
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from("profiles")
         .select(`
@@ -41,7 +65,7 @@ export default function AdminUsers() {
           user_roles(role)
         `)
         .order("created_at", { ascending: false })
-        .limit(100);
+        .range(from, to);
 
       if (search) {
         query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
@@ -80,8 +104,55 @@ export default function AdminUsers() {
     },
   });
 
+  const banUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ 
+          banned_at: new Date().toISOString(),
+          ban_reason: "Banido pelo administrador" 
+        })
+        .eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      toast.success("Usuário banido com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao banir usuário");
+    },
+  });
+
+  const unbanUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ 
+          banned_at: null,
+          ban_reason: null 
+        })
+        .eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      toast.success("Banimento removido");
+    },
+    onError: () => {
+      toast.error("Erro ao remover banimento");
+    },
+  });
+
   const isUserAdmin = (user: any) => {
     return user.user_roles?.some((r: any) => r.role === "admin");
+  };
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
   };
 
   return (
@@ -91,7 +162,7 @@ export default function AdminUsers() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Usuários</h1>
             <p className="text-muted-foreground">
-              Gerencie todos os usuários da plataforma
+              Gerencie todos os usuários da plataforma ({totalCount || 0} usuários)
             </p>
           </div>
         </div>
@@ -102,7 +173,7 @@ export default function AdminUsers() {
             <Input
               placeholder="Buscar por nome ou username..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -172,7 +243,11 @@ export default function AdminUsers() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {user.conta_verificada ? (
+                      {user.banned_at ? (
+                        <Badge variant="destructive">
+                          Banido
+                        </Badge>
+                      ) : user.conta_verificada ? (
                         <Badge variant="outline" className="border-green-500 text-green-500">
                           Verificado
                         </Badge>
@@ -210,14 +285,22 @@ export default function AdminUsers() {
                             <Shield className="h-4 w-4 mr-2" />
                             {isUserAdmin(user) ? "Remover admin" : "Tornar admin"}
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
-                            <Ban className="h-4 w-4 mr-2" />
-                            Banir usuário
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
-                            <UserX className="h-4 w-4 mr-2" />
-                            Deletar conta
-                          </DropdownMenuItem>
+                          {user.banned_at ? (
+                            <DropdownMenuItem
+                              onClick={() => unbanUserMutation.mutate(user.id)}
+                            >
+                              <UserX className="h-4 w-4 mr-2" />
+                              Remover banimento
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => banUserMutation.mutate(user.id)}
+                            >
+                              <Ban className="h-4 w-4 mr-2" />
+                              Banir usuário
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -227,6 +310,60 @@ export default function AdminUsers() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, totalCount || 0)} de {totalCount} usuários
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className="w-9"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Próximo
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
