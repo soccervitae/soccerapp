@@ -175,7 +175,7 @@ export default function AdminUsers() {
 
   // Query for filter counts (statistics)
   const { data: filterStats } = useQuery({
-    queryKey: ["adminUsersStats"],
+    queryKey: ["adminUsersStats", adminUserIds],
     queryFn: async () => {
       const [
         totalResult,
@@ -185,8 +185,8 @@ export default function AdminUsers() {
         verifiedResult,
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "male"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "female"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "homem"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "mulher"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).not("banned_at", "is", null),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("conta_verificada", true),
       ]);
@@ -438,8 +438,8 @@ export default function AdminUsers() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os sexos</SelectItem>
-                <SelectItem value="male">Masculino ({filterStats?.male || 0})</SelectItem>
-                <SelectItem value="female">Feminino ({filterStats?.female || 0})</SelectItem>
+                <SelectItem value="homem">Masculino ({filterStats?.male || 0})</SelectItem>
+                <SelectItem value="mulher">Feminino ({filterStats?.female || 0})</SelectItem>
               </SelectContent>
             </Select>
 
