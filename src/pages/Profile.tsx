@@ -403,24 +403,24 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border flex overflow-x-auto scrollbar-hide">
+      <TabsList className="w-full h-auto bg-transparent p-0 border-b border-border flex justify-start overflow-x-auto scrollbar-hide">
         <TabsTrigger 
           value="profile" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
           <span className="material-symbols-outlined text-[20px]">grid_on</span>
           Posts
         </TabsTrigger>
         <TabsTrigger 
           value="teams" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
           <span className="material-symbols-outlined text-[20px]">shield</span>
           Times
         </TabsTrigger>
         <TabsTrigger 
           value="videos" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
           <span className="material-symbols-outlined text-[20px]">play_circle</span>
           Vídeos
@@ -428,7 +428,7 @@ const Profile = () => {
         {!isOfficialAccount && (
           <TabsTrigger 
             value="championships" 
-            className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
           >
             <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
             Campeonatos
@@ -436,8 +436,8 @@ const Profile = () => {
         )}
         {!isOfficialAccount && (
           <TabsTrigger 
-            value="achievements" 
-            className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+            value="achievements"
+            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
           >
             <span className="material-symbols-outlined text-[20px]">trophy</span>
             Conquistas
@@ -445,7 +445,7 @@ const Profile = () => {
         )}
         <TabsTrigger 
           value="photos" 
-          className="flex-1 flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+          className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
         >
           <span className="material-symbols-outlined text-[20px]">photo_library</span>
           Fotos
