@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -30,16 +30,31 @@ import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
 
 const ITEMS_PER_PAGE = 20;
 
+type UserFilter = "all" | "admin" | "verified" | "unverified" | "banned";
+
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<UserFilter>("all");
   const queryClient = useQueryClient();
 
-  // Query for total count
+  // Fetch all admin user IDs for filtering
+  const { data: adminUserIds } = useQuery({
+    queryKey: ["adminUserIds"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+      return data?.map(r => r.user_id) || [];
+    },
+  });
+
+  // Query for total count with filters
   const { data: totalCount } = useQuery({
-    queryKey: ["adminUsersCount", search],
+    queryKey: ["adminUsersCount", search, activeFilter, adminUserIds],
     queryFn: async () => {
       let query = supabase
         .from("profiles")
@@ -49,14 +64,29 @@ export default function AdminUsers() {
         query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
       }
 
+      // Apply filters
+      if (activeFilter === "banned") {
+        query = query.not("banned_at", "is", null);
+      } else if (activeFilter === "verified") {
+        query = query.eq("conta_verificada", true).is("banned_at", null);
+      } else if (activeFilter === "unverified") {
+        query = query.eq("conta_verificada", false).is("banned_at", null);
+      } else if (activeFilter === "admin" && adminUserIds && adminUserIds.length > 0) {
+        query = query.in("id", adminUserIds);
+      } else if (activeFilter === "admin") {
+        // No admins exist
+        return 0;
+      }
+
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
     },
+    enabled: activeFilter !== "admin" || adminUserIds !== undefined,
   });
 
   const { data: users, isLoading } = useQuery({
-    queryKey: ["adminUsers", search, currentPage],
+    queryKey: ["adminUsers", search, currentPage, activeFilter, adminUserIds],
     queryFn: async () => {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
@@ -64,12 +94,26 @@ export default function AdminUsers() {
       let query = supabase
         .from("profiles")
         .select("*")
-        .order("created_at", { ascending: false })
-        .range(from, to);
+        .order("created_at", { ascending: false });
 
       if (search) {
         query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
       }
+
+      // Apply filters
+      if (activeFilter === "banned") {
+        query = query.not("banned_at", "is", null);
+      } else if (activeFilter === "verified") {
+        query = query.eq("conta_verificada", true).is("banned_at", null);
+      } else if (activeFilter === "unverified") {
+        query = query.eq("conta_verificada", false).is("banned_at", null);
+      } else if (activeFilter === "admin" && adminUserIds && adminUserIds.length > 0) {
+        query = query.in("id", adminUserIds);
+      } else if (activeFilter === "admin") {
+        return [];
+      }
+
+      query = query.range(from, to);
 
       const { data: profiles, error } = await query;
       if (error) throw error;
@@ -91,6 +135,7 @@ export default function AdminUsers() {
       
       return profiles || [];
     },
+    enabled: activeFilter !== "admin" || adminUserIds !== undefined,
   });
 
   const toggleAdminMutation = useMutation({
@@ -171,6 +216,19 @@ export default function AdminUsers() {
     setCurrentPage(1);
   };
 
+  const handleFilterChange = (filter: UserFilter) => {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  };
+
+  const filterOptions: { value: UserFilter; label: string; color?: string }[] = [
+    { value: "all", label: "Todos" },
+    { value: "admin", label: "Administradores", color: "bg-primary text-primary-foreground" },
+    { value: "verified", label: "Verificados", color: "border-green-500 text-green-500" },
+    { value: "unverified", label: "Não verificados", color: "bg-secondary text-secondary-foreground" },
+    { value: "banned", label: "Banidos", color: "bg-destructive text-destructive-foreground" },
+  ];
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -183,15 +241,44 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome ou username..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome ou username..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          
+          {/* Filter Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            {filterOptions.map((filter) => (
+              <Button
+                key={filter.value}
+                variant={activeFilter === filter.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleFilterChange(filter.value)}
+                className={activeFilter === filter.value ? "" : "hover:bg-muted"}
+              >
+                {filter.label}
+              </Button>
+            ))}
+            {activeFilter !== "all" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleFilterChange("all")}
+                className="text-muted-foreground"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Limpar
+              </Button>
+            )}
           </div>
         </div>
 
