@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLikePost, useSavePost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
@@ -15,6 +15,21 @@ import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoControls } from "@/components/feed/VideoControls";
 import { Send, Bookmark, MessageCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
+
+const REPORT_REASONS = [
+  { value: "spam", label: "Spam ou conteúdo enganoso" },
+  { value: "inappropriate", label: "Conteúdo impróprio" },
+  { value: "harassment", label: "Assédio ou bullying" },
+  { value: "violence", label: "Violência ou ameaças" },
+  { value: "other", label: "Outro motivo" },
+];
 
 interface PostMediaViewerProps {
   post: Post;
@@ -57,6 +72,14 @@ export const PostMediaViewer = ({
   const [showInfo, setShowInfo] = useState(false);
   const [scale, setScale] = useState(1);
   
+  // Edit/Delete/Report dialogs
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
+  
   // Local optimistic state for like/save
   const [isLikedLocal, setIsLikedLocal] = useState(post.liked_by_user);
   const [isSavedLocal, setIsSavedLocal] = useState(post.saved_by_user);
@@ -67,7 +90,9 @@ export const PostMediaViewer = ({
     setIsLikedLocal(post.liked_by_user);
     setIsSavedLocal(post.saved_by_user);
     setLikesCountLocal(post.likes_count);
-  }, [post.liked_by_user, post.saved_by_user, post.likes_count]);
+    setEditContent(post.content);
+  }, [post.liked_by_user, post.saved_by_user, post.likes_count, post.content]);
+  
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
@@ -86,7 +111,52 @@ export const PostMediaViewer = ({
   // Hooks for interactions
   const likePost = useLikePost();
   const savePost = useSavePost();
+  const updatePost = useUpdatePost();
+  const deletePost = useDeletePost();
+  const reportPost = useReportPost();
   const { data: likers = [] } = usePostLikes(post.id, isOpen && likesCountLocal > 0);
+  
+  const isOwner = user?.id === post.user_id;
+
+  const handleEdit = () => {
+    setEditContent(post.content);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    updatePost.mutate(
+      { postId: post.id, content: editContent },
+      {
+        onSuccess: () => {
+          setIsEditDialogOpen(false);
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+        },
+      }
+    );
+  };
+
+  const handleDelete = () => {
+    deletePost.mutate(post.id, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        onClose();
+      },
+    });
+  };
+
+  const handleReport = () => {
+    if (!reportReason) return;
+    reportPost.mutate(
+      { postId: post.id, reason: reportReason, description: reportDescription },
+      {
+        onSuccess: () => {
+          setIsReportDialogOpen(false);
+          setReportReason("");
+          setReportDescription("");
+        },
+      }
+    );
+  };
 
   useEffect(() => {
     console.log("[PostMediaViewer] isOpen change", {
@@ -593,17 +663,60 @@ export const PostMediaViewer = ({
                     )}
                     {isVideo && <div />}
 
-                    {/* Close button - always arrow */}
-                    <button
-                      onClick={onClose}
-                      className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
-                        isVideo
-                          ? "bg-black/50 text-white hover:bg-black/70"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined">arrow_back</span>
-                    </button>
+                    {/* Right side: Close button + Options menu */}
+                    <div className="flex items-center gap-2">
+                      {/* Three dots menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
+                              isVideo
+                                ? "bg-black/50 text-white hover:bg-black/70"
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[20px]">more_horiz</span>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 z-[70]">
+                          {isOwner ? (
+                            <>
+                              <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+                                <span className="material-symbols-outlined text-[18px] mr-2">edit</span>
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="cursor-pointer text-primary focus:text-primary"
+                              >
+                                <span className="material-symbols-outlined text-[18px] mr-2">delete</span>
+                                Excluir
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <DropdownMenuItem
+                              onClick={() => setIsReportDialogOpen(true)}
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <span className="material-symbols-outlined text-[18px] mr-2">flag</span>
+                              Denunciar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Close button */}
+                      <button
+                        onClick={onClose}
+                        className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
+                          isVideo
+                            ? "bg-black/50 text-white hover:bg-black/70"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined">arrow_back</span>
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -811,6 +924,80 @@ export const PostMediaViewer = ({
         contentPreview={mediaUrls[0]}
         contentTitle={post.content?.substring(0, 50) || "Publicação"}
       />
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md z-[80]">
+          <DialogHeader>
+            <DialogTitle>Editar publicação</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="O que você está pensando?"
+              className="min-h-[100px] resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updatePost.isPending}>
+              {updatePost.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ResponsiveAlertModal
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Excluir publicação"
+        description="Tem certeza que deseja excluir esta publicação? Esta ação não pode ser desfeita."
+        confirmText={deletePost.isPending ? "Excluindo..." : "Excluir"}
+        cancelText="Cancelar"
+        onConfirm={handleDelete}
+        confirmVariant="destructive"
+      />
+
+      {/* Report Dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="sm:max-w-md z-[80]">
+          <DialogHeader>
+            <DialogTitle>Denunciar publicação</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <RadioGroup value={reportReason} onValueChange={setReportReason}>
+              {REPORT_REASONS.map((reason) => (
+                <div key={reason.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={reason.value} id={reason.value} />
+                  <Label htmlFor={reason.value}>{reason.label}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+            <Textarea
+              value={reportDescription}
+              onChange={(e) => setReportDescription(e.target.value)}
+              placeholder="Descreva o problema (opcional)"
+              className="min-h-[80px] resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleReport}
+              disabled={!reportReason || reportPost.isPending}
+              variant="destructive"
+            >
+              {reportPost.isPending ? "Enviando..." : "Denunciar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
