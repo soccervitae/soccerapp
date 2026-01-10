@@ -213,9 +213,16 @@ export const ProfileInfo = ({
               <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
             </div>}
         </div>
-        {profile.conta_verificada && <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
+        {/* Badge: Gold star for official accounts, green verified for regular verified accounts */}
+        {(profile as any).is_official_account ? (
+          <div className="absolute bottom-0 right-0 bg-amber-500 text-white rounded-full p-1.5 border-4 border-background flex items-center justify-center">
+            <span className="material-symbols-outlined text-[16px] font-bold">star</span>
+          </div>
+        ) : profile.conta_verificada && (
+          <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-4 border-background flex items-center justify-center">
             <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
-          </div>}
+          </div>
+        )}
       </div>
 
       {/* Name and Position */}

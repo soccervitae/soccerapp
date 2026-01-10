@@ -36,8 +36,11 @@ export const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Redirect admin users to admin dashboard
-  if (isAdmin && !location.pathname.startsWith("/admin")) {
+  const profileData = profile as any;
+
+  // Redirect admin users to admin dashboard (except official accounts who can use both)
+  const isOfficialAccount = profileData?.is_official_account === true;
+  if (isAdmin && !isOfficialAccount && !location.pathname.startsWith("/admin")) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -45,8 +48,6 @@ export const ProtectedRoute = ({
   if (requirePwa && shouldBlockAccess && location.pathname !== "/install") {
     return <Navigate to="/install" replace />;
   }
-
-  const profileData = profile as any;
 
   // Redirect to complete profile if profile is not completed
   if (
