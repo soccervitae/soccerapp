@@ -125,7 +125,7 @@ export default function AdminPosts() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Posts</h1>
           <p className="text-muted-foreground">
-            Gerencie todos os posts da plataforma
+            Gerencie todos os posts da plataforma ({totalCount || 0} posts)
           </p>
         </div>
 
