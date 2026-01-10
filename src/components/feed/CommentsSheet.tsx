@@ -305,7 +305,12 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
               </AnimatePresence>
             </button>
             {likesCount > 0 && (
-              <span className="text-xs text-muted-foreground">{likesCount}</span>
+              <button
+                onClick={() => setSelectedCommentId(c.id)}
+                className="text-xs text-muted-foreground hover:underline"
+              >
+                {likesCount}
+              </button>
             )}
             {/* Options menu for own comments */}
             {isOwnComment && !isEditing && (
