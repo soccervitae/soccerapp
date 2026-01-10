@@ -167,10 +167,22 @@ export default function AdminPosts() {
                       </p>
                     </TableCell>
                     <TableCell>
-                      {post.media_type ? (
-                        <Badge variant="secondary">
-                          {post.media_type === "video" ? "Vídeo" : "Imagem"}
-                        </Badge>
+                      {post.media_url ? (
+                        <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                          {post.media_type === "video" ? (
+                            <video 
+                              src={post.media_url} 
+                              className="w-full h-full object-cover"
+                              muted
+                            />
+                          ) : (
+                            <img 
+                              src={post.media_url} 
+                              alt="Post media"
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
