@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -20,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Eye, Trash2, Heart, MessageCircle } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Heart, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -46,14 +45,38 @@ interface Post {
   } | null;
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export default function AdminPosts() {
   const [search, setSearch] = useState("");
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["adminPosts", search],
+  // Query for total count
+  const { data: totalCount } = useQuery({
+    queryKey: ["adminPostsCount", search],
     queryFn: async () => {
+      let query = supabase
+        .from("posts")
+        .select("id", { count: "exact", head: true });
+
+      if (search) {
+        query = query.ilike("content", `%${search}%`);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const { data: posts, isLoading } = useQuery({
+    queryKey: ["adminPosts", search, currentPage],
+    queryFn: async () => {
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from("posts")
         .select(`
@@ -61,7 +84,7 @@ export default function AdminPosts() {
           profiles:user_id(username, full_name, avatar_url)
         `)
         .order("created_at", { ascending: false })
-        .limit(100);
+        .range(from, to);
 
       if (search) {
         query = query.ilike("content", `%${search}%`);
@@ -80,6 +103,7 @@ export default function AdminPosts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["adminPostsCount"] });
       toast.success("Post deletado com sucesso");
       setSelectedPost(null);
     },
@@ -87,6 +111,13 @@ export default function AdminPosts() {
       toast.error("Erro ao deletar post");
     },
   });
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1); // Reset to first page on search
+  };
 
   return (
     <AdminLayout>
@@ -104,7 +135,7 @@ export default function AdminPosts() {
             <Input
               placeholder="Buscar por conteúdo..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -133,7 +164,7 @@ export default function AdminPosts() {
                       </div>
                     </TableCell>
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
@@ -225,6 +256,60 @@ export default function AdminPosts() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, totalCount || 0)} de {totalCount} posts
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className="w-9"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Próximo
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <EditPostSheet
