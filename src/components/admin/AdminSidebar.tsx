@@ -8,6 +8,7 @@ import {
   Flag,
   Shield,
   Trophy,
+  Medal,
   Settings,
   LogOut,
   Sparkles,
@@ -25,6 +26,7 @@ const menuItems = [
   { icon: Flag, label: "Denúncias", path: "/admin/reports" },
   { icon: Shield, label: "Times", path: "/admin/teams" },
   { icon: Trophy, label: "Campeonatos", path: "/admin/championships" },
+  { icon: Medal, label: "Conquistas", path: "/admin/achievements" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
 ];
 
