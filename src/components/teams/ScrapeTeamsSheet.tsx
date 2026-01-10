@@ -105,14 +105,32 @@ export const ScrapeTeamsSheet = ({
 
       // Check for duplicates in the database
       const teamNames = data.teams.map((t: ScrapedTeam) => t.nome);
-      const { data: existingTeams } = await supabase
+      
+      // Build query to check existing teams - handle null estado_id correctly
+      let duplicateQuery = supabase
         .from("times")
         .select("nome")
-        .in("nome", teamNames)
-        .eq("pais_id", selectedPaisId)
-        .eq("estado_id", selectedEstadoId || -1);
+        .in("nome", teamNames);
+      
+      if (selectedPaisId) {
+        duplicateQuery = duplicateQuery.eq("pais_id", selectedPaisId);
+      }
+      
+      if (selectedEstadoId) {
+        duplicateQuery = duplicateQuery.eq("estado_id", selectedEstadoId);
+      } else {
+        duplicateQuery = duplicateQuery.is("estado_id", null);
+      }
+      
+      const { data: existingTeams, error: duplicateError } = await duplicateQuery;
+      
+      if (duplicateError) {
+        console.warn("Error checking duplicates:", duplicateError);
+      }
 
       const existingNames = new Set(existingTeams?.map((t) => t.nome) || []);
+      
+      console.log(`[ScrapeTeams] Found ${teamNames.length} teams, ${existingNames.size} already exist in DB for pais=${selectedPaisId}, estado=${selectedEstadoId}`);
 
       const scrapedTeams = data.teams.map((t: ScrapedTeam) => ({
         ...t,
@@ -164,9 +182,22 @@ export const ScrapeTeamsSheet = ({
       return;
     }
 
+    // Validate required fields
+    if (!selectedPaisId) {
+      setImportResult({ success: false, count: 0, message: "Selecione o país antes de importar" });
+      return;
+    }
+
+    if (!selectedEstadoId) {
+      setImportResult({ success: false, count: 0, message: "Selecione o estado antes de importar" });
+      return;
+    }
+
     setIsSaving(true);
     setImportResult(null);
     setBatchLogs([]);
+
+    console.log(`[ScrapeTeams] Starting import: ${selectedTeams.length} teams, pais=${selectedPaisId}, estado=${selectedEstadoId}, user=${user.id}`);
 
     try {
       const teamsToInsert = selectedTeams.map((t) => ({
@@ -193,15 +224,18 @@ export const ScrapeTeamsSheet = ({
           `Lote ${batchNum}/${totalBatches}: Salvando ${batch.length} times...`,
         ]);
 
+        console.log(`[ScrapeTeams] Batch ${batchNum}: Upserting ${batch.length} teams`, batch.map(t => t.nome));
+        
         const { data, error } = await supabase
           .from("times")
           .upsert(batch, {
             onConflict: "nome,estado_id,pais_id",
             ignoreDuplicates: true,
           })
-          .select("id");
+          .select("id, nome");
 
         if (error) {
+          console.error(`[ScrapeTeams] Batch ${batchNum} error:`, error);
           const errorMsg = `Lote ${batchNum}/${totalBatches} erro: ${error.code ?? ""} ${error.message}`.trim();
           setBatchLogs((prev) => [...prev.slice(0, -1), `❌ ${errorMsg}`]);
 
@@ -225,17 +259,44 @@ export const ScrapeTeamsSheet = ({
 
         const inserted = data?.length ?? 0;
         insertedCount += inserted;
+        
+        console.log(`[ScrapeTeams] Batch ${batchNum} result: ${inserted} inserted`, data?.map(t => t.nome));
+        
         setBatchLogs((prev) => [
           ...prev.slice(0, -1),
           `✅ Lote ${batchNum}/${totalBatches}: ${inserted} novos times inseridos`,
         ]);
       }
 
+      // Post-import verification: check how many teams actually exist in the database
+      const teamNamesToVerify = selectedTeams.map(t => t.nome);
+      const { data: verifiedTeams, error: verifyError } = await supabase
+        .from("times")
+        .select("id, nome")
+        .in("nome", teamNamesToVerify)
+        .eq("pais_id", selectedPaisId)
+        .eq("estado_id", selectedEstadoId);
+      
+      if (verifyError) {
+        console.warn("[ScrapeTeams] Verification query error:", verifyError);
+      } else {
+        const verifiedCount = verifiedTeams?.length ?? 0;
+        console.log(`[ScrapeTeams] Verification: ${verifiedCount}/${teamNamesToVerify.length} teams exist in DB after import`);
+        
+        if (verifiedCount > 0 && insertedCount === 0) {
+          // Teams exist but none were "inserted" - they already existed
+          setBatchLogs((prev) => [
+            ...prev,
+            `ℹ️ Verificação: ${verifiedCount} times já existem no banco de dados`,
+          ]);
+        }
+      }
+
       if (insertedCount === 0) {
         setImportResult({
           success: false,
           count: 0,
-          message: "Nenhum time novo foi inserido (provavelmente todos já existiam).",
+          message: "Nenhum time novo foi inserido (todos já existiam no banco de dados).",
         });
         return;
       }
@@ -251,7 +312,7 @@ export const ScrapeTeamsSheet = ({
       // Show success confirmation sheet
       setShowSuccessSheet(true);
     } catch (error) {
-      console.error("Import error:", error);
+      console.error("[ScrapeTeams] Import error:", error);
       const message =
         error && typeof error === "object" && "message" in error
           ? String((error as any).message)
@@ -261,6 +322,9 @@ export const ScrapeTeamsSheet = ({
       setIsSaving(false);
     }
   };
+
+  // Determine if import is allowed
+  const canImport = selectedCount > 0 && selectedPaisId && selectedEstadoId;
 
   return (
     <>
@@ -275,8 +339,9 @@ export const ScrapeTeamsSheet = ({
               {selectedCount > 0 && (
                 <Button
                   onClick={handleImport}
-                  disabled={isSaving}
+                  disabled={isSaving || !canImport}
                   size="sm"
+                  title={!selectedPaisId ? "Selecione o país" : !selectedEstadoId ? "Selecione o estado" : ""}
                 >
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -398,6 +463,18 @@ export const ScrapeTeamsSheet = ({
                     <Ban className="w-5 h-5 text-amber-500" />
                     <span className="text-sm text-amber-600 dark:text-amber-400">
                       {duplicateCount} {duplicateCount === 1 ? "time já existe" : "times já existem"} e {duplicateCount === 1 ? "será ignorado" : "serão ignorados"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Warning when country/state not selected */}
+                {selectedCount > 0 && (!selectedPaisId || !selectedEstadoId) && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <AlertCircle className="w-5 h-5 text-amber-500" />
+                    <span className="text-sm text-amber-600 dark:text-amber-400">
+                      {!selectedPaisId 
+                        ? "Selecione o país para poder importar" 
+                        : "Selecione o estado para poder importar"}
                     </span>
                   </div>
                 )}
