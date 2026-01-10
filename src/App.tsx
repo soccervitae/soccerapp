@@ -37,6 +37,7 @@ import Welcome from "./pages/Welcome";
 import Teams from "./pages/Teams";
 import Install from "./pages/Install";
 import Landing from "./pages/Landing";
+import Guidelines from "./pages/Guidelines";
 
 import AdminDashboard from "./pages/admin/Index";
 import AdminContent from "./pages/admin/Content";
@@ -106,6 +107,8 @@ const AnimatedRoutes = () => {
       {/* Install page - public, no login required */}
       <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
       
+      {/* Guidelines page - public, no login required */}
+      <Route path="/guidelines" element={<PageTransition><Guidelines /></PageTransition>} />
       {/* Complete profile route - requires login but not complete profile or onboarding */}
       <Route path="/complete-profile" element={
         <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
