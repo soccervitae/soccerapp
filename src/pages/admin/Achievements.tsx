@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy, Users, Tag, Palette } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Edit, Plus, Trophy, Users, Tag, List } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddAchievementTypeSheet } from "@/components/admin/AddAchievementTypeSheet";
@@ -174,7 +174,7 @@ export default function AdminAchievements() {
           <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
             <p className="text-2xl font-bold text-orange-500">{achievementTypes?.length || 0}</p>
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-              <Palette className="h-3 w-3" /> Listados
+              <List className="h-3 w-3" /> Listados
             </p>
           </div>
         </div>
@@ -197,7 +197,6 @@ export default function AdminAchievements() {
               <TableRow>
                 <TableHead>Tipo de Conquista</TableHead>
                 <TableHead>Categoria</TableHead>
-                <TableHead>Cor</TableHead>
                 <TableHead>Usuários</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
@@ -206,21 +205,15 @@ export default function AdminAchievements() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-10 w-10 rounded-full" />
-                        <Skeleton className="h-4 w-32" />
-                      </div>
-                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : achievementTypes?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     Nenhum tipo de conquista encontrado
                   </TableCell>
                 </TableRow>
@@ -228,23 +221,15 @@ export default function AdminAchievements() {
                 achievementTypes?.map((achievement) => (
                   <TableRow key={achievement.id}>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="h-10 w-10 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: achievement.color || '#6366f1' }}
-                        >
-                          <Trophy className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground block">
-                            {achievement.name}
+                      <div>
+                        <span className="font-medium text-foreground block">
+                          {achievement.name}
+                        </span>
+                        {achievement.description && (
+                          <span className="text-xs text-muted-foreground line-clamp-1">
+                            {achievement.description}
                           </span>
-                          {achievement.description && (
-                            <span className="text-xs text-muted-foreground line-clamp-1">
-                              {achievement.description}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -252,21 +237,6 @@ export default function AdminAchievements() {
                         <Badge variant="outline">
                           {achievement.category}
                         </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {achievement.color ? (
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="h-4 w-4 rounded-full border border-border"
-                            style={{ backgroundColor: achievement.color }}
-                          />
-                          <span className="text-xs text-muted-foreground">
-                            {achievement.color}
-                          </span>
-                        </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
