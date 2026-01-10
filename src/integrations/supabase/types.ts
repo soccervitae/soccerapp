@@ -1031,6 +1031,7 @@ export type Database = {
           gender: string | null
           height: number | null
           id: string
+          is_official_account: boolean | null
           is_private: boolean | null
           last_seen_at: string | null
           nationality: number | null
@@ -1078,6 +1079,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id: string
+          is_official_account?: boolean | null
           is_private?: boolean | null
           last_seen_at?: string | null
           nationality?: number | null
@@ -1125,6 +1127,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id?: string
+          is_official_account?: boolean | null
           is_private?: boolean | null
           last_seen_at?: string | null
           nationality?: number | null
