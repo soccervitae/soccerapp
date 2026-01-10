@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePostComments, useCreateComment, type Post } from "@/hooks/usePosts";
+import { usePostComments, useCreateComment, type Post, type Comment } from "@/hooks/usePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useCommentLikes, useLikeComment } from "@/hooks/useCommentLikes";
@@ -27,13 +27,34 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
   const { data: currentUserProfile } = useProfile(user?.id);
   const [comment, setComment] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; username: string } | null>(null);
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const inputRef = useRef<HTMLInputElement>(null);
   const { data: comments, isLoading } = usePostComments(post.id);
   const createComment = useCreateComment();
   const likeComment = useLikeComment();
 
-  // Get all comment IDs for fetching likes
-  const commentIds = useMemo(() => comments?.map(c => c.id) || [], [comments]);
-  const { data: likesData } = useCommentLikes(commentIds);
+  // Get all comment IDs including replies for fetching likes
+  const allCommentIds = useMemo(() => {
+    const ids: string[] = [];
+    const collectIds = (commentList: Comment[] | undefined) => {
+      for (const c of commentList || []) {
+        ids.push(c.id);
+        if (c.replies) collectIds(c.replies);
+      }
+    };
+    collectIds(comments);
+    return ids;
+  }, [comments]);
+  
+  const { data: likesData } = useCommentLikes(allCommentIds);
+
+  // Focus input when replying
+  useEffect(() => {
+    if (replyingTo && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [replyingTo]);
 
   const handleComment = () => {
     if (!user) {
@@ -43,9 +64,43 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
     if (!comment.trim()) return;
     
     createComment.mutate(
-      { postId: post.id, content: comment },
-      { onSuccess: () => setComment("") }
+      { 
+        postId: post.id, 
+        content: comment,
+        parentId: replyingTo?.id,
+      },
+      { 
+        onSuccess: () => {
+          setComment("");
+          setReplyingTo(null);
+          // Auto-expand replies for the parent comment
+          if (replyingTo) {
+            setExpandedReplies(prev => new Set(prev).add(replyingTo.id));
+          }
+        } 
+      }
     );
+  };
+
+  const handleReply = (commentId: string, username: string) => {
+    setReplyingTo({ id: commentId, username });
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
+    setComment("");
+  };
+
+  const toggleReplies = (commentId: string) => {
+    setExpandedReplies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
   };
 
   const handleLikeComment = (commentId: string) => {
@@ -71,6 +126,108 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
     return commentDate.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
   };
 
+  // Render a single comment (used for both parent and replies)
+  const renderComment = (c: Comment, isReply: boolean = false) => {
+    const isLiked = likesData?.likedByUser[c.id] || false;
+    const likesCount = likesData?.counts[c.id] || 0;
+    const repliesCount = c.replies?.length || 0;
+    const isExpanded = expandedReplies.has(c.id);
+    
+    return (
+      <div key={c.id} className={`${isReply ? 'ml-12' : ''}`}>
+        <div className="flex gap-3 px-1">
+          <img
+            src={c.profile?.avatar_url || "/placeholder.svg"}
+            alt={c.profile?.username}
+            className={`${isReply ? 'w-7 h-7' : 'w-9 h-9'} rounded-full object-cover flex-shrink-0 cursor-pointer`}
+            onClick={() => {
+              onOpenChange(false);
+              navigate(`/${c.profile?.username}`);
+            }}
+          />
+          <div className="flex-1 min-w-0">
+            <div className="bg-muted/50 rounded-2xl px-3 py-2">
+              <span 
+                className="font-semibold text-sm text-foreground cursor-pointer hover:underline"
+                onClick={() => {
+                  onOpenChange(false);
+                  navigate(`/${c.profile?.username}`);
+                }}
+              >
+                {c.profile?.username}
+              </span>
+              <p className="text-sm text-foreground break-words">
+                {c.content}
+              </p>
+            </div>
+            {/* Actions row */}
+            <div className="flex items-center gap-4 mt-1 ml-2">
+              <span className="text-xs text-muted-foreground">
+                {getTimeAgo(c.created_at)}
+              </span>
+              {/* Like count */}
+              {likesCount > 0 && (
+                <button
+                  onClick={() => setSelectedCommentId(c.id)}
+                  className="text-xs text-muted-foreground hover:underline"
+                >
+                  {likesCount} {likesCount === 1 ? "aplauso" : "aplausos"}
+                </button>
+              )}
+              {/* Reply button - only for parent comments */}
+              {!isReply && (
+                <button
+                  onClick={() => handleReply(c.id, c.profile?.username || "")}
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                >
+                  Responder
+                </button>
+              )}
+            </div>
+            {/* Show replies toggle */}
+            {!isReply && repliesCount > 0 && (
+              <button
+                onClick={() => toggleReplies(c.id)}
+                className="flex items-center gap-2 mt-2 ml-2 text-xs font-semibold text-primary hover:underline"
+              >
+                <div className="w-6 h-px bg-muted-foreground/50" />
+                {isExpanded ? 'Ocultar respostas' : `Ver ${repliesCount} ${repliesCount === 1 ? 'resposta' : 'respostas'}`}
+              </button>
+            )}
+          </div>
+          {/* Like button */}
+          <button
+            onClick={() => handleLikeComment(c.id)}
+            disabled={likeComment.isPending}
+            className="flex-shrink-0 p-1 transition-all active:scale-110 self-start mt-2"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={isLiked ? "liked" : "unliked"}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+              >
+                <ClappingHandsIcon 
+                  className="w-4 h-4" 
+                  filled={isLiked} 
+                  variant="green" 
+                />
+              </motion.div>
+            </AnimatePresence>
+          </button>
+        </div>
+        {/* Render replies if expanded */}
+        {!isReply && isExpanded && c.replies && c.replies.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {c.replies.map(reply => renderComment(reply, true))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
       <ResponsiveModalContent className="sm:max-w-lg h-[70vh] sm:h-[500px] flex flex-col z-[70]" overlayClassName="z-[70]">
@@ -85,74 +242,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
             </div>
           ) : comments && comments.length > 0 ? (
             <div className="space-y-4">
-              {comments.map((c) => {
-                const isLiked = likesData?.likedByUser[c.id] || false;
-                const likesCount = likesData?.counts[c.id] || 0;
-                
-                return (
-                  <div key={c.id} className="flex gap-3 px-1">
-                    <img
-                      src={c.profile?.avatar_url || "/placeholder.svg"}
-                      alt={c.profile?.username}
-                      className="w-9 h-9 rounded-full object-cover flex-shrink-0 cursor-pointer"
-                      onClick={() => {
-                        onOpenChange(false);
-                        navigate(`/${c.profile?.username}`);
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span 
-                          className="font-semibold text-sm text-foreground cursor-pointer hover:underline"
-                          onClick={() => {
-                            onOpenChange(false);
-                            navigate(`/${c.profile?.username}`);
-                          }}
-                        >
-                          {c.profile?.username}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {getTimeAgo(c.created_at)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-foreground mt-0.5 break-words">
-                        {c.content}
-                      </p>
-                      {/* Like count - clickable to show likers */}
-                      {likesCount > 0 && (
-                        <button
-                          onClick={() => setSelectedCommentId(c.id)}
-                          className="text-xs text-muted-foreground mt-1 inline-block hover:underline"
-                        >
-                          {likesCount} {likesCount === 1 ? "aplauso" : "aplausos"}
-                        </button>
-                      )}
-                    </div>
-                    {/* Like button */}
-                    <button
-                      onClick={() => handleLikeComment(c.id)}
-                      disabled={likeComment.isPending}
-                      className="flex-shrink-0 p-1 transition-all active:scale-110"
-                    >
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.div
-                          key={isLiked ? "liked" : "unliked"}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.8, opacity: 0 }}
-                          transition={{ duration: 0.15, ease: "easeOut" }}
-                        >
-                          <ClappingHandsIcon 
-                            className="w-4 h-4" 
-                            filled={isLiked} 
-                            variant="green" 
-                          />
-                        </motion.div>
-                      </AnimatePresence>
-                    </button>
-                  </div>
-                );
-              })}
+              {comments.map((c) => renderComment(c))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
@@ -165,6 +255,20 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
 
         {/* Comment input */}
         <div className="border-t border-border bg-background p-4 mt-auto">
+          {/* Reply indicator */}
+          {replyingTo && (
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-xs text-muted-foreground">
+                Respondendo a <span className="font-semibold text-foreground">@{replyingTo.username}</span>
+              </span>
+              <button
+                onClick={cancelReply}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
               {user && currentUserProfile?.avatar_url ? (
@@ -178,8 +282,9 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
               )}
             </div>
             <input
+              ref={inputRef}
               type="text"
-              placeholder="Adicione um comentário..."
+              placeholder={replyingTo ? `Responder a @${replyingTo.username}...` : "Adicione um comentário..."}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleComment()}
@@ -191,7 +296,7 @@ export const CommentsSheet = ({ post, open, onOpenChange }: CommentsSheetProps) 
                 disabled={createComment.isPending}
                 className="text-primary font-bold text-sm hover:text-primary/80 transition-colors disabled:opacity-50"
               >
-                Publicar
+                {replyingTo ? 'Responder' : 'Publicar'}
               </button>
             )}
           </div>
