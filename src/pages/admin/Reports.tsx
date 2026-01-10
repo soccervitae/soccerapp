@@ -273,7 +273,8 @@ export default function AdminReports() {
       <TableHeader>
         <TableRow>
           <TableHead>Denunciante</TableHead>
-          <TableHead>Post</TableHead>
+          <TableHead>Autor do Post</TableHead>
+          <TableHead>Conteúdo</TableHead>
           <TableHead>Mídia</TableHead>
           <TableHead>Motivo</TableHead>
           <TableHead>Status</TableHead>
@@ -286,6 +287,7 @@ export default function AdminReports() {
           Array.from({ length: 3 }).map((_, i) => (
             <TableRow key={i}>
               <TableCell><Skeleton className="h-10 w-32" /></TableCell>
+              <TableCell><Skeleton className="h-10 w-32" /></TableCell>
               <TableCell><Skeleton className="h-4 w-48" /></TableCell>
               <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
@@ -296,7 +298,7 @@ export default function AdminReports() {
           ))
         ) : postReports?.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
               Nenhuma denúncia de post encontrada
             </TableCell>
           </TableRow>
@@ -315,11 +317,23 @@ export default function AdminReports() {
                 </div>
               </TableCell>
               <TableCell>
-                <p className="text-sm line-clamp-1 max-w-xs">
+                {report.post?.profiles ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={report.post.profiles.avatar_url || ""} />
+                      <AvatarFallback>
+                        {report.post.profiles.username?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">@{report.post.profiles.username}</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">-</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <p className="text-sm line-clamp-2 max-w-[200px]">
                   {report.post?.content || "Post deletado"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  por @{report.post?.profiles?.username}
                 </p>
               </TableCell>
               <TableCell>
