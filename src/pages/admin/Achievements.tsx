@@ -55,7 +55,7 @@ export default function AdminAchievements() {
     queryFn: async () => {
       let query = supabase
         .from("achievement_types")
-        .select("*")
+        .select("*, user_achievements(count)")
         .order("name", { ascending: true })
         .limit(100);
 
@@ -65,7 +65,7 @@ export default function AdminAchievements() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as AchievementType[];
+      return data as (AchievementType & { user_achievements: { count: number }[] })[];
     },
   });
 
@@ -189,6 +189,7 @@ export default function AdminAchievements() {
                 <TableHead>Tipo de Conquista</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Cor</TableHead>
+                <TableHead>Usuários</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
@@ -204,13 +205,13 @@ export default function AdminAchievements() {
                     </TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : achievementTypes?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     Nenhum tipo de conquista encontrado
                   </TableCell>
                 </TableRow>
@@ -260,6 +261,14 @@ export default function AdminAchievements() {
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">
+                          {achievement.user_achievements?.[0]?.count || 0}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
