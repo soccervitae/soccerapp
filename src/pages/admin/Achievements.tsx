@@ -82,7 +82,7 @@ export default function AdminAchievements() {
 
   // Query for statistics
   const { data: stats } = useQuery({
-    queryKey: ["adminAchievementsStats"],
+    queryKey: ["adminAchievementsStats", userAchievementsCount],
     queryFn: async () => {
       const [
         typesResult,
@@ -97,7 +97,6 @@ export default function AdminAchievements() {
       return {
         totalTypes: typesResult.count || 0,
         categories: uniqueCategories.size,
-        userAdded: userAchievementsCount || 0,
       };
     },
   });
@@ -158,7 +157,7 @@ export default function AdminAchievements() {
             </p>
           </div>
           <div className="bg-card border border-border rounded-lg px-4 py-3 text-center">
-            <p className="text-2xl font-bold text-purple-500">{stats?.userAdded || 0}</p>
+            <p className="text-2xl font-bold text-purple-500">{userAchievementsCount || 0}</p>
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
               <Users className="h-3 w-3" /> Por Usuários
             </p>
