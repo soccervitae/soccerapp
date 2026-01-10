@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, FileText, Star, Image, Video } from "lucide-react";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
+import { ScheduledPostsSection } from "@/components/admin/ScheduledPostsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -126,6 +127,11 @@ export default function AdminContent() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Scheduled Posts */}
+        {officialAccount?.id && (
+          <ScheduledPostsSection userId={officialAccount.id} />
+        )}
 
         {/* Recent Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -102,6 +102,7 @@ export const usePosts = () => {
             cover_url
           )
         `)
+        .eq("is_published", true)
         .order("created_at", { ascending: false });
 
       console.log('[usePosts] Fetched posts:', { postsCount: posts?.length, error });
@@ -304,6 +305,8 @@ export const useCreatePost = () => {
       musicTrackId,
       musicStartSeconds,
       musicEndSeconds,
+      scheduledAt,
+      isPublished = true,
     }: { 
       content: string; 
       mediaUrl?: string; 
@@ -314,6 +317,8 @@ export const useCreatePost = () => {
       musicTrackId?: string;
       musicStartSeconds?: number;
       musicEndSeconds?: number;
+      scheduledAt?: string;
+      isPublished?: boolean;
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -330,6 +335,9 @@ export const useCreatePost = () => {
           music_track_id: musicTrackId || null,
           music_start_seconds: musicStartSeconds ?? null,
           music_end_seconds: musicEndSeconds ?? null,
+          scheduled_at: scheduledAt || null,
+          is_published: isPublished,
+          published_at: isPublished ? new Date().toISOString() : null,
         })
         .select()
         .single();
