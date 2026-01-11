@@ -10,6 +10,7 @@ export interface Team {
   pais_id: number | null;
   selected_by_users: string[];
   user_id: string | null;
+  created_by_admin?: boolean;
   estado?: {
     id: number;
     nome: string;
@@ -64,7 +65,24 @@ export const useTeams = (options: UseTeamsOptions = {}) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Team[];
+      
+      // Check if creators are admins
+      const teamsWithAdminCheck = await Promise.all(
+        (data || []).map(async (team) => {
+          if (!team.user_id) return { ...team, created_by_admin: false };
+          
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", team.user_id)
+            .eq("role", "admin")
+            .maybeSingle();
+          
+          return { ...team, created_by_admin: !!roleData };
+        })
+      );
+      
+      return teamsWithAdminCheck as Team[];
     },
   });
 };
