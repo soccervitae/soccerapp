@@ -209,7 +209,7 @@ export const useCreateTeam = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ nome, estadoId, paisId }: { nome: string; estadoId: number | null; paisId: number | null }) => {
+    mutationFn: async ({ nome, estadoId, paisId, escudoUrl }: { nome: string; estadoId: number | null; paisId: number | null; escudoUrl?: string | null }) => {
       if (!user) throw new Error("User not authenticated");
 
       const { data, error } = await supabase
@@ -218,6 +218,7 @@ export const useCreateTeam = () => {
           nome: nome.trim(),
           estado_id: estadoId,
           pais_id: paisId,
+          escudo_url: escudoUrl || null,
           selected_by_users: [user.id],
           user_id: user.id,
         })
