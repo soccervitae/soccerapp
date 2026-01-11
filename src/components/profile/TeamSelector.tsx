@@ -527,22 +527,24 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                         );
                       })}
                       
-                      {/* Add custom team button */}
-                      <button
-                        onClick={() => {
-                          setNewTeamName("");
-                          setShowAddTeamDialog(true);
-                        }}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-primary/50 text-primary hover:bg-primary/5 transition-colors text-left mt-4"
-                      >
-                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Plus className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium">Não encontrou seu time?</p>
-                          <p className="text-xs text-muted-foreground">Toque aqui para adicionar</p>
-                        </div>
-                      </button>
+                      {/* Add custom team button - only show when searching */}
+                      {debouncedSearch.trim() && (
+                        <button
+                          onClick={() => {
+                            setNewTeamName(debouncedSearch);
+                            setShowAddTeamDialog(true);
+                          }}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-primary/50 text-primary hover:bg-primary/5 transition-colors text-left mt-4"
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Plus className="w-6 h-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium">Não encontrou "{debouncedSearch}"?</p>
+                            <p className="text-xs text-muted-foreground">Toque aqui para adicionar</p>
+                          </div>
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
