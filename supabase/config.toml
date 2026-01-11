@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.clear-expired-bans]
 verify_jwt = false
+
+[functions.notify-support-response]
+verify_jwt = false
