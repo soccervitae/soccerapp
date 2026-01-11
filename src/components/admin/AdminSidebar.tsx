@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   Sparkles,
+  MessageSquarePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +25,7 @@ const menuItems = [
   { icon: Users, label: "Usuários", path: "/admin/users" },
   { icon: FileText, label: "Posts", path: "/admin/posts" },
   { icon: Flag, label: "Denúncias", path: "/admin/reports" },
+  { icon: MessageSquarePlus, label: "Suporte", path: "/admin/support" },
   { icon: Shield, label: "Times", path: "/admin/teams" },
   { icon: Trophy, label: "Campeonatos", path: "/admin/championships" },
   { icon: Medal, label: "Conquistas", path: "/admin/achievements" },

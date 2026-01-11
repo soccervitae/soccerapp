@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsPWA } from "@/hooks/useIsPWA";
+import { SupportSheet } from "@/components/support/SupportSheet";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Settings() {
   const isPWA = useIsPWA();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -118,6 +120,19 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Suporte */}
+        <div className="p-4 pt-0">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Suporte</p>
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <SettingsItem 
+              icon="contact_support"
+              label="Enviar sugestão ou reclamação"
+              onClick={() => setShowSupport(true)}
+              isLast
+            />
+          </div>
+        </div>
+
         {/* Preferências */}
         <div className="p-4 pt-0">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Preferências</p>
@@ -188,6 +203,8 @@ export default function Settings() {
         onConfirm={handleSignOut}
         confirmVariant="destructive"
       />
+
+      <SupportSheet open={showSupport} onOpenChange={setShowSupport} />
     </div>
   );
 }
