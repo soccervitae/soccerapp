@@ -304,6 +304,9 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
           ? "carousel" 
           : "image";
 
+      // Se tem mídia e não é post agendado, criar como não publicado para moderação
+      const needsModeration = !scheduledDate && (selectedMediaType === "video" || selectedMediaType === "photo");
+
       const result = await createPost.mutateAsync({
         content: caption || "",
         mediaUrl,
@@ -315,7 +318,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         musicStartSeconds: selectedMusic?.startSeconds,
         musicEndSeconds: selectedMusic?.endSeconds,
         scheduledAt: scheduledDate?.toISOString(),
-        isPublished: !scheduledDate,
+        isPublished: scheduledDate ? false : !needsModeration,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -326,6 +329,40 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
         }
       }
 
+      // Se precisa moderação, chamar a edge function
+      if (needsModeration && result?.id) {
+        toast.loading("Analisando conteúdo...", { id: "moderation-progress" });
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('moderate-content', {
+            body: {
+              postId: result.id,
+              mediaUrls: uploadedUrls,
+              mediaType: selectedMediaType,
+            }
+          });
+
+          toast.dismiss("moderation-progress");
+
+          if (error) {
+            console.error("Moderation error:", error);
+            // Em caso de erro, o post fica como não publicado
+            toast.info("Seu post está sendo analisado. Em breve será publicado se estiver de acordo com nossas diretrizes.");
+          } else if (data?.approved) {
+            toast.success("Post publicado com sucesso!");
+          } else {
+            toast.error(data?.reason || "Seu post foi rejeitado por violar as diretrizes da comunidade.");
+          }
+        } catch (moderationErr) {
+          console.error("Moderation call failed:", moderationErr);
+          toast.info("Seu post está sendo analisado. Em breve será publicado se estiver de acordo com nossas diretrizes.");
+        }
+      } else if (scheduledDate) {
+        toast.success("Post agendado com sucesso!");
+      } else {
+        toast.success("Post publicado com sucesso!");
+      }
+
       setCaption("");
       setSelectedMediaList([]);
       setSelectedMediaType("photo");
@@ -334,9 +371,6 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setSelectedLocation(null);
       setSelectedMusic(null);
       setScheduledDate(null);
-      if (scheduledDate) {
-        toast.success("Post agendado com sucesso!");
-      }
       onOpenChange(false);
     } catch (err) {
       console.error("Error publishing post:", err);

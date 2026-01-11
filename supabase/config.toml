@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.notify-support-response]
 verify_jwt = false
+
+[functions.moderate-content]
+verify_jwt = false
