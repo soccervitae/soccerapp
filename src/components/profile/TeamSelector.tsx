@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Check, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, type Team } from "@/hooks/useTeams";
+import { Loader2, Check, Search, X, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, useCreateTeam, type Team } from "@/hooks/useTeams";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +19,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface TeamSelectorProps {
   open: boolean;
@@ -39,9 +47,14 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   const [localSelectedIds, setLocalSelectedIds] = useState<string[]>([]);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Add custom team dialog
+  const [showAddTeamDialog, setShowAddTeamDialog] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
 
   const addUserToTeam = useAddUserToTeam();
   const removeUserFromTeam = useRemoveUserFromTeam();
+  const createTeam = useCreateTeam();
 
   // Initialize local selections when sheet opens or selectedTeamIds change
   useEffect(() => {
@@ -389,6 +402,18 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     <div className="text-center py-8 text-muted-foreground">
                       <p>Nenhum time encontrado</p>
                       <p className="text-sm mt-1">Tente buscar por outro nome</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setNewTeamName(searchInput);
+                          setShowAddTeamDialog(true);
+                        }}
+                        className="mt-4"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar "{searchInput || 'novo time'}"
+                      </Button>
                     </div>
                   ) : (
                     <>
@@ -456,6 +481,23 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                           </button>
                         );
                       })}
+                      
+                      {/* Add custom team button */}
+                      <button
+                        onClick={() => {
+                          setNewTeamName("");
+                          setShowAddTeamDialog(true);
+                        }}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-primary/50 text-primary hover:bg-primary/5 transition-colors text-left mt-4"
+                      >
+                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Plus className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">Não encontrou seu time?</p>
+                          <p className="text-xs text-muted-foreground">Toque aqui para adicionar</p>
+                        </div>
+                      </button>
                     </>
                   )}
                 </div>
@@ -491,6 +533,65 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add custom team dialog */}
+      <Dialog open={showAddTeamDialog} onOpenChange={setShowAddTeamDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar novo time</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nome do time</label>
+              <Input
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+                placeholder="Ex: Clube Atlético..."
+                autoFocus
+              />
+            </div>
+            {selectedCountry && (
+              <p className="text-sm text-muted-foreground">
+                Será adicionado em: {selectedState?.nome || selectedCountry.nome}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddTeamDialog(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!newTeamName.trim()) {
+                  toast.error("Digite o nome do time");
+                  return;
+                }
+                try {
+                  const newTeam = await createTeam.mutateAsync({
+                    nome: newTeamName.trim(),
+                    estadoId,
+                    paisId,
+                  });
+                  toast.success("Time adicionado com sucesso!");
+                  setShowAddTeamDialog(false);
+                  setNewTeamName("");
+                  setSearchInput("");
+                  onOpenChange(false);
+                } catch (error) {
+                  toast.error("Erro ao adicionar time");
+                }
+              }}
+              disabled={createTeam.isPending || !newTeamName.trim()}
+            >
+              {createTeam.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Adicionar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
