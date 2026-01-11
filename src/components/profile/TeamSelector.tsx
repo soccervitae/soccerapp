@@ -254,14 +254,12 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
           <DrawerHeader className="px-4 pt-4 pb-2">
             <div className="flex items-center justify-between">
               {step !== "country" ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
                   onClick={handleBack}
-                  className="h-8 w-8 hover:bg-transparent"
+                  className="h-8 w-8 flex items-center justify-center"
                 >
                   <ChevronLeft className="w-5 h-5" />
-                </Button>
+                </button>
               ) : (
                 <div className="w-8" />
               )}
