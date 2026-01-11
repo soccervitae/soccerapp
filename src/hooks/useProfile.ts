@@ -45,8 +45,9 @@ export const useProfile = (userId?: string) => {
 
   const query = useQuery({
     queryKey: ["profile", targetUserId],
-    refetchOnMount: "always",
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<Profile | null> => {
       if (!targetUserId) return null;
 
@@ -123,8 +124,9 @@ export const useProfile = (userId?: string) => {
 export const useProfileByUsername = (username: string) => {
   const query = useQuery({
     queryKey: ["profile", "username", username],
-    refetchOnMount: "always",
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<Profile | null> => {
       // If offline, return cached data
       if (!isOnline()) {
@@ -248,8 +250,9 @@ export const useUserPosts = (userId?: string) => {
 
   const query = useQuery({
     queryKey: ["user-posts", targetUserId, currentUserId],
-    refetchOnMount: "always",
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<UserPost[]> => {
       if (!targetUserId) return [];
 
@@ -327,8 +330,9 @@ export const useFollowStats = (userId?: string) => {
 
   return useQuery({
     queryKey: ["follow-stats", targetUserId],
-    refetchOnMount: "always",
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       if (!targetUserId) return { followers: 0, following: 0, isFollowing: false };
 
