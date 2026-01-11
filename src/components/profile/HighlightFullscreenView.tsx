@@ -318,16 +318,19 @@ export const HighlightFullscreenView = ({
             exit={getInitialPosition()}
             transition={{ 
               type: "spring", 
-              stiffness: 200, 
-              damping: 25,
-              mass: 0.8,
-              opacity: { duration: 0.25 }
+              stiffness: 280, 
+              damping: 28,
+              mass: 0.9,
+              opacity: { duration: 0.3 }
             }}
           >
-            <div className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto">
+            <div 
+              className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto"
+              style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
               <div className="relative w-full h-full flex flex-col overflow-hidden">
                 {/* Progress bars for images */}
-                <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
+                <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-3 pt-3" style={{ marginTop: 'env(safe-area-inset-top)' }}>
                   {currentImages.map((media, index) => {
                     const mediaIsVideo = media.media_type === 'video';
                     let barProgress = 0;
@@ -351,7 +354,7 @@ export const HighlightFullscreenView = ({
                 </div>
 
                 {/* Header */}
-                <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4">
+                <div className="absolute left-0 right-0 z-20 flex items-center justify-between px-4" style={{ top: 'calc(2rem + env(safe-area-inset-top))' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-400">
                       <div 
@@ -494,7 +497,10 @@ export const HighlightFullscreenView = ({
                 </div>
 
                 {/* Footer with gradient */}
-                <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-6 bg-gradient-to-t from-black/60 to-transparent">
+                <div 
+                  className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/60 to-transparent"
+                  style={{ paddingBottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem))' }}
+                >
                   {isOwnProfile ? (
                     // Owner footer: views, likes, replies count and action buttons
                     <div className="flex items-center justify-between">

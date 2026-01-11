@@ -118,12 +118,15 @@ export const SharedHighlightViewer = ({ highlight, isOpen, onClose }: SharedHigh
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.9 }}
           >
-            <div className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto">
+            <div 
+              className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto"
+              style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
               <div className="relative w-full h-full flex flex-col overflow-hidden">
                 {/* Progress bars */}
-                <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-3 pt-4">
+                <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-3 pt-3" style={{ marginTop: 'env(safe-area-inset-top)' }}>
                   {highlight.images.map((media, index) => {
                     const mediaIsVideo = media.media_type === "video";
                     let barProgress = 0;
@@ -147,7 +150,7 @@ export const SharedHighlightViewer = ({ highlight, isOpen, onClose }: SharedHigh
                 </div>
 
                 {/* Header */}
-                <div className="absolute top-8 left-0 right-0 z-20 flex items-center justify-between px-4">
+                <div className="absolute left-0 right-0 z-20 flex items-center justify-between px-4" style={{ top: 'calc(2rem + env(safe-area-inset-top))' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-primary to-emerald-400">
                       <img
@@ -224,7 +227,10 @@ export const SharedHighlightViewer = ({ highlight, isOpen, onClose }: SharedHigh
 
                 {/* Footer dots */}
                 {highlight.images.length > 1 && (
-                  <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center">
+                  <div 
+                    className="absolute left-0 right-0 z-20 flex justify-center"
+                    style={{ bottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem))' }}
+                  >
                     <div className="flex gap-2">
                       {highlight.images.map((_, index) => (
                         <button
