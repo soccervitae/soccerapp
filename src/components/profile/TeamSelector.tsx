@@ -680,7 +680,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
                 {/* Emblem upload */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                  <label className="text-sm font-medium">Escudo do time <span className="text-destructive">*</span></label>
                   <div className="flex items-center gap-4">
                     <input
                       ref={emblemInputRef}
@@ -737,6 +737,10 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     toast.error("Digite o nome do time");
                     return;
                   }
+                  if (!emblemFile) {
+                    toast.error("Adicione o escudo do time");
+                    return;
+                  }
                   try {
                     let escudoUrl: string | null = null;
                     if (emblemFile) {
@@ -759,7 +763,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     toast.error("Erro ao adicionar time");
                   }
                 }}
-                disabled={createTeam.isPending || isUploading || !newTeamName.trim()}
+                disabled={createTeam.isPending || isUploading || !newTeamName.trim() || !emblemFile}
               >
                 {(createTeam.isPending || isUploading) ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -869,7 +873,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
                 {/* Emblem upload */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                  <label className="text-sm font-medium">Escudo do time <span className="text-destructive">*</span></label>
                   <div className="flex items-center gap-4">
                     <input
                       ref={emblemInputRef}
@@ -925,6 +929,10 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     toast.error("Digite o nome do time");
                     return;
                   }
+                  if (!emblemFile) {
+                    toast.error("Adicione o escudo do time");
+                    return;
+                  }
                   try {
                     let escudoUrl: string | null = null;
                     if (emblemFile) {
@@ -947,7 +955,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                     toast.error("Erro ao adicionar time");
                   }
                 }}
-                disabled={createTeam.isPending || isUploading || !newTeamName.trim()}
+                disabled={createTeam.isPending || isUploading || !newTeamName.trim() || !emblemFile}
               >
                 {(createTeam.isPending || isUploading) ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
