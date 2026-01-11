@@ -11,6 +11,7 @@ interface LocationState {
   email: string;
   userId: string;
   maskedEmail: string;
+  isAdmin?: boolean;
 }
 
 const TwoFactorVerify = () => {
@@ -69,8 +70,8 @@ const TwoFactorVerify = () => {
         await trustCurrentDevice(state.userId);
       }
 
-      // Navigate to home
-      navigate("/", { replace: true });
+      // Navigate based on admin status
+      navigate(state.isAdmin ? "/admin" : "/", { replace: true });
     } catch (error: any) {
       console.error("Error verifying 2FA code:", error);
     }
