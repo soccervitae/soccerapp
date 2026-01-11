@@ -195,3 +195,29 @@ export const useDeleteStory = () => {
     },
   });
 };
+
+export const useReportStory = () => {
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ storyId, reason, description }: { storyId: string; reason: string; description?: string }) => {
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { error } = await supabase
+        .from("story_reports")
+        .insert({
+          story_id: storyId,
+          reporter_id: user.id,
+          reason,
+          description: description || null,
+        });
+
+      if (error) {
+        if (error.code === "23505") {
+          throw new Error("Você já denunciou este replay");
+        }
+        throw error;
+      }
+    },
+  });
+};
