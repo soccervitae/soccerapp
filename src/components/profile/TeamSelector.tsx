@@ -5,7 +5,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Check, Search, X, ChevronLeft, ChevronRight, Plus, Upload, ImageIcon } from "lucide-react";
-import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, useCreateTeam, type Team } from "@/hooks/useTeams";
+import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, useCreateTeam, useSearchExistingTeams, type Team } from "@/hooks/useTeams";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useImageCompression } from "@/hooks/useImageCompression";
@@ -54,6 +54,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   // Add custom team dialog
   const [showAddTeamDialog, setShowAddTeamDialog] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
+  const debouncedNewTeamName = useDebouncedValue(newTeamName, 300);
   const [emblemFile, setEmblemFile] = useState<File | null>(null);
   const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   const emblemInputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +65,9 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   const { uploadMedia, isUploading } = useUploadMedia();
   const { compressImage } = useImageCompression();
   const isPWA = useIsPWA();
+  
+  // Search for existing teams when adding new team
+  const { data: existingTeams = [], isLoading: isSearchingExisting } = useSearchExistingTeams(debouncedNewTeamName);
 
   const handleEmblemSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -588,79 +592,139 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
             setNewTeamName("");
           }
         }}>
-          <DrawerContent className="px-4 pb-6">
+          <DrawerContent className="px-4 pb-6 max-h-[85dvh]">
             <DrawerHeader className="px-0">
               <DrawerTitle>Adicionar novo time</DrawerTitle>
             </DrawerHeader>
-            <div className="space-y-4 py-4">
-              {/* Emblem upload */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Escudo do time (opcional)</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    ref={emblemInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleEmblemSelect}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => emblemInputRef.current?.click()}
-                    className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
-                  >
-                    {emblemPreview ? (
-                      <img
-                        src={emblemPreview}
-                        alt="Preview"
-                        className="w-full h-full object-contain p-1"
-                      />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    )}
-                  </button>
-                  <div className="flex-1 space-y-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => emblemInputRef.current?.click()}
-                      className="w-full"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
-                    </Button>
-                    {emblemPreview && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearEmblem}
-                        className="w-full text-muted-foreground"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Remover
-                      </Button>
-                    )}
+            <ScrollArea className="flex-1 -mx-4 px-4">
+              <div className="space-y-4 py-4">
+                {/* Team name - moved to top for search */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nome do time</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
+                      placeholder="Digite o nome para buscar..."
+                      className="pl-9"
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Team name */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome do time</label>
-                <Input
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                  placeholder="Ex: Clube Atlético..."
-                />
+                {/* Existing teams found */}
+                {debouncedNewTeamName.trim().length >= 2 && (
+                  <div className="space-y-2">
+                    {isSearchingExisting ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : existingTeams.length > 0 ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Times encontrados com esse nome:
+                        </p>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {existingTeams.map((team) => {
+                            const isAlreadySelected = selectedTeamIds.includes(team.id) || localSelectedIds.includes(team.id);
+                            return (
+                              <button
+                                key={team.id}
+                                onClick={() => {
+                                  if (!isAlreadySelected) {
+                                    addUserToTeam.mutate(team.id, {
+                                      onSuccess: () => {
+                                        toast.success(`${team.nome} adicionado!`);
+                                        setShowAddTeamDialog(false);
+                                        setNewTeamName("");
+                                        onOpenChange(false);
+                                      }
+                                    });
+                                  }
+                                }}
+                                disabled={isAlreadySelected || addUserToTeam.isPending}
+                                className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left ${
+                                  isAlreadySelected
+                                    ? "bg-muted/50 opacity-60 cursor-not-allowed"
+                                    : "bg-card border border-border hover:bg-muted"
+                                }`}
+                              >
+                                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  {team.escudo_url ? (
+                                    <img src={team.escudo_url} alt={team.nome} className="w-full h-full object-contain p-0.5" />
+                                  ) : (
+                                    <span className="material-symbols-outlined text-xl text-muted-foreground">shield</span>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{team.nome}</p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {isAlreadySelected ? "Já selecionado" : [team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
+                                  </p>
+                                </div>
+                                {isAlreadySelected && <Check className="w-4 h-4 text-muted-foreground" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground text-center mb-2">
+                            Não é nenhum desses? Continue abaixo para criar novo
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        Nenhum time encontrado. Você pode criar um novo abaixo.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Emblem upload */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={emblemInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEmblemSelect}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => emblemInputRef.current?.click()}
+                      className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
+                    >
+                      {emblemPreview ? (
+                        <img src={emblemPreview} alt="Preview" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                      )}
+                    </button>
+                    <div className="flex-1 space-y-1">
+                      <Button type="button" variant="outline" size="sm" onClick={() => emblemInputRef.current?.click()} className="w-full">
+                        <Upload className="w-4 h-4 mr-2" />
+                        {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
+                      </Button>
+                      {emblemPreview && (
+                        <Button type="button" variant="ghost" size="sm" onClick={clearEmblem} className="w-full text-muted-foreground">
+                          <X className="w-4 h-4 mr-2" />
+                          Remover
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedCountry && (
+                  <p className="text-sm text-muted-foreground">
+                    Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
+                  </p>
+                )}
               </div>
-              {selectedCountry && (
-                <p className="text-sm text-muted-foreground">
-                  Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
-                </p>
-              )}
-            </div>
+            </ScrollArea>
             <DrawerFooter className="px-0 flex-row gap-2">
               <Button variant="outline" className="flex-1" onClick={() => {
                 setShowAddTeamDialog(false);
@@ -678,13 +742,10 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   }
                   try {
                     let escudoUrl: string | null = null;
-                    
-                    // Upload emblem if provided
                     if (emblemFile) {
                       const compressed = await compressImage(emblemFile);
                       escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
                     }
-                    
                     await createTeam.mutateAsync({
                       nome: newTeamName.trim(),
                       estadoId,
@@ -706,7 +767,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 {(createTeam.isPending || isUploading) ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Adicionar"
+                  "Criar novo time"
                 )}
               </Button>
             </DrawerFooter>
@@ -720,79 +781,139 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
             setNewTeamName("");
           }
         }}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Adicionar novo time</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              {/* Emblem upload */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Escudo do time (opcional)</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    ref={emblemInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleEmblemSelect}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => emblemInputRef.current?.click()}
-                    className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
-                  >
-                    {emblemPreview ? (
-                      <img
-                        src={emblemPreview}
-                        alt="Preview"
-                        className="w-full h-full object-contain p-1"
-                      />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    )}
-                  </button>
-                  <div className="flex-1 space-y-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => emblemInputRef.current?.click()}
-                      className="w-full"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
-                    </Button>
-                    {emblemPreview && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearEmblem}
-                        className="w-full text-muted-foreground"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Remover
-                      </Button>
-                    )}
+            <ScrollArea className="flex-1 -mx-6 px-6">
+              <div className="space-y-4 py-4">
+                {/* Team name - moved to top for search */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nome do time</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
+                      placeholder="Digite o nome para buscar..."
+                      className="pl-9"
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Team name */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome do time</label>
-                <Input
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
-                  placeholder="Ex: Clube Atlético..."
-                />
+                {/* Existing teams found */}
+                {debouncedNewTeamName.trim().length >= 2 && (
+                  <div className="space-y-2">
+                    {isSearchingExisting ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : existingTeams.length > 0 ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Times encontrados com esse nome:
+                        </p>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {existingTeams.map((team) => {
+                            const isAlreadySelected = selectedTeamIds.includes(team.id) || localSelectedIds.includes(team.id);
+                            return (
+                              <button
+                                key={team.id}
+                                onClick={() => {
+                                  if (!isAlreadySelected) {
+                                    addUserToTeam.mutate(team.id, {
+                                      onSuccess: () => {
+                                        toast.success(`${team.nome} adicionado!`);
+                                        setShowAddTeamDialog(false);
+                                        setNewTeamName("");
+                                        onOpenChange(false);
+                                      }
+                                    });
+                                  }
+                                }}
+                                disabled={isAlreadySelected || addUserToTeam.isPending}
+                                className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left ${
+                                  isAlreadySelected
+                                    ? "bg-muted/50 opacity-60 cursor-not-allowed"
+                                    : "bg-card border border-border hover:bg-muted"
+                                }`}
+                              >
+                                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  {team.escudo_url ? (
+                                    <img src={team.escudo_url} alt={team.nome} className="w-full h-full object-contain p-0.5" />
+                                  ) : (
+                                    <span className="material-symbols-outlined text-xl text-muted-foreground">shield</span>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{team.nome}</p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {isAlreadySelected ? "Já selecionado" : [team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
+                                  </p>
+                                </div>
+                                {isAlreadySelected && <Check className="w-4 h-4 text-muted-foreground" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground text-center mb-2">
+                            Não é nenhum desses? Continue abaixo para criar novo
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        Nenhum time encontrado. Você pode criar um novo abaixo.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Emblem upload */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={emblemInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEmblemSelect}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => emblemInputRef.current?.click()}
+                      className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
+                    >
+                      {emblemPreview ? (
+                        <img src={emblemPreview} alt="Preview" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                      )}
+                    </button>
+                    <div className="flex-1 space-y-1">
+                      <Button type="button" variant="outline" size="sm" onClick={() => emblemInputRef.current?.click()} className="w-full">
+                        <Upload className="w-4 h-4 mr-2" />
+                        {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
+                      </Button>
+                      {emblemPreview && (
+                        <Button type="button" variant="ghost" size="sm" onClick={clearEmblem} className="w-full text-muted-foreground">
+                          <X className="w-4 h-4 mr-2" />
+                          Remover
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedCountry && (
+                  <p className="text-sm text-muted-foreground">
+                    Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
+                  </p>
+                )}
               </div>
-              {selectedCountry && (
-                <p className="text-sm text-muted-foreground">
-                  Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
-                </p>
-              )}
-            </div>
+            </ScrollArea>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setShowAddTeamDialog(false);
@@ -809,13 +930,10 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   }
                   try {
                     let escudoUrl: string | null = null;
-                    
-                    // Upload emblem if provided
                     if (emblemFile) {
                       const compressed = await compressImage(emblemFile);
                       escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
                     }
-                    
                     await createTeam.mutateAsync({
                       nome: newTeamName.trim(),
                       estadoId,
@@ -837,7 +955,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 {(createTeam.isPending || isUploading) ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Adicionar"
+                  "Criar novo time"
                 )}
               </Button>
             </DialogFooter>

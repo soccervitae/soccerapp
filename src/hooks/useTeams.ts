@@ -204,6 +204,35 @@ export const useRemoveUserFromTeam = () => {
   });
 };
 
+export const useSearchExistingTeams = (search: string) => {
+  return useQuery({
+    queryKey: ["search-existing-teams", search],
+    queryFn: async () => {
+      if (!search || search.trim().length < 2) return [];
+
+      const { data, error } = await supabase
+        .from("times")
+        .select(`
+          id,
+          nome,
+          escudo_url,
+          estado_id,
+          pais_id,
+          selected_by_users,
+          estado:estados(id, nome, uf),
+          pais:paises(id, nome, bandeira_url)
+        `)
+        .ilike("nome", `%${search.trim()}%`)
+        .order("nome")
+        .limit(10);
+
+      if (error) throw error;
+      return data as Team[];
+    },
+    enabled: search.trim().length >= 2,
+  });
+};
+
 export const useCreateTeam = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -231,6 +260,7 @@ export const useCreateTeam = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-teams"] });
       queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["search-existing-teams"] });
     },
   });
 };
