@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useViewStory, useLikeStory, useDeleteStory, type GroupedStories } from "@/hooks/useStories";
+import { useViewStory, useLikeStory, useDeleteStory, useReportStory, type GroupedStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStoryLikeStatus, useSendStoryReply, useStoryViewerCount, useStoryReplyCount } from "@/hooks/useStoryInteractions";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,8 +9,23 @@ import { StoryRepliesSheet } from "./StoryRepliesSheet";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
-import { MessageCircle, ImageOff, Send } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { MessageCircle, ImageOff, Send, MoreHorizontal, Flag } from "lucide-react";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { toast } from "sonner";
+
+const REPORT_REASONS = [
+  { value: "spam", label: "Spam ou conteúdo enganoso" },
+  { value: "inappropriate", label: "Conteúdo impróprio" },
+  { value: "harassment", label: "Assédio ou bullying" },
+  { value: "violence", label: "Violência ou ameaças" },
+  { value: "other", label: "Outro motivo" },
+];
 
 // Helper function to check unsupported formats
 const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
@@ -60,10 +75,14 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const viewStory = useViewStory();
   const likeStory = useLikeStory();
   const deleteStory = useDeleteStory();
+  const reportStory = useReportStory();
   
   // Dynamic theme color for iOS status bar
   useThemeColor(isOpen, "#000000");
   const sendReply = useSendStoryReply();
+
+  // Ref for dropdown portal container
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
 
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
@@ -77,11 +96,15 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [showRepliesSheet, setShowRepliesSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
   const [mediaError, setMediaError] = useState(false);
 
   const currentGroup = groupedStories[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
   const isOwner = user?.id === currentGroup?.userId;
+
 
   // Story interactions
   const { data: isLiked = false } = useStoryLikeStatus(currentStory?.id);
@@ -232,7 +255,28 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     }
   };
 
-  if (!currentStory || !currentGroup) return null;
+  const handleReport = async () => {
+    if (!currentStory || !user || !reportReason) return;
+    
+    try {
+      await reportStory.mutateAsync({
+        storyId: currentStory.id,
+        reason: reportReason,
+        description: reportDescription || undefined,
+      });
+      setShowReportDialog(false);
+      setReportReason("");
+      setReportDescription("");
+      toast.success("Denúncia enviada com sucesso");
+    } catch (error: any) {
+      if (error.message === "Você já denunciou este replay") {
+        toast.error(error.message);
+      } else {
+        toast.error("Erro ao enviar denúncia");
+      }
+      console.error("Error reporting story:", error);
+    }
+  };
 
   const getTransitionClasses = () => {
     if (!isTransitioning) return "opacity-100 scale-100 translate-x-0";
@@ -304,6 +348,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
               }}
             >
               <div 
+                ref={dropdownContainerRef}
                 className="w-full h-full max-w-md sm:h-[90vh] sm:max-h-[800px] bg-black sm:rounded-2xl overflow-hidden pointer-events-auto"
                 style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
               >
@@ -341,14 +386,33 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      {isOwner && (
-                        <button 
-                          onClick={() => setShowDeleteDialog(true)}
-                          className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[24px]">delete</span>
-                        </button>
-                      )}
+                      {/* 3-dot menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors">
+                            <MoreHorizontal className="w-5 h-5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 z-[70]" container={dropdownContainerRef.current}>
+                          {isOwner ? (
+                            <DropdownMenuItem 
+                              onClick={() => setShowDeleteDialog(true)} 
+                              className="cursor-pointer text-primary focus:text-primary"
+                            >
+                              <span className="material-symbols-outlined text-[18px] mr-2">delete</span>
+                              Excluir
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              onClick={() => setShowReportDialog(true)} 
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <Flag className="w-4 h-4 mr-2" />
+                              Denunciar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <button 
                         onClick={onClose}
                         className="w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
@@ -535,6 +599,52 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
           contentTitle={`Replay de ${currentGroup?.username || 'usuário'}`}
         />
       )}
+
+      {/* Report Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="sm:max-w-md z-[70]">
+          <DialogHeader>
+            <DialogTitle>Denunciar replay</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-3">
+              <Label>Por que você está denunciando este replay?</Label>
+              <RadioGroup value={reportReason} onValueChange={setReportReason}>
+                {REPORT_REASONS.map(reason => (
+                  <div key={reason.value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={reason.value} id={`story-${reason.value}`} />
+                    <Label htmlFor={`story-${reason.value}`} className="font-normal cursor-pointer">
+                      {reason.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="story-description">Detalhes adicionais (opcional)</Label>
+              <Textarea 
+                id="story-description" 
+                value={reportDescription} 
+                onChange={e => setReportDescription(e.target.value)} 
+                placeholder="Forneça mais informações sobre a denúncia..." 
+                className="min-h-[80px] resize-none" 
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportDialog(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleReport} 
+              disabled={reportStory.isPending || !reportReason} 
+              variant="destructive"
+            >
+              {reportStory.isPending ? "Enviando..." : "Denunciar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
