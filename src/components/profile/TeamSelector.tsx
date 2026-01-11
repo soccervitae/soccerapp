@@ -442,39 +442,39 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
               {/* Teams List */}
               <ScrollArea className="flex-1">
                 <div className="p-4 space-y-2">
-                  {teamsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                {/* Add custom team button - show ABOVE the list when searching (always visible when typing) */}
+                {searchInput.trim() && !teamsLoading && (
+                  <button
+                    onClick={() => {
+                      setNewTeamName(searchInput);
+                      setShowAddTeamDialog(true);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-primary/50 text-primary hover:bg-primary/5 transition-colors text-left mb-4"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Plus className="w-6 h-6 text-primary" />
                     </div>
-                  ) : teams.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>Nenhum time encontrado</p>
-                      <p className="text-sm mt-1">Tente buscar por outro nome ou adicione um novo acima</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">Não encontrou "{searchInput}"?</p>
+                      <p className="text-xs text-muted-foreground">Toque aqui para adicionar</p>
                     </div>
-                  ) : (
-                    <>
-                      {/* Add custom team button - show ABOVE the list when searching */}
-                      {searchInput.trim() && (
-                        <button
-                          onClick={() => {
-                            setNewTeamName(searchInput);
-                            setShowAddTeamDialog(true);
-                          }}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-primary/50 text-primary hover:bg-primary/5 transition-colors text-left mb-4"
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Plus className="w-6 h-6 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium">Não encontrou "{searchInput}"?</p>
-                            <p className="text-xs text-muted-foreground">Toque aqui para adicionar</p>
-                          </div>
-                        </button>
-                      )}
+                  </button>
+                )}
 
-                      <p className="text-xs text-muted-foreground text-center mb-3">
-                        {teams.length} {teams.length === 1 ? 'time encontrado' : 'times encontrados'} • Toque para selecionar
-                      </p>
+                {teamsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : teams.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Nenhum time encontrado</p>
+                    <p className="text-sm mt-1">Tente buscar por outro nome ou adicione um novo acima</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground text-center mb-3">
+                      {teams.length} {teams.length === 1 ? 'time encontrado' : 'times encontrados'} • Toque para selecionar
+                    </p>
                       {teams.map((team) => {
                         const isAlreadyAdded = selectedTeamIds.includes(team.id);
                         const isNewlySelected = localSelectedIds.includes(team.id) && !isAlreadyAdded;
