@@ -625,26 +625,32 @@ export const PostMediaViewer = ({
                 </motion.div>
               )}
 
-              {/* Top gradient - only for non-video and when info is shown */}
-              {!isVideo && showInfo && (
-                <motion.div
-                  className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/90 via-white/50 to-transparent z-10 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                />
-              )}
+              <AnimatePresence>
+                {!isVideo && showInfo && (
+                  <motion.div
+                    className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/90 via-white/50 to-transparent z-10 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                )}
+              </AnimatePresence>
 
               {/* Header - overlaid with profile info and close button */}
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {showInfo && (
                   <motion.div
                     className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between"
-                    initial={{ opacity: 0, y: -10 }}
+                    style={{ paddingTop: 'env(safe-area-inset-top)' }}
+                    initial={{ opacity: 0, y: -15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: [0.4, 0, 0.2, 1],
+                      opacity: { duration: 0.25 }
+                    }}
                   >
                     {/* Profile info - hidden for video */}
                     {!isVideo && (
@@ -736,40 +742,50 @@ export const PostMediaViewer = ({
               </AnimatePresence>
 
               {/* Close button always visible when info is hidden */}
-              {!showInfo && (
-                <motion.button
-                  onClick={onClose}
-                  className="absolute top-4 left-4 z-20 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-black/50 text-white hover:bg-black/70"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <span className="material-symbols-outlined">arrow_back</span>
-                </motion.button>
-              )}
+              <AnimatePresence>
+                {!showInfo && (
+                  <motion.button
+                    onClick={onClose}
+                    className="absolute top-4 left-4 z-20 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-black/50 text-white hover:bg-black/70"
+                    style={{ marginTop: 'env(safe-area-inset-top)' }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <span className="material-symbols-outlined">arrow_back</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
 
-              {/* Bottom gradient - only for non-video and when info is shown */}
-              {!isVideo && showInfo && (
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white/95 via-white/70 to-transparent z-10 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                />
-              )}
+              <AnimatePresence>
+                {!isVideo && showInfo && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white/95 via-white/70 to-transparent z-10 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                )}
+              </AnimatePresence>
 
               {/* Footer - overlaid */}
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {showInfo && (
                   <motion.div
                     className={`absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3 ${
                       isVideo ? "bg-gradient-to-t from-black/80 via-black/50 to-transparent" : ""
                     }`}
-                    initial={{ opacity: 0, y: 10 }}
+                    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: 15 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: [0.4, 0, 0.2, 1],
+                      opacity: { duration: 0.25 }
+                    }}
                   >
                     {/* Caption */}
                     {post.content && (
