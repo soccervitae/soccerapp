@@ -48,8 +48,10 @@ serve(async (req) => {
     console.log(`[moderate-content] Analisando post ${postId} com ${mediaUrls.length} mídia(s)`);
 
     let isApproved = true;
+    let isFlagged = false;
     let moderationReason = '';
-    const analysisResults: { url: string; approved: boolean; reason?: string }[] = [];
+    let confidenceLevel = 100;
+    const analysisResults: { url: string; approved: boolean; flagged: boolean; reason?: string; confidence: number }[] = [];
 
     // Analisar cada mídia
     for (const url of mediaUrls) {
@@ -60,7 +62,7 @@ serve(async (req) => {
         const messages = [
           {
             role: 'system',
-            content: `Você é um moderador de conteúdo. Analise a ${isVideo ? 'thumbnail do vídeo' : 'imagem'} e determine se contém:
+            content: `Você é um moderador de conteúdo rigoroso. Analise a ${isVideo ? 'thumbnail do vídeo' : 'imagem'} e determine se contém:
 1. Conteúdo sexual explícito ou nudez
 2. Violência gráfica ou gore
 3. Discurso de ódio, símbolos de ódio ou conteúdo discriminatório
@@ -71,18 +73,24 @@ serve(async (req) => {
 Responda APENAS com um JSON no formato:
 {
   "approved": true/false,
-  "reason": "motivo se reprovado, vazio se aprovado",
+  "flagged": true/false,
+  "reason": "motivo detalhado se reprovado ou flagged, vazio se aprovado sem dúvidas",
   "confidence": 0-100
 }
 
-Seja rigoroso. Se houver dúvida, reprove.`
+REGRAS:
+- "approved": true significa conteúdo completamente seguro
+- "flagged": true significa que precisa revisão humana (dúvidas, conteúdo suspeito mas não claramente violador)
+- Se confidence < 80, marque como flagged para revisão manual
+- Se conteúdo claramente viola as regras, approved=false e flagged=false
+- Se conteúdo parece suspeito mas não é claramente violador, approved=false e flagged=true`
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Analise esta imagem e verifique se viola as diretrizes da comunidade.'
+                text: 'Analise esta imagem e verifique se viola as diretrizes da comunidade de uma rede social de futebol.'
               },
               {
                 type: 'image_url',
@@ -112,8 +120,9 @@ Seja rigoroso. Se houver dúvida, reprove.`
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`[moderate-content] Erro OpenAI: ${response.status} - ${errorText}`);
-          // Em caso de erro da API, aprovar por padrão mas logar
-          analysisResults.push({ url, approved: true, reason: 'Erro na análise' });
+          // Em caso de erro da API, marcar para revisão manual
+          analysisResults.push({ url, approved: false, flagged: true, reason: 'Erro na análise automática - requer revisão manual', confidence: 0 });
+          isFlagged = true;
           continue;
         }
 
@@ -123,7 +132,7 @@ Seja rigoroso. Se houver dúvida, reprove.`
         console.log(`[moderate-content] Resposta para ${url}: ${content}`);
 
         // Extrair JSON da resposta
-        let analysis = { approved: true, reason: '', confidence: 0 };
+        let analysis = { approved: true, flagged: false, reason: '', confidence: 100 };
         try {
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
@@ -135,76 +144,118 @@ Seja rigoroso. Se houver dúvida, reprove.`
           const lowerContent = content.toLowerCase();
           const hasProhibited = PROHIBITED_KEYWORDS.some(kw => lowerContent.includes(kw));
           if (hasProhibited && (lowerContent.includes('não') || lowerContent.includes('viola') || lowerContent.includes('reprova'))) {
-            analysis = { approved: false, reason: 'Conteúdo potencialmente inadequado detectado', confidence: 70 };
+            analysis = { approved: false, flagged: true, reason: 'Conteúdo potencialmente inadequado detectado', confidence: 50 };
           }
+        }
+
+        // Se confidence baixo, forçar flagged
+        if (analysis.confidence < 80 && analysis.approved) {
+          analysis.flagged = true;
+          analysis.reason = analysis.reason || 'Baixa confiança na análise - requer revisão manual';
         }
 
         analysisResults.push({
           url,
           approved: analysis.approved,
-          reason: analysis.reason || undefined
+          flagged: analysis.flagged || false,
+          reason: analysis.reason || undefined,
+          confidence: analysis.confidence || 100
         });
 
         if (!analysis.approved) {
           isApproved = false;
+          if (analysis.flagged) {
+            isFlagged = true;
+          }
           moderationReason = analysis.reason || 'Conteúdo viola as diretrizes da comunidade';
+          confidenceLevel = Math.min(confidenceLevel, analysis.confidence || 0);
+        } else if (analysis.flagged) {
+          isFlagged = true;
+          if (!moderationReason) {
+            moderationReason = analysis.reason || 'Requer revisão manual';
+          }
         }
 
       } catch (mediaError) {
         console.error(`[moderate-content] Erro ao analisar mídia ${url}:`, mediaError);
-        // Em caso de erro, aprovar por padrão
-        analysisResults.push({ url, approved: true, reason: 'Erro na análise' });
+        // Em caso de erro, marcar para revisão manual
+        analysisResults.push({ url, approved: false, flagged: true, reason: 'Erro na análise', confidence: 0 });
+        isFlagged = true;
       }
     }
 
-    console.log(`[moderate-content] Resultado final para post ${postId}: approved=${isApproved}`);
+    console.log(`[moderate-content] Resultado final para post ${postId}: approved=${isApproved}, flagged=${isFlagged}`);
+
+    // Determinar status de moderação
+    let moderationStatus: 'approved' | 'rejected' | 'flagged';
+    
+    if (isApproved && !isFlagged) {
+      moderationStatus = 'approved';
+    } else if (!isApproved && !isFlagged) {
+      moderationStatus = 'rejected';
+    } else {
+      moderationStatus = 'flagged';
+    }
 
     // Atualizar o post baseado no resultado
-    if (isApproved) {
-      // Publicar o post
-      const { error: updateError } = await supabase
-        .from('posts')
-        .update({ 
-          is_published: true,
-          published_at: new Date().toISOString()
-        })
-        .eq('id', postId);
+    const updateData: any = {
+      moderation_status: moderationStatus,
+      moderation_reason: moderationReason || null,
+      moderated_at: new Date().toISOString(),
+    };
 
-      if (updateError) {
-        console.error('[moderate-content] Erro ao publicar post:', updateError);
-        throw updateError;
-      }
+    if (moderationStatus === 'approved') {
+      updateData.is_published = true;
+      updateData.published_at = new Date().toISOString();
     } else {
-      // Manter como não publicado e criar um report automático
-      const { data: post } = await supabase
-        .from('posts')
-        .select('user_id')
-        .eq('id', postId)
-        .single();
+      updateData.is_published = false;
+    }
 
-      if (post) {
-        // Criar notificação para o usuário
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: post.user_id,
-            actor_id: post.user_id,
-            type: 'moderation',
-            content: `Seu post foi rejeitado pela moderação automática: ${moderationReason}`,
-            post_id: postId,
-          });
+    const { error: updateError } = await supabase
+      .from('posts')
+      .update(updateData)
+      .eq('id', postId);
+
+    if (updateError) {
+      console.error('[moderate-content] Erro ao atualizar post:', updateError);
+      throw updateError;
+    }
+
+    // Criar notificação para o usuário
+    const { data: post } = await supabase
+      .from('posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single();
+
+    if (post) {
+      let notificationContent = '';
+      let notificationType = 'moderation';
+
+      if (moderationStatus === 'approved') {
+        notificationContent = 'Seu post foi aprovado e publicado!';
+      } else if (moderationStatus === 'flagged') {
+        notificationContent = 'Seu post está em análise pela nossa equipe. Você será notificado quando a revisão for concluída.';
+      } else {
+        notificationContent = `Seu post foi rejeitado: ${moderationReason}`;
       }
 
-      // Deletar o post reprovado
       await supabase
-        .from('posts')
-        .delete()
-        .eq('id', postId);
+        .from('notifications')
+        .insert({
+          user_id: post.user_id,
+          actor_id: post.user_id,
+          type: notificationType,
+          content: notificationContent,
+          post_id: postId,
+        });
     }
 
     return new Response(
       JSON.stringify({ 
-        approved: isApproved,
+        approved: isApproved && !isFlagged,
+        flagged: isFlagged,
+        status: moderationStatus,
         reason: moderationReason,
         results: analysisResults
       }),
