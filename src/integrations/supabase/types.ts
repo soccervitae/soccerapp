@@ -882,6 +882,10 @@ export type Database = {
           location_name: string | null
           media_type: string | null
           media_url: string | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          moderation_status: string | null
           music_end_seconds: number | null
           music_start_seconds: number | null
           music_track_id: string | null
@@ -903,6 +907,10 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null
@@ -924,6 +932,10 @@ export type Database = {
           location_name?: string | null
           media_type?: string | null
           media_url?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
           music_end_seconds?: number | null
           music_start_seconds?: number | null
           music_track_id?: string | null

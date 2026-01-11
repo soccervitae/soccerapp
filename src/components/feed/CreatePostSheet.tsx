@@ -346,10 +346,12 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
           if (error) {
             console.error("Moderation error:", error);
-            // Em caso de erro, o post fica como não publicado
-            toast.info("Seu post está sendo analisado. Em breve será publicado se estiver de acordo com nossas diretrizes.");
-          } else if (data?.approved) {
+            // Em caso de erro, o post fica pendente de moderação
+            toast.info("Seu post está sendo analisado pela nossa equipe. Você será notificado quando a revisão for concluída.");
+          } else if (data?.status === 'approved') {
             toast.success("Post publicado com sucesso!");
+          } else if (data?.status === 'flagged') {
+            toast.info("Seu post está sendo analisado pela nossa equipe. Você será notificado quando a revisão for concluída.");
           } else {
             toast.error(data?.reason || "Seu post foi rejeitado por violar as diretrizes da comunidade.");
           }

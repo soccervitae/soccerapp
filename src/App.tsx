@@ -45,6 +45,7 @@ import AdminDashboard from "./pages/admin/Index";
 import AdminContent from "./pages/admin/Content";
 import AdminUsers from "./pages/admin/Users";
 import AdminPosts from "./pages/admin/Posts";
+import AdminModeration from "./pages/admin/Moderation";
 import AdminReports from "./pages/admin/Reports";
 import AdminSupport from "./pages/admin/Support";
 import AdminTeams from "./pages/admin/Teams";
@@ -208,6 +209,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/content" element={<AdminRoute><AdminContent /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
+      <Route path="/admin/moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
       <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
       <Route path="/admin/support" element={<AdminRoute><AdminSupport /></AdminRoute>} />
       <Route path="/admin/teams" element={<AdminRoute><AdminTeams /></AdminRoute>} />
