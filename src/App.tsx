@@ -27,6 +27,7 @@ import Security from "./pages/settings/Security";
 import Notifications from "./pages/settings/Notifications";
 import Settings from "./pages/settings/Index";
 import Saved from "./pages/settings/Saved";
+import MyPosts from "./pages/settings/MyPosts";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 
@@ -186,6 +187,11 @@ const AnimatedRoutes = () => {
       <Route path="/settings/saved" element={
         <ProtectedRoute>
           <PageTransition><Saved /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/my-posts" element={
+        <ProtectedRoute>
+          <PageTransition><MyPosts /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/messages" element={

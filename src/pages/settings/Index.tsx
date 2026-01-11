@@ -115,6 +115,11 @@ export default function Settings() {
               icon="bookmark"
               label="Salvos"
               onClick={() => navigate("/settings/saved")}
+            />
+            <SettingsItem 
+              icon="pending_actions"
+              label="Meus posts e moderação"
+              onClick={() => navigate("/settings/my-posts")}
               isLast
             />
           </div>
