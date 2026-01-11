@@ -102,6 +102,7 @@ export const PostMediaViewer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
   const initialPinchDistance = useRef<number | null>(null);
   const initialScale = useRef<number>(1);
   const lastPosition = useRef({ x: 0, y: 0 });
@@ -487,7 +488,7 @@ export const PostMediaViewer = ({
     <>
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden" ref={dropdownContainerRef}>
             {/* Overlay */}
             <motion.div
               className="absolute inset-0 bg-white"
@@ -698,7 +699,7 @@ export const PostMediaViewer = ({
                             <span className="material-symbols-outlined text-[20px]">more_horiz</span>
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 z-[70]">
+                        <DropdownMenuContent align="end" className="w-40 z-[70]" container={dropdownContainerRef.current}>
                           {isOwner ? (
                             <>
                               <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
