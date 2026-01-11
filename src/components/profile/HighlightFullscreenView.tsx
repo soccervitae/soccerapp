@@ -5,6 +5,7 @@ import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { Input } from "@/components/ui/input";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import { EmblaCarouselType } from "embla-carousel";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 // Helper function to check unsupported formats
 const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
@@ -98,6 +99,9 @@ export const HighlightFullscreenView = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const replyInputRef = useRef<HTMLInputElement | null>(null);
   const [mediaErrors, setMediaErrors] = useState<Record<string, boolean>>({});
+  
+  // Dynamic theme color for iOS status bar
+  useThemeColor(viewDialogOpen, "#000000");
   
   const { user } = useAuth();
   const markViewed = useMarkHighlightViewed();

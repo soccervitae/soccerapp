@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause } from "lucide-react";
 import type { SharedStory } from "@/hooks/useSharedContentData";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface SharedStoryViewerProps {
   story: SharedStory;
@@ -31,6 +32,9 @@ const formatTimeAgo = (dateString: string): string => {
 export const SharedStoryViewer = ({ story, isOpen, onClose }: SharedStoryViewerProps) => {
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
 
   const isVideo = story.media_type === "video";
 

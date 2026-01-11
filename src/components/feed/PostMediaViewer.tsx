@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
@@ -61,6 +62,9 @@ export const PostMediaViewer = ({
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
+  
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showLikesSheet, setShowLikesSheet] = useState(false);
   const [showCommentsSheet, setShowCommentsSheet] = useState(false);
