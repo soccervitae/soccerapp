@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
+import { toast } from "sonner";
 
 const REPORT_REASONS = [
   { value: "spam", label: "Spam ou conteúdo enganoso" },
@@ -73,7 +74,7 @@ export const PostMediaViewer = ({
   const [showDoubleTapAnimation, setShowDoubleTapAnimation] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [showVideoControls, setShowVideoControls] = useState(true);
-  const [showInfo, setShowInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(true);
   const [scale, setScale] = useState(1);
   
   // Edit/Delete/Report dialogs
@@ -173,7 +174,7 @@ export const PostMediaViewer = ({
     if (isOpen) {
       setCurrentIndex(initialIndex);
       setMediaLoaded(false);
-      setShowInfo(false);
+      setShowInfo(true);
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
@@ -366,14 +367,22 @@ export const PostMediaViewer = ({
       return;
     }
     // Optimistic update
-    setIsSavedLocal(!isSavedLocal);
+    const wasSaved = isSavedLocal;
+    setIsSavedLocal(!wasSaved);
     
     savePost.mutate({
       postId: post.id,
-      isSaved: isSavedLocal,
+      isSaved: wasSaved,
     }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["posts"] });
+        queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
+        toast.success(wasSaved ? "Publicação removida dos salvos" : "Publicação salva");
+      },
+      onError: () => {
+        // Rollback on error
+        setIsSavedLocal(wasSaved);
+        toast.error("Erro ao salvar publicação");
       }
     });
   }, [user, navigate, savePost, post.id, isSavedLocal, queryClient]);
