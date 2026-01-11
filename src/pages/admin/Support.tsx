@@ -123,6 +123,8 @@ export default function AdminSupport() {
     mutationFn: async () => {
       if (!selectedTicket || !user?.id) return;
 
+      const isNewResponse = response && response !== selectedTicket.admin_response;
+
       const { error } = await supabase
         .from("support_tickets")
         .update({
@@ -134,6 +136,25 @@ export default function AdminSupport() {
         .eq("id", selectedTicket.id);
 
       if (error) throw error;
+
+      // Send notification if there's a new response
+      if (isNewResponse) {
+        try {
+          const { error: notifyError } = await supabase.functions.invoke('notify-support-response', {
+            body: {
+              ticket_id: selectedTicket.id,
+              admin_response: response,
+            },
+          });
+
+          if (notifyError) {
+            console.error("Error sending notification:", notifyError);
+            // Don't throw - ticket was updated successfully
+          }
+        } catch (notifyErr) {
+          console.error("Failed to send notification:", notifyErr);
+        }
+      }
     },
     onSuccess: () => {
       toast.success("Ticket atualizado com sucesso!");
