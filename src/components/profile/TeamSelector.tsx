@@ -210,11 +210,11 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
               <DrawerTitle className="text-center flex-1">{getStepTitle()}</DrawerTitle>
               {step === "teams" ? (
                 <Button
-                  variant="default"
+                  variant="ghost"
                   size="sm"
                   onClick={handleSave}
                   disabled={isSaving || !hasChanges}
-                  className="h-8 px-3"
+                  className="h-8 px-3 text-primary font-semibold hover:bg-transparent hover:text-primary/80"
                 >
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
