@@ -747,7 +747,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                       escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
                     }
                     await createTeam.mutateAsync({
-                      nome: newTeamName.trim(),
+                      nome: newTeamName.trim().toUpperCase(),
                       estadoId,
                       paisId,
                       escudoUrl,
@@ -940,7 +940,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                       escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
                     }
                     await createTeam.mutateAsync({
-                      nome: newTeamName.trim(),
+                      nome: newTeamName.trim().toUpperCase(),
                       estadoId,
                       paisId,
                       escudoUrl,
