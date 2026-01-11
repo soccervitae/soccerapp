@@ -253,10 +253,11 @@ export const FullscreenImageViewer = ({
         <motion.div
           ref={containerRef}
           className="fixed inset-0 z-[60] bg-black flex items-center justify-center touch-none"
+          style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           onClick={handleBackgroundClick}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -268,11 +269,12 @@ export const FullscreenImageViewer = ({
               e.stopPropagation();
               handleClose();
             }}
-            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
+            className="absolute z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
+            style={{ top: 'max(1rem, env(safe-area-inset-top))', right: '1rem' }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
+            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
           >
             <X className="w-6 h-6 text-white" />
           </motion.button>
@@ -280,10 +282,12 @@ export const FullscreenImageViewer = ({
           {/* Zoom indicator */}
           {scale > 1 && (
             <motion.div
-              className="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
+              className="absolute z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
+              style={{ top: 'max(1rem, env(safe-area-inset-top))', left: '1rem' }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
             >
               <span className="text-white text-sm font-medium">{Math.round(scale * 100)}%</span>
             </motion.div>
@@ -292,11 +296,12 @@ export const FullscreenImageViewer = ({
           {/* Image counter */}
           {images.length > 1 && (
             <motion.div
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
+              className="absolute left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm"
+              style={{ top: 'max(1rem, env(safe-area-inset-top))' }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
             >
               <span className="text-white text-sm font-medium">
                 {currentIndex + 1} / {images.length}
@@ -361,9 +366,9 @@ export const FullscreenImageViewer = ({
               }
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 30,
-                duration: 0.3,
+                stiffness: 280,
+                damping: 28,
+                mass: 0.9,
               }}
             >
               <motion.img
@@ -392,11 +397,12 @@ export const FullscreenImageViewer = ({
           {/* Dot indicators */}
           {images.length > 1 && (
             <motion.div
-              className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20"
+              className="absolute left-0 right-0 flex justify-center gap-2 z-20"
+              style={{ bottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem))' }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2, delay: 0.15 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1], delay: 0.15 }}
             >
               {images.map((_, index) => (
                 <button

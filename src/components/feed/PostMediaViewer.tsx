@@ -486,6 +486,7 @@ export const PostMediaViewer = ({
             {/* Main container - story style */}
             <motion.div
               className="relative w-full h-full sm:w-auto sm:h-auto sm:max-w-md sm:max-h-[90vh] sm:aspect-[9/16] sm:rounded-2xl overflow-hidden"
+              style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
               initial={getInitialPosition()}
               animate={{
                 opacity: 1,
@@ -497,10 +498,10 @@ export const PostMediaViewer = ({
               exit={getInitialPosition()}
               transition={{
                 type: "spring",
-                stiffness: 200,
-                damping: 25,
-                mass: 0.8,
-                opacity: { duration: 0.25 },
+                stiffness: 280,
+                damping: 28,
+                mass: 0.9,
+                opacity: { duration: 0.3 },
               }}
             >
               {/* Media - fullscreen */}

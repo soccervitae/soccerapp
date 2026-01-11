@@ -205,10 +205,11 @@ export const FullscreenVideoViewer = ({
       {isOpen && !isExiting && (
         <motion.div
           className="fixed inset-0 z-[60] bg-black flex items-center justify-center"
+          style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -219,11 +220,12 @@ export const FullscreenVideoViewer = ({
               e.stopPropagation();
               handleClose();
             }}
-            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
+            className="absolute z-20 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
+            style={{ top: 'max(1rem, env(safe-area-inset-top))', right: '1rem' }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
+            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
           >
             <X className="w-6 h-6 text-white" />
           </motion.button>
@@ -231,10 +233,12 @@ export const FullscreenVideoViewer = ({
           {/* Video counter */}
           {videoList.length > 1 && (
             <motion.div
-              className="absolute top-4 left-4 z-20 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm"
+              className="absolute z-20 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm"
+              style={{ top: 'max(1rem, env(safe-area-inset-top))', left: '1rem' }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
             >
               <span className="text-white text-sm font-medium">
                 {currentIndex + 1} / {videoList.length}
@@ -284,8 +288,9 @@ export const FullscreenVideoViewer = ({
               exit={{ opacity: 0, x: swipeDirection === "left" ? -100 : 100 }}
               transition={{
                 type: "spring",
-                stiffness: 260,
-                damping: 25,
+                stiffness: 280,
+                damping: 28,
+                mass: 0.9,
               }}
             >
               <motion.video
@@ -308,10 +313,12 @@ export const FullscreenVideoViewer = ({
           {/* Dot indicators */}
           {videoList.length > 1 && (
             <motion.div
-              className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-1.5"
+              className="absolute left-1/2 -translate-x-1/2 z-20 flex gap-1.5"
+              style={{ bottom: 'max(6rem, calc(env(safe-area-inset-bottom) + 5rem))' }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
             >
               {videoList.map((_, index) => (
                 <button
