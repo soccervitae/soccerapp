@@ -258,7 +258,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   variant="ghost"
                   size="icon"
                   onClick={handleBack}
-                  className="h-8 w-8"
+                  className="h-8 w-8 hover:bg-transparent"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
