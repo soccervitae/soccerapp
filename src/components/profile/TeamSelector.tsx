@@ -463,15 +463,6 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
             </>
           )}
 
-          {/* Selected count */}
-          {localSelectedIds.length > 0 && (
-            <div className="px-4 py-3 border-t border-border bg-muted/50">
-              <p className="text-sm text-center text-muted-foreground">
-                {localSelectedIds.length} time{localSelectedIds.length !== 1 ? "s" : ""} selecionado
-                {localSelectedIds.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-          )}
         </DrawerContent>
       </Drawer>
 
