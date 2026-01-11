@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Check, Search, X, ChevronLeft, ChevronRight, Plus, Upload, ImageIcon } from "lucide-react";
@@ -9,6 +9,7 @@ import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, useCreateTeam, type 
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
 import { useImageCompression } from "@/hooks/useImageCompression";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -62,6 +63,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   const createTeam = useCreateTeam();
   const { uploadMedia, isUploading } = useUploadMedia();
   const { compressImage } = useImageCompression();
+  const isPWA = useIsPWA();
 
   const handleEmblemSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -577,137 +579,271 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Add custom team dialog */}
-      <Dialog open={showAddTeamDialog} onOpenChange={(open) => {
-        setShowAddTeamDialog(open);
-        if (!open) {
-          clearEmblem();
-          setNewTeamName("");
-        }
-      }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Adicionar novo time</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Emblem upload */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Escudo do time (opcional)</label>
-              <div className="flex items-center gap-4">
-                <input
-                  ref={emblemInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleEmblemSelect}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => emblemInputRef.current?.click()}
-                  className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
-                >
-                  {emblemPreview ? (
-                    <img
-                      src={emblemPreview}
-                      alt="Preview"
-                      className="w-full h-full object-contain p-1"
-                    />
-                  ) : (
-                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                  )}
-                </button>
-                <div className="flex-1 space-y-1">
-                  <Button
+      {/* Add custom team - Drawer for PWA, Dialog for desktop */}
+      {isPWA ? (
+        <Drawer open={showAddTeamDialog} onOpenChange={(open) => {
+          setShowAddTeamDialog(open);
+          if (!open) {
+            clearEmblem();
+            setNewTeamName("");
+          }
+        }}>
+          <DrawerContent className="px-4 pb-6">
+            <DrawerHeader className="px-0">
+              <DrawerTitle>Adicionar novo time</DrawerTitle>
+            </DrawerHeader>
+            <div className="space-y-4 py-4">
+              {/* Emblem upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    ref={emblemInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEmblemSelect}
+                    className="hidden"
+                  />
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={() => emblemInputRef.current?.click()}
-                    className="w-full"
+                    className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
                   >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
-                  </Button>
-                  {emblemPreview && (
+                    {emblemPreview ? (
+                      <img
+                        src={emblemPreview}
+                        alt="Preview"
+                        className="w-full h-full object-contain p-1"
+                      />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                    )}
+                  </button>
+                  <div className="flex-1 space-y-1">
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={clearEmblem}
-                      className="w-full text-muted-foreground"
+                      onClick={() => emblemInputRef.current?.click()}
+                      className="w-full"
                     >
-                      <X className="w-4 h-4 mr-2" />
-                      Remover
+                      <Upload className="w-4 h-4 mr-2" />
+                      {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
                     </Button>
-                  )}
+                    {emblemPreview && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearEmblem}
+                        className="w-full text-muted-foreground"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Remover
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Team name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nome do time</label>
-              <Input
-                value={newTeamName}
-                onChange={(e) => setNewTeamName(e.target.value)}
-                placeholder="Ex: Clube Atlético..."
-              />
-            </div>
-            {selectedCountry && (
-              <p className="text-sm text-muted-foreground">
-                Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setShowAddTeamDialog(false);
-              clearEmblem();
-              setNewTeamName("");
-            }}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={async () => {
-                if (!newTeamName.trim()) {
-                  toast.error("Digite o nome do time");
-                  return;
-                }
-                try {
-                  let escudoUrl: string | null = null;
-                  
-                  // Upload emblem if provided
-                  if (emblemFile) {
-                    const compressed = await compressImage(emblemFile);
-                    escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
-                  }
-                  
-                  await createTeam.mutateAsync({
-                    nome: newTeamName.trim(),
-                    estadoId,
-                    paisId,
-                    escudoUrl,
-                  });
-                  toast.success("Time adicionado com sucesso!");
-                  setShowAddTeamDialog(false);
-                  setNewTeamName("");
-                  clearEmblem();
-                  setSearchInput("");
-                  onOpenChange(false);
-                } catch (error) {
-                  toast.error("Erro ao adicionar time");
-                }
-              }}
-              disabled={createTeam.isPending || isUploading || !newTeamName.trim()}
-            >
-              {(createTeam.isPending || isUploading) ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Adicionar"
+              {/* Team name */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do time</label>
+                <Input
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="Ex: Clube Atlético..."
+                />
+              </div>
+              {selectedCountry && (
+                <p className="text-sm text-muted-foreground">
+                  Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
+                </p>
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </div>
+            <DrawerFooter className="px-0 flex-row gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowAddTeamDialog(false);
+                clearEmblem();
+                setNewTeamName("");
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={async () => {
+                  if (!newTeamName.trim()) {
+                    toast.error("Digite o nome do time");
+                    return;
+                  }
+                  try {
+                    let escudoUrl: string | null = null;
+                    
+                    // Upload emblem if provided
+                    if (emblemFile) {
+                      const compressed = await compressImage(emblemFile);
+                      escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
+                    }
+                    
+                    await createTeam.mutateAsync({
+                      nome: newTeamName.trim(),
+                      estadoId,
+                      paisId,
+                      escudoUrl,
+                    });
+                    toast.success("Time adicionado com sucesso!");
+                    setShowAddTeamDialog(false);
+                    setNewTeamName("");
+                    clearEmblem();
+                    setSearchInput("");
+                    onOpenChange(false);
+                  } catch (error) {
+                    toast.error("Erro ao adicionar time");
+                  }
+                }}
+                disabled={createTeam.isPending || isUploading || !newTeamName.trim()}
+              >
+                {(createTeam.isPending || isUploading) ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Adicionar"
+                )}
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={showAddTeamDialog} onOpenChange={(open) => {
+          setShowAddTeamDialog(open);
+          if (!open) {
+            clearEmblem();
+            setNewTeamName("");
+          }
+        }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Adicionar novo time</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Emblem upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Escudo do time (opcional)</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    ref={emblemInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEmblemSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => emblemInputRef.current?.click()}
+                    className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center overflow-hidden bg-muted/50 transition-colors"
+                  >
+                    {emblemPreview ? (
+                      <img
+                        src={emblemPreview}
+                        alt="Preview"
+                        className="w-full h-full object-contain p-1"
+                      />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                    )}
+                  </button>
+                  <div className="flex-1 space-y-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => emblemInputRef.current?.click()}
+                      className="w-full"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {emblemPreview ? "Trocar imagem" : "Escolher imagem"}
+                    </Button>
+                    {emblemPreview && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearEmblem}
+                        className="w-full text-muted-foreground"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Remover
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Team name */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do time</label>
+                <Input
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="Ex: Clube Atlético..."
+                />
+              </div>
+              {selectedCountry && (
+                <p className="text-sm text-muted-foreground">
+                  Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowAddTeamDialog(false);
+                clearEmblem();
+                setNewTeamName("");
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!newTeamName.trim()) {
+                    toast.error("Digite o nome do time");
+                    return;
+                  }
+                  try {
+                    let escudoUrl: string | null = null;
+                    
+                    // Upload emblem if provided
+                    if (emblemFile) {
+                      const compressed = await compressImage(emblemFile);
+                      escudoUrl = await uploadMedia(compressed, "team-emblems", `${Date.now()}.jpg`);
+                    }
+                    
+                    await createTeam.mutateAsync({
+                      nome: newTeamName.trim(),
+                      estadoId,
+                      paisId,
+                      escudoUrl,
+                    });
+                    toast.success("Time adicionado com sucesso!");
+                    setShowAddTeamDialog(false);
+                    setNewTeamName("");
+                    clearEmblem();
+                    setSearchInput("");
+                    onOpenChange(false);
+                  } catch (error) {
+                    toast.error("Erro ao adicionar time");
+                  }
+                }}
+                disabled={createTeam.isPending || isUploading || !newTeamName.trim()}
+              >
+                {(createTeam.isPending || isUploading) ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Adicionar"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
