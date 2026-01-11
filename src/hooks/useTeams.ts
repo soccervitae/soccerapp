@@ -203,3 +203,33 @@ export const useRemoveUserFromTeam = () => {
     },
   });
 };
+
+export const useCreateTeam = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ nome, estadoId, paisId }: { nome: string; estadoId: number | null; paisId: number | null }) => {
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from("times")
+        .insert({
+          nome: nome.trim(),
+          estado_id: estadoId,
+          pais_id: paisId,
+          selected_by_users: [user.id],
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-teams"] });
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+    },
+  });
+};
