@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-type BucketName = "post-media" | "story-media" | "avatars" | "covers" | "message-media";
+type BucketName = "post-media" | "story-media" | "avatars" | "covers" | "message-media" | "team-emblems";
 
 export const useUploadMedia = () => {
   const [isUploading, setIsUploading] = useState(false);
