@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Check, Search, X, ChevronLeft, ChevronRight, Plus, Upload, ImageIcon } from "lucide-react";
+import { Loader2, Check, Search, X, ChevronLeft, ChevronRight, Plus, Upload, ImageIcon, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useTeams, useAddUserToTeam, useRemoveUserFromTeam, useCreateTeam, useSearchExistingTeams, type Team } from "@/hooks/useTeams";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
@@ -517,7 +518,15 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
                             {/* Team Info */}
                             <div className="flex-1 min-w-0">
-                              <p className={`font-medium truncate ${isAlreadyAdded ? "text-muted-foreground" : "text-foreground"}`}>{team.nome}</p>
+                              <div className="flex items-center gap-2">
+                                <p className={`font-medium truncate ${isAlreadyAdded ? "text-muted-foreground" : "text-foreground"}`}>{team.nome}</p>
+                                {team.user_id && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 flex-shrink-0 bg-primary/10 text-primary border-0">
+                                    <Users className="w-2.5 h-2.5 mr-0.5" />
+                                    Comunidade
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-xs text-muted-foreground truncate">
                                 {isAlreadyAdded 
                                   ? "Já adicionado" 

@@ -9,6 +9,7 @@ export interface Team {
   estado_id: number | null;
   pais_id: number | null;
   selected_by_users: string[];
+  user_id: string | null;
   estado?: {
     id: number;
     nome: string;
@@ -42,6 +43,7 @@ export const useTeams = (options: UseTeamsOptions = {}) => {
           estado_id,
           pais_id,
           selected_by_users,
+          user_id,
           estado:estados(id, nome, uf),
           pais:paises(id, nome, bandeira_url)
         `)
@@ -84,6 +86,7 @@ export const useUserTeams = (userId?: string) => {
             estado_id,
             pais_id,
             selected_by_users,
+            user_id,
             estado:estados(id, nome, uf),
             pais:paises(id, nome, bandeira_url)
           `)
@@ -219,6 +222,7 @@ export const useSearchExistingTeams = (search: string) => {
           estado_id,
           pais_id,
           selected_by_users,
+          user_id,
           estado:estados(id, nome, uf),
           pais:paises(id, nome, bandeira_url)
         `)
