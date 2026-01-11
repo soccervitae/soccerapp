@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
+import { BanUserDialog } from "@/components/admin/BanUserDialog";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -52,6 +53,8 @@ export default function AdminUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [userToBan, setUserToBan] = useState<{ id: string; username: string } | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     status: "all",
     gender: "all",
@@ -271,19 +274,22 @@ export default function AdminUsers() {
   });
 
   const banUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
       const { error } = await supabase
         .from("profiles")
         .update({ 
           banned_at: new Date().toISOString(),
-          ban_reason: "Banido pelo administrador" 
+          ban_reason: reason 
         })
         .eq("id", userId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminUserDetails"] });
       toast.success("Usuário banido com sucesso");
+      setBanDialogOpen(false);
+      setUserToBan(null);
     },
     onError: () => {
       toast.error("Erro ao banir usuário");
@@ -672,7 +678,10 @@ export default function AdminUsers() {
                           ) : (
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => banUserMutation.mutate(user.id)}
+                              onClick={() => {
+                                setUserToBan({ id: user.id, username: user.username });
+                                setBanDialogOpen(true);
+                              }}
                             >
                               <Ban className="h-4 w-4 mr-2" />
                               Banir usuário
@@ -747,8 +756,9 @@ export default function AdminUsers() {
         open={viewSheetOpen}
         onOpenChange={setViewSheetOpen}
         userId={selectedUserId}
-        onBan={(userId) => {
-          banUserMutation.mutate(userId);
+        onBan={(userId, username) => {
+          setUserToBan({ id: userId, username: username || "" });
+          setBanDialogOpen(true);
           setViewSheetOpen(false);
         }}
         onUnban={(userId) => {
@@ -765,6 +775,18 @@ export default function AdminUsers() {
         }}
         isBanning={banUserMutation.isPending || unbanUserMutation.isPending}
         isDeleting={deleteUserMutation.isPending}
+      />
+
+      <BanUserDialog
+        open={banDialogOpen}
+        onOpenChange={setBanDialogOpen}
+        userName={userToBan?.username}
+        isPending={banUserMutation.isPending}
+        onConfirm={(reason) => {
+          if (userToBan) {
+            banUserMutation.mutate({ userId: userToBan.id, reason });
+          }
+        }}
       />
     </AdminLayout>
   );

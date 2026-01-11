@@ -41,7 +41,7 @@ interface ViewUserSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | null;
-  onBan: (userId: string) => void;
+  onBan: (userId: string, username?: string) => void;
   onUnban: (userId: string) => void;
   onToggleAdmin: (userId: string, isAdmin: boolean) => void;
   onDelete?: (userId: string) => void;
@@ -513,7 +513,7 @@ export function ViewUserSheet({
                   ) : (
                     <Button
                       variant="destructive"
-                      onClick={() => onBan(user.id)}
+                      onClick={() => onBan(user.id, user.username)}
                       disabled={isBanning}
                       className="flex-1"
                     >
