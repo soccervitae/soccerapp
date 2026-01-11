@@ -162,18 +162,51 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (data.user) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("banned_at, ban_reason")
+        .select("banned_at, ban_reason, banned_until")
         .eq("id", data.user.id)
         .single();
 
       if (profile?.banned_at) {
+        const bannedUntil = (profile as any).banned_until;
+        
+        // Check if temporary ban has expired
+        if (bannedUntil && new Date(bannedUntil) < new Date()) {
+          // Ban has expired, remove it automatically
+          await supabase
+            .from("profiles")
+            .update({ 
+              banned_at: null, 
+              ban_reason: null, 
+              banned_until: null 
+            })
+            .eq("id", data.user.id);
+          // Allow login to continue
+          return { error: null };
+        }
+
         // Sign out the banned user immediately
         await supabase.auth.signOut();
-        const banError = new Error(
-          profile.ban_reason 
-            ? `Sua conta foi banida. Motivo: ${profile.ban_reason}`
-            : "Sua conta foi banida permanentemente."
-        );
+        
+        let banMessage: string;
+        if (bannedUntil) {
+          const expiryDate = new Date(bannedUntil);
+          const formattedDate = expiryDate.toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          banMessage = profile.ban_reason 
+            ? `Sua conta está suspensa até ${formattedDate}. Motivo: ${profile.ban_reason}`
+            : `Sua conta está suspensa até ${formattedDate}.`;
+        } else {
+          banMessage = profile.ban_reason 
+            ? `Sua conta foi banida permanentemente. Motivo: ${profile.ban_reason}`
+            : "Sua conta foi banida permanentemente.";
+        }
+        
+        const banError = new Error(banMessage);
         return { error: banError };
       }
     }

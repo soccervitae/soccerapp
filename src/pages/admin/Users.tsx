@@ -274,12 +274,13 @@ export default function AdminUsers() {
   });
 
   const banUserMutation = useMutation({
-    mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
+    mutationFn: async ({ userId, reason, bannedUntil }: { userId: string; reason: string; bannedUntil: string | null }) => {
       const { error } = await supabase
         .from("profiles")
         .update({ 
           banned_at: new Date().toISOString(),
-          ban_reason: reason 
+          ban_reason: reason,
+          banned_until: bannedUntil
         })
         .eq("id", userId);
       if (error) throw error;
@@ -302,13 +303,15 @@ export default function AdminUsers() {
         .from("profiles")
         .update({ 
           banned_at: null,
-          ban_reason: null 
+          ban_reason: null,
+          banned_until: null
         })
         .eq("id", userId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminUserDetails"] });
       toast.success("Banimento removido");
     },
     onError: () => {
@@ -782,9 +785,9 @@ export default function AdminUsers() {
         onOpenChange={setBanDialogOpen}
         userName={userToBan?.username}
         isPending={banUserMutation.isPending}
-        onConfirm={(reason) => {
+        onConfirm={(reason, bannedUntil) => {
           if (userToBan) {
-            banUserMutation.mutate({ userId: userToBan.id, reason });
+            banUserMutation.mutate({ userId: userToBan.id, reason, bannedUntil });
           }
         }}
       />

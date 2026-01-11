@@ -382,10 +382,22 @@ export function ViewUserSheet({
                       Cadastrado em: {format(new Date(user.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
                     </p>
                     {user.banned_at && (
-                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                        <p className="text-sm font-medium text-destructive">Banido em: {format(new Date(user.banned_at), "dd/MM/yyyy 'às' HH:mm")}</p>
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 space-y-1">
+                        <p className="text-sm font-medium text-destructive">
+                          Banido em: {format(new Date(user.banned_at), "dd/MM/yyyy 'às' HH:mm")}
+                        </p>
+                        {(user as any).banned_until ? (
+                          <p className="text-sm text-destructive/80">
+                            Expira em: {format(new Date((user as any).banned_until), "dd/MM/yyyy 'às' HH:mm")}
+                            {new Date((user as any).banned_until) < new Date() && (
+                              <span className="ml-2 text-yellow-600 font-medium">(Expirado)</span>
+                            )}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-destructive/80">Banimento permanente</p>
+                        )}
                         {user.ban_reason && (
-                          <p className="text-sm text-destructive/80 mt-1">Motivo: {user.ban_reason}</p>
+                          <p className="text-sm text-destructive/80">Motivo: {user.ban_reason}</p>
                         )}
                       </div>
                     )}
