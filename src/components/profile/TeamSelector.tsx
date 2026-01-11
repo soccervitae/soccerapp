@@ -393,7 +393,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   ) : (
                     <>
                       <p className="text-xs text-muted-foreground text-center mb-3">
-                        Toque nos times para selecionar
+                        {teams.length} {teams.length === 1 ? 'time encontrado' : 'times encontrados'} • Toque para selecionar
                       </p>
                       {teams.map((team) => {
                         const isAlreadyAdded = selectedTeamIds.includes(team.id);
