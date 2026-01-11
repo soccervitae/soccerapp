@@ -24,12 +24,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface TeamSelectorProps {
   open: boolean;
@@ -775,18 +774,18 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
           </DrawerContent>
         </Drawer>
       ) : (
-        <Dialog open={showAddTeamDialog} onOpenChange={(open) => {
+        <Sheet open={showAddTeamDialog} onOpenChange={(open) => {
           setShowAddTeamDialog(open);
           if (!open) {
             clearEmblem();
             setNewTeamName("");
           }
         }}>
-          <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Adicionar novo time</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="flex-1 -mx-6 px-6">
+          <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
+            <SheetHeader className="px-4 py-4 border-b border-border">
+              <SheetTitle>Adicionar novo time</SheetTitle>
+            </SheetHeader>
+            <ScrollArea className="flex-1 px-4">
               <div className="space-y-4 py-4">
                 {/* Team name - moved to top for search */}
                 <div className="space-y-2">
@@ -915,8 +914,8 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 )}
               </div>
             </ScrollArea>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
+            <div className="p-4 border-t border-border flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => {
                 setShowAddTeamDialog(false);
                 clearEmblem();
                 setNewTeamName("");
@@ -924,6 +923,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                 Cancelar
               </Button>
               <Button
+                className="flex-1"
                 onClick={async () => {
                   if (!newTeamName.trim()) {
                     toast.error("Digite o nome do time");
@@ -963,9 +963,9 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   "Criar novo time"
                 )}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
     </>
   );
