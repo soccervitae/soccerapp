@@ -1815,6 +1815,10 @@ export type Database = {
         Returns: string
       }
       delete_expired_temporary_messages: { Args: never; Returns: undefined }
+      delete_user_completely: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
