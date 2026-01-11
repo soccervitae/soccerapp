@@ -396,33 +396,40 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                         Toque nos times para selecionar
                       </p>
                       {teams.map((team) => {
+                        const isAlreadyAdded = selectedTeamIds.includes(team.id);
+                        const isNewlySelected = localSelectedIds.includes(team.id) && !isAlreadyAdded;
                         const isSelected = localSelectedIds.includes(team.id);
+                        
                         return (
                           <button
                             key={team.id}
-                            onClick={() => handleTeamToggle(team)}
-                            disabled={isSaving}
+                            onClick={() => !isAlreadyAdded && handleTeamToggle(team)}
+                            disabled={isSaving || isAlreadyAdded}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
-                              isSelected
-                                ? "bg-primary/10 border-2 border-primary"
-                                : "bg-card border border-border hover:bg-muted"
-                            } disabled:opacity-50`}
+                              isAlreadyAdded
+                                ? "bg-muted/50 border border-border opacity-60 cursor-not-allowed"
+                                : isNewlySelected
+                                  ? "bg-primary/10 border-2 border-primary"
+                                  : "bg-card border border-border hover:bg-muted"
+                            } disabled:cursor-not-allowed`}
                           >
                             {/* Selection indicator - always visible */}
                             <div 
                               className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                                isSelected 
-                                  ? "bg-primary border-primary" 
-                                  : "border-muted-foreground/40 bg-transparent"
+                                isAlreadyAdded
+                                  ? "bg-muted border-muted-foreground/30"
+                                  : isSelected 
+                                    ? "bg-primary border-primary" 
+                                    : "border-muted-foreground/40 bg-transparent"
                               }`}
                             >
-                              {isSelected && (
-                                <Check className="w-4 h-4 text-primary-foreground" />
+                              {(isSelected || isAlreadyAdded) && (
+                                <Check className={`w-4 h-4 ${isAlreadyAdded ? "text-muted-foreground" : "text-primary-foreground"}`} />
                               )}
                             </div>
 
                             {/* Team Logo */}
-                            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <div className={`w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 ${isAlreadyAdded ? "grayscale" : ""}`}>
                               {team.escudo_url ? (
                                 <img
                                   src={team.escudo_url}
@@ -438,9 +445,12 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
 
                             {/* Team Info */}
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground truncate">{team.nome}</p>
+                              <p className={`font-medium truncate ${isAlreadyAdded ? "text-muted-foreground" : "text-foreground"}`}>{team.nome}</p>
                               <p className="text-xs text-muted-foreground truncate">
-                                {[team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")}
+                                {isAlreadyAdded 
+                                  ? "Já adicionado" 
+                                  : [team.estado?.nome, team.pais?.nome].filter(Boolean).join(" • ")
+                                }
                               </p>
                             </div>
                           </button>
