@@ -427,15 +427,15 @@ export const PostMediaViewer = ({
       const x = clientX - rect.left;
       const width = rect.width;
       
-      if (x < width / 3) {
-        // Left third - previous
+      if (x < width / 4) {
+        // Left quarter - previous
         setCurrentIndex((prev) => Math.max(0, prev - 1));
-      } else if (x > (width * 2) / 3) {
-        // Right two thirds - next
+      } else if (x > (width * 3) / 4) {
+        // Right quarter - next
         setCurrentIndex((prev) => Math.min(mediaUrls.length - 1, prev + 1));
       } else {
-        // Middle third - toggle info
-        handleImageClick(e as React.MouseEvent);
+        // Middle half - toggle info for immersive mode
+        setShowInfo(prev => !prev);
       }
     }, DOUBLE_TAP_DELAY);
   };
