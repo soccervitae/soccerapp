@@ -449,19 +449,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
                   ) : teams.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <p>Nenhum time encontrado</p>
-                      <p className="text-sm mt-1">Tente buscar por outro nome</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setNewTeamName(searchInput);
-                          setShowAddTeamDialog(true);
-                        }}
-                        className="mt-4"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar "{searchInput || 'novo time'}"
-                      </Button>
+                      <p className="text-sm mt-1">Tente buscar por outro nome ou adicione um novo acima</p>
                     </div>
                   ) : (
                     <>
