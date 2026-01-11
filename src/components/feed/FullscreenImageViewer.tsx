@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useThemeColor } from "@/hooks/useThemeColor";
 interface OriginRect {
   x: number;
   y: number;
@@ -24,6 +25,8 @@ export const FullscreenImageViewer = ({
   onClose,
   originRect,
 }: FullscreenImageViewerProps) => {
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [scale, setScale] = useState(1);

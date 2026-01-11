@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoControls } from "./VideoControls";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface OriginRect {
   x: number;
@@ -33,6 +34,8 @@ export const FullscreenVideoViewer = ({
   initialMuted = true,
   videoUrl,
 }: FullscreenVideoViewerProps) => {
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
   // Support legacy single video prop
   const videoList = videos.length > 0 ? videos : (videoUrl ? [videoUrl] : []);
   

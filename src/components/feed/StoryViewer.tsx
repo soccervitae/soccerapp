@@ -10,6 +10,7 @@ import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { MessageCircle, ImageOff, Send } from "lucide-react";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 // Helper function to check unsupported formats
 const UNSUPPORTED_FORMATS = ['.dng', '.raw', '.cr2', '.nef', '.arw', '.orf', '.rw2'];
@@ -59,6 +60,9 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const viewStory = useViewStory();
   const likeStory = useLikeStory();
   const deleteStory = useDeleteStory();
+  
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
   const sendReply = useSendStoryReply();
 
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);

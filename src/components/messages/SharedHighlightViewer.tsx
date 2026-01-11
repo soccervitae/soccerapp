@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import type { SharedHighlight } from "@/hooks/useSharedContentData";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface SharedHighlightViewerProps {
   highlight: SharedHighlight;
@@ -15,6 +16,9 @@ export const SharedHighlightViewer = ({ highlight, isOpen, onClose }: SharedHigh
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  
+  // Dynamic theme color for iOS status bar
+  useThemeColor(isOpen, "#000000");
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
 
