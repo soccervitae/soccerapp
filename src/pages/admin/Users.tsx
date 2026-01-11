@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight, Filter, X, Users } from "lucide-react";
+import { Search, MoreHorizontal, Shield, Eye, Ban, UserX, ChevronLeft, ChevronRight, Filter, X, Users, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -307,6 +307,27 @@ export default function AdminUsers() {
     },
     onError: () => {
       toast.error("Erro ao remover banimento");
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc("delete_user_completely", {
+        p_user_id: userId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminUsersCount"] });
+      queryClient.invalidateQueries({ queryKey: ["adminUsersStats"] });
+      toast.success("Usuário excluído permanentemente");
+      setViewSheetOpen(false);
+      setSelectedUserId(null);
+    },
+    onError: (error) => {
+      console.error("Error deleting user:", error);
+      toast.error("Erro ao excluir usuário");
     },
   });
 
@@ -629,12 +650,25 @@ export default function AdminUsers() {
                             {isUserAdmin(user) ? "Remover admin" : "Tornar admin"}
                           </DropdownMenuItem>
                           {user.banned_at ? (
-                            <DropdownMenuItem
-                              onClick={() => unbanUserMutation.mutate(user.id)}
-                            >
-                              <UserX className="h-4 w-4 mr-2" />
-                              Remover banimento
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => unbanUserMutation.mutate(user.id)}
+                              >
+                                <UserX className="h-4 w-4 mr-2" />
+                                Remover banimento
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => {
+                                  if (confirm("Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.")) {
+                                    deleteUserMutation.mutate(user.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir permanentemente
+                              </DropdownMenuItem>
+                            </>
                           ) : (
                             <DropdownMenuItem
                               className="text-destructive"
@@ -724,7 +758,13 @@ export default function AdminUsers() {
         onToggleAdmin={(userId, isAdmin) => {
           toggleAdminMutation.mutate({ userId, isAdmin });
         }}
+        onDelete={(userId) => {
+          if (confirm("Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita e removerá todos os dados do usuário.")) {
+            deleteUserMutation.mutate(userId);
+          }
+        }}
         isBanning={banUserMutation.isPending || unbanUserMutation.isPending}
+        isDeleting={deleteUserMutation.isPending}
       />
     </AdminLayout>
   );

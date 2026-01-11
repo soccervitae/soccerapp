@@ -34,6 +34,7 @@ import {
   Ruler,
   Weight,
   Footprints,
+  Trash2,
 } from "lucide-react";
 
 interface ViewUserSheetProps {
@@ -43,7 +44,9 @@ interface ViewUserSheetProps {
   onBan: (userId: string) => void;
   onUnban: (userId: string) => void;
   onToggleAdmin: (userId: string, isAdmin: boolean) => void;
+  onDelete?: (userId: string) => void;
   isBanning?: boolean;
+  isDeleting?: boolean;
 }
 
 export function ViewUserSheet({
@@ -53,7 +56,9 @@ export function ViewUserSheet({
   onBan,
   onUnban,
   onToggleAdmin,
+  onDelete,
   isBanning,
+  isDeleting,
 }: ViewUserSheetProps) {
   const [tab, setTab] = useState("info");
 
@@ -485,34 +490,49 @@ export function ViewUserSheet({
               <Separator />
 
               {/* Actions */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => onToggleAdmin(user.id, isAdmin)}
-                  className="flex-1"
-                >
-                  <Shield className="h-4 w-4 mr-2" />
-                  {isAdmin ? "Remover Admin" : "Tornar Admin"}
-                </Button>
-                {user.banned_at ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => onUnban(user.id)}
-                    disabled={isBanning}
+                    onClick={() => onToggleAdmin(user.id, isAdmin)}
                     className="flex-1"
                   >
-                    <Ban className="h-4 w-4 mr-2" />
-                    Remover Banimento
+                    <Shield className="h-4 w-4 mr-2" />
+                    {isAdmin ? "Remover Admin" : "Tornar Admin"}
                   </Button>
-                ) : (
+                  {user.banned_at ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => onUnban(user.id)}
+                      disabled={isBanning}
+                      className="flex-1"
+                    >
+                      <Ban className="h-4 w-4 mr-2" />
+                      Remover Banimento
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="destructive"
+                      onClick={() => onBan(user.id)}
+                      disabled={isBanning}
+                      className="flex-1"
+                    >
+                      <Ban className="h-4 w-4 mr-2" />
+                      Banir Usuário
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Delete button - only shown for banned users */}
+                {user.banned_at && onDelete && (
                   <Button
                     variant="destructive"
-                    onClick={() => onBan(user.id)}
-                    disabled={isBanning}
-                    className="flex-1"
+                    onClick={() => onDelete(user.id)}
+                    disabled={isDeleting}
+                    className="w-full"
                   >
-                    <Ban className="h-4 w-4 mr-2" />
-                    Banir Usuário
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {isDeleting ? "Excluindo..." : "Excluir Usuário Permanentemente"}
                   </Button>
                 )}
               </div>
