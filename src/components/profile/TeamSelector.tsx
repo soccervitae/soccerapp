@@ -145,9 +145,18 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
   const selectedCountry = countries.find((c) => c.id === paisId);
   const selectedState = states.find((s) => s.id === estadoId);
 
+  // Check if the selected country is Brazil (has states)
+  const isBrazil = selectedCountry?.nome === "Brasil";
+
   const handleCountrySelect = (countryId: number) => {
     setPaisId(countryId);
-    setStep("state");
+    const country = countries.find(c => c.id === countryId);
+    // If Brazil, go to state selection; otherwise, go directly to teams
+    if (country?.nome === "Brasil") {
+      setStep("state");
+    } else {
+      setStep("teams");
+    }
   };
 
   const handleStateSelect = (stateId: number) => {
@@ -160,8 +169,15 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
       setStep("country");
       setPaisId(null);
     } else if (step === "teams") {
-      setStep("state");
-      setEstadoId(null);
+      // If Brazil, go back to state; otherwise, go back to country
+      if (isBrazil && estadoId) {
+        setStep("state");
+        setEstadoId(null);
+      } else {
+        setStep("country");
+        setPaisId(null);
+        setEstadoId(null);
+      }
       setSearchInput("");
     }
   };
@@ -638,7 +654,7 @@ export const TeamSelector = ({ open, onOpenChange, selectedTeamIds }: TeamSelect
             </div>
             {selectedCountry && (
               <p className="text-sm text-muted-foreground">
-                Será adicionado em: {selectedState?.nome || selectedCountry.nome}
+                Será adicionado em: {selectedState ? `${selectedState.nome}, ${selectedCountry.nome}` : selectedCountry.nome}
               </p>
             )}
           </div>
