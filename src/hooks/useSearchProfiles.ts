@@ -93,6 +93,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
+        .neq("is_official_account", true)
         .order("full_name");
 
       // Search by name or username
@@ -159,6 +160,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
         .neq("id", currentUserId || "")
+        .neq("is_official_account", true)
         .order("conta_verificada", { ascending: false })
         .limit(20);
 
