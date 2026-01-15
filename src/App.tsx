@@ -56,6 +56,7 @@ import AdminSettings from "./pages/admin/Settings";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 
 import NotFound from "./pages/NotFound";
+import Forbidden from "./pages/Forbidden";
 
 const queryClient = new QueryClient();
 
@@ -223,6 +224,8 @@ const AnimatedRoutes = () => {
       <Route path="/admin/achievements" element={<AdminRoute><AdminAchievements /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
       
+      {/* Error pages */}
+      <Route path="/403" element={<PageTransition><Forbidden /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );
