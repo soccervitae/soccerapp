@@ -144,14 +144,25 @@ export function AdminMobileHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
+    <header 
+      className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center gap-3"
+      style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+    >
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="shrink-0">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-4 flex flex-col">
+        <SheetContent 
+          side="left" 
+          className="w-72 p-4 flex flex-col"
+          style={{ 
+            paddingTop: 'max(1rem, env(safe-area-inset-top))',
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left))'
+          }}
+        >
           <SidebarContent onItemClick={() => setIsOpen(false)} />
         </SheetContent>
       </Sheet>

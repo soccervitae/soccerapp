@@ -13,7 +13,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <AdminMobileHeader />
       <div className="flex flex-1">
         <AdminSidebar />
-        <main className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+        <main 
+          className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}
+          style={isMobile ? { 
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+            paddingRight: 'max(1rem, env(safe-area-inset-right))'
+          } : undefined}
+        >
           {children}
         </main>
       </div>
