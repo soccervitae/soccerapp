@@ -196,10 +196,7 @@ export default function AdminAddTeams() {
         
         const { data, error } = await supabase
           .from("times")
-          .upsert(batch, {
-            onConflict: "nome,estado_id,pais_id",
-            ignoreDuplicates: true,
-          })
+          .insert(batch)
           .select("id, nome");
 
         if (error) {
