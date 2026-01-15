@@ -40,15 +40,15 @@ const Login = () => {
       // Register device automatically (pass email for new device notification)
       await registerDevice(user.id, email);
 
-      // Check if user is admin
+      // Check if user is admin or oficial
       const { data: adminRole } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
-        .single();
+        .in("role", ["admin", "oficial"])
+        .maybeSingle();
 
-      const isAdmin = !!adminRole;
+      const isAdminOrOficial = !!adminRole;
 
       // Check if user has 2FA enabled
       const { data: profile } = await supabase
@@ -62,8 +62,8 @@ const Login = () => {
         const trusted = await isDeviceTrusted(user.id);
         
         if (trusted) {
-          // Device is trusted, skip 2FA - redirect based on admin status
-          navigate(isAdmin ? "/admin" : "/");
+          // Device is trusted, skip 2FA - redirect based on admin/oficial status
+          navigate(isAdminOrOficial ? "/admin" : "/");
           setLoading(false);
           return;
         }
@@ -83,13 +83,13 @@ const Login = () => {
           return;
         }
 
-        // Redirect to 2FA verification page with admin status
+        // Redirect to 2FA verification page with admin/oficial status
         navigate("/two-factor-verify", {
           state: {
             email: email,
             userId: user.id,
             maskedEmail: data?.masked_email || email,
-            isAdmin: isAdmin,
+            isAdmin: isAdminOrOficial,
           },
           replace: true,
         });
@@ -97,8 +97,8 @@ const Login = () => {
         return;
       }
 
-      // No 2FA - redirect based on admin status
-      navigate(isAdmin ? "/admin" : "/");
+      // No 2FA - redirect based on admin/oficial status
+      navigate(isAdminOrOficial ? "/admin" : "/");
       setLoading(false);
       return;
     }
