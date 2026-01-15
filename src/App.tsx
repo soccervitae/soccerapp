@@ -50,6 +50,7 @@ import AdminModeration from "./pages/admin/Moderation";
 import AdminReports from "./pages/admin/Reports";
 import AdminSupport from "./pages/admin/Support";
 import AdminTeams from "./pages/admin/Teams";
+import AdminAddTeams from "./pages/admin/AddTeams";
 import AdminChampionships from "./pages/admin/Championships";
 import AdminAchievements from "./pages/admin/Achievements";
 import AdminSettings from "./pages/admin/Settings";
@@ -220,6 +221,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
       <Route path="/admin/support" element={<AdminRoute><AdminSupport /></AdminRoute>} />
       <Route path="/admin/teams" element={<AdminRoute><AdminTeams /></AdminRoute>} />
+      <Route path="/admin/teams/add" element={<AdminRoute><AdminAddTeams /></AdminRoute>} />
       <Route path="/admin/championships" element={<AdminRoute><AdminChampionships /></AdminRoute>} />
       <Route path="/admin/achievements" element={<AdminRoute><AdminAchievements /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
