@@ -41,14 +41,14 @@ const Login = () => {
       await registerDevice(user.id, email);
 
       // Check if user is admin or oficial
-      const { data: adminRole } = await supabase
+      const { data: userRoles } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["admin", "oficial"] as any[])
-        .maybeSingle();
+        .eq("user_id", user.id);
 
-      const isAdminOrOficial = !!adminRole;
+      const isAdminOrOficial = userRoles?.some(
+        (r) => r.role === "admin" || r.role === ("oficial" as typeof r.role)
+      ) ?? false;
 
       // Check if user has 2FA enabled
       const { data: profile } = await supabase
