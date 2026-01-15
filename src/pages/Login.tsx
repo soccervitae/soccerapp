@@ -50,20 +50,24 @@ const Login = () => {
         (r) => r.role === "admin" || r.role === ("oficial" as typeof r.role)
       ) ?? false;
 
-      // Check if user has 2FA enabled
+      // Check if user has 2FA enabled and get username
       const { data: profile } = await supabase
         .from("profiles")
-        .select("two_factor_enabled")
+        .select("two_factor_enabled, username")
         .eq("id", user.id)
         .single();
+
+      // Check if it's the official soccervitae account - always redirect to admin
+      const isSoccerVitaeAccount = profile?.username === "soccervitae";
+      const shouldRedirectToAdmin = isAdminOrOficial || isSoccerVitaeAccount;
 
       if (profile?.two_factor_enabled) {
         // Check if current device is trusted
         const trusted = await isDeviceTrusted(user.id);
         
         if (trusted) {
-          // Device is trusted, skip 2FA - redirect based on admin/oficial status
-          navigate(isAdminOrOficial ? "/admin" : "/");
+          // Device is trusted, skip 2FA - redirect based on admin/oficial status or soccervitae account
+          navigate(shouldRedirectToAdmin ? "/admin" : "/");
           setLoading(false);
           return;
         }
@@ -83,13 +87,13 @@ const Login = () => {
           return;
         }
 
-        // Redirect to 2FA verification page with admin/oficial status
+        // Redirect to 2FA verification page with admin/oficial status or soccervitae account
         navigate("/two-factor-verify", {
           state: {
             email: email,
             userId: user.id,
             maskedEmail: data?.masked_email || email,
-            isAdmin: isAdminOrOficial,
+            isAdmin: shouldRedirectToAdmin,
           },
           replace: true,
         });
@@ -97,10 +101,10 @@ const Login = () => {
         return;
       }
 
-      // No 2FA - redirect based on admin/oficial status
+      // No 2FA - redirect based on admin/oficial status or soccervitae account
       // Small delay to ensure auth state is properly updated before navigating
       await new Promise(resolve => setTimeout(resolve, 100));
-      navigate(isAdminOrOficial ? "/admin" : "/", { replace: true });
+      navigate(shouldRedirectToAdmin ? "/admin" : "/", { replace: true });
       setLoading(false);
       return;
     }
