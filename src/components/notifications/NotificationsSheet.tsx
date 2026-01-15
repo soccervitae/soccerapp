@@ -77,10 +77,23 @@ const NotificationItem = ({
     onClose();
 
     // Navigate based on notification type
-    if (notification.type === "follow") {
-      navigate(`/profile/${notification.actor_id}`);
-    } else if (notification.post_id) {
-      navigate(`/`); // Could navigate to specific post if route exists
+    switch (notification.type) {
+      case "follow":
+        // Navigate to the profile of the user who started following
+        if (notification.actor?.username) {
+          navigate(`/${notification.actor.username}`);
+        }
+        break;
+      case "like":
+      case "comment":
+      case "mention":
+        // Navigate to the post where the interaction occurred
+        if (notification.post_id) {
+          navigate(`/post/${notification.post_id}`);
+        }
+        break;
+      default:
+        navigate("/");
     }
   };
 
