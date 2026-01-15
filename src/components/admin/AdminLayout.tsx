@@ -12,9 +12,7 @@ const AdminRefreshContext = createContext<AdminRefreshContextType | null>(null);
 
 export function useAdminRefresh() {
   const context = useContext(AdminRefreshContext);
-  if (!context) {
-    throw new Error("useAdminRefresh must be used within AdminLayout");
-  }
+  // Return null context if not within AdminLayout - allows hook to be used conditionally
   return context;
 }
 

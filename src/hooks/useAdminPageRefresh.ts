@@ -2,7 +2,7 @@ import { useEffect, useCallback, useRef } from "react";
 import { useAdminRefresh } from "@/components/admin/AdminLayout";
 
 export function useAdminPageRefresh(refetch: () => Promise<any>) {
-  const { onRefreshCallback } = useAdminRefresh();
+  const context = useAdminRefresh();
   const refetchRef = useRef(refetch);
   
   // Keep ref updated
@@ -13,7 +13,10 @@ export function useAdminPageRefresh(refetch: () => Promise<any>) {
   }, []);
 
   useEffect(() => {
-    onRefreshCallback(handleRefresh);
-  }, [handleRefresh, onRefreshCallback]);
+    // Only register callback if context is available
+    if (context?.onRefreshCallback) {
+      context.onRefreshCallback(handleRefresh);
+    }
+  }, [handleRefresh, context]);
 }
 
