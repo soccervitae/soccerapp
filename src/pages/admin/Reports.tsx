@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ViewReportedPostSheet } from "@/components/admin/ViewReportedPostSheet";
 import { ViewReportedProfileSheet } from "@/components/admin/ViewReportedProfileSheet";
+import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
@@ -60,7 +61,7 @@ export default function AdminReports() {
   const [profileStatusFilter, setProfileStatusFilter] = useState<string>("all");
   const queryClient = useQueryClient();
 
-  const { data: postReports, isLoading: loadingPostReports } = useQuery({
+  const { data: postReports, isLoading: loadingPostReports, refetch: refetchPostReports } = useQuery({
     queryKey: ["adminPostReports"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -88,7 +89,7 @@ export default function AdminReports() {
     },
   });
 
-  const { data: profileReports, isLoading: loadingProfileReports } = useQuery({
+  const { data: profileReports, isLoading: loadingProfileReports, refetch: refetchProfileReports } = useQuery({
     queryKey: ["adminProfileReports"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -286,6 +287,12 @@ export default function AdminReports() {
   const filteredProfileReports = profileReports?.filter(
     (report) => profileStatusFilter === "all" || report.status === profileStatusFilter
   );
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchPostReports(), refetchProfileReports()]);
+  }, [refetchPostReports, refetchProfileReports]);
+
+  useAdminPageRefresh(handleRefresh);
 
   const renderPostReports = () => (
     <Table>

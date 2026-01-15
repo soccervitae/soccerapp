@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EditPostSheet } from "@/components/admin/EditPostSheet";
+import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
 
 interface Post {
   id: string;
@@ -54,7 +55,7 @@ export default function AdminPosts() {
   const queryClient = useQueryClient();
 
   // Query for total count
-  const { data: totalCount } = useQuery({
+  const { data: totalCount, refetch: refetchCount } = useQuery({
     queryKey: ["adminPostsCount", search],
     queryFn: async () => {
       let query = supabase
@@ -72,7 +73,7 @@ export default function AdminPosts() {
   });
 
   // Query for engagement stats
-  const { data: engagementStats } = useQuery({
+  const { data: engagementStats, refetch: refetchStats } = useQuery({
     queryKey: ["adminPostsEngagementStats"],
     queryFn: async () => {
       const { data: posts, error } = await supabase
@@ -109,7 +110,7 @@ export default function AdminPosts() {
     },
   });
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts, isLoading, refetch: refetchPosts } = useQuery({
     queryKey: ["adminPosts", search, currentPage],
     queryFn: async () => {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -151,6 +152,12 @@ export default function AdminPosts() {
   });
 
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchCount(), refetchStats(), refetchPosts()]);
+  }, [refetchCount, refetchStats, refetchPosts]);
+
+  useAdminPageRefresh(handleRefresh);
 
   const handleSearch = (value: string) => {
     setSearch(value);

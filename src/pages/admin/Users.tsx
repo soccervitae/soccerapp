@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
 import { BanUserDialog } from "@/components/admin/BanUserDialog";
+import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -156,7 +157,7 @@ export default function AdminUsers() {
   };
 
   // Query for total count with filters
-  const { data: totalCount } = useQuery({
+  const { data: totalCount, refetch: refetchCount } = useQuery({
     queryKey: ["adminUsersCount", search, filters, adminUserIds],
     queryFn: async () => {
       if (filters.status === "admin" && (!adminUserIds || adminUserIds.length === 0)) {
@@ -177,7 +178,7 @@ export default function AdminUsers() {
   });
 
   // Query for filter counts (statistics)
-  const { data: filterStats } = useQuery({
+  const { data: filterStats, refetch: refetchStats } = useQuery({
     queryKey: ["adminUsersStats", adminUserIds],
     queryFn: async () => {
       const [
@@ -205,7 +206,7 @@ export default function AdminUsers() {
     },
   });
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, refetch: refetchUsers } = useQuery({
     queryKey: ["adminUsers", search, currentPage, filters, adminUserIds],
     queryFn: async () => {
       if (filters.status === "admin" && (!adminUserIds || adminUserIds.length === 0)) {
@@ -345,6 +346,12 @@ export default function AdminUsers() {
   };
 
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchCount(), refetchStats(), refetchUsers()]);
+  }, [refetchCount, refetchStats, refetchUsers]);
+
+  useAdminPageRefresh(handleRefresh);
 
   const handleSearch = (value: string) => {
     setSearch(value);
