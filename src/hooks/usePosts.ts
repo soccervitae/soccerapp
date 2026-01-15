@@ -58,6 +58,125 @@ export interface Post {
   recent_likes: RecentLike[];
 }
 
+export const usePostById = (postId: string | undefined) => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["post", postId],
+    queryFn: async (): Promise<Post | null> => {
+      if (!postId) return null;
+
+      const { data: post, error } = await supabase
+        .from("posts")
+        .select(`
+          *,
+          profile:profiles!posts_user_id_fkey (
+            id,
+            username,
+            full_name,
+            nickname,
+            avatar_url,
+            team,
+            conta_verificada,
+            gender,
+            role,
+            posicaomas,
+            posicaofem,
+            funcao
+          ),
+          music_track:music_tracks (
+            id,
+            title,
+            artist,
+            audio_url,
+            duration_seconds,
+            cover_url
+          )
+        `)
+        .eq("id", postId)
+        .eq("is_published", true)
+        .single();
+
+      if (error) throw error;
+      if (!post) return null;
+
+      // Fetch recent likes for this post
+      const recentLikesRes = await supabase
+        .from("likes")
+        .select(`
+          post_id,
+          user_id,
+          created_at,
+          profile:profiles!likes_user_id_fkey (
+            id,
+            username,
+            full_name,
+            nickname,
+            avatar_url,
+            conta_verificada
+          )
+        `)
+        .eq("post_id", postId)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      const recentLikes: RecentLike[] = (recentLikesRes.data || []).map(like => ({
+        user_id: like.user_id,
+        username: (like.profile as any)?.username || "",
+        full_name: (like.profile as any)?.full_name || null,
+        nickname: (like.profile as any)?.nickname || null,
+        avatar_url: (like.profile as any)?.avatar_url || null,
+        conta_verificada: (like.profile as any)?.conta_verificada || false,
+      }));
+
+      // Get position name
+      const profile = post.profile as any;
+      const isMale = profile.gender === 'homem' || profile.gender === 'masculino' || profile.gender === 'male';
+      const isFemale = profile.gender === 'mulher' || profile.gender === 'feminino' || profile.gender === 'female';
+      const isStaff = profile.role === 'tecnico' || profile.role === 'preparador_fisico' || profile.role === 'auxiliar' || profile.role === 'comissao_tecnica';
+
+      let positionName: string | null = null;
+
+      if (isStaff && profile.funcao) {
+        const tableName = isFemale ? 'funcaofem' : 'funcaomas';
+        const { data: funcaoData } = await supabase.from(tableName).select('name').eq('id', profile.funcao).single();
+        positionName = funcaoData?.name || null;
+      } else if (isMale && profile.posicaomas) {
+        const { data: posData } = await supabase.from('posicao_masculina').select('name').eq('id', profile.posicaomas).single();
+        positionName = posData?.name || null;
+      } else if (isFemale && profile.posicaofem) {
+        const { data: posData } = await supabase.from('posicao_feminina').select('name').eq('id', profile.posicaofem).single();
+        positionName = posData?.name || null;
+      }
+
+      // Check if liked/saved by current user
+      let liked_by_user = false;
+      let saved_by_user = false;
+
+      if (user) {
+        const [likeRes, savedRes] = await Promise.all([
+          supabase.from("likes").select("id").eq("post_id", postId).eq("user_id", user.id).maybeSingle(),
+          supabase.from("saved_posts").select("id").eq("post_id", postId).eq("user_id", user.id).maybeSingle(),
+        ]);
+        liked_by_user = !!likeRes.data;
+        saved_by_user = !!savedRes.data;
+      }
+
+      return {
+        ...post,
+        profile: {
+          ...post.profile,
+          position_name: positionName,
+        },
+        liked_by_user,
+        saved_by_user,
+        recent_likes: recentLikes,
+      };
+    },
+    enabled: !!postId,
+  });
+};
+
 export const usePosts = () => {
   const { user } = useAuth();
 
