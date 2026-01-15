@@ -62,46 +62,66 @@ serve(async (req) => {
         const messages = [
           {
             role: 'system',
-            content: `Você é um moderador de conteúdo rigoroso. Analise a ${isVideo ? 'thumbnail do vídeo' : 'imagem'} e determine se contém:
-1. Conteúdo sexual explícito ou nudez
-2. Violência gráfica ou gore
-3. Discurso de ódio, símbolos de ódio ou conteúdo discriminatório
-4. Conteúdo que promova drogas ilegais
-5. Conteúdo terrorista ou que promova violência
-6. Assédio ou bullying
+            content: `Você é um sistema de moderação de conteúdo especializado em detectar conteúdo explícito e impróprio.
 
-Responda APENAS com um JSON no formato:
+Sua tarefa é analisar a ${isVideo ? 'thumbnail do vídeo' : 'imagem'} e identificar se contém:
+
+🔴 CONTEÚDO EXPLÍCITO (REJEITAR IMEDIATAMENTE):
+- Nudez total ou parcial (genitais, seios expostos, nádegas)
+- Conteúdo pornográfico ou sexual explícito
+- Atos sexuais ou sugestivos
+- Gore, violência gráfica extrema, mutilação
+- Símbolos de ódio (nazismo, supremacia racial)
+
+🟡 CONTEÚDO SUSPEITO (SINALIZAR PARA REVISÃO MANUAL):
+- Roupas muito reveladoras/provocantes
+- Poses sugestivas
+- Violência moderada
+- Conteúdo que pode ser interpretado de forma ambígua
+- Qualquer dúvida sobre a adequação
+
+🟢 CONTEÚDO APROVADO:
+- Fotos de futebol, esportes
+- Fotos normais de pessoas vestidas adequadamente
+- Paisagens, objetos, comida
+- Celebrações esportivas
+- Conteúdo claramente seguro para todas as idades
+
+RESPONDA APENAS com JSON:
 {
   "approved": true/false,
   "flagged": true/false,
-  "reason": "motivo detalhado se reprovado ou flagged, vazio se aprovado sem dúvidas",
-  "confidence": 0-100
+  "reason": "descrição detalhada se não aprovado",
+  "confidence": 0-100,
+  "explicit_content_detected": true/false
 }
 
-REGRAS:
-- "approved": true significa conteúdo completamente seguro
-- "flagged": true significa que precisa revisão humana (dúvidas, conteúdo suspeito mas não claramente violador)
-- Se confidence < 80, marque como flagged para revisão manual
-- Se conteúdo claramente viola as regras, approved=false e flagged=false
-- Se conteúdo parece suspeito mas não é claramente violador, approved=false e flagged=true`
+REGRAS CRÍTICAS:
+- explicit_content_detected=true → approved=false, flagged=false (rejeitar direto)
+- Conteúdo suspeito → approved=false, flagged=true (revisão manual)
+- Conteúdo seguro com confidence >= 85 → approved=true
+- Conteúdo seguro mas confidence < 85 → flagged=true (revisão manual)
+- NA DÚVIDA, SEMPRE SINALIZAR para revisão humana`
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Analise esta imagem e verifique se viola as diretrizes da comunidade de uma rede social de futebol.'
+                text: 'Analise esta imagem para verificar se contém conteúdo explícito ou impróprio para uma rede social de futebol. Seja rigoroso na detecção de nudez e conteúdo sexual.'
               },
               {
                 type: 'image_url',
                 image_url: {
                   url: url,
-                  detail: 'low'
+                  detail: 'high'
                 }
               }
             ]
           }
         ];
+
+        console.log(`[moderate-content] Analisando mídia: ${url.substring(0, 100)}...`);
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -110,10 +130,10 @@ REGRAS:
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model: 'gpt-4o',
             messages,
-            max_tokens: 200,
-            temperature: 0.1,
+            max_tokens: 300,
+            temperature: 0,
           }),
         });
 
@@ -132,7 +152,7 @@ REGRAS:
         console.log(`[moderate-content] Resposta para ${url}: ${content}`);
 
         // Extrair JSON da resposta
-        let analysis = { approved: true, flagged: false, reason: '', confidence: 100 };
+        let analysis = { approved: true, flagged: false, reason: '', confidence: 100, explicit_content_detected: false };
         try {
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
@@ -143,15 +163,25 @@ REGRAS:
           // Verificar palavras-chave na resposta
           const lowerContent = content.toLowerCase();
           const hasProhibited = PROHIBITED_KEYWORDS.some(kw => lowerContent.includes(kw));
-          if (hasProhibited && (lowerContent.includes('não') || lowerContent.includes('viola') || lowerContent.includes('reprova'))) {
-            analysis = { approved: false, flagged: true, reason: 'Conteúdo potencialmente inadequado detectado', confidence: 50 };
+          if (hasProhibited && (lowerContent.includes('não') || lowerContent.includes('viola') || lowerContent.includes('reprova') || lowerContent.includes('explicit'))) {
+            analysis = { approved: false, flagged: false, reason: 'Conteúdo explícito detectado', confidence: 90, explicit_content_detected: true };
+          } else if (hasProhibited) {
+            analysis = { approved: false, flagged: true, reason: 'Conteúdo potencialmente inadequado detectado', confidence: 50, explicit_content_detected: false };
           }
         }
 
-        // Se confidence baixo, forçar flagged
-        if (analysis.confidence < 80 && analysis.approved) {
+        // Se conteúdo explícito detectado, rejeitar diretamente (não flagged)
+        if (analysis.explicit_content_detected) {
+          analysis.approved = false;
+          analysis.flagged = false;
+          console.log(`[moderate-content] ⛔ Conteúdo explícito detectado em: ${url.substring(0, 50)}...`);
+        }
+        // Se confidence baixo mas não é explícito, forçar flagged para revisão
+        else if (analysis.confidence < 85 && analysis.approved) {
           analysis.flagged = true;
+          analysis.approved = false;
           analysis.reason = analysis.reason || 'Baixa confiança na análise - requer revisão manual';
+          console.log(`[moderate-content] ⚠️ Baixa confiança (${analysis.confidence}%), sinalizando para revisão`);
         }
 
         analysisResults.push({
