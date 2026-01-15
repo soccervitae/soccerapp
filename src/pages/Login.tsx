@@ -98,12 +98,16 @@ const Login = () => {
       }
 
       // No 2FA - redirect based on admin/oficial status
-      navigate(isAdminOrOficial ? "/admin" : "/");
+      // Small delay to ensure auth state is properly updated before navigating
+      await new Promise(resolve => setTimeout(resolve, 100));
+      navigate(isAdminOrOficial ? "/admin" : "/", { replace: true });
       setLoading(false);
       return;
     }
 
-    navigate("/");
+    // Small delay to ensure auth state is properly updated before navigating
+    await new Promise(resolve => setTimeout(resolve, 100));
+    navigate("/", { replace: true });
     setLoading(false);
   };
 
