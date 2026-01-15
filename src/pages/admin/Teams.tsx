@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,14 +42,14 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
+
 
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminTeams() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
-  const [showAddSheet, setShowAddSheet] = useState(false);
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -294,12 +295,11 @@ export default function AdminTeams() {
             </Button>
           )}
 
-          <Button onClick={() => setShowAddSheet(true)} className="ml-auto">
+          <Button onClick={() => navigate("/admin/teams/add")} className="ml-auto">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Times
           </Button>
         </div>
-
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -459,14 +459,6 @@ export default function AdminTeams() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ScrapeTeamsSheet
-        open={showAddSheet}
-        onOpenChange={setShowAddSheet}
-        onTeamsImported={() => {
-          queryClient.invalidateQueries({ queryKey: ["adminTeams"] });
-          queryClient.invalidateQueries({ queryKey: ["adminTeamsCount"] });
-        }}
-      />
     </AdminLayout>
   );
 }
