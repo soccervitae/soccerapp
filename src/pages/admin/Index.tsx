@@ -1,6 +1,7 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
 import {
   Users,
   FileText,
@@ -12,7 +13,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useAdminStats();
+  const { data: stats, isLoading, refetch } = useAdminStats();
+  
+  useAdminPageRefresh(refetch);
 
   return (
     <AdminLayout>
