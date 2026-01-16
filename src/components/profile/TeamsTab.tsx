@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +19,6 @@ import { useUserTeams, useRemoveUserFromTeam, useUpdateTeamOrder, Team } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus } from "lucide-react";
-import { TeamSelector } from "@/components/profile/TeamSelector";
 import { SortableTeamItem } from "@/components/profile/SortableTeamItem";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 
@@ -29,10 +29,10 @@ interface TeamsTabProps {
 
 export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: teams = [], isLoading: teamsLoading } = useUserTeams(userId);
   const removeUserFromTeam = useRemoveUserFromTeam();
   const updateTeamOrder = useUpdateTeamOrder();
-  const [selectorOpen, setSelectorOpen] = useState(false);
   const [localTeams, setLocalTeams] = useState<Team[]>([]);
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
 
@@ -97,20 +97,13 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
         </span>
         <p className="text-muted-foreground text-sm mt-2">Nenhum time ainda</p>
         {isOwnProfile && (
-          <>
-            <button
-              onClick={() => setSelectorOpen(true)}
-              className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Adicionar time
-            </button>
-            <TeamSelector
-              open={selectorOpen}
-              onOpenChange={setSelectorOpen}
-              selectedTeamIds={[]}
-            />
-          </>
+          <button
+            onClick={() => navigate("/select-teams")}
+            className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar time
+          </button>
         )}
       </div>
     );
@@ -120,7 +113,7 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
     <div className="flex flex-col gap-2 mb-8">
       {isOwnProfile && (
         <button
-          onClick={() => setSelectorOpen(true)}
+          onClick={() => navigate("/select-teams")}
           className="bg-card border border-dashed border-border rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -183,13 +176,6 @@ export const TeamsTab = ({ userId, isLoading = false }: TeamsTabProps) => {
         ))
       )}
 
-      {isOwnProfile && (
-        <TeamSelector
-          open={selectorOpen}
-          onOpenChange={setSelectorOpen}
-          selectedTeamIds={localTeams.map((t) => t.id)}
-        />
-      )}
 
       {/* Delete Confirmation */}
       <ResponsiveAlertModal

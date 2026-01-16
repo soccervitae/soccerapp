@@ -11,7 +11,7 @@ import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
 import { EditHighlightSheet } from "@/components/profile/EditHighlightSheet";
-import { TeamSelector } from "@/components/profile/TeamSelector";
+
 import { useUserTeams } from "@/hooks/useTeams";
 
 type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
@@ -68,7 +68,7 @@ export const DesktopSidebar = () => {
   const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
   const [isEditHighlightOpen, setIsEditHighlightOpen] = useState(false);
   const [selectedHighlightToEdit, setSelectedHighlightToEdit] = useState<UserHighlight | null>(null);
-  const [isTimesOpen, setIsTimesOpen] = useState(false);
+  
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   const currentPath = location.pathname;
@@ -99,7 +99,7 @@ export const DesktopSidebar = () => {
         setIsSelectHighlightOpen(true);
         break;
       case "times":
-        setIsTimesOpen(true);
+        navigate("/select-teams");
         break;
       case "championship":
         setIsChampionshipOpen(true);
@@ -157,7 +157,7 @@ export const DesktopSidebar = () => {
         onOpenChange={setIsEditHighlightOpen}
         highlight={selectedHighlightToEdit}
       />
-      <TeamSelector open={isTimesOpen} onOpenChange={setIsTimesOpen} selectedTeamIds={userTeams.map(t => t.id)} />
+      
       <AddChampionshipSheet open={isChampionshipOpen} onOpenChange={setIsChampionshipOpen} userTeams={userTeams} />
       <AddAchievementSheet open={isAchievementOpen} onOpenChange={setIsAchievementOpen} userTeams={userTeams} />
     </>;
