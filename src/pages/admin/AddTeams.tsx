@@ -55,9 +55,17 @@ export default function AdminAddTeams() {
         .select("id, nome, sigla, bandeira_url")
         .order("nome");
       if (error) throw error;
-      return data;
+      // Sort with Brazil first
+      return data?.sort((a, b) => {
+        if (a.nome === "Brasil") return -1;
+        if (b.nome === "Brasil") return 1;
+        return a.nome.localeCompare(b.nome);
+      });
     },
   });
+
+  // Check if Brazil is selected
+  const isBrazilSelected = paises?.find(p => p.id === selectedPaisId)?.nome === "Brasil";
 
   // Fetch states based on selected country
   const { data: estados } = useQuery({
@@ -163,8 +171,15 @@ export default function AdminAddTeams() {
       return;
     }
 
-    if (!user?.id || !selectedPaisId || !selectedEstadoId) {
+    if (!user?.id || !selectedPaisId) {
       toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    // Estado is required only for Brazil
+    const brazilCountry = paises?.find(p => p.nome === "Brasil");
+    if (brazilCountry && selectedPaisId === brazilCountry.id && !selectedEstadoId) {
+      toast.error("Selecione o estado");
       return;
     }
 
@@ -310,7 +325,7 @@ export default function AdminAddTeams() {
     }
   };
 
-  const canImport = selectedCount > 0 && selectedPaisId && selectedEstadoId;
+  const canImport = selectedCount > 0 && selectedPaisId && (!isBrazilSelected || selectedEstadoId);
 
   const teamsToDisplay = showOnlySelected 
     ? teams.filter(t => t.selected) 
@@ -375,30 +390,32 @@ export default function AdminAddTeams() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Estado *</Label>
-                <Select
-                  value={selectedEstadoId?.toString() || ""}
-                  onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
-                  disabled={!selectedPaisId || !estados?.length}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={!selectedPaisId ? "Selecione o país" : "Selecione o estado"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {estados?.map((estado) => (
-                      <SelectItem key={estado.id} value={estado.id.toString()}>
-                        <div className="flex items-center gap-2">
-                          {estado.bandeira_url && (
-                            <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
-                          )}
-                          {estado.nome} ({estado.uf})
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {isBrazilSelected && (
+                <div className="space-y-2">
+                  <Label>Estado *</Label>
+                  <Select
+                    value={selectedEstadoId?.toString() || ""}
+                    onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
+                    disabled={!estados?.length}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {estados?.map((estado) => (
+                        <SelectItem key={estado.id} value={estado.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            {estado.bandeira_url && (
+                              <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
+                            )}
+                            {estado.nome} ({estado.uf})
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* URL Input */}
@@ -558,7 +575,7 @@ export default function AdminAddTeams() {
           <TabsContent value="manual" className="space-y-4 mt-4">
             <div className="max-w-md space-y-4">
               {/* Country & State */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className={`grid gap-4 ${isBrazilSelected ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 <div className="space-y-2">
                   <Label>País *</Label>
                   <Select
@@ -582,30 +599,32 @@ export default function AdminAddTeams() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Select
-                    value={selectedEstadoId?.toString() || ""}
-                    onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
-                    disabled={!selectedPaisId || !estados?.length}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {estados?.map((estado) => (
-                        <SelectItem key={estado.id} value={estado.id.toString()}>
-                          <div className="flex items-center gap-2">
-                            {estado.bandeira_url && (
-                              <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
-                            )}
-                            {estado.uf}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {isBrazilSelected && (
+                  <div className="space-y-2">
+                    <Label>Estado</Label>
+                    <Select
+                      value={selectedEstadoId?.toString() || ""}
+                      onValueChange={(v) => setSelectedEstadoId(v ? parseInt(v) : null)}
+                      disabled={!estados?.length}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {estados?.map((estado) => (
+                          <SelectItem key={estado.id} value={estado.id.toString()}>
+                            <div className="flex items-center gap-2">
+                              {estado.bandeira_url && (
+                                <img src={estado.bandeira_url} alt="" className="w-4 h-3 object-cover" />
+                              )}
+                              {estado.uf}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Team Name */}
