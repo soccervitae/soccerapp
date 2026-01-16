@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { EditTeamSheet } from "@/components/admin/EditTeamSheet";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -37,12 +38,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MoreHorizontal, Trash2, Users, Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Users, Plus, X, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface Team {
+  id: string;
+  nome: string;
+  escudo_url: string | null;
+  pais_id: number | null;
+  estado_id: number | null;
+  selected_by_users: string[];
+  created_at: string | null;
+  pais?: { nome: string; bandeira_url: string | null } | null;
+  estado?: { nome: string; uf: string } | null;
+}
 
 const ITEMS_PER_PAGE = 20;
 
@@ -50,6 +62,7 @@ export default function AdminTeams() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
+  const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -390,6 +403,12 @@ export default function AdminTeams() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
+                            onClick={() => setEditTeam(team)}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar time
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setDeleteTeamId(team.id)}
                           >
@@ -459,6 +478,11 @@ export default function AdminTeams() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <EditTeamSheet
+        team={editTeam}
+        open={!!editTeam}
+        onOpenChange={(open) => !open && setEditTeam(null)}
+      />
     </AdminLayout>
   );
 }
