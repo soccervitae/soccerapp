@@ -37,12 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MoreHorizontal, Trash2, Users, Plus, X, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Users, Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EditTeamSheet } from "@/components/admin/EditTeamSheet";
 
 
 const ITEMS_PER_PAGE = 20;
@@ -51,7 +50,6 @@ export default function AdminTeams() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [deleteTeamId, setDeleteTeamId] = useState<string | null>(null);
-  const [editTeamId, setEditTeamId] = useState<string | null>(null);
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(null);
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -392,12 +390,6 @@ export default function AdminTeams() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => setEditTeamId(team.id)}
-                          >
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Editar time
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setDeleteTeamId(team.id)}
                           >
@@ -466,12 +458,6 @@ export default function AdminTeams() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <EditTeamSheet
-        open={!!editTeamId}
-        onOpenChange={(open) => !open && setEditTeamId(null)}
-        teamId={editTeamId}
-      />
 
     </AdminLayout>
   );
