@@ -36,7 +36,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import CompleteProfile from "./pages/CompleteProfile";
 import Welcome from "./pages/Welcome";
 import Teams from "./pages/Teams";
-import SelectTeams from "./pages/SelectTeams";
 import Install from "./pages/Install";
 import Landing from "./pages/Landing";
 import Guidelines from "./pages/Guidelines";
@@ -216,11 +215,6 @@ const AnimatedRoutes = () => {
       <Route path="/teams" element={
         <ProtectedRoute>
           <PageTransition><Teams /></PageTransition>
-        </ProtectedRoute>
-      } />
-      <Route path="/select-teams" element={
-        <ProtectedRoute>
-          <PageTransition><SelectTeams /></PageTransition>
         </ProtectedRoute>
       } />
       

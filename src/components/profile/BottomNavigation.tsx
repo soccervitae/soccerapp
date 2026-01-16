@@ -9,7 +9,7 @@ import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
 import { EditHighlightSheet } from "@/components/profile/EditHighlightSheet";
-
+import { TeamSelector } from "@/components/profile/TeamSelector";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
@@ -71,7 +71,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
   const [isEditHighlightOpen, setIsEditHighlightOpen] = useState(false);
   const [selectedHighlightToEdit, setSelectedHighlightToEdit] = useState<UserHighlight | null>(null);
-  
+  const [isTimesOpen, setIsTimesOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
@@ -164,7 +164,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         setIsSelectHighlightOpen(true);
         break;
       case "times":
-        navigate("/select-teams");
+        setIsTimesOpen(true);
         break;
       case "championship":
         setIsChampionshipOpen(true);
@@ -263,6 +263,11 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         highlight={selectedHighlightToEdit}
       />
 
+      <TeamSelector 
+        open={isTimesOpen} 
+        onOpenChange={setIsTimesOpen}
+        selectedTeamIds={userTeams.map(t => t.id)}
+      />
 
       <AddChampionshipSheet 
         open={isChampionshipOpen} 
