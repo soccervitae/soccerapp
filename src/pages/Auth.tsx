@@ -277,6 +277,24 @@ const LoginForm = () => {
         await trustCurrentDevice(user.id);
       }
 
+      // Check if user is admin
+      const { data: isAdminRole } = await supabase.rpc("has_role", { 
+        _user_id: user.id, 
+        _role: "admin" 
+      });
+      
+      // Also check for oficial role
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasOficialRole = userRoles?.some(
+        (r) => r.role === ("oficial" as typeof r.role)
+      ) ?? false;
+      
+      const isAdmin = isAdminRole || hasOficialRole;
+
       // Check if user has 2FA enabled
       const { data: profile } = await supabase
         .from("profiles")
@@ -289,8 +307,8 @@ const LoginForm = () => {
         const trusted = await isDeviceTrusted(user.id);
         
         if (trusted) {
-          // Device is trusted, skip 2FA
-          navigate("/");
+          // Device is trusted, skip 2FA - redirect based on role
+          navigate(isAdmin ? "/admin" : "/");
           setLoading(false);
           return;
         }
@@ -311,22 +329,27 @@ const LoginForm = () => {
           return;
         }
 
-        // Redirect to 2FA verification page
+        // Redirect to 2FA verification page with admin info
         navigate("/two-factor-verify", {
           state: {
             email: email,
             userId: user.id,
             maskedEmail: data?.masked_email || email,
+            isAdmin: isAdmin,
           },
           replace: true,
         });
         setLoading(false);
         return;
       }
+
+      // No 2FA, redirect based on role
+      navigate(isAdmin ? "/admin" : "/");
+      setLoading(false);
+      return;
     }
 
     navigate("/");
-
     setLoading(false);
   };
 
