@@ -38,9 +38,8 @@ export const ProtectedRoute = ({
 
   const profileData = profile as any;
 
-  // Redirect admin users to admin dashboard (except official accounts who can use both)
-  const isOfficialAccount = profileData?.is_official_account === true;
-  if (isAdmin && !isOfficialAccount && !location.pathname.startsWith("/admin")) {
+  // Redirect admin users to admin dashboard
+  if (isAdmin && !location.pathname.startsWith("/admin")) {
     return <Navigate to="/admin" replace />;
   }
 
