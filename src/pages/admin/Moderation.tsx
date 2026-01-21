@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Check, X, Eye, AlertTriangle, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Check, X, Eye, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -54,7 +54,7 @@ export default function AdminModeration() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("flagged");
+  const [activeTab, setActiveTab] = useState<string>("pending");
   const [selectedPost, setSelectedPost] = useState<ModerationPost | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
@@ -64,7 +64,7 @@ export default function AdminModeration() {
   const { data: statusCounts } = useQuery({
     queryKey: ["moderationStatusCounts"],
     queryFn: async () => {
-      const statuses = ['pending', 'flagged', 'approved', 'rejected'];
+      const statuses = ['pending', 'approved', 'rejected'];
       const counts: Record<string, number> = {};
       
       for (const status of statuses) {
@@ -267,8 +267,6 @@ export default function AdminModeration() {
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case "flagged":
-        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"><AlertTriangle className="h-3 w-3 mr-1" /> Flagged</Badge>;
       case "pending":
         return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
       case "approved":
@@ -286,22 +284,13 @@ export default function AdminModeration() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Moderação de Conteúdo</h1>
           <p className="text-muted-foreground">
-            Revise e aprove posts flagged pela IA
+            Gerencie posts aprovados e rejeitados pela moderação automática
           </p>
         </div>
 
         {/* Status Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-4 max-w-xl">
-            <TabsTrigger value="flagged" className="relative">
-              <AlertTriangle className="h-4 w-4 mr-1" />
-              Flagged
-              {(statusCounts?.flagged || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {statusCounts?.flagged}
-                </span>
-              )}
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="pending" className="relative">
               <Clock className="h-4 w-4 mr-1" />
               Pendente
@@ -439,7 +428,7 @@ export default function AdminModeration() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {(activeTab === "flagged" || activeTab === "pending") && (
+                            {activeTab === "pending" && (
                               <>
                                 <Button
                                   variant="ghost"
@@ -566,12 +555,12 @@ export default function AdminModeration() {
 
               {/* Moderation Reason */}
               {selectedPost.moderation_reason && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    Motivo da Flag (IA)
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200 flex items-center gap-2">
+                    <XCircle className="h-4 w-4" />
+                    Motivo da Rejeição
                   </p>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                  <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                     {selectedPost.moderation_reason}
                   </p>
                 </div>
@@ -580,7 +569,7 @@ export default function AdminModeration() {
           )}
 
           <DialogFooter className="gap-2">
-            {(selectedPost?.moderation_status === "flagged" || selectedPost?.moderation_status === "pending") && (
+            {selectedPost?.moderation_status === "pending" && (
               <>
                 <Button
                   variant="outline"
