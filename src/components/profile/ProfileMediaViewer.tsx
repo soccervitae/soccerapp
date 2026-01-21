@@ -496,7 +496,12 @@ export const ProfileMediaViewer = ({
               <div
                 ref={imageContainerRef}
                 className={`absolute inset-0 ${isVideo ? "bg-black" : "bg-background"} flex items-center justify-center touch-none`}
-                onClick={handleTapNavigation}
+                onClick={(e) => {
+                  // Only handle tap navigation if clicking on media directly
+                  if (e.target === imageContainerRef.current || (e.target as HTMLElement).tagName === 'IMG' || (e.target as HTMLElement).tagName === 'VIDEO') {
+                    handleTapNavigation(e);
+                  }
+                }}
                 onTouchStart={!isVideo ? handleTouchStart : undefined}
                 onTouchMove={!isVideo ? handleTouchMove : undefined}
                 onTouchEnd={!isVideo ? handleTouchEnd : undefined}
@@ -625,10 +630,11 @@ export const ProfileMediaViewer = ({
               <AnimatePresence>
                 {showInfo && (
                   <motion.div
-                    className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between"
+                    className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-auto"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {!isVideo && (
                       <button
@@ -703,10 +709,11 @@ export const ProfileMediaViewer = ({
               <AnimatePresence>
                 {!isVideo && showInfo && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3"
+                    className="absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3 pointer-events-auto"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Caption */}
                     {currentPost.content && (
