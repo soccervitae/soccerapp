@@ -45,6 +45,7 @@ import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { SchedulePostPicker } from "@/components/feed/SchedulePostPicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ModerationInfoSheet } from "@/components/feed/ModerationInfoSheet";
 
 interface CreatePostSheetProps {
   open: boolean;
@@ -108,6 +109,7 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [showModerationSheet, setShowModerationSheet] = useState(false);
 
   useEffect(() => {
     if (error) {
@@ -346,18 +348,20 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
           if (error) {
             console.error("Moderation error:", error);
-            // Em caso de erro, o post fica pendente de moderação
-            toast.info("Seu post está sendo analisado pela nossa equipe. Você será notificado quando a revisão for concluída.");
+            // Em caso de erro, mostrar sheet de moderação
+            setShowModerationSheet(true);
           } else if (data?.status === 'approved') {
             toast.success("Post publicado com sucesso!");
           } else if (data?.status === 'flagged') {
-            toast.info("Seu post está sendo analisado pela nossa equipe. Você será notificado quando a revisão for concluída.");
+            // Post pendente, mostrar sheet de moderação
+            setShowModerationSheet(true);
           } else {
             toast.error(data?.reason || "Seu post foi rejeitado por violar as diretrizes da comunidade.");
           }
         } catch (moderationErr) {
           console.error("Moderation call failed:", moderationErr);
-          toast.info("Seu post está sendo analisado. Em breve será publicado se estiver de acordo com nossas diretrizes.");
+          // Em caso de erro na chamada, mostrar sheet de moderação
+          setShowModerationSheet(true);
         }
       } else if (scheduledDate) {
         toast.success("Post agendado com sucesso!");
@@ -1036,19 +1040,25 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="max-h-[90dvh] p-0">
-          {defaultContent}
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={open} onOpenChange={handleClose}>
+          <DrawerContent className="max-h-[90dvh] p-0">
+            {defaultContent}
+          </DrawerContent>
+        </Drawer>
+        <ModerationInfoSheet open={showModerationSheet} onOpenChange={setShowModerationSheet} />
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl h-[90vh] p-0 overflow-hidden">
-        {defaultContent}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-xl h-[90vh] p-0 overflow-hidden">
+          {defaultContent}
+        </DialogContent>
+      </Dialog>
+      <ModerationInfoSheet open={showModerationSheet} onOpenChange={setShowModerationSheet} />
+    </>
   );
 };
