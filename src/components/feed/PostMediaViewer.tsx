@@ -522,7 +522,12 @@ export const PostMediaViewer = ({
               <div
                 ref={imageContainerRef}
                 className={`absolute inset-0 ${isVideo ? "bg-black" : "bg-white"} flex items-center justify-center touch-none`}
-                onClick={handleTapNavigation}
+                onClick={(e) => {
+                  // Only handle tap navigation if clicking on media directly, not on UI overlays
+                  if (e.target === imageContainerRef.current || (e.target as HTMLElement).tagName === 'IMG' || (e.target as HTMLElement).tagName === 'VIDEO') {
+                    handleTapNavigation(e);
+                  }
+                }}
                 onTouchStart={!isVideo ? handleTouchStart : undefined}
                 onTouchMove={!isVideo ? handleTouchMove : undefined}
                 onTouchEnd={!isVideo ? handleTouchEnd : undefined}
@@ -642,7 +647,7 @@ export const PostMediaViewer = ({
               <AnimatePresence mode="wait">
                 {showInfo && (
                   <motion.div
-                    className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between"
+                    className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-auto"
                     style={{ paddingTop: 'env(safe-area-inset-top)' }}
                     initial={{ opacity: 0, y: -15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -652,6 +657,7 @@ export const PostMediaViewer = ({
                       ease: [0.4, 0, 0.2, 1],
                       opacity: { duration: 0.25 }
                     }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Profile info - hidden for video */}
                     {!isVideo && (
@@ -775,7 +781,7 @@ export const PostMediaViewer = ({
               <AnimatePresence mode="wait">
                 {showInfo && (
                   <motion.div
-                    className={`absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3 ${
+                    className={`absolute bottom-0 left-0 right-0 z-20 p-4 space-y-3 pointer-events-auto ${
                       isVideo ? "bg-gradient-to-t from-black/80 via-black/50 to-transparent" : ""
                     }`}
                     style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -787,6 +793,7 @@ export const PostMediaViewer = ({
                       ease: [0.4, 0, 0.2, 1],
                       opacity: { duration: 0.25 }
                     }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Caption */}
                     {post.content && (
