@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FeedHeader } from "@/components/feed/FeedHeader";
 import { FeedStories } from "@/components/feed/FeedStories";
 import { FeedPost } from "@/components/feed/FeedPost";
@@ -16,7 +16,7 @@ import { FeedSkeleton } from "@/components/skeletons/FeedSkeleton";
 import { OfflineCacheIndicator } from "@/components/common/OfflineCacheIndicator";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { getPostsCacheTimestamp } from "@/lib/offlineStorage";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Index = () => {
   const { data: posts, isLoading, isFetching, isFromCache, refetch } = usePosts();
@@ -25,6 +25,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
   const cacheTimestamp = isFromCache ? getPostsCacheTimestamp() : null;
+  const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
 
   const handleRefresh = async () => {
     await Promise.all([refetch(), refetchStories()]);
@@ -32,18 +33,26 @@ const Index = () => {
 
   // Listen for home tab press to refresh feed and scroll to top
   useEffect(() => {
-    const handleHomeTabPressed = () => {
+    const handleHomeTabPressed = async () => {
       // Scroll to top smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Refresh data
-      handleRefresh();
+      // Refresh data and highlight the newest post
+      await handleRefresh();
+      // Get the first post after refresh and highlight it
+      setTimeout(() => {
+        if (posts && posts.length > 0) {
+          setHighlightedPostId(posts[0].id);
+          // Remove highlight after 3 seconds
+          setTimeout(() => setHighlightedPostId(null), 3000);
+        }
+      }, 500);
     };
     
     window.addEventListener('home-tab-pressed', handleHomeTabPressed);
     return () => {
       window.removeEventListener('home-tab-pressed', handleHomeTabPressed);
     };
-  }, []);
+  }, [posts]);
 
   // Show onboarding for first-time users
   if (!onboardingLoading && showOnboarding) {
@@ -55,7 +64,26 @@ const Index = () => {
       {isLoading ? (
         <FeedSkeleton />
       ) : posts && posts.length > 0 ? (
-        posts.map((post) => <FeedPost key={post.id} post={post} />)
+        posts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            initial={highlightedPostId === post.id ? { scale: 0.95, opacity: 0 } : false}
+            animate={{ 
+              scale: 1, 
+              opacity: 1,
+              boxShadow: highlightedPostId === post.id 
+                ? ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 20px 4px hsl(var(--primary) / 0.4)', '0 0 0 0 hsl(var(--primary) / 0)']
+                : '0 0 0 0 transparent'
+            }}
+            transition={{ 
+              duration: highlightedPostId === post.id ? 0.5 : 0.3,
+              boxShadow: highlightedPostId === post.id ? { duration: 2, repeat: 1, ease: "easeInOut" } : undefined
+            }}
+            className={highlightedPostId === post.id ? 'relative z-10' : ''}
+          >
+            <FeedPost post={post} />
+          </motion.div>
+        ))
       ) : (
         <div className="flex flex-col items-center justify-center py-20 px-4">
           <span className="material-symbols-outlined text-[64px] text-muted-foreground/50 mb-4">
