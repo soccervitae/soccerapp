@@ -374,6 +374,9 @@ export const CreatePostSheet = ({ open, onOpenChange }: CreatePostSheetProps) =>
       setSelectedMusic(null);
       setScheduledDate(null);
       onOpenChange(false);
+      
+      // Dispatch event to refresh home feed
+      window.dispatchEvent(new CustomEvent('home-tab-pressed'));
     } catch (err) {
       console.error("Error publishing post:", err);
       toast.error("Erro ao publicar post");

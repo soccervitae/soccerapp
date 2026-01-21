@@ -275,6 +275,9 @@ export const CreatePostInline = () => {
       // Reset all states
       resetForm();
       toast.success("Publicado com sucesso!");
+      
+      // Dispatch event to refresh home feed
+      window.dispatchEvent(new CustomEvent('home-tab-pressed'));
     } catch (err) {
       console.error("Error publishing post:", err);
       toast.error("Erro ao publicar post");
