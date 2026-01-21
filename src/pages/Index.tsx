@@ -30,9 +30,12 @@ const Index = () => {
     await Promise.all([refetch(), refetchStories()]);
   };
 
-  // Listen for home tab press to refresh feed
+  // Listen for home tab press to refresh feed and scroll to top
   useEffect(() => {
     const handleHomeTabPressed = () => {
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Refresh data
       handleRefresh();
     };
     
