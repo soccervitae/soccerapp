@@ -36,6 +36,8 @@ import { LocationPicker } from "@/components/feed/LocationPicker";
 import { MusicPicker } from "@/components/feed/MusicPicker";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
+import { supabase } from "@/integrations/supabase/client";
+import { ModerationInfoSheet } from "@/components/feed/ModerationInfoSheet";
 
 interface MediaItem {
   url: string;
@@ -79,6 +81,7 @@ export const CreatePostInline = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
   const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
+  const [showModerationSheet, setShowModerationSheet] = useState(false);
   
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -252,6 +255,9 @@ export const CreatePostInline = () => {
           ? "carousel" 
           : "image";
 
+      // Se tem mídia, criar como não publicado para moderação
+      const needsModeration = selectedMediaType === "video" || selectedMediaType === "photo";
+
       const result = await createPost.mutateAsync({
         content: caption || "",
         mediaUrl,
@@ -262,6 +268,7 @@ export const CreatePostInline = () => {
         musicTrackId: selectedMusic?.track.id,
         musicStartSeconds: selectedMusic?.startSeconds,
         musicEndSeconds: selectedMusic?.endSeconds,
+        isPublished: !needsModeration,
       });
 
       if (allTags.length > 0 && result?.id) {
@@ -272,9 +279,47 @@ export const CreatePostInline = () => {
         }
       }
 
-      // Reset all states
-      resetForm();
-      toast.success("Publicado com sucesso!");
+      // Se precisa moderação, chamar a edge function
+      if (needsModeration && result?.id) {
+        toast.loading("Analisando conteúdo...", { id: "moderation-progress" });
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('moderate-content', {
+            body: {
+              postId: result.id,
+              mediaUrls: uploadedUrls,
+              mediaType: selectedMediaType,
+            }
+          });
+
+          toast.dismiss("moderation-progress");
+
+          if (error) {
+            console.error("Moderation error:", error);
+            // Em caso de erro, mostrar sheet de moderação
+            resetForm();
+            setShowModerationSheet(true);
+          } else if (data?.status === 'approved') {
+            resetForm();
+            toast.success("Post publicado com sucesso!");
+          } else if (data?.status === 'flagged') {
+            // Post pendente, mostrar sheet de moderação
+            resetForm();
+            setShowModerationSheet(true);
+          } else {
+            toast.error(data?.reason || "Seu post foi rejeitado por violar as diretrizes da comunidade.");
+          }
+        } catch (moderationErr) {
+          console.error("Moderation call failed:", moderationErr);
+          // Em caso de erro na chamada, mostrar sheet de moderação
+          resetForm();
+          setShowModerationSheet(true);
+        }
+      } else {
+        // Reset all states
+        resetForm();
+        toast.success("Publicado com sucesso!");
+      }
       
       // Dispatch event to refresh home feed
       window.dispatchEvent(new CustomEvent('home-tab-pressed'));
@@ -832,6 +877,9 @@ export const CreatePostInline = () => {
 
       {/* Replay Sheet */}
       <CreateReplaySheet open={isReplayOpen} onOpenChange={setIsReplayOpen} />
+
+      {/* Moderation Info Sheet */}
+      <ModerationInfoSheet open={showModerationSheet} onOpenChange={setShowModerationSheet} />
     </>
   );
 };
