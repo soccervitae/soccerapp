@@ -366,24 +366,34 @@ export const useInfiniteUserPosts = (userId?: string) => {
 
       const postIds = posts.map(p => p.id);
 
-      // Fetch recent likes for all posts (3 per post)
+      // Fetch recent likes for all posts
       const recentLikesResult = await supabase
         .from("likes")
-        .select(`
-          post_id,
-          user_id,
-          created_at,
-          profile:profiles!likes_user_id_fkey (
-            id,
-            username,
-            full_name,
-            nickname,
-            avatar_url,
-            conta_verificada
-          )
-        `)
+        .select("post_id, user_id, created_at")
         .in("post_id", postIds)
         .order("created_at", { ascending: false });
+
+      // Get unique user IDs from likes
+      const likeUserIds = [...new Set((recentLikesResult.data || []).map(l => l.user_id))];
+      
+      // Fetch profiles for these users
+      let profilesMap: Record<string, { username: string; full_name: string | null; nickname: string | null; avatar_url: string | null; conta_verificada: boolean }> = {};
+      if (likeUserIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, username, full_name, nickname, avatar_url, conta_verificada")
+          .in("id", likeUserIds);
+        
+        for (const profile of profilesData || []) {
+          profilesMap[profile.id] = {
+            username: profile.username,
+            full_name: profile.full_name,
+            nickname: profile.nickname,
+            avatar_url: profile.avatar_url,
+            conta_verificada: profile.conta_verificada,
+          };
+        }
+      }
 
       // Group recent likes by post_id (max 3 per post)
       const recentLikesByPost: Record<string, RecentLikeUser[]> = {};
@@ -392,13 +402,14 @@ export const useInfiniteUserPosts = (userId?: string) => {
           recentLikesByPost[like.post_id] = [];
         }
         if (recentLikesByPost[like.post_id].length < 3) {
+          const profile = profilesMap[like.user_id];
           recentLikesByPost[like.post_id].push({
             user_id: like.user_id,
-            username: (like.profile as any)?.username || "",
-            full_name: (like.profile as any)?.full_name || null,
-            nickname: (like.profile as any)?.nickname || null,
-            avatar_url: (like.profile as any)?.avatar_url || null,
-            conta_verificada: (like.profile as any)?.conta_verificada || false,
+            username: profile?.username || "",
+            full_name: profile?.full_name || null,
+            nickname: profile?.nickname || null,
+            avatar_url: profile?.avatar_url || null,
+            conta_verificada: profile?.conta_verificada || false,
           });
         }
       }
