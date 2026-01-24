@@ -1,7 +1,6 @@
 import { forwardRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
 import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
@@ -65,7 +64,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const { data: highlights = [] } = useUserHighlights(user?.id);
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isPostOpen, setIsPostOpen] = useState(false);
   const [isReplayOpen, setIsReplayOpen] = useState(false);
   const [isSelectHighlightOpen, setIsSelectHighlightOpen] = useState(false);
   const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
@@ -155,7 +153,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const handleSelectOption = (option: "post" | "replay" | "highlight" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
-        setIsPostOpen(true);
+        navigate("/create-post");
         break;
       case "replay":
         setIsReplayOpen(true);
@@ -234,10 +232,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         onSelectOption={handleSelectOption}
       />
 
-      <CreatePostSheet 
-        open={isPostOpen} 
-        onOpenChange={setIsPostOpen} 
-      />
 
       <CreateReplaySheet 
         open={isReplayOpen} 
