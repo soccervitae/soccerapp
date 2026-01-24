@@ -2,6 +2,9 @@ import { useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const SUPABASE_URL = "https://wdgpmpgdlauiawbtbxmn.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkZ3BtcGdkbGF1aWF3YnRieG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MTQ2NDAsImV4cCI6MjA3MTk5MDY0MH0.N4GcBwufglOUGhJ9pARhgxsA3_NOY9WbAtsKRmtBA08";
+
 export interface MusicTrack {
   id: string;
   title: string;
@@ -11,6 +14,7 @@ export interface MusicTrack {
   audio_url: string;
   cover_url: string | null;
   play_count: number;
+  source?: "local" | "deezer";
 }
 
 export interface SelectedMusicWithTrim {
@@ -19,73 +23,100 @@ export interface SelectedMusicWithTrim {
   endSeconds: number;
 }
 
-export const MUSIC_CATEGORIES = [
-  { id: "all", label: "Todas", icon: "music_note" },
-  { id: "energia", label: "Energia", icon: "bolt" },
-  { id: "motivacao", label: "Motivação", icon: "trending_up" },
-  { id: "treino", label: "Treino", icon: "fitness_center" },
-  { id: "celebracao", label: "Celebração", icon: "celebration" },
-  { id: "relaxante", label: "Relaxante", icon: "spa" },
+// Deezer genre categories
+export const DEEZER_GENRES = [
+  { id: "all", label: "Top Charts", icon: "trending_up" },
+  { id: "pop", label: "Pop", icon: "star" },
+  { id: "rock", label: "Rock", icon: "electric_bolt" },
+  { id: "hiphop", label: "Hip Hop", icon: "mic" },
+  { id: "electronic", label: "Eletrônica", icon: "graphic_eq" },
+  { id: "latin", label: "Latin", icon: "music_note" },
+  { id: "rnb", label: "R&B", icon: "nightlife" },
+  { id: "jazz", label: "Jazz", icon: "piano" },
+  { id: "classical", label: "Clássica", icon: "library_music" },
+  { id: "reggae", label: "Reggae", icon: "waves" },
+  { id: "country", label: "Country", icon: "forest" },
 ] as const;
 
+// Fetch trending music from Deezer API
 export const useTrendingMusic = (limit: number = 6) => {
   return useQuery({
-    queryKey: ["trending-music", limit],
+    queryKey: ["deezer-trending", limit],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("music_tracks")
-        .select("*")
-        .eq("is_active", true)
-        .order("play_count", { ascending: false })
-        .limit(limit);
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/fetch-deezer-music?type=chart&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
 
-      if (error) throw error;
-      return data as MusicTrack[];
+      if (!response.ok) {
+        throw new Error("Failed to fetch trending music");
+      }
+
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
     },
     staleTime: 5 * 60 * 1000,
   });
 };
 
-export const useMusicTracks = (category?: string) => {
+// Fetch music by genre from Deezer API
+export const useDeezerByGenre = (genre: string, limit: number = 30) => {
   return useQuery({
-    queryKey: ["music-tracks", category],
+    queryKey: ["deezer-genre", genre, limit],
     queryFn: async () => {
-      let query = supabase
-        .from("music_tracks")
-        .select("*")
-        .eq("is_active", true)
-        .order("play_count", { ascending: false });
+      const params = genre === "all" 
+        ? `type=chart&limit=${limit}`
+        : `genre=${genre}&limit=${limit}`;
+      
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/fetch-deezer-music?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
 
-      if (category && category !== "all") {
-        query = query.eq("category", category);
+      if (!response.ok) {
+        throw new Error("Failed to fetch music by genre");
       }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data as MusicTrack[];
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-export const useSearchMusic = (searchQuery: string) => {
+// Search music from Deezer API
+export const useDeezerSearch = (searchQuery: string) => {
   return useQuery({
-    queryKey: ["music-search", searchQuery],
+    queryKey: ["deezer-search", searchQuery],
     queryFn: async () => {
       if (!searchQuery.trim()) return [];
 
-      const { data, error } = await supabase
-        .from("music_tracks")
-        .select("*")
-        .eq("is_active", true)
-        .or(`title.ilike.%${searchQuery}%,artist.ilike.%${searchQuery}%`)
-        .order("play_count", { ascending: false })
-        .limit(20);
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/fetch-deezer-music?search=${encodeURIComponent(searchQuery)}&limit=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
 
-      if (error) throw error;
-      return data as MusicTrack[];
+      if (!response.ok) {
+        throw new Error("Failed to search music");
+      }
+
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
     },
     enabled: searchQuery.trim().length > 0,
+    staleTime: 2 * 60 * 1000,
   });
 };
 

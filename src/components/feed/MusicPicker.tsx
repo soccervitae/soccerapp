@@ -4,11 +4,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  useMusicTracks,
-  useSearchMusic,
+  useDeezerByGenre,
+  useDeezerSearch,
   useMusicPlayer,
   MusicTrack,
-  MUSIC_CATEGORIES,
+  DEEZER_GENRES,
   formatDuration,
   SelectedMusicWithTrim,
 } from "@/hooks/useMusic";
@@ -32,13 +32,13 @@ export function MusicPicker({
   maxTrimDuration = 15,
 }: MusicPickerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeGenre, setActiveGenre] = useState("all");
   const [showTrimmer, setShowTrimmer] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<MusicTrack | null>(null);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  const { data: tracks, isLoading } = useMusicTracks(activeCategory);
-  const { data: searchResults, isLoading: isSearching } = useSearchMusic(debouncedSearch);
+  const { data: tracks, isLoading } = useDeezerByGenre(activeGenre, 30);
+  const { data: searchResults, isLoading: isSearching } = useDeezerSearch(debouncedSearch);
   const { currentTrack, isPlaying, progress, toggle, stop } = useMusicPlayer();
 
   // Parar música ao desmontar
@@ -142,26 +142,26 @@ export function MusicPicker({
         </div>
       </div>
 
-      {/* Category Tabs */}
+      {/* Genre Tabs */}
       {!debouncedSearch.trim() && (
         <div className="border-b border-border">
           <ScrollArea className="w-full">
             <div className="flex gap-2 p-4">
-              {MUSIC_CATEGORIES.map((category) => (
+              {DEEZER_GENRES.map((genre) => (
                 <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  key={genre.id}
+                  onClick={() => setActiveGenre(genre.id)}
                   className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                    activeCategory === category.id
+                    activeGenre === genre.id
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   )}
                 >
                   <span className="material-symbols-outlined text-[18px]">
-                    {category.icon}
+                    {genre.icon}
                   </span>
-                  {category.label}
+                  {genre.label}
                 </button>
               ))}
             </div>
