@@ -109,13 +109,13 @@ const Profile = () => {
   const profileFetching = username ? usernameFetching : idFetching;
   const isRefetching = (profileFetching || statsFetching) && !isLoading;
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     const refetchProfile = username ? refetchProfileByUsername : refetchProfileById;
     await Promise.all([
       refetchProfile(),
       refetchStats(),
     ]);
-  };
+  }, [username, refetchProfileByUsername, refetchProfileById, refetchStats]);
 
   // Listen for profile tab press to refresh
   useEffect(() => {
@@ -127,7 +127,24 @@ const Profile = () => {
     return () => {
       window.removeEventListener('profile-tab-pressed', handleProfileTabPressed);
     };
-  }, []);
+  }, [handleRefresh]);
+
+  // Infinite scroll observer - must be before any conditional returns
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -215,24 +232,6 @@ const Profile = () => {
     },
     music_track: null,
   });
-
-  // Infinite scroll observer
-  useEffect(() => {
-    if (!loadMoreRef.current) return;
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   // Render profile feed as vertical feed (like Home page) with infinite scroll
   const renderProfileFeed = () => {
     if (infinitePostsLoading) {
