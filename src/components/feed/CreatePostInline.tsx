@@ -38,7 +38,7 @@ import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { ModerationInfoSheet } from "@/components/feed/ModerationInfoSheet";
-import { TrendingMusicCards } from "@/components/feed/TrendingMusicCards";
+
 
 interface MediaItem {
   url: string;
@@ -710,16 +710,6 @@ export const CreatePostInline = () => {
           </button>
         )}
 
-        {/* Trending Music Cards - Show when media is selected but no music yet */}
-        {isExpanded && selectedMediaList.length > 0 && !selectedMusic && !isPublishing && (
-          <TrendingMusicCards
-            selectedMusic={selectedMusic}
-            onSelect={setSelectedMusic}
-            onOpenFullPicker={() => setViewMode("music-picker")}
-            maxTrimDuration={30}
-            disabled={isPublishing}
-          />
-        )}
 
         {/* Selected Music Display */}
         {isExpanded && selectedMusic && (
