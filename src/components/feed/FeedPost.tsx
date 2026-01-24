@@ -544,7 +544,26 @@ export const FeedPost = ({
           <span className="truncate">{post.location_name}</span>
         </a>}
 
-
+      {/* Music Player - suporta músicas do Deezer (novos campos) ou músicas locais (music_track) */}
+      {(post.music_audio_url || post.music_track) && (() => {
+        const musicData = post.music_audio_url ? {
+          id: `external-${post.id}`,
+          title: post.music_title || "Música",
+          artist: post.music_artist || "Artista",
+          audio_url: post.music_audio_url,
+          duration_seconds: post.music_duration_seconds || 30,
+          cover_url: post.music_cover_url || null,
+        } : post.music_track!;
+        
+        return (
+          <PostMusicPlayer
+            track={musicData}
+            startSeconds={post.music_start_seconds ?? undefined}
+            endSeconds={post.music_end_seconds ?? undefined}
+            className="-mx-4"
+          />
+        );
+      })()}
 
       {/* Liked by section */}
       {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
