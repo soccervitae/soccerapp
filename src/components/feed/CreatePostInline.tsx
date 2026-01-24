@@ -38,6 +38,7 @@ import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { supabase } from "@/integrations/supabase/client";
 import { ModerationInfoSheet } from "@/components/feed/ModerationInfoSheet";
+import { TrendingMusicCards } from "@/components/feed/TrendingMusicCards";
 
 interface MediaItem {
   url: string;
@@ -701,6 +702,41 @@ export const CreatePostInline = () => {
             <span className="material-symbols-outlined text-[20px] text-foreground">add_photo_alternate</span>
             <span className="text-sm font-medium text-foreground">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
           </button>
+        )}
+
+        {/* Trending Music Cards - Show when media is selected but no music yet */}
+        {isExpanded && selectedMediaList.length > 0 && !selectedMusic && !isPublishing && (
+          <TrendingMusicCards
+            selectedMusic={selectedMusic}
+            onSelect={setSelectedMusic}
+            onOpenFullPicker={() => setViewMode("music-picker")}
+            maxTrimDuration={30}
+            disabled={isPublishing}
+          />
+        )}
+
+        {/* Selected Music Display */}
+        {isExpanded && selectedMusic && (
+          <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-xl border border-primary/30 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-primary-foreground">music_note</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{selectedMusic.track.title}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                setSelectedMusic(null);
+                toast.success("Música removida");
+              }}
+              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px] text-muted-foreground">close</span>
+            </button>
+          </div>
         )}
 
         {/* Options section (when expanded) */}

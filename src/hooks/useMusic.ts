@@ -28,6 +28,24 @@ export const MUSIC_CATEGORIES = [
   { id: "relaxante", label: "Relaxante", icon: "spa" },
 ] as const;
 
+export const useTrendingMusic = (limit: number = 6) => {
+  return useQuery({
+    queryKey: ["trending-music", limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("music_tracks")
+        .select("*")
+        .eq("is_active", true)
+        .order("play_count", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as MusicTrack[];
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+};
+
 export const useMusicTracks = (category?: string) => {
   return useQuery({
     queryKey: ["music-tracks", category],
