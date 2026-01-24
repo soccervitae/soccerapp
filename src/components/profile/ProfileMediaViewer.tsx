@@ -206,6 +206,13 @@ export const ProfileMediaViewer = ({
     music_start_seconds: currentPost?.music_start_seconds,
     music_end_seconds: currentPost?.music_end_seconds,
     music_track: null,
+    // Campos para músicas externas
+    music_title: null,
+    music_artist: null,
+    music_audio_url: null,
+    music_cover_url: null,
+    music_duration_seconds: null,
+    music_source: null,
     profile: {
       id: profile.id,
       username: profile.username,

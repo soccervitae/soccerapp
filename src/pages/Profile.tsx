@@ -238,6 +238,13 @@ const Profile = () => {
       position_name: profile?.position_name || null,
     },
     music_track: null,
+    // Campos para músicas externas
+    music_title: null,
+    music_artist: null,
+    music_audio_url: null,
+    music_cover_url: null,
+    music_duration_seconds: null,
+    music_source: null,
   });
   // Render profile feed as vertical feed (like Home page) with infinite scroll
   const renderProfileFeed = () => {

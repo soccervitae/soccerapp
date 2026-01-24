@@ -886,8 +886,14 @@ export type Database = {
           moderated_by: string | null
           moderation_reason: string | null
           moderation_status: string | null
+          music_artist: string | null
+          music_audio_url: string | null
+          music_cover_url: string | null
+          music_duration_seconds: number | null
           music_end_seconds: number | null
+          music_source: string | null
           music_start_seconds: number | null
+          music_title: string | null
           music_track_id: string | null
           published_at: string | null
           scheduled_at: string | null
@@ -911,8 +917,14 @@ export type Database = {
           moderated_by?: string | null
           moderation_reason?: string | null
           moderation_status?: string | null
+          music_artist?: string | null
+          music_audio_url?: string | null
+          music_cover_url?: string | null
+          music_duration_seconds?: number | null
           music_end_seconds?: number | null
+          music_source?: string | null
           music_start_seconds?: number | null
+          music_title?: string | null
           music_track_id?: string | null
           published_at?: string | null
           scheduled_at?: string | null
@@ -936,8 +948,14 @@ export type Database = {
           moderated_by?: string | null
           moderation_reason?: string | null
           moderation_status?: string | null
+          music_artist?: string | null
+          music_audio_url?: string | null
+          music_cover_url?: string | null
+          music_duration_seconds?: number | null
           music_end_seconds?: number | null
+          music_source?: string | null
           music_start_seconds?: number | null
+          music_title?: string | null
           music_track_id?: string | null
           published_at?: string | null
           scheduled_at?: string | null

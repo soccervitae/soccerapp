@@ -30,6 +30,14 @@ export interface Post {
   music_track_id: string | null;
   music_start_seconds: number | null;
   music_end_seconds: number | null;
+  // Campos para músicas externas (Deezer, etc.)
+  music_title: string | null;
+  music_artist: string | null;
+  music_audio_url: string | null;
+  music_cover_url: string | null;
+  music_duration_seconds: number | null;
+  music_source: string | null;
+  // Músicas locais (retrocompatibilidade)
   music_track: {
     id: string;
     title: string;
@@ -421,7 +429,13 @@ export const useCreatePost = () => {
       locationName,
       locationLat,
       locationLng,
-      musicTrackId,
+      // Campos para músicas externas (Deezer, etc.)
+      musicTitle,
+      musicArtist,
+      musicAudioUrl,
+      musicCoverUrl,
+      musicDurationSeconds,
+      musicSource,
       musicStartSeconds,
       musicEndSeconds,
       scheduledAt,
@@ -433,7 +447,13 @@ export const useCreatePost = () => {
       locationName?: string;
       locationLat?: number;
       locationLng?: number;
-      musicTrackId?: string;
+      // Campos para músicas externas
+      musicTitle?: string;
+      musicArtist?: string;
+      musicAudioUrl?: string;
+      musicCoverUrl?: string;
+      musicDurationSeconds?: number;
+      musicSource?: string;
       musicStartSeconds?: number;
       musicEndSeconds?: number;
       scheduledAt?: string;
@@ -451,7 +471,13 @@ export const useCreatePost = () => {
           location_name: locationName || null,
           location_lat: locationLat || null,
           location_lng: locationLng || null,
-          music_track_id: musicTrackId || null,
+          // Campos para músicas externas
+          music_title: musicTitle || null,
+          music_artist: musicArtist || null,
+          music_audio_url: musicAudioUrl || null,
+          music_cover_url: musicCoverUrl || null,
+          music_duration_seconds: musicDurationSeconds || null,
+          music_source: musicSource || null,
           music_start_seconds: musicStartSeconds ?? null,
           music_end_seconds: musicEndSeconds ?? null,
           scheduled_at: scheduledAt || null,

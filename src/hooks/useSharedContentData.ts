@@ -188,6 +188,13 @@ export function sharedPostToPost(shared: SharedPost): Post {
     music_start_seconds: shared.music_start_seconds,
     music_end_seconds: shared.music_end_seconds,
     music_track: null,
+    // Campos para músicas externas
+    music_title: null,
+    music_artist: null,
+    music_audio_url: null,
+    music_cover_url: null,
+    music_duration_seconds: null,
+    music_source: null,
     profile: {
       id: shared.profile.id,
       username: shared.profile.username,
@@ -229,6 +236,13 @@ export function storyToPost(story: SharedStory): Post {
     music_start_seconds: null,
     music_end_seconds: null,
     music_track: null,
+    // Campos para músicas externas
+    music_title: null,
+    music_artist: null,
+    music_audio_url: null,
+    music_cover_url: null,
+    music_duration_seconds: null,
+    music_source: null,
     profile: {
       id: story.profile.id,
       username: story.profile.username,
@@ -271,6 +285,13 @@ export function highlightToPost(highlight: SharedHighlight): Post {
     music_start_seconds: null,
     music_end_seconds: null,
     music_track: null,
+    // Campos para músicas externas
+    music_title: null,
+    music_artist: null,
+    music_audio_url: null,
+    music_cover_url: null,
+    music_duration_seconds: null,
+    music_source: null,
     profile: {
       id: highlight.profile.id,
       username: highlight.profile.username,
