@@ -20,6 +20,7 @@ export interface SelectedMusicWithTrim {
   endSeconds: number;
 }
 
+// Local categories (for local music_tracks table)
 export const MUSIC_CATEGORIES = [
   { id: "all", label: "Todas", icon: "music_note" },
   { id: "energia", label: "Energia", icon: "bolt" },
@@ -29,22 +30,34 @@ export const MUSIC_CATEGORIES = [
   { id: "relaxante", label: "Relaxante", icon: "spa" },
 ] as const;
 
+// Jamendo genre categories
+export const JAMENDO_GENRES = [
+  { id: "all", label: "Trending", icon: "trending_up" },
+  { id: "rock", label: "Rock", icon: "electric_bolt" },
+  { id: "pop", label: "Pop", icon: "star" },
+  { id: "electronic", label: "Eletrônica", icon: "graphic_eq" },
+  { id: "hiphop", label: "Hip Hop", icon: "mic" },
+  { id: "jazz", label: "Jazz", icon: "piano" },
+  { id: "ambient", label: "Ambient", icon: "spa" },
+  { id: "metal", label: "Metal", icon: "whatshot" },
+  { id: "folk", label: "Folk", icon: "forest" },
+  { id: "latin", label: "Latin", icon: "music_note" },
+  { id: "funk", label: "Funk/Soul", icon: "nightlife" },
+] as const;
+
+const SUPABASE_URL = "https://wdgpmpgdlauiawbtbxmn.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkZ3BtcGdkbGF1aWF3YnRieG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MTQ2NDAsImV4cCI6MjA3MTk5MDY0MH0.N4GcBwufglOUGhJ9pARhgxsA3_NOY9WbAtsKRmtBA08";
+
 // Fetch trending music from Jamendo API
 export const useTrendingMusic = (limit: number = 6) => {
   return useQuery({
     queryKey: ["trending-music-jamendo", limit],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("fetch-jamendo-music", {
-        body: null,
-        method: "GET",
-      });
-
-      // Build URL with query params
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-jamendo-music?type=trending&limit=${limit}`,
+        `${SUPABASE_URL}/functions/v1/fetch-jamendo-music?type=trending&limit=${limit}`,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
         }
       );
@@ -60,6 +73,35 @@ export const useTrendingMusic = (limit: number = 6) => {
   });
 };
 
+// Fetch music by genre from Jamendo API
+export const useJamendoByGenre = (genre: string, limit: number = 30) => {
+  return useQuery({
+    queryKey: ["jamendo-genre", genre, limit],
+    queryFn: async () => {
+      const params = genre === "all" 
+        ? `type=trending&limit=${limit}`
+        : `genre=${genre}&limit=${limit}`;
+      
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/fetch-jamendo-music?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch music by genre");
+      }
+
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 // Search music from Jamendo API
 export const useJamendoSearch = (searchQuery: string) => {
   return useQuery({
@@ -68,10 +110,10 @@ export const useJamendoSearch = (searchQuery: string) => {
       if (!searchQuery.trim()) return [];
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-jamendo-music?search=${encodeURIComponent(searchQuery)}&limit=20`,
+        `${SUPABASE_URL}/functions/v1/fetch-jamendo-music?search=${encodeURIComponent(searchQuery)}&limit=20`,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
         }
       );
