@@ -9,6 +9,22 @@ const corsHeaders = {
 const JAMENDO_API_BASE = "https://api.jamendo.com/v3.0";
 const JAMENDO_CLIENT_ID = "b6747d04"; // Public client ID for basic API access
 
+// Jamendo genre/tag mapping
+const GENRE_TAGS: Record<string, string[]> = {
+  rock: ["rock", "alternativerock", "hardrock", "punkrock", "indierock"],
+  pop: ["pop", "electropop", "indiepop", "synthpop"],
+  electronic: ["electronic", "electronica", "house", "techno", "edm", "trance", "dubstep"],
+  hiphop: ["hiphop", "rap", "trap", "beats"],
+  jazz: ["jazz", "smoothjazz", "swing"],
+  classical: ["classical", "orchestra", "piano", "instrumental"],
+  ambient: ["ambient", "chillout", "lounge", "relaxing", "meditation"],
+  metal: ["metal", "heavymetal", "deathmetal", "thrash"],
+  folk: ["folk", "acoustic", "country", "blues"],
+  latin: ["latin", "salsa", "reggaeton", "bossanova"],
+  world: ["world", "african", "asian", "celtic", "indian"],
+  funk: ["funk", "soul", "disco", "groove"],
+};
+
 interface JamendoTrack {
   id: string;
   name: string;
@@ -40,12 +56,17 @@ serve(async (req) => {
     const limit = url.searchParams.get("limit") || "20";
     const search = url.searchParams.get("search") || "";
     const offset = url.searchParams.get("offset") || "0";
+    const genre = url.searchParams.get("genre") || "";
 
     let apiUrl: string;
 
     if (search) {
       // Search tracks
       apiUrl = `${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=${limit}&offset=${offset}&namesearch=${encodeURIComponent(search)}&include=musicinfo&groupby=artist_id`;
+    } else if (genre && GENRE_TAGS[genre]) {
+      // Filter by genre tags
+      const tags = GENRE_TAGS[genre].join("+");
+      apiUrl = `${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=${limit}&offset=${offset}&tags=${tags}&order=popularity_total&include=musicinfo&groupby=artist_id`;
     } else if (type === "trending") {
       // Get popular/trending tracks
       apiUrl = `${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=${limit}&offset=${offset}&order=popularity_total&include=musicinfo&groupby=artist_id`;
@@ -74,7 +95,7 @@ serve(async (req) => {
       id: `jamendo_${track.id}`,
       title: track.name,
       artist: track.artist_name,
-      category: "jamendo",
+      category: genre || "jamendo",
       duration_seconds: track.duration,
       audio_url: track.audio || track.audiodownload,
       cover_url: track.album_image || track.image,
@@ -82,10 +103,17 @@ serve(async (req) => {
       source: "jamendo",
     }));
 
+    // Return available genres for UI
+    const availableGenres = Object.keys(GENRE_TAGS).map((key) => ({
+      id: key,
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+    }));
+
     return new Response(
       JSON.stringify({
         tracks,
         total: data.headers.results_count,
+        genres: availableGenres,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

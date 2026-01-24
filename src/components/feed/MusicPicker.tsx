@@ -4,14 +4,13 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  useMusicTracks,
   useJamendoSearch,
+  useJamendoByGenre,
   useMusicPlayer,
   MusicTrack,
-  MUSIC_CATEGORIES,
+  JAMENDO_GENRES,
   formatDuration,
   SelectedMusicWithTrim,
-  useTrendingMusic,
 } from "@/hooks/useMusic";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/lib/utils";
@@ -33,14 +32,13 @@ export function MusicPicker({
   maxTrimDuration = 15,
 }: MusicPickerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeGenre, setActiveGenre] = useState("all");
   const [showTrimmer, setShowTrimmer] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<MusicTrack | null>(null);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  // Use Jamendo for trending and search
-  const { data: jamendoTracks, isLoading: isLoadingJamendo } = useTrendingMusic(30);
-  const { data: localTracks, isLoading: isLoadingLocal } = useMusicTracks(activeCategory);
+  // Use Jamendo for genre filtering and search
+  const { data: genreTracks, isLoading: isLoadingGenre } = useJamendoByGenre(activeGenre, 30);
   const { data: searchResults, isLoading: isSearching } = useJamendoSearch(debouncedSearch);
   const { currentTrack, isPlaying, progress, toggle, stop } = useMusicPlayer();
 
@@ -51,13 +49,8 @@ export function MusicPicker({
     };
   }, [stop]);
 
-  // Combine Jamendo tracks with local tracks, prioritize Jamendo for "all" category
-  const isLoading = isLoadingJamendo || isLoadingLocal;
-  const tracks = activeCategory === "all" 
-    ? [...(jamendoTracks || []), ...(localTracks || [])]
-    : localTracks;
-
-  const displayTracks = debouncedSearch.trim() ? searchResults : tracks;
+  const isLoading = isLoadingGenre;
+  const displayTracks = debouncedSearch.trim() ? searchResults : genreTracks;
 
   const handleTrackSelect = (track: MusicTrack) => {
     if (selectedMusic?.track.id === track.id) {
@@ -151,26 +144,26 @@ export function MusicPicker({
         </div>
       </div>
 
-      {/* Category Tabs */}
+      {/* Genre Tabs */}
       {!debouncedSearch.trim() && (
         <div className="border-b border-border">
           <ScrollArea className="w-full">
             <div className="flex gap-2 p-4">
-              {MUSIC_CATEGORIES.map((category) => (
+              {JAMENDO_GENRES.map((genre) => (
                 <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  key={genre.id}
+                  onClick={() => setActiveGenre(genre.id)}
                   className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                    activeCategory === category.id
+                    activeGenre === genre.id
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   )}
                 >
                   <span className="material-symbols-outlined text-[18px]">
-                    {category.icon}
+                    {genre.icon}
                   </span>
-                  {category.label}
+                  {genre.label}
                 </button>
               ))}
             </div>
