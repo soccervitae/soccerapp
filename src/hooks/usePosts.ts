@@ -548,11 +548,8 @@ export const useLikePost = () => {
         });
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["infinite-user-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
-    },
+    // No invalidation needed - optimistic updates handle the UI
+    // Only invalidate on error via rollback
   });
 };
 
@@ -626,12 +623,8 @@ export const useSavePost = () => {
         });
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["infinite-user-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
-    },
+    // No invalidation needed - optimistic updates handle the UI
+    // saved-posts page will refetch on navigation
   });
 };
 
