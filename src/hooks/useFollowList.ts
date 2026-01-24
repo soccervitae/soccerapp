@@ -36,6 +36,10 @@ export const useFollowers = (userId: string) => {
   });
 };
 
+interface FollowUserWithOfficial extends FollowUser {
+  is_official_account?: boolean | null;
+}
+
 export const useFollowing = (userId: string) => {
   return useQuery({
     queryKey: ["following", userId],
@@ -48,16 +52,22 @@ export const useFollowing = (userId: string) => {
             username,
             full_name,
             avatar_url,
-            conta_verificada
+            conta_verificada,
+            is_official_account
           )
         `)
         .eq("follower_id", userId);
 
       if (error) throw error;
       
-      return (data || [])
-        .map((item) => item.following)
-        .filter((f): f is FollowUser => f !== null);
+      const users = (data || [])
+        .map((item) => item.following as FollowUserWithOfficial | null)
+        .filter((f): f is FollowUserWithOfficial => f !== null)
+        // Filter out official accounts from messaging/search
+        .filter((f) => !f.is_official_account);
+      
+      // Return without is_official_account field
+      return users.map(({ is_official_account, ...rest }) => rest);
     },
     enabled: !!userId,
   });
