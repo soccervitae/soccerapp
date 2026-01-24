@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { usePostTags } from "@/hooks/usePostTags";
-import { PostMusicPlayer } from "./PostMusicPlayer";
+
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
 import { FullscreenImageViewer } from "./FullscreenImageViewer";
 import { useStories } from "@/hooks/useStories";
@@ -68,6 +68,7 @@ export const FeedPost = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isMusicMuted, setIsMusicMuted] = useState(true);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -77,6 +78,8 @@ export const FeedPost = ({
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaContainerRef = useRef<HTMLDivElement>(null);
   const {
     data: postTags = []
   } = usePostTags(post.id);
@@ -106,6 +109,12 @@ export const FeedPost = ({
     };
   }, [carouselApi]);
 
+  // Get music data for this post
+  const hasMusicTrack = !!(post.music_audio_url || post.music_track);
+  const musicAudioUrl = post.music_audio_url || post.music_track?.audio_url;
+  const musicStartSeconds = post.music_start_seconds ?? 0;
+  const musicEndSeconds = post.music_end_seconds ?? (post.music_duration_seconds || post.music_track?.duration_seconds || 30);
+
   // Video autoplay on viewport intersection
   useEffect(() => {
     if (post.media_type !== "video" || !videoContainerRef.current) return;
@@ -130,6 +139,55 @@ export const FeedPost = ({
     observer.observe(videoContainerRef.current);
     return () => observer.disconnect();
   }, [post.media_type]);
+
+  // Music autoplay on viewport intersection (for image posts with music)
+  useEffect(() => {
+    if (!hasMusicTrack || !musicAudioUrl || post.media_type === "video") return;
+    if (!mediaContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            // Start playing music when visible
+            if (!musicAudioRef.current) {
+              musicAudioRef.current = new Audio(musicAudioUrl);
+              musicAudioRef.current.loop = true;
+              musicAudioRef.current.currentTime = musicStartSeconds;
+            }
+            if (!isMusicMuted) {
+              musicAudioRef.current.play().catch(() => {});
+            }
+          } else {
+            // Pause music when not visible
+            if (musicAudioRef.current) {
+              musicAudioRef.current.pause();
+            }
+          }
+        });
+      },
+      { threshold: [0, 0.6, 1] }
+    );
+
+    observer.observe(mediaContainerRef.current);
+    return () => {
+      observer.disconnect();
+      if (musicAudioRef.current) {
+        musicAudioRef.current.pause();
+        musicAudioRef.current = null;
+      }
+    };
+  }, [hasMusicTrack, musicAudioUrl, post.media_type, musicStartSeconds]);
+
+  // Handle music mute toggle
+  useEffect(() => {
+    if (!musicAudioRef.current) return;
+    if (isMusicMuted) {
+      musicAudioRef.current.pause();
+    } else {
+      musicAudioRef.current.play().catch(() => {});
+    }
+  }, [isMusicMuted]);
 
   // Helper to parse media URLs
   const getMediaUrls = (): string[] => {
@@ -399,6 +457,7 @@ export const FeedPost = ({
 
       {/* Media */}
       {post.media_url && <div
+        ref={post.media_type !== "video" ? mediaContainerRef : undefined}
         data-no-pull="true"
         className={`relative -mx-4 ${
         post.media_type === "video" 
@@ -536,6 +595,21 @@ export const FeedPost = ({
           {postTags.length > 0 && post.media_type !== "video" && <button onClick={() => setShowTags(!showTags)} className={`absolute bottom-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${showTags ? "bg-foreground text-background" : "bg-background/80 backdrop-blur-sm text-foreground"}`}>
               <span className="material-symbols-outlined text-[18px]">person</span>
             </button>}
+
+          {/* Music volume button for image posts */}
+          {hasMusicTrack && post.media_type !== "video" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMusicMuted(!isMusicMuted);
+              }}
+              className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-95"
+            >
+              <span className="material-symbols-outlined text-white text-lg">
+                {isMusicMuted ? "volume_off" : "volume_up"}
+              </span>
+            </button>
+          )}
         </div>}
 
       {/* Location */}
@@ -544,26 +618,6 @@ export const FeedPost = ({
           <span className="truncate">{post.location_name}</span>
         </a>}
 
-      {/* Music Player - suporta músicas do Deezer (novos campos) ou músicas locais (music_track) */}
-      {(post.music_audio_url || post.music_track) && (() => {
-        const musicData = post.music_audio_url ? {
-          id: `external-${post.id}`,
-          title: post.music_title || "Música",
-          artist: post.music_artist || "Artista",
-          audio_url: post.music_audio_url,
-          duration_seconds: post.music_duration_seconds || 30,
-          cover_url: post.music_cover_url || null,
-        } : post.music_track!;
-        
-        return (
-          <PostMusicPlayer
-            track={musicData}
-            startSeconds={post.music_start_seconds ?? undefined}
-            endSeconds={post.music_end_seconds ?? undefined}
-            className="-mx-4"
-          />
-        );
-      })()}
 
       {/* Liked by section */}
       {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
