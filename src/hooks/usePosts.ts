@@ -492,8 +492,66 @@ export const useLikePost = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onMutate: async ({ postId, isLiked }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["infinite-user-posts"] });
+
+      // Snapshot previous values
+      const previousPosts = queryClient.getQueryData(["posts"]);
+      const previousInfinitePosts = queryClient.getQueriesData({ queryKey: ["infinite-user-posts"] });
+
+      // Optimistically update posts cache
+      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: Post[] | undefined) => {
+        if (!old) return old;
+        return old.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                liked_by_user: !isLiked,
+                likes_count: isLiked ? Math.max(0, (post.likes_count || 0) - 1) : (post.likes_count || 0) + 1
+              }
+            : post
+        );
+      });
+
+      // Optimistically update infinite user posts cache
+      queryClient.setQueriesData({ queryKey: ["infinite-user-posts"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts.map((post: any) =>
+              post.id === postId
+                ? {
+                    ...post,
+                    liked_by_user: !isLiked,
+                    likes_count: isLiked ? Math.max(0, (post.likes_count || 0) - 1) : (post.likes_count || 0) + 1
+                  }
+                : post
+            ),
+          })),
+        };
+      });
+
+      return { previousPosts, previousInfinitePosts };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousPosts) {
+        queryClient.setQueryData(["posts"], context.previousPosts);
+      }
+      if (context?.previousInfinitePosts) {
+        context.previousInfinitePosts.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-user-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
     },
   });
 };
@@ -520,9 +578,59 @@ export const useSavePost = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onMutate: async ({ postId, isSaved }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["infinite-user-posts"] });
+
+      // Snapshot previous values
+      const previousPosts = queryClient.getQueryData(["posts"]);
+      const previousInfinitePosts = queryClient.getQueriesData({ queryKey: ["infinite-user-posts"] });
+
+      // Optimistically update posts cache
+      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: Post[] | undefined) => {
+        if (!old) return old;
+        return old.map(post => 
+          post.id === postId 
+            ? { ...post, saved_by_user: !isSaved }
+            : post
+        );
+      });
+
+      // Optimistically update infinite user posts cache
+      queryClient.setQueriesData({ queryKey: ["infinite-user-posts"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts.map((post: any) =>
+              post.id === postId
+                ? { ...post, saved_by_user: !isSaved }
+                : post
+            ),
+          })),
+        };
+      });
+
+      return { previousPosts, previousInfinitePosts };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousPosts) {
+        queryClient.setQueryData(["posts"], context.previousPosts);
+      }
+      if (context?.previousInfinitePosts) {
+        context.previousInfinitePosts.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-user-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
     },
   });
 };
