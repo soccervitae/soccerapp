@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLikePost, useSavePost, useDeletePost, type Post } from "@/hooks/usePosts";
+import { useLikePost, useSavePost, useDeletePost, useUpdatePost, useReportPost, type Post } from "@/hooks/usePosts";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,9 +15,22 @@ import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoControls } from "@/components/feed/VideoControls";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
-import { Send, Bookmark, MessageCircle, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Send, Bookmark, MessageCircle, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
+const REPORT_REASONS = [
+  { value: "spam", label: "Spam ou conteúdo enganoso" },
+  { value: "inappropriate", label: "Conteúdo impróprio" },
+  { value: "harassment", label: "Assédio ou bullying" },
+  { value: "violence", label: "Violência ou ameaças" },
+  { value: "other", label: "Outro motivo" },
+];
 interface ProfilePost {
   id: string;
   media_url: string | null;
@@ -91,6 +104,13 @@ export const ProfileMediaViewer = ({
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  
+  // Edit/Report dialogs
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
 
   const currentPost = posts[currentPostIndex];
   const isOwnProfile = user?.id === profile.id;
@@ -103,6 +123,7 @@ export const ProfileMediaViewer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastTapRef = useRef<number>(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
   const initialPinchDistance = useRef<number | null>(null);
   const initialScale = useRef<number>(1);
   const lastPosition = useRef({ x: 0, y: 0 });
@@ -113,8 +134,9 @@ export const ProfileMediaViewer = ({
   const likePost = useLikePost();
   const savePost = useSavePost();
   const deletePost = useDeletePost();
+  const updatePost = useUpdatePost();
+  const reportPost = useReportPost();
   const { data: likers = [] } = usePostLikes(currentPost?.id || "", isOpen && likesCountLocal > 0);
-
   // Sync with post changes
   useEffect(() => {
     if (currentPost) {
@@ -368,6 +390,48 @@ export const ProfileMediaViewer = ({
     });
   }, [currentPost, deletePost, posts.length, currentPostIndex, onClose, queryClient]);
 
+  const handleEdit = useCallback(() => {
+    if (!currentPost) return;
+    setEditContent(currentPost.content);
+    setIsEditDialogOpen(true);
+  }, [currentPost]);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!currentPost) return;
+    updatePost.mutate(
+      { postId: currentPost.id, content: editContent },
+      {
+        onSuccess: () => {
+          toast.success("Publicação editada com sucesso");
+          setIsEditDialogOpen(false);
+          queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+        },
+        onError: () => {
+          toast.error("Erro ao editar publicação");
+        },
+      }
+    );
+  }, [currentPost, updatePost, editContent, queryClient]);
+
+  const handleReport = useCallback(() => {
+    if (!currentPost || !reportReason) return;
+    reportPost.mutate(
+      { postId: currentPost.id, reason: reportReason, description: reportDescription },
+      {
+        onSuccess: () => {
+          toast.success("Denúncia enviada com sucesso");
+          setIsReportDialogOpen(false);
+          setReportReason("");
+          setReportDescription("");
+        },
+        onError: () => {
+          toast.error("Erro ao enviar denúncia");
+        },
+      }
+    );
+  }, [currentPost, reportPost, reportReason, reportDescription]);
+
   const handleTapNavigation = (e: React.MouseEvent | React.TouchEvent) => {
     if (scale > 1) return;
 
@@ -462,7 +526,7 @@ export const ProfileMediaViewer = ({
     <>
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden" ref={dropdownContainerRef}>
             {/* Overlay */}
             <motion.div
               className="absolute inset-0 bg-background"
@@ -664,19 +728,56 @@ export const ProfileMediaViewer = ({
                     {isVideo && <div />}
 
                     <div className="flex items-center gap-2">
-                      {isOwnProfile && (
-                        <button
-                          onClick={() => setShowDeleteDialog(true)}
-                          className="w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-foreground/10 text-foreground hover:bg-foreground/20"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      )}
+                      {/* Three dots menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
+                              isVideo
+                                ? "bg-black/50 text-white hover:bg-black/70"
+                                : "bg-foreground/10 text-foreground hover:bg-foreground/20"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[20px]">more_horiz</span>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 z-[70]" container={dropdownContainerRef.current}>
+                          {isOwnProfile ? (
+                            <>
+                              <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+                                <span className="material-symbols-outlined text-[18px] mr-2">edit</span>
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setShowDeleteDialog(true)}
+                                className="cursor-pointer text-primary focus:text-primary"
+                              >
+                                <span className="material-symbols-outlined text-[18px] mr-2">delete</span>
+                                Excluir
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <DropdownMenuItem
+                              onClick={() => setIsReportDialogOpen(true)}
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <span className="material-symbols-outlined text-[18px] mr-2">flag</span>
+                              Denunciar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Close button */}
                       <button
                         onClick={onClose}
-                        className="w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors bg-foreground/10 text-foreground hover:bg-foreground/20"
+                        className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${
+                          isVideo
+                            ? "bg-black/50 text-white hover:bg-black/70"
+                            : "bg-foreground/10 text-foreground hover:bg-foreground/20"
+                        }`}
                       >
-                        <span className="material-symbols-outlined">close</span>
+                        <span className="material-symbols-outlined">arrow_back</span>
                       </button>
                     </div>
                   </motion.div>
@@ -861,6 +962,74 @@ export const ProfileMediaViewer = ({
         onConfirm={handleDelete}
         confirmVariant="destructive"
       />
+
+      {/* Edit dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar publicação</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            placeholder="O que você está pensando?"
+            className="min-h-[100px]"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updatePost.isPending}>
+              {updatePost.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report dialog */}
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Denunciar publicação</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Motivo da denúncia</Label>
+              <RadioGroup value={reportReason} onValueChange={setReportReason}>
+                {REPORT_REASONS.map((reason) => (
+                  <div key={reason.value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={reason.value} id={reason.value} />
+                    <Label htmlFor={reason.value} className="font-normal cursor-pointer">
+                      {reason.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição (opcional)</Label>
+              <Textarea
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                placeholder="Descreva o problema..."
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleReport}
+              disabled={!reportReason || reportPost.isPending}
+              variant="destructive"
+            >
+              {reportPost.isPending ? "Enviando..." : "Denunciar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
