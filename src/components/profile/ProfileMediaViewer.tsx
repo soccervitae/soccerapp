@@ -108,6 +108,7 @@ export const ProfileMediaViewer = ({
   // Edit/Report dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [showReportConfirmDialog, setShowReportConfirmDialog] = useState(false);
   const [editContent, setEditContent] = useState("");
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
@@ -421,6 +422,7 @@ export const ProfileMediaViewer = ({
       {
         onSuccess: () => {
           toast.success("Denúncia enviada com sucesso");
+          setShowReportConfirmDialog(false);
           setIsReportDialogOpen(false);
           setReportReason("");
           setReportDescription("");
@@ -1021,15 +1023,27 @@ export const ProfileMediaViewer = ({
               Cancelar
             </Button>
             <Button
-              onClick={handleReport}
-              disabled={!reportReason || reportPost.isPending}
+              onClick={() => setShowReportConfirmDialog(true)}
+              disabled={!reportReason}
               variant="destructive"
             >
-              {reportPost.isPending ? "Enviando..." : "Denunciar"}
+              Denunciar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Report confirmation dialog */}
+      <ResponsiveAlertModal
+        open={showReportConfirmDialog}
+        onOpenChange={setShowReportConfirmDialog}
+        title="Confirmar denúncia"
+        description="Tem certeza que deseja denunciar esta publicação? Nossa equipe analisará o conteúdo e tomará as medidas necessárias."
+        confirmText={reportPost.isPending ? "Enviando..." : "Confirmar denúncia"}
+        cancelText="Voltar"
+        onConfirm={handleReport}
+        confirmVariant="destructive"
+      />
     </>
   );
 };
