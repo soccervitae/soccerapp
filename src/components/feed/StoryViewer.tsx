@@ -90,6 +90,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const [showViewersSheet, setShowViewersSheet] = useState(false);
@@ -104,6 +105,8 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
   const currentGroup = groupedStories[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
   const isOwner = user?.id === currentGroup?.userId;
+  const isCurrentStoryVideo = currentStory?.media_type === "video";
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
 
   // Story interactions
@@ -148,8 +151,38 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
     setMediaError(false);
   }, [currentStory?.id]);
 
-  const handlePauseStart = () => setIsPaused(true);
-  const handlePauseEnd = () => setIsPaused(false);
+  const handlePauseStart = () => {
+    setIsPaused(true);
+    if (videoRef.current && isCurrentStoryVideo) {
+      videoRef.current.pause();
+    }
+  };
+  const handlePauseEnd = () => {
+    setIsPaused(false);
+    if (videoRef.current && isCurrentStoryVideo && !isVideoPaused) {
+      videoRef.current.play();
+    }
+  };
+
+  // Toggle video pause on center tap
+  const handleCenterTap = () => {
+    if (!isCurrentStoryVideo) return;
+    
+    if (videoRef.current) {
+      if (isVideoPaused) {
+        videoRef.current.play();
+        setIsVideoPaused(false);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPaused(true);
+      }
+    }
+  };
+
+  // Reset video pause state when story changes
+  useEffect(() => {
+    setIsVideoPaused(false);
+  }, [currentStory?.id]);
 
   const goToNextStory = () => {
     if (!currentGroup) return;
@@ -431,6 +464,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                       </div>
                     ) : currentStory.media_type === "video" ? (
                       <video
+                        ref={videoRef}
                         src={currentStory.media_url}
                         className={`w-full h-full object-contain transition-all duration-300 ease-out ${getTransitionClasses()}`}
                         autoPlay
@@ -469,7 +503,11 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                       className="w-1/3 h-full focus:outline-none"
                       aria-label="Story anterior"
                     />
-                    <div className="w-1/3" />
+                    <button 
+                      onClick={handleCenterTap}
+                      className="w-1/3 h-full focus:outline-none"
+                      aria-label={isCurrentStoryVideo ? (isVideoPaused ? "Reproduzir vídeo" : "Pausar vídeo") : undefined}
+                    />
                     <button 
                       onClick={goToNextStory} 
                       className="w-1/3 h-full focus:outline-none"
@@ -478,7 +516,7 @@ export const StoryViewer = ({ groupedStories, initialGroupIndex, isOpen, onClose
                   </div>
 
                   {/* Pause indicator */}
-                  {isPaused && (
+                  {(isPaused || isVideoPaused) && (
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                       <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center animate-scale-in">
                         <span className="material-symbols-outlined text-white text-[32px]">pause</span>
