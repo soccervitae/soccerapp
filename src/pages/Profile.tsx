@@ -25,7 +25,7 @@ import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ProfileFeedSheet } from "@/components/profile/ProfileFeedSheet";
+// ProfileFeedSheet removed - using FeedPost directly in profile tab
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
 
@@ -37,10 +37,7 @@ const Profile = () => {
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
-  const [feedSheetOpen, setFeedSheetOpen] = useState(false);
-  const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  const [feedSheetOriginRect, setFeedSheetOriginRect] = useState<DOMRect | null>(null);
-  const gridItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Grid refs removed - using FeedPost directly
   
   // Media viewer states
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
@@ -204,22 +201,13 @@ const Profile = () => {
     music_track: null,
   });
 
-  // Handle grid item click
-  const handleGridItemClick = (index: number, element: HTMLDivElement | null) => {
-    if (element) {
-      setFeedSheetOriginRect(element.getBoundingClientRect());
-    }
-    setSelectedPostIndex(index);
-    setFeedSheetOpen(true);
-  };
-
-  // Render profile feed as grid
+  // Render profile feed as vertical feed (like Home page)
   const renderProfileFeed = () => {
     if (postsLoading) {
       return (
-        <div className="grid grid-cols-3 gap-1">
-          {[...Array(9)].map((_, i) => (
-            <div key={i} className="aspect-square bg-muted animate-pulse rounded-sm" />
+        <div className="flex flex-col gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-muted animate-pulse rounded-sm h-96" />
           ))}
         </div>
       );
@@ -234,50 +222,14 @@ const Profile = () => {
       );
     }
 
-      return (
-        <div className="grid grid-cols-3 gap-px">
-        {userPosts.map((post, index) => {
-          const mediaUrls = post.media_url?.split(',') || [];
-          const firstMedia = mediaUrls[0];
-          const isVideo = post.media_type === 'video';
-          const isCarousel = post.media_type === 'carousel' && mediaUrls.length > 1;
-
-          return (
-            <div 
-              key={post.id} 
-              ref={(el) => { gridItemRefs.current[index] = el; }}
-              className="aspect-square relative overflow-hidden bg-muted cursor-pointer"
-              onClick={() => handleGridItemClick(index, gridItemRefs.current[index])}
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              {isVideo ? (
-                <video
-                  src={firstMedia}
-                  className="w-full h-full object-cover"
-                  muted
-                  playsInline
-                />
-              ) : (
-                <img
-                  src={firstMedia}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              )}
-              {isVideo && (
-                <div className="absolute top-2 right-2">
-                  <span className="material-symbols-outlined text-white text-[18px] drop-shadow-lg">play_circle</span>
-                </div>
-              )}
-              {isCarousel && (
-                <div className="absolute top-2 right-2">
-                  <span className="material-symbols-outlined text-white text-[18px] drop-shadow-lg">photo_library</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+    return (
+      <div className="flex flex-col">
+        {userPosts.map((post) => (
+          <FeedPost 
+            key={post.id} 
+            post={transformToFeedPost(post)} 
+          />
+        ))}
       </div>
     );
   };
@@ -617,30 +569,7 @@ const Profile = () => {
         <GuestBanner />
       )}
 
-      {/* Profile Feed Sheet */}
-      {profile && userPosts && (
-        <ProfileFeedSheet
-          posts={userPosts}
-          initialPostIndex={selectedPostIndex}
-          isOpen={feedSheetOpen}
-          onClose={() => setFeedSheetOpen(false)}
-          profile={{
-            id: profile.id,
-            username: profile.username,
-            full_name: profile.full_name,
-            nickname: profile.nickname,
-            avatar_url: profile.avatar_url,
-            conta_verificada: profile.conta_verificada,
-            gender: profile.gender,
-            role: profile.role,
-            posicaomas: profile.posicaomas,
-            posicaofem: profile.posicaofem,
-            funcao: profile.funcao,
-            position_name: profile.position_name,
-          }}
-          originRect={feedSheetOriginRect}
-        />
-      )}
+      {/* ProfileFeedSheet removed - posts now render directly as FeedPost */}
 
       {/* Fullscreen Image Viewer for Photos/Videos tabs */}
       <FullscreenImageViewer
