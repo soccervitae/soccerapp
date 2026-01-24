@@ -82,7 +82,12 @@ const LandingOrIndex = () => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return null;
+    // Show a minimal loading state instead of null
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
   
   // If not logged in and in PWA mode, redirect to auth
