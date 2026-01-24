@@ -6,6 +6,7 @@ import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, 
 import { useAuth } from "@/contexts/AuthContext";
 import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
+import { MusicDetailsSheet } from "./MusicDetailsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
@@ -76,6 +77,7 @@ export const FeedPost = ({
   const [videoOriginRect, setVideoOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [videoTimeOnOpen, setVideoTimeOnOpen] = useState(0);
   const [showMusicInfo, setShowMusicInfo] = useState(false);
+  const [isMusicDetailsOpen, setIsMusicDetailsOpen] = useState(false);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -416,13 +418,17 @@ export const FeedPost = ({
             <div className="h-4 overflow-hidden relative">
               <AnimatePresence mode="wait">
                 {hasMusicTrack && musicTitle && showMusicInfo ? (
-                  <motion.p
+                  <motion.button
                     key="music"
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -10, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px]"
+                    className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px] hover:text-foreground transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMusicDetailsOpen(true);
+                    }}
                   >
                     <span className="material-symbols-outlined text-[12px]">music_note</span>
                     <span className="truncate">{musicTitle}</span>
@@ -432,7 +438,7 @@ export const FeedPost = ({
                         <span className="truncate">{musicArtist}</span>
                       </>
                     )}
-                  </motion.p>
+                  </motion.button>
                 ) : (
                   post.profile.position_name ? (
                     <motion.p
@@ -446,13 +452,17 @@ export const FeedPost = ({
                       {post.profile.position_name}
                     </motion.p>
                   ) : hasMusicTrack && musicTitle ? (
-                    <motion.p
+                    <motion.button
                       key="music-only"
                       initial={{ y: 10, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: -10, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px]"
+                      className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px] hover:text-foreground transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMusicDetailsOpen(true);
+                      }}
                     >
                       <span className="material-symbols-outlined text-[12px]">music_note</span>
                       <span className="truncate">{musicTitle}</span>
@@ -462,7 +472,7 @@ export const FeedPost = ({
                           <span className="truncate">{musicArtist}</span>
                         </>
                       )}
-                    </motion.p>
+                    </motion.button>
                   ) : null
                 )}
               </AnimatePresence>
@@ -889,6 +899,21 @@ export const FeedPost = ({
           isOpen={storyViewerOpen}
           onClose={() => setStoryViewerOpen(false)}
           originRect={storyClickOrigin}
+        />
+      )}
+
+      {/* Music Details Sheet */}
+      {hasMusicTrack && musicTitle && (
+        <MusicDetailsSheet
+          isOpen={isMusicDetailsOpen}
+          onOpenChange={setIsMusicDetailsOpen}
+          title={musicTitle}
+          artist={musicArtist || "Artista desconhecido"}
+          coverUrl={post.music_cover_url || post.music_track?.cover_url}
+          audioUrl={musicAudioUrl}
+          durationSeconds={post.music_duration_seconds || post.music_track?.duration_seconds}
+          startSeconds={post.music_start_seconds ?? 0}
+          endSeconds={post.music_end_seconds}
         />
       )}
 
