@@ -42,6 +42,7 @@ import Landing from "./pages/Landing";
 import Guidelines from "./pages/Guidelines";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/Privacy";
+import About from "./pages/About";
 
 import AdminDashboard from "./pages/admin/Index";
 import AdminContent from "./pages/admin/Content";
@@ -124,9 +125,10 @@ const AnimatedRoutes = () => {
       {/* Guidelines page - public, no login required */}
       <Route path="/guidelines" element={<PageTransition><Guidelines /></PageTransition>} />
       
-      {/* Terms and Privacy - public, no login required */}
+      {/* Terms, Privacy and About - public, no login required */}
       <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
       <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+      <Route path="/about" element={<PageTransition><About /></PageTransition>} />
 
       {/* Complete profile route - requires login but not complete profile or onboarding */}
       <Route path="/complete-profile" element={
