@@ -195,7 +195,7 @@ const Profile = () => {
   };
 
   // Transform user post to Post format for FeedPost
-  const transformToFeedPost = (post: NonNullable<typeof userPosts>[0]): Post => ({
+  const transformToFeedPost = (post: NonNullable<typeof allInfinitePosts>[0]): Post => ({
     id: post.id,
     user_id: post.user_id,
     content: post.content,
@@ -214,7 +214,14 @@ const Profile = () => {
     updated_at: post.updated_at,
     liked_by_user: post.liked_by_user || false,
     saved_by_user: post.saved_by_user || false,
-    recent_likes: [],
+    recent_likes: (post.recent_likes || []).map(like => ({
+      user_id: like.user_id,
+      username: like.username,
+      full_name: like.full_name,
+      nickname: like.nickname,
+      avatar_url: like.avatar_url,
+      conta_verificada: like.conta_verificada,
+    })),
     profile: {
       id: profile?.id || '',
       username: profile?.username || '',
