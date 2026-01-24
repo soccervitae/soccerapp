@@ -4,11 +4,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  useJamendoSearch,
-  useJamendoByGenre,
+  useMusicTracks,
+  useSearchMusic,
   useMusicPlayer,
   MusicTrack,
-  JAMENDO_GENRES,
+  MUSIC_CATEGORIES,
   formatDuration,
   SelectedMusicWithTrim,
 } from "@/hooks/useMusic";
@@ -32,14 +32,13 @@ export function MusicPicker({
   maxTrimDuration = 15,
 }: MusicPickerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeGenre, setActiveGenre] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [showTrimmer, setShowTrimmer] = useState(false);
   const [pendingTrack, setPendingTrack] = useState<MusicTrack | null>(null);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  // Use Jamendo for genre filtering and search
-  const { data: genreTracks, isLoading: isLoadingGenre } = useJamendoByGenre(activeGenre, 30);
-  const { data: searchResults, isLoading: isSearching } = useJamendoSearch(debouncedSearch);
+  const { data: tracks, isLoading } = useMusicTracks(activeCategory);
+  const { data: searchResults, isLoading: isSearching } = useSearchMusic(debouncedSearch);
   const { currentTrack, isPlaying, progress, toggle, stop } = useMusicPlayer();
 
   // Parar música ao desmontar
@@ -49,8 +48,7 @@ export function MusicPicker({
     };
   }, [stop]);
 
-  const isLoading = isLoadingGenre;
-  const displayTracks = debouncedSearch.trim() ? searchResults : genreTracks;
+  const displayTracks = debouncedSearch.trim() ? searchResults : tracks;
 
   const handleTrackSelect = (track: MusicTrack) => {
     if (selectedMusic?.track.id === track.id) {
@@ -144,26 +142,26 @@ export function MusicPicker({
         </div>
       </div>
 
-      {/* Genre Tabs */}
+      {/* Category Tabs */}
       {!debouncedSearch.trim() && (
         <div className="border-b border-border">
           <ScrollArea className="w-full">
             <div className="flex gap-2 p-4">
-              {JAMENDO_GENRES.map((genre) => (
+              {MUSIC_CATEGORIES.map((category) => (
                 <button
-                  key={genre.id}
-                  onClick={() => setActiveGenre(genre.id)}
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
                   className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                    activeGenre === genre.id
+                    activeCategory === category.id
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   )}
                 >
                   <span className="material-symbols-outlined text-[18px]">
-                    {genre.icon}
+                    {category.icon}
                   </span>
-                  {genre.label}
+                  {category.label}
                 </button>
               ))}
             </div>
