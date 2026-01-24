@@ -61,6 +61,7 @@ import { AdminRoute } from "@/components/admin/AdminRoute";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import Post from "./pages/Post";
+import CreatePost from "./pages/CreatePost";
 
 const queryClient = new QueryClient();
 
@@ -168,6 +169,11 @@ const AnimatedRoutes = () => {
       <Route path="/post/:postId" element={
         <ProtectedRoute>
           <PageTransition><Post /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/create-post" element={
+        <ProtectedRoute>
+          <PageTransition><CreatePost /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/explore" element={
