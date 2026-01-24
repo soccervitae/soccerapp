@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -322,6 +322,82 @@ export const useUserPosts = (userId?: string) => {
   }, [targetUserId, query.data]);
 
   return query;
+};
+
+const POSTS_PER_PAGE = 10;
+
+export const useInfiniteUserPosts = (userId?: string) => {
+  const { user } = useAuth();
+  const targetUserId = userId || user?.id;
+  const currentUserId = user?.id;
+
+  return useInfiniteQuery({
+    queryKey: ["infinite-user-posts", targetUserId, currentUserId],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }): Promise<{ posts: UserPost[]; nextCursor: number | null }> => {
+      if (!targetUserId) return { posts: [], nextCursor: null };
+
+      const from = pageParam * POSTS_PER_PAGE;
+      const to = from + POSTS_PER_PAGE - 1;
+
+      const { data: posts, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      if (!posts || posts.length === 0) return { posts: [], nextCursor: null };
+
+      // If current user is logged in, fetch their likes and saves for these posts
+      let enrichedPosts: UserPost[];
+      if (currentUserId) {
+        const postIds = posts.map(p => p.id);
+        
+        const [likesResult, savesResult] = await Promise.all([
+          supabase
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", currentUserId)
+            .in("post_id", postIds),
+          supabase
+            .from("saved_posts")
+            .select("post_id")
+            .eq("user_id", currentUserId)
+            .in("post_id", postIds)
+        ]);
+
+        const likedPostIds = new Set((likesResult.data || []).map(l => l.post_id));
+        const savedPostIds = new Set((savesResult.data || []).map(s => s.post_id));
+
+        enrichedPosts = posts.map(post => ({
+          ...post,
+          liked_by_user: likedPostIds.has(post.id),
+          saved_by_user: savedPostIds.has(post.id),
+        }));
+      } else {
+        enrichedPosts = posts.map(post => ({
+          ...post,
+          liked_by_user: false,
+          saved_by_user: false,
+        }));
+      }
+
+      // Check if there are more posts
+      const hasMore = posts.length === POSTS_PER_PAGE;
+      return {
+        posts: enrichedPosts,
+        nextCursor: hasMore ? pageParam + 1 : null,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    enabled: !!targetUserId,
+  });
 };
 
 export const useFollowStats = (userId?: string) => {

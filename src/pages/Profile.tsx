@@ -7,7 +7,7 @@ import { AchievementsTab } from "@/components/profile/AchievementsTab";
 import { TeamsTab } from "@/components/profile/TeamsTab";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { FeedPost } from "@/components/feed/FeedPost";
-import { useUserChampionships, useUserAchievements, useUserPosts } from "@/hooks/useProfile";
+import { useUserChampionships, useUserAchievements, useUserPosts, useInfiniteUserPosts } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Post } from "@/hooks/usePosts";
 import GuestBanner from "@/components/common/GuestBanner";
@@ -22,7 +22,7 @@ import {
 } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 // ProfileFeedSheet removed - using FeedPost directly in profile tab
@@ -71,6 +71,21 @@ const Profile = () => {
   const { data: championships, isLoading: championshipsLoading } = useUserChampionships(targetUserId);
   const { data: achievements, isLoading: achievementsLoading } = useUserAchievements(targetUserId);
   const { data: userPosts, isLoading: postsLoading } = useUserPosts(targetUserId);
+  
+  // Infinite scroll for profile feed
+  const {
+    data: infinitePosts,
+    isLoading: infinitePostsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteUserPosts(targetUserId);
+  
+  // Flatten infinite posts for the feed
+  const allInfinitePosts = infinitePosts?.pages.flatMap(page => page.posts) || [];
+  
+  // Observer ref for infinite scroll
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Filter posts by type
   const photoPosts = userPosts?.filter(post => 
@@ -201,9 +216,26 @@ const Profile = () => {
     music_track: null,
   });
 
-  // Render profile feed as vertical feed (like Home page)
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Render profile feed as vertical feed (like Home page) with infinite scroll
   const renderProfileFeed = () => {
-    if (postsLoading) {
+    if (infinitePostsLoading) {
       return (
         <div className="flex flex-col gap-4">
           {[...Array(3)].map((_, i) => (
@@ -213,7 +245,7 @@ const Profile = () => {
       );
     }
 
-    if (!userPosts || userPosts.length === 0) {
+    if (allInfinitePosts.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <span className="material-symbols-outlined text-[48px] mb-2">grid_view</span>
@@ -224,12 +256,25 @@ const Profile = () => {
 
     return (
       <div className="flex flex-col">
-        {userPosts.map((post) => (
+        {allInfinitePosts.map((post) => (
           <FeedPost 
             key={post.id} 
             post={transformToFeedPost(post)} 
           />
         ))}
+        
+        {/* Load more trigger */}
+        <div ref={loadMoreRef} className="py-4 flex justify-center">
+          {isFetchingNextPage && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm">Carregando...</span>
+            </div>
+          )}
+          {!hasNextPage && allInfinitePosts.length > 0 && (
+            <p className="text-sm text-muted-foreground">Você viu todas as publicações</p>
+          )}
+        </div>
       </div>
     );
   };
