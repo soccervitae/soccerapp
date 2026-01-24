@@ -11,6 +11,7 @@ export interface MusicTrack {
   audio_url: string;
   cover_url: string | null;
   play_count: number;
+  source?: "local" | "jamendo";
 }
 
 export interface SelectedMusicWithTrim {
@@ -28,21 +29,62 @@ export const MUSIC_CATEGORIES = [
   { id: "relaxante", label: "Relaxante", icon: "spa" },
 ] as const;
 
+// Fetch trending music from Jamendo API
 export const useTrendingMusic = (limit: number = 6) => {
   return useQuery({
-    queryKey: ["trending-music", limit],
+    queryKey: ["trending-music-jamendo", limit],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("music_tracks")
-        .select("*")
-        .eq("is_active", true)
-        .order("play_count", { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.functions.invoke("fetch-jamendo-music", {
+        body: null,
+        method: "GET",
+      });
 
-      if (error) throw error;
-      return data as MusicTrack[];
+      // Build URL with query params
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-jamendo-music?type=trending&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch trending music");
+      }
+
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+};
+
+// Search music from Jamendo API
+export const useJamendoSearch = (searchQuery: string) => {
+  return useQuery({
+    queryKey: ["jamendo-search", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim()) return [];
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-jamendo-music?search=${encodeURIComponent(searchQuery)}&limit=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to search music");
+      }
+
+      const result = await response.json();
+      return result.tracks as MusicTrack[];
+    },
+    enabled: searchQuery.trim().length > 0,
+    staleTime: 2 * 60 * 1000,
   });
 };
 
