@@ -5,12 +5,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useMusicTracks,
-  useSearchMusic,
+  useJamendoSearch,
   useMusicPlayer,
   MusicTrack,
   MUSIC_CATEGORIES,
   formatDuration,
   SelectedMusicWithTrim,
+  useTrendingMusic,
 } from "@/hooks/useMusic";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/lib/utils";
@@ -37,9 +38,10 @@ export function MusicPicker({
   const [pendingTrack, setPendingTrack] = useState<MusicTrack | null>(null);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  const { data: tracks, isLoading } = useMusicTracks(activeCategory);
-  const { data: searchResults, isLoading: isSearching } =
-    useSearchMusic(debouncedSearch);
+  // Use Jamendo for trending and search
+  const { data: jamendoTracks, isLoading: isLoadingJamendo } = useTrendingMusic(30);
+  const { data: localTracks, isLoading: isLoadingLocal } = useMusicTracks(activeCategory);
+  const { data: searchResults, isLoading: isSearching } = useJamendoSearch(debouncedSearch);
   const { currentTrack, isPlaying, progress, toggle, stop } = useMusicPlayer();
 
   // Parar música ao desmontar
@@ -48,6 +50,12 @@ export function MusicPicker({
       stop();
     };
   }, [stop]);
+
+  // Combine Jamendo tracks with local tracks, prioritize Jamendo for "all" category
+  const isLoading = isLoadingJamendo || isLoadingLocal;
+  const tracks = activeCategory === "all" 
+    ? [...(jamendoTracks || []), ...(localTracks || [])]
+    : localTracks;
 
   const displayTracks = debouncedSearch.trim() ? searchResults : tracks;
 
