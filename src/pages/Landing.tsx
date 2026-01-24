@@ -186,7 +186,7 @@ const Landing = () => {
               <img src={logoText} alt="SOCCER VITAE" className="h-6" />
             </div>
             <div className="flex gap-6 text-white/60 text-sm">
-              <a href="/about" className="hover:text-white transition-colors">Sobre</a>
+              <a href="/sobre" className="hover:text-white transition-colors">Sobre</a>
               <a href="/terms" className="hover:text-white transition-colors">Termos</a>
               <a href="/privacy-policy" className="hover:text-white transition-colors">Privacidade</a>
               <a href="#" className="hover:text-white transition-colors">Suporte</a>

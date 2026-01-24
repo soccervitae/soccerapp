@@ -128,7 +128,7 @@ const AnimatedRoutes = () => {
       {/* Terms, Privacy and About - public, no login required */}
       <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
       <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-      <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+      <Route path="/sobre" element={<PageTransition><About /></PageTransition>} />
 
       {/* Complete profile route - requires login but not complete profile or onboarding */}
       <Route path="/complete-profile" element={
