@@ -75,6 +75,7 @@ export const FeedPost = ({
   const [imageOriginRect, setImageOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [videoOriginRect, setVideoOriginRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [videoTimeOnOpen, setVideoTimeOnOpen] = useState(0);
+  const [showMusicInfo, setShowMusicInfo] = useState(false);
   const lastTapRef = useRef<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -98,6 +99,10 @@ export const FeedPost = ({
   const deletePost = useDeletePost();
   const reportPost = useReportPost();
   const isOwner = user?.id === post.user_id;
+  
+  // Music info for header alternation
+  const musicTitle = post.music_title || post.music_track?.title;
+  const musicArtist = post.music_artist || post.music_track?.artist;
 
   // Carousel effect
   useEffect(() => {
@@ -114,6 +119,17 @@ export const FeedPost = ({
   const musicAudioUrl = post.music_audio_url || post.music_track?.audio_url;
   const musicStartSeconds = post.music_start_seconds ?? 0;
   const musicEndSeconds = post.music_end_seconds ?? (post.music_duration_seconds || post.music_track?.duration_seconds || 30);
+
+  // Alternate between position and music info every 4 seconds
+  useEffect(() => {
+    if (!hasMusicTrack || !musicTitle) return;
+    
+    const interval = setInterval(() => {
+      setShowMusicInfo(prev => !prev);
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [hasMusicTrack, musicTitle]);
 
   // Video autoplay on viewport intersection
   useEffect(() => {
@@ -396,7 +412,61 @@ export const FeedPost = ({
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
             </div>
-            {post.profile.position_name && <p className="text-xs text-muted-foreground">{post.profile.position_name}</p>}
+            {/* Alternating position/music info */}
+            <div className="h-4 overflow-hidden relative">
+              <AnimatePresence mode="wait">
+                {hasMusicTrack && musicTitle && showMusicInfo ? (
+                  <motion.p
+                    key="music"
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px]"
+                  >
+                    <span className="material-symbols-outlined text-[12px]">music_note</span>
+                    <span className="truncate">{musicTitle}</span>
+                    {musicArtist && (
+                      <>
+                        <span className="flex-shrink-0">•</span>
+                        <span className="truncate">{musicArtist}</span>
+                      </>
+                    )}
+                  </motion.p>
+                ) : (
+                  post.profile.position_name ? (
+                    <motion.p
+                      key="position"
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -10, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {post.profile.position_name}
+                    </motion.p>
+                  ) : hasMusicTrack && musicTitle ? (
+                    <motion.p
+                      key="music-only"
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -10, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-xs text-muted-foreground flex items-center gap-1 max-w-[200px]"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">music_note</span>
+                      <span className="truncate">{musicTitle}</span>
+                      {musicArtist && (
+                        <>
+                          <span className="flex-shrink-0">•</span>
+                          <span className="truncate">{musicArtist}</span>
+                        </>
+                      )}
+                    </motion.p>
+                  ) : null
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
