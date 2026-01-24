@@ -90,6 +90,7 @@ export const HighlightFullscreenView = ({
 }: HighlightFullscreenViewProps) => {
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [shareToChatSheetOpen, setShareToChatSheetOpen] = useState(false);
   const [viewersSheetOpen, setViewersSheetOpen] = useState(false);
   const [repliesSheetOpen, setRepliesSheetOpen] = useState(false);
@@ -204,9 +205,10 @@ export const HighlightFullscreenView = ({
     return () => clearInterval(interval);
   }, [viewDialogOpen, isPaused, isVideo, isEditingTitle, currentImageIndex, currentImages.length, currentHighlightIndex, displayHighlights.length, imageEmblaApi, handleNextHighlight, onClose]);
 
-  // Reset progress when media changes
+  // Reset progress and video pause state when media changes
   useEffect(() => {
     setProgress(0);
+    setIsVideoPaused(false);
   }, [currentImageIndex, currentHighlightIndex, selectedHighlight?.id]);
 
   // Handle video end
@@ -229,8 +231,23 @@ export const HighlightFullscreenView = ({
 
   const handlePauseEnd = () => {
     setIsPaused(false);
-    if (videoRef.current && isVideo) {
+    if (videoRef.current && isVideo && !isVideoPaused) {
       videoRef.current.play();
+    }
+  };
+
+  // Toggle video pause on center tap
+  const handleVideoCenterTap = () => {
+    if (!isVideo) return;
+    
+    if (videoRef.current) {
+      if (isVideoPaused) {
+        videoRef.current.play();
+        setIsVideoPaused(false);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPaused(true);
+      }
     }
   };
   // Instagram-style tap navigation
@@ -241,7 +258,14 @@ export const HighlightFullscreenView = ({
       : e.clientX;
     const x = clientX - rect.left;
     const isLeft = x < rect.width / 3;
-    const isRight = x > (rect.width / 3);
+    const isRight = x > (rect.width * 2 / 3);
+    const isCenter = !isLeft && !isRight;
+
+    if (isCenter && isVideo) {
+      // Center tap on video - toggle pause
+      handleVideoCenterTap();
+      return;
+    }
 
     if (isLeft) {
       // Navigate to previous media/highlight
@@ -480,7 +504,7 @@ export const HighlightFullscreenView = ({
                   </AnimatePresence>
 
                   {/* Pause indicator */}
-                  {isPaused && !showHeartAnimation && (
+                  {(isPaused || isVideoPaused) && !showHeartAnimation && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                       <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center">
                         <Pause className="w-8 h-8 text-white" />
