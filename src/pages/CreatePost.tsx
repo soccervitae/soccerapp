@@ -450,7 +450,7 @@ const CreatePost = () => {
   // Fullscreen editors
   if (viewMode === "video-recorder") {
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <VideoRecorder onVideoRecorded={handleVideoRecorded} onClose={() => setViewMode("default")} />
       </div>
     );
@@ -459,7 +459,7 @@ const CreatePost = () => {
   if (viewMode === "photo-editor" && editingPhotoIndex !== null) {
     const mediaToEdit = selectedMediaList[editingPhotoIndex];
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <PhotoFilterEditor
           imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
           initialFilters={mediaToEdit.filters}
@@ -476,7 +476,7 @@ const CreatePost = () => {
   if (viewMode === "photo-crop" && editingPhotoIndex !== null) {
     const mediaToEdit = selectedMediaList[editingPhotoIndex];
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <PhotoCropEditor
           imageUrl={mediaToEdit.url}
           initialCropData={mediaToEdit.cropData}
@@ -493,7 +493,7 @@ const CreatePost = () => {
   if (viewMode === "photo-tag" && editingPhotoIndex !== null) {
     const mediaToEdit = selectedMediaList[editingPhotoIndex];
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <PhotoTagEditor
           imageUrl={mediaToEdit.croppedUrl || mediaToEdit.url}
           photoIndex={editingPhotoIndex}
@@ -510,7 +510,7 @@ const CreatePost = () => {
 
   if (viewMode === "location-picker") {
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <LocationPicker
           initialLocation={selectedLocation}
           onConfirm={handleLocationConfirm}
@@ -522,7 +522,7 @@ const CreatePost = () => {
 
   if (viewMode === "music-picker") {
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <MusicPicker
           selectedMusic={selectedMusic}
           onSelect={setSelectedMusic}
@@ -541,7 +541,7 @@ const CreatePost = () => {
 
   if (viewMode === "schedule-picker") {
     return (
-      <div className="fixed inset-0 bg-background z-50">
+      <div className="fixed inset-0 bg-black z-50">
         <SchedulePostPicker
           scheduledDate={scheduledDate}
           onScheduleChange={setScheduledDate}
@@ -554,28 +554,31 @@ const CreatePost = () => {
   // Gallery picker view
   if (viewMode === "gallery-picker") {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+        {/* Header - Glassmorphism */}
+        <div className="flex items-center justify-between px-4 py-3 bg-black/60 backdrop-blur-xl">
           <button 
             onClick={() => {
               setViewMode("default");
               clearGallery();
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-200"
           >
-            <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
+            <span className="material-symbols-outlined text-[24px] text-white">close</span>
           </button>
           
-          <span className="text-base font-semibold text-foreground">
+          <span className="text-base font-semibold text-white">
             Selecionar Fotos {selectedMediaList.length > 0 && `(${selectedMediaList.length}/${MAX_PHOTOS})`}
           </span>
           
           <Button 
             onClick={handleGalleryDone}
             size="sm"
-            variant="ghost"
-            className="text-primary font-semibold text-sm hover:bg-transparent"
+            className={`rounded-full px-5 font-semibold text-sm transition-all duration-200 ${
+              selectedMediaList.length > 0
+                ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25' 
+                : 'bg-white/10 text-white/40 hover:bg-white/10'
+            }`}
             disabled={selectedMediaList.length === 0}
           >
             Concluir
@@ -584,7 +587,7 @@ const CreatePost = () => {
 
         {/* Gallery Grid */}
         <div 
-          className="flex-1 overflow-y-auto p-1"
+          className="flex-1 overflow-y-auto bg-zinc-950"
           onScroll={(e) => {
             const target = e.currentTarget;
             const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
@@ -596,18 +599,18 @@ const CreatePost = () => {
           {isGalleryLoading ? (
             <div className="w-full h-64 flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-muted-foreground">Carregando galeria...</span>
+                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="text-sm text-white/60">Carregando galeria...</span>
               </div>
             </div>
           ) : deviceGallery.length === 0 ? (
             <div className="w-full h-64 flex flex-col items-center justify-center gap-3">
-              <span className="material-symbols-outlined text-[48px] text-muted-foreground">photo_library</span>
-              <p className="text-sm text-muted-foreground">Nenhuma foto encontrada</p>
+              <span className="material-symbols-outlined text-[48px] text-white/30">photo_library</span>
+              <p className="text-sm text-white/60">Nenhuma foto encontrada</p>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-4 gap-0.5">
+              <div className="grid grid-cols-4 gap-0.5 p-0.5">
                 {deviceGallery.map((item, index) => {
                   const isSelected = selectedMediaList.some(m => m.url === item.webPath);
                   const selectionIndex = selectedMediaList.findIndex(m => m.url === item.webPath) + 1;
@@ -622,28 +625,31 @@ const CreatePost = () => {
                           handleGallerySelect(item);
                         }
                       }}
-                      className="relative aspect-square overflow-hidden"
+                      className="relative aspect-square overflow-hidden group"
                     >
                       <img
                         src={item.thumbnail.startsWith('data:') ? item.thumbnail : `data:image/jpeg;base64,${item.thumbnail}`}
                         alt={`Gallery ${index + 1}`}
                         className={`w-full h-full object-cover transition-all duration-200 ${
-                          isSelected ? 'scale-90 rounded-lg' : ''
+                          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-black rounded-sm scale-[0.92]' : ''
                         }`}
                       />
                       
-                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200" />
+                      
+                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                         isSelected 
-                          ? 'bg-primary border-primary' 
-                          : 'bg-black/30 border-white/70'
+                          ? 'bg-primary border-primary shadow-lg shadow-primary/30' 
+                          : 'bg-black/40 border-white/60 backdrop-blur-sm'
                       }`}>
                         {isSelected && (
-                          <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>
+                          <span className="text-xs font-bold text-white">{selectionIndex}</span>
                         )}
                       </div>
 
                       {item.type === 'video' && (
-                        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
+                        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 backdrop-blur-sm rounded">
                           <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
                         </div>
                       )}
@@ -654,13 +660,13 @@ const CreatePost = () => {
 
               {isLoadingMore && (
                 <div className="flex items-center justify-center py-4">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
 
               {!hasMore && deviceGallery.length > 0 && (
                 <div className="flex items-center justify-center py-4">
-                  <span className="text-xs text-muted-foreground">Fim da galeria</span>
+                  <span className="text-xs text-white/40">Fim da galeria</span>
                 </div>
               )}
             </>
@@ -673,36 +679,37 @@ const CreatePost = () => {
   // Default view
   return (
     <>
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Header */}
-        <div className="sticky top-0 z-40 bg-background border-b border-border px-4 py-3">
+      <div className="min-h-screen bg-black flex flex-col">
+        {/* Header - Glassmorphism */}
+        <div className="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-4 py-3">
           <div className="flex items-center justify-between">
             <button 
               onClick={handleClose} 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-200"
               disabled={isPublishing}
             >
-              Cancelar
+              <span className="material-symbols-outlined text-[24px] text-white">close</span>
             </button>
-            <span className="text-base font-bold">Nova Publicação</span>
-            <button 
+            <span className="text-base font-semibold text-white">Nova Publicação</span>
+            <Button 
               onClick={handlePost} 
-              className={`text-sm font-semibold transition-colors ${
-                isButtonDisabled 
-                  ? "text-muted-foreground cursor-not-allowed" 
-                  : "text-primary hover:text-primary/80"
+              size="sm"
+              className={`rounded-full px-5 font-semibold text-sm transition-all duration-200 ${
+                !isButtonDisabled
+                  ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25' 
+                  : 'bg-white/10 text-white/40 hover:bg-white/10'
               }`}
               disabled={isButtonDisabled}
             >
               {isPublishing ? (scheduledDate ? "Agendando..." : "Publicando...") : (scheduledDate ? "Agendar" : "Publicar")}
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 pb-safe">
           {/* Upload Progress */}
           {isPublishing && (
-            <div className="w-full bg-muted rounded-full h-2 overflow-hidden mb-4">
+            <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden mb-4">
               <div 
                 className="h-full bg-primary transition-all duration-300" 
                 style={{ width: `${progress}%` }} 
@@ -711,38 +718,44 @@ const CreatePost = () => {
           )}
 
           {selectedMediaList.length === 0 ? (
-            <div className="w-full aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-6 p-6">
+            <div className="w-full aspect-square bg-zinc-900/80 rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-6 p-6 backdrop-blur-sm">
               {isLoading ? (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-muted-foreground">Carregando...</p>
+                  <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                  <p className="text-sm text-white/60">Carregando...</p>
                 </div>
               ) : (
                 <>
-                  <button onClick={handlePickFromGallery} className="w-full max-w-[200px] flex flex-col items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
-                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
+                  <button onClick={handlePickFromGallery} className="w-full max-w-[200px] flex flex-col items-center gap-3 p-4 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shadow-lg shadow-primary/10">
                       <span className="material-symbols-outlined text-[28px] text-primary">photo_library</span>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-foreground">Escolher da Galeria</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Selecione até {MAX_PHOTOS} fotos</p>
+                      <p className="text-sm font-medium text-white">Escolher da Galeria</p>
+                      <p className="text-xs text-white/60 mt-0.5">Selecione até {MAX_PHOTOS} fotos</p>
                     </div>
                   </button>
                   <div className="flex items-center gap-3 w-full max-w-[200px]">
-                    <div className="flex-1 h-px bg-border" /><span className="text-xs text-muted-foreground">ou</span><div className="flex-1 h-px bg-border" />
+                    <div className="flex-1 h-px bg-white/10" /><span className="text-xs text-white/40">ou</span><div className="flex-1 h-px bg-white/10" />
                   </div>
                   <div className="flex gap-4">
-                    <button onClick={handleTakePhoto} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">photo_camera</span></div>
-                      <span className="text-xs font-medium text-foreground">Tirar Foto</span>
+                    <button onClick={handleTakePhoto} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/30 to-blue-600/10 flex items-center justify-center shadow-lg shadow-blue-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-blue-400">photo_camera</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Foto</span>
                     </button>
-                    <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">video_library</span></div>
-                      <span className="text-xs font-medium text-foreground">Vídeo Galeria</span>
+                    <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-purple-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-purple-400">video_library</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Vídeo</span>
                     </button>
-                    <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center"><span className="material-symbols-outlined text-[24px] text-foreground">videocam</span></div>
-                      <span className="text-xs font-medium text-foreground">Gravar Vídeo</span>
+                    <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Gravar</span>
                     </button>
                   </div>
                 </>
@@ -752,17 +765,17 @@ const CreatePost = () => {
             <div className="relative">
               {selectedMediaType === "video" ? (
                 <>
-                  <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-lg" />
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-foreground">videocam</span>
-                    <span className="text-xs font-medium text-foreground">VÍDEO</span>
+                  <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-xl" />
+                  <div className="absolute top-2 left-2 px-3 py-1.5 bg-red-500/90 backdrop-blur-sm rounded-full flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-white">videocam</span>
+                    <span className="text-xs font-semibold text-white">VÍDEO</span>
                   </div>
                 </>
               ) : selectedMediaList.length === 1 ? (
                 <img 
                   src={selectedMediaList[0]?.croppedUrl || selectedMediaList[0]?.url} 
                   alt="Preview" 
-                  className="w-full aspect-square object-cover rounded-lg" 
+                  className="w-full aspect-square object-cover rounded-xl" 
                   style={selectedMediaList[0]?.filters ? getCSSFilterWithFade(selectedMediaList[0].filters) : undefined}
                 />
               ) : (
@@ -773,7 +786,7 @@ const CreatePost = () => {
                         <img 
                           src={media.croppedUrl || media.url} 
                           alt={`Foto ${index + 1}`} 
-                          className="w-full aspect-square object-cover rounded-lg" 
+                          className="w-full aspect-square object-cover rounded-xl" 
                           style={media.filters ? getCSSFilterWithFade(media.filters) : undefined}
                         />
                       </CarouselItem>
@@ -782,36 +795,36 @@ const CreatePost = () => {
                 </Carousel>
               )}
               {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
-                <div className="absolute top-2 left-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded-full flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-foreground">photo_library</span>
-                  <span className="text-xs font-medium text-foreground">{currentIndex + 1}/{selectedMediaList.length}</span>
+                <div className="absolute top-2 left-2 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-white">photo_library</span>
+                  <span className="text-xs font-semibold text-white">{currentIndex + 1}/{selectedMediaList.length}</span>
                 </div>
               )}
               {selectedMediaType === "photo" && !isPublishing && (
                 <>
                   <button 
                     onClick={() => handleCropPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
-                    className="absolute top-2 right-[5.5rem] w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    className="absolute top-2 right-[5.5rem] w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-all duration-200"
                     title="Recortar"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-foreground">crop</span>
+                    <span className="material-symbols-outlined text-[18px] text-white">crop</span>
                   </button>
                   <button 
                     onClick={() => handleEditPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)} 
-                    className="absolute top-2 right-12 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    className="absolute top-2 right-12 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-all duration-200"
                     title="Filtros"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-foreground">auto_fix_high</span>
+                    <span className="material-symbols-outlined text-[18px] text-white">auto_fix_high</span>
                   </button>
                 </>
               )}
-              <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50">
-                <span className="material-symbols-outlined text-[18px] text-foreground">close</span>
+              <button onClick={handleRemoveCurrentMedia} disabled={isPublishing} className="absolute top-2 right-2 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-all duration-200 disabled:opacity-50">
+                <span className="material-symbols-outlined text-[18px] text-white">close</span>
               </button>
               {selectedMediaList.length > 1 && selectedMediaType === "photo" && (
                 <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
                   {selectedMediaList.map((_, index) => (
-                    <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-background/60"}`} />
+                    <button key={index} onClick={() => carouselApi?.scrollTo(index)} className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? "bg-primary w-4" : "bg-white/40"}`} />
                   ))}
                 </div>
               )}
@@ -831,9 +844,9 @@ const CreatePost = () => {
                 />
               )}
               {selectedMediaType === "photo" && selectedMediaList.length < MAX_PHOTOS && !isPublishing && (
-                <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors disabled:opacity-50">
-                  <span className="material-symbols-outlined text-[20px] text-foreground">add_photo_alternate</span>
-                  <span className="text-sm font-medium text-foreground">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
+                <button onClick={handleAddMorePhotos} disabled={isLoading} className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200 disabled:opacity-50">
+                  <span className="material-symbols-outlined text-[20px] text-primary">add_photo_alternate</span>
+                  <span className="text-sm font-medium text-white">Adicionar mais fotos ({selectedMediaList.length}/{MAX_PHOTOS})</span>
                 </button>
               )}
             </div>
@@ -841,13 +854,13 @@ const CreatePost = () => {
 
           {/* Selected Music Display */}
           {selectedMusic && (
-            <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-xl border border-primary/30 mt-4">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-primary-foreground">music_note</span>
+            <div className="flex items-center gap-3 p-4 bg-zinc-900/80 backdrop-blur-sm rounded-xl border border-white/10 mt-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center animate-spin flex-shrink-0" style={{ animationDuration: '3s' }}>
+                <span className="material-symbols-outlined text-[18px] text-white">album</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{selectedMusic.track.title}</p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-sm font-medium text-white truncate">{selectedMusic.track.title}</p>
+                <p className="text-xs text-white/60 truncate">
                   {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
                 </p>
               </div>
@@ -856,44 +869,44 @@ const CreatePost = () => {
                   setSelectedMusic(null);
                   toast.success("Música removida");
                 }}
-                className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0 transition-all duration-200"
               >
-                <span className="material-symbols-outlined text-[18px] text-muted-foreground">close</span>
+                <span className="material-symbols-outlined text-[16px] text-white">close</span>
               </button>
             </div>
           )}
 
           <div className="flex gap-3 mt-4">
-            <Avatar className="w-10 h-10 flex-shrink-0">
+            <Avatar className="w-10 h-10 flex-shrink-0 border-2 border-white/20">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "Usuário"} />
-              <AvatarFallback className="bg-muted">
-                <span className="material-symbols-outlined text-[18px] text-muted-foreground">person</span>
+              <AvatarFallback className="bg-zinc-800">
+                <span className="material-symbols-outlined text-[18px] text-white/40">person</span>
               </AvatarFallback>
             </Avatar>
             <Textarea 
               placeholder="Escreva uma legenda..." 
               value={caption} 
               onChange={(e) => setCaption(e.target.value)} 
-              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm placeholder:text-muted-foreground focus-visible:ring-0" 
+              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-sm text-white placeholder:text-white/40 focus-visible:ring-0" 
               disabled={isPublishing}
               autoFocus={false}
             />
           </div>
 
-          <div className="border-t border-border pt-4 mt-4 space-y-1">
+          <div className="border-t border-white/10 pt-4 mt-4 space-y-1">
             <button 
               onClick={() => setViewMode("location-picker")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/80 transition-all duration-200" 
               disabled={isPublishing}
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px] text-foreground">location_on</span>
+                <span className="material-symbols-outlined text-[22px] text-white">location_on</span>
                 <div className="flex flex-col items-start">
-                  <span className="text-sm text-foreground">
+                  <span className="text-sm text-white">
                     {selectedLocation ? selectedLocation.name : "Adicionar localização"}
                   </span>
                   {selectedLocation && (
-                    <span className="text-xs text-muted-foreground">Toque para alterar</span>
+                    <span className="text-xs text-white/60">Toque para alterar</span>
                   )}
                 </div>
               </div>
@@ -905,40 +918,40 @@ const CreatePost = () => {
                       setSelectedLocation(null);
                       toast.success("Localização removida");
                     }}
-                    className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                    className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                    <span className="material-symbols-outlined text-[16px] text-white/60">close</span>
                   </button>
                 )}
-                <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+                <span className="material-symbols-outlined text-[20px] text-white/40">chevron_right</span>
               </div>
             </button>
             <button 
               onClick={() => selectedMediaType === "photo" && selectedMediaList.length > 0 && handleTagPhoto(selectedMediaList.length === 1 ? 0 : currentIndex)}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/80 transition-all duration-200" 
               disabled={isPublishing || selectedMediaType !== "photo" || selectedMediaList.length === 0}
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px] text-foreground">person_add</span>
-                <span className="text-sm text-foreground">
+                <span className="material-symbols-outlined text-[22px] text-white">person_add</span>
+                <span className="text-sm text-white">
                   Marcar pessoas {allTags.length > 0 && `(${allTags.length})`}
                 </span>
               </div>
-              <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+              <span className="material-symbols-outlined text-[20px] text-white/40">chevron_right</span>
             </button>
             <button 
               onClick={() => setViewMode("music-picker")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/80 transition-all duration-200" 
               disabled={isPublishing}
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px] text-foreground">music_note</span>
+                <span className="material-symbols-outlined text-[22px] text-white">music_note</span>
                 <div className="flex flex-col items-start">
-                  <span className="text-sm text-foreground">
+                  <span className="text-sm text-white">
                     {selectedMusic ? selectedMusic.track.title : "Adicionar música"}
                   </span>
                   {selectedMusic && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-white/60">
                       {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
                     </span>
                   )}
@@ -952,27 +965,27 @@ const CreatePost = () => {
                       setSelectedMusic(null);
                       toast.success("Música removida");
                     }}
-                    className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                    className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                    <span className="material-symbols-outlined text-[16px] text-white/60">close</span>
                   </button>
                 )}
-                <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+                <span className="material-symbols-outlined text-[20px] text-white/40">chevron_right</span>
               </div>
             </button>
             <button 
               onClick={() => setViewMode("schedule-picker")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors" 
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/80 transition-all duration-200" 
               disabled={isPublishing}
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[22px] text-foreground">schedule</span>
+                <span className="material-symbols-outlined text-[22px] text-white">schedule</span>
                 <div className="flex flex-col items-start">
-                  <span className="text-sm text-foreground">
+                  <span className="text-sm text-white">
                     {scheduledDate ? "Agendado para" : "Agendar publicação"}
                   </span>
                   {scheduledDate && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-white/60">
                       {format(scheduledDate, "dd MMM yyyy, HH:mm", { locale: ptBR })}
                     </span>
                   )}
@@ -986,12 +999,12 @@ const CreatePost = () => {
                       setScheduledDate(null);
                       toast.success("Agendamento removido");
                     }}
-                    className="w-6 h-6 rounded-full hover:bg-muted-foreground/20 flex items-center justify-center"
+                    className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-muted-foreground">close</span>
+                    <span className="material-symbols-outlined text-[16px] text-white/60">close</span>
                   </button>
                 )}
-                <span className="material-symbols-outlined text-[20px] text-muted-foreground">chevron_right</span>
+                <span className="material-symbols-outlined text-[20px] text-white/40">chevron_right</span>
               </div>
             </button>
           </div>
