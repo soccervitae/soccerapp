@@ -1,177 +1,171 @@
 
-## Plano: Redesign da Página CreateReplay com UI Moderna e Fundo Preto
+## Plano: Aplicar Layout Moderno da CreateReplay para CreateHighlight
 
 ### Objetivo
-Transformar a página de criação de Replay em uma experiência visual mais moderna e imersiva, com fundo completamente preto e elementos de UI estilo Instagram/TikTok.
+Transformar a página de criação de Destaque (CreateHighlight) no mesmo estilo visual moderno e imersivo da página CreateReplay, com fundo preto e elementos glassmorphism.
 
 ---
 
-### Mudanças de Design Propostas
+### Mudanças de Design
 
-#### 1. Fundo e Tema Geral
+#### 1. Tema Geral
 - **Fundo principal**: Preto sólido (`bg-black`) em toda a página
-- **Seção de galeria**: Fundo escuro com gradiente sutil (`bg-zinc-950` ou `bg-neutral-950`)
-- **Remover bordas claras**: Substituir `border-border` por bordas escuras sutis
+- **Seção de conteúdo**: Fundo escuro (`bg-zinc-950`)
+- **Textos**: Brancos com variações de opacidade (`white`, `white/60`, `white/40`)
 
-#### 2. Header Redesenhado
+#### 2. Header Modernizado
 - Fundo transparente com blur (`bg-black/60 backdrop-blur-xl`)
-- Botão de fechar com estilo minimalista (ícone branco sem fundo)
-- Título "Novo Replay" em branco
-- Botão "Avançar" com estilo mais destacado (fundo primary quando ativo)
+- Ícone de voltar em branco
+- Título centralizado em branco
+- Botão "Salvar" com estilo glassmorphism quando inativo, primary quando ativo
 
-#### 3. Área de Preview Melhorada
-- Manter fundo preto
-- Adicionar gradiente escuro na parte inferior para os controles
-- Controles flutuantes com glassmorphism mais pronunciado
-- Indicador de música com animação de vinil/disco girando
+#### 3. Modo de Seleção (Select Mode)
+- Cards de destaque com fundo `zinc-900/80` e bordas sutis `white/10`
+- Hover com `white/20` para feedback visual
+- Botão "Criar novo" com ícone em gradiente primary
+- Avatares com bordas escuras
 
-#### 4. Grid de Galeria Modernizado
-- Tiles de ação (Galeria, Foto, Vídeo) com design glassmorphism
-- Ícones com brilho/glow sutil
-- Bordas arredondadas maiores nos tiles
-- Seleção com borda brilhante ao invés de escala
-- Indicador de seleção com gradiente animado
+#### 4. Modo de Criação (Create Mode)
+- Input com fundo `zinc-900` e borda `white/10`
+- Grid de mídia com tiles glassmorphism
+- Botão de adicionar mídia com gradiente
+- Indicadores de seleção com glow
 
-#### 5. Detalhes Visuais
-- Usar `zinc-900`, `zinc-800` para tons intermediários
-- Textos em `white`, `white/80`, `white/60` para hierarquia
-- Spinners de loading em branco
-- Tabs de filtro (All/Photos/Videos) com estilo pill
+#### 5. Modo de Edição (Edit Mode)
+- Manter consistência com modo de criação
+- Progress bar com cores adaptadas ao tema escuro
 
 ---
 
-### Estrutura Visual Proposta
+### Estrutura Visual
 
 ```text
 ┌─────────────────────────────────────┐
-│  ✕          Novo Replay    Avançar  │  ← Header transparente com blur
+│  ←       Destaques/Novo      Salvar │  ← Header transparente + blur
 ├─────────────────────────────────────┤
 │                                     │
+│  ┌─────────────────────────────┐    │
+│  │ ➕ Criar novo destaque      │    │  ← Card glassmorphism
+│  └─────────────────────────────┘    │
 │                                     │
-│         [PREVIEW MÍDIA]             │  ← Área de preview 45%
+│  ── Seus Destaques ──               │
 │                                     │
-│    ┌──────────────────────────┐     │
-│    │ 🎵 Música · Artista      │     │  ← Indicador de música
-│    └──────────────────────────┘     │
-│  [⬜]          [✨] [🎵]            │  ← Controles flutuantes
-├─────────────────────────────────────┤
-│  [Galeria] [Foto] [Vídeo] [Multi]   │  ← Action tiles com glow
-├─────────────────────────────────────┤
-│  ┌───┐ ┌───┐ ┌───┐ ┌───┐           │
-│  │   │ │   │ │   │ │   │           │  ← Grid de galeria
-│  └───┘ └───┘ └───┘ └───┘           │
-│  ┌───┐ ┌───┐ ┌───┐ ┌───┐           │
-│  │   │ │   │ │   │ │   │           │
-│  └───┘ └───┘ └───┘ └───┘           │
+│  ┌─────────────────────────────┐    │
+│  │ 🖼 Destaque 1 · 5 mídias    │    │  ← Cards existentes
+│  └─────────────────────────────┘    │
+│  ┌─────────────────────────────┐    │
+│  │ 🖼 Destaque 2 · 3 mídias    │    │
+│  └─────────────────────────────┘    │
+│                                     │
 └─────────────────────────────────────┘
 ```
 
 ---
 
-### Alterações Técnicas
+### Alterações Técnicas no CreateHighlight.tsx
 
-#### Arquivo: `src/pages/CreateReplay.tsx`
-
-**Container Principal:**
+#### Container Principal
 ```tsx
 // De:
-<div className="h-screen w-full flex flex-col bg-background">
+<div className="min-h-screen bg-background">
 
 // Para:
-<div className="h-screen w-full flex flex-col bg-black">
+<div className="min-h-screen bg-black">
 ```
 
-**Header:**
+#### Header
 ```tsx
 // De:
-<div className="flex items-center justify-between px-4 py-3 border-b border-border">
+<div className="sticky top-0 z-10 flex items-center ... border-b border-border bg-background">
+  <button className="... hover:bg-muted">
+    <ArrowLeft className="w-5 h-5" />
 
 // Para:
-<div className="flex items-center justify-between px-4 py-3 bg-black/60 backdrop-blur-xl">
+<div className="sticky top-0 z-10 flex items-center ... bg-black/60 backdrop-blur-xl">
+  <button className="... hover:bg-white/10 transition-all duration-200">
+    <ArrowLeft className="w-5 h-5 text-white" />
+  <span className="text-base font-semibold text-white">
 ```
 
-**Botões do Header:**
+#### Cards de Seleção
 ```tsx
 // De:
-<button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted">
-  <span className="text-foreground">close</span>
+<button className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50">
+  <div className="h-14 w-14 rounded-full bg-primary/10 flex ... border-2 border-dashed border-primary">
 
 // Para:
-<button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10">
-  <span className="text-white">close</span>
+<button className="w-full flex items-center gap-4 p-4 rounded-xl bg-zinc-900/80 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200">
+  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex ... border-2 border-dashed border-primary/60 shadow-lg shadow-primary/10">
 ```
 
-**Botão Avançar:**
+#### Avatares de Destaques Existentes
 ```tsx
 // De:
-<Button variant="ghost" className="text-primary">
+<Avatar className="h-14 w-14 border-2 border-border">
+
+// Para:
+<Avatar className="h-14 w-14 border-2 border-white/20">
+```
+
+#### Labels e Textos
+```tsx
+// De:
+<p className="text-sm font-medium text-muted-foreground">
+
+// Para:
+<p className="text-sm font-medium text-white/60">
+```
+
+#### Inputs
+```tsx
+// De:
+<Input ... />
+
+// Para:
+<Input className="bg-zinc-900 border-white/10 text-white placeholder:text-white/40 focus:border-white/30" ... />
+```
+
+#### Tiles de Mídia
+```tsx
+// De:
+<div className="w-20 h-20 rounded-lg bg-muted border-2 border-dashed border-border">
+
+// Para:
+<div className="w-20 h-20 rounded-lg bg-zinc-900/80 border-2 border-dashed border-white/20 backdrop-blur-sm">
+```
+
+#### Botões
+```tsx
+// De:
+<Button type="submit" disabled={...} className="w-full">
 
 // Para:
 <Button 
-  className={`rounded-full px-4 ${
-    hasSelection 
-      ? 'bg-primary text-white hover:bg-primary/90' 
-      : 'bg-white/10 text-white/40'
-  }`}
+  type="submit" 
+  disabled={...} 
+  className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl transition-all duration-200 disabled:bg-white/10 disabled:text-white/40"
 >
 ```
 
-**Seção de Galeria:**
+#### Progress Bar (Edit Mode)
 ```tsx
 // De:
-<div className="flex-1 flex flex-col min-h-0 bg-background">
+<div className="flex flex-col gap-2 p-3 bg-muted rounded-lg">
 
 // Para:
-<div className="flex-1 flex flex-col min-h-0 bg-zinc-950">
+<div className="flex flex-col gap-2 p-3 bg-zinc-900/80 backdrop-blur-sm rounded-xl border border-white/10">
 ```
 
-**Tiles de Ação (Galeria, Foto, Vídeo):**
+#### Componentes SortableMedia e SortableExistingMedia
 ```tsx
 // De:
-<button className="bg-muted flex flex-col items-center">
-  <div className="w-10 h-10 bg-blue-500/20 rounded-full">
+<img ... className="... border-2 border-border" />
+<div className="... bg-background/80 ...">
 
 // Para:
-<button className="bg-zinc-900/80 backdrop-blur-sm rounded-lg flex flex-col items-center border border-white/5 hover:border-white/20">
-  <div className="w-11 h-11 bg-gradient-to-br from-blue-500/30 to-blue-600/10 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/10">
+<img ... className="... border-2 border-white/20" />
+<div className="... bg-black/60 backdrop-blur-sm border border-white/10 ...">
 ```
-
-**Itens da Galeria:**
-```tsx
-// De:
-className={`... ${isSelected ? 'scale-90 rounded-lg' : ''}`}
-
-// Para:
-className={`... ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-black rounded-sm' : ''}`}
-```
-
-**Loading States:**
-```tsx
-// De:
-<div className="border-2 border-primary border-t-transparent">
-
-// Para:
-<div className="border-2 border-white border-t-transparent">
-```
-
-**Textos e Labels:**
-```tsx
-// De:
-<span className="text-muted-foreground">
-
-// Para:
-<span className="text-white/60">
-```
-
----
-
-### Elementos de UI Modernos a Adicionar
-
-1. **Tile de Multi-seleção**: Adicionar botão para ativar seleção múltipla na barra de ações
-2. **Gradiente no Preview**: Adicionar gradiente escuro na parte inferior do preview
-3. **Animação no Indicador de Música**: Adicionar ícone de vinil girando
-4. **Hover States**: Transições suaves com `transition-all duration-200`
-5. **Safe Area Insets**: Garantir compatibilidade com notch/dynamic island
 
 ---
 
@@ -180,18 +174,19 @@ className={`... ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-bl
 | Elemento | Cor |
 |----------|-----|
 | Fundo principal | `#000000` (black) |
-| Fundo galeria | `#0a0a0a` (zinc-950) |
-| Tiles de ação | `#18181b` (zinc-900) |
-| Bordas | `rgba(255,255,255,0.05)` |
+| Fundo conteúdo | `#0a0a0a` (zinc-950) |
+| Cards/Tiles | `#18181b` (zinc-900) com opacity |
+| Bordas | `rgba(255,255,255,0.1)` |
 | Texto primário | `#ffffff` |
 | Texto secundário | `rgba(255,255,255,0.6)` |
+| Texto terciário | `rgba(255,255,255,0.4)` |
 | Accent | `#426F42` (primary) |
 
 ---
 
 ### Arquivos a Modificar
 
-1. **`src/pages/CreateReplay.tsx`** - Aplicar todas as mudanças de estilo descritas acima
+1. **`src/pages/CreateHighlight.tsx`** - Aplicar todas as mudanças de estilo
 
 ### Resultado Esperado
-Uma página de criação de Replay com visual moderno e imersivo, seguindo tendências de design de apps como Instagram Stories, TikTok e CapCut, com fundo escuro e elementos glassmorphism.
+Uma página de Destaque com o mesmo visual moderno e imersivo da página de Replay, mantendo consistência visual em todo o fluxo de criação de conteúdo.
