@@ -210,7 +210,7 @@ const CreateReplay = () => {
   // Show music picker fullscreen
   if (viewMode === "music-picker") {
     return (
-      <div className="h-screen w-full bg-background">
+      <div className="h-screen w-full bg-black">
         <MusicPicker 
           selectedMusic={selectedMusic} 
           onSelect={setSelectedMusic} 
@@ -244,31 +244,34 @@ const CreateReplay = () => {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div className="h-screen w-full flex flex-col bg-black">
+      {/* Header - Glassmorphism style */}
+      <div className="flex items-center justify-between px-4 py-3 bg-black/60 backdrop-blur-xl z-50">
         <button 
           onClick={handleClose} 
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-200"
         >
-          <span className="material-symbols-outlined text-[24px] text-foreground">close</span>
+          <span className="material-symbols-outlined text-[24px] text-white">close</span>
         </button>
         
-        <span className="text-base font-semibold text-foreground">Novo Replay</span>
+        <span className="text-base font-semibold text-white">Novo Replay</span>
         
         <Button 
           onClick={handleAdvance} 
           size="sm" 
-          variant="ghost" 
-          className="text-primary font-semibold text-sm hover:bg-transparent" 
+          className={`rounded-full px-5 font-semibold text-sm transition-all duration-200 ${
+            hasSelection && !isLoading
+              ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25' 
+              : 'bg-white/10 text-white/40 hover:bg-white/10'
+          }`}
           disabled={!hasSelection || isLoading}
         >
           Avançar
         </Button>
       </div>
 
-      {/* Preview Area */}
-      <div className="relative bg-black flex-shrink-0" style={{ height: '40%' }}>
+      {/* Preview Area - Dark immersive */}
+      <div className="relative bg-black flex-shrink-0" style={{ height: '45%' }}>
         {selectedMedia ? (
           selectedMediaType === "video" ? (
             <video 
@@ -296,27 +299,34 @@ const CreateReplay = () => {
                 </div>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[48px] text-white/40">photo_library</span>
-                  <p className="text-white/60 text-sm mt-2">Selecione uma foto ou vídeo</p>
+                  <span className="material-symbols-outlined text-[48px] text-white/30">photo_library</span>
+                  <p className="text-white/50 text-sm mt-2">Selecione uma foto ou vídeo</p>
                 </>
               )}
             </div>
           </div>
         )}
         
-        {/* Preview controls */}
+        {/* Bottom gradient overlay */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+        
+        {/* Preview controls - Floating glassmorphism */}
         {selectedMedia && (
-          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-            <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
+            <button className="w-11 h-11 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all duration-200">
               <span className="material-symbols-outlined text-[22px] text-white">aspect_ratio</span>
             </button>
             <div className="flex gap-2">
-              <button className="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
+              <button className="w-11 h-11 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all duration-200">
                 <span className="material-symbols-outlined text-[22px] text-white">auto_fix_high</span>
               </button>
               <button 
                 onClick={() => setViewMode("music-picker")} 
-                className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors ${selectedMusic ? 'bg-primary' : 'bg-black/50'}`}
+                className={`w-11 h-11 backdrop-blur-md rounded-full flex items-center justify-center border transition-all duration-200 ${
+                  selectedMusic 
+                    ? 'bg-primary border-primary shadow-lg shadow-primary/30' 
+                    : 'bg-white/10 border-white/10 hover:bg-white/20'
+                }`}
               >
                 <span className="material-symbols-outlined text-[22px] text-white">music_note</span>
               </button>
@@ -324,21 +334,23 @@ const CreateReplay = () => {
           </div>
         )}
 
-        {/* Selected music indicator */}
+        {/* Selected music indicator - Glassmorphism card */}
         {selectedMusic && (
-          <div className="absolute bottom-16 left-4 right-4 flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-lg">
-            <span className="material-symbols-outlined text-[18px] text-white animate-pulse">music_note</span>
+          <div className="absolute bottom-20 left-4 right-4 flex items-center gap-3 px-4 py-3 bg-white/10 backdrop-blur-xl rounded-xl border border-white/10 z-10">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center animate-spin" style={{ animationDuration: '3s' }}>
+              <span className="material-symbols-outlined text-[18px] text-white">album</span>
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium truncate">{selectedMusic.track.title}</p>
-              <p className="text-white/60 text-[10px] truncate">
+              <p className="text-white text-sm font-medium truncate">{selectedMusic.track.title}</p>
+              <p className="text-white/60 text-xs truncate">
                 {selectedMusic.track.artist} · {formatDuration(selectedMusic.startSeconds)} - {formatDuration(selectedMusic.endSeconds)}
               </p>
             </div>
             <button 
               onClick={() => setSelectedMusic(null)} 
-              className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-200"
             >
-              <span className="material-symbols-outlined text-[14px] text-white">close</span>
+              <span className="material-symbols-outlined text-[16px] text-white">close</span>
             </button>
           </div>
         )}
@@ -351,7 +363,7 @@ const CreateReplay = () => {
         )}
 
         {isLoading && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span className="text-white text-sm">Carregando...</span>
@@ -360,15 +372,15 @@ const CreateReplay = () => {
         )}
       </div>
 
-      {/* Gallery Section */}
-      <div className="flex-1 flex flex-col min-h-0 bg-background">
+      {/* Gallery Section - Dark theme */}
+      <div className="flex-1 flex flex-col min-h-0 bg-zinc-950">
         {/* Android fallback */}
         {isAndroid && (
           <div className="px-4 py-4">
             <button 
               onClick={handlePickFromGallery} 
               disabled={isLoading} 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl p-4 flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl p-4 flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[24px]">photo_library</span>
               <span className="font-medium">Escolher da Galeria</span>
@@ -392,48 +404,71 @@ const CreateReplay = () => {
           {isGalleryLoading && filteredMedia.length === 0 && (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-muted-foreground">Carregando galeria...</span>
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-white/50">Carregando galeria...</span>
               </div>
             </div>
           )}
 
           {/* Gallery items grid */}
           {(!isGalleryLoading || filteredMedia.length > 0) && (
-            <div className="grid grid-cols-4 gap-0.5">
-              {/* Gallery picker tile */}
+            <div className="grid grid-cols-4 gap-0.5 p-0.5">
+              {/* Gallery picker tile - Glassmorphism */}
               <button 
                 onClick={handlePickFromGallery} 
                 disabled={isLoading} 
-                className="relative aspect-square overflow-hidden bg-muted flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors disabled:opacity-50"
+                className="relative aspect-square overflow-hidden bg-zinc-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-1.5 hover:bg-zinc-800 transition-all duration-200 disabled:opacity-50 rounded-sm"
               >
-                <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[24px] text-blue-500">photo_library</span>
+                <div className="w-11 h-11 bg-gradient-to-br from-blue-500/30 to-blue-600/10 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/10">
+                  <span className="material-symbols-outlined text-[24px] text-blue-400">photo_library</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground font-medium">Galeria</span>
+                <span className="text-[10px] text-white/60 font-medium">Galeria</span>
               </button>
 
-              {/* Camera tile */}
+              {/* Camera tile - Glassmorphism */}
               <button 
                 onClick={handleTakePhoto} 
                 disabled={isLoading} 
-                className="relative aspect-square overflow-hidden bg-muted flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors disabled:opacity-50"
+                className="relative aspect-square overflow-hidden bg-zinc-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-1.5 hover:bg-zinc-800 transition-all duration-200 disabled:opacity-50 rounded-sm"
               >
-                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                <div className="w-11 h-11 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full flex items-center justify-center shadow-lg shadow-primary/10">
                   <span className="material-symbols-outlined text-[24px] text-primary">photo_camera</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground font-medium">Foto</span>
+                <span className="text-[10px] text-white/60 font-medium">Foto</span>
               </button>
 
-              {/* Video recorder tile */}
+              {/* Video recorder tile - Glassmorphism */}
               <button 
                 onClick={() => setViewMode("video-recorder")} 
-                className="relative aspect-square overflow-hidden bg-muted flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors"
+                className="relative aspect-square overflow-hidden bg-zinc-900/80 backdrop-blur-sm flex flex-col items-center justify-center gap-1.5 hover:bg-zinc-800 transition-all duration-200 rounded-sm"
               >
-                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[24px] text-red-500">videocam</span>
+                <div className="w-11 h-11 bg-gradient-to-br from-red-500/30 to-red-600/10 rounded-full flex items-center justify-center shadow-lg shadow-red-500/10">
+                  <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground font-medium">Vídeo</span>
+                <span className="text-[10px] text-white/60 font-medium">Vídeo</span>
+              </button>
+
+              {/* Multi-select tile - Glassmorphism */}
+              <button 
+                onClick={toggleMultiSelect} 
+                className={`relative aspect-square overflow-hidden backdrop-blur-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 rounded-sm ${
+                  multiSelect 
+                    ? 'bg-primary/20 ring-2 ring-primary ring-inset' 
+                    : 'bg-zinc-900/80 hover:bg-zinc-800'
+                }`}
+              >
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                  multiSelect 
+                    ? 'bg-primary shadow-primary/30' 
+                    : 'bg-gradient-to-br from-purple-500/30 to-purple-600/10 shadow-purple-500/10'
+                }`}>
+                  <span className={`material-symbols-outlined text-[24px] ${multiSelect ? 'text-white' : 'text-purple-400'}`}>
+                    {multiSelect ? 'check_circle' : 'library_add_check'}
+                  </span>
+                </div>
+                <span className={`text-[10px] font-medium ${multiSelect ? 'text-primary' : 'text-white/60'}`}>
+                  {multiSelect ? 'Multi ✓' : 'Multi'}
+                </span>
               </button>
 
               {/* Gallery items */}
@@ -446,12 +481,14 @@ const CreateReplay = () => {
                   <button 
                     key={`${media.id}-${index}`} 
                     onClick={() => handleMediaSelect(media)} 
-                    className="relative aspect-square overflow-hidden"
+                    className="relative aspect-square overflow-hidden group"
                   >
                     {media.type === "video" ? (
                       <video 
                         src={media.url} 
-                        className={`w-full h-full object-cover transition-all duration-200 ${isSelected ? 'scale-90 rounded-lg' : ''}`} 
+                        className={`w-full h-full object-cover transition-all duration-200 ${
+                          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-black rounded-sm scale-[0.92]' : ''
+                        }`} 
                         muted 
                         playsInline 
                       />
@@ -459,30 +496,39 @@ const CreateReplay = () => {
                       <img 
                         src={media.url} 
                         alt={`Gallery ${index + 1}`} 
-                        className={`w-full h-full object-cover transition-all duration-200 ${isSelected ? 'scale-90 rounded-lg' : ''}`} 
+                        className={`w-full h-full object-cover transition-all duration-200 ${
+                          isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-black rounded-sm scale-[0.92]' : ''
+                        }`} 
                       />
                     )}
                     
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200" />
+                    
                     {isCaptured && (
-                      <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-primary rounded text-[10px] font-bold text-primary-foreground">
+                      <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-primary rounded text-[10px] font-bold text-white">
                         NOVO
                       </div>
                     )}
                     
                     {multiSelect && (
-                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary' : 'bg-black/30 border-white/70'}`}>
-                        {isSelected && <span className="text-xs font-bold text-primary-foreground">{selectionIndex}</span>}
+                      <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                        isSelected 
+                          ? 'bg-primary border-primary shadow-lg shadow-primary/30' 
+                          : 'bg-black/40 border-white/60 backdrop-blur-sm'
+                      }`}>
+                        {isSelected && <span className="text-xs font-bold text-white">{selectionIndex}</span>}
                       </div>
                     )}
                     
                     {!multiSelect && isSelected && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[16px] text-primary-foreground">check</span>
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                        <span className="material-symbols-outlined text-[16px] text-white">check</span>
                       </div>
                     )}
 
                     {media.type === "video" && (
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/60 rounded">
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 backdrop-blur-sm rounded">
                         <span className="material-symbols-outlined text-[14px] text-white">play_arrow</span>
                       </div>
                     )}
@@ -494,13 +540,13 @@ const CreateReplay = () => {
 
           {isLoadingMore && (
             <div className="flex items-center justify-center py-4">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
           {!hasMore && deviceGallery.length > 0 && (
             <div className="flex items-center justify-center py-4">
-              <span className="text-xs text-muted-foreground">Fim da galeria</span>
+              <span className="text-xs text-white/40">Fim da galeria</span>
             </div>
           )}
         </div>
