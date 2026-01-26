@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Trash2, X, GripVertical, Pencil, Check, ChevronLeft, ChevronRight, ImagePlus, Images, Play, Film, Loader2, Eye, ImageOff } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { AddHighlightSheet } from "./AddHighlightSheet";
-import { SelectHighlightSheet } from "./SelectHighlightSheet";
 import { HighlightFullscreenView } from "./HighlightFullscreenView";
 import { UserHighlight, HighlightImage, useDeleteHighlight, useReorderHighlights, useUpdateHighlight, useAddHighlightImage, useDeleteHighlightImage } from "@/hooks/useProfile";
 import { useHighlightsNewViews } from "@/hooks/useHighlightInteractions";
@@ -181,11 +180,10 @@ export const HighlightsSection = ({
   profileUsername,
   profileAvatarUrl,
 }: HighlightsSectionProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const { data: currentUserProfile } = useProfile();
-  const [selectSheetOpen, setSelectSheetOpen] = useState(false);
-  const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteImageDialogOpen, setDeleteImageDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -574,7 +572,7 @@ export const HighlightsSection = ({
         {canAddHighlights && (
           <div 
             className="flex-none w-20 flex flex-col gap-2 items-center cursor-pointer"
-            onClick={() => setSelectSheetOpen(true)}
+            onClick={() => navigate("/create-highlight")}
           >
             <div className="w-16 h-16 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center hover:bg-muted/80 transition-colors">
               <Plus className="w-6 h-6 text-muted-foreground" />
@@ -611,17 +609,6 @@ export const HighlightsSection = ({
         className="hidden"
         onChange={handleAddMediaToExistingHighlight}
       />
-
-      {/* Select Highlight Sheet */}
-      <SelectHighlightSheet
-        open={selectSheetOpen}
-        onOpenChange={setSelectSheetOpen}
-        highlights={displayHighlights}
-        onSelectHighlight={handleSelectExistingHighlight}
-        onCreateNew={() => setAddSheetOpen(true)}
-      />
-
-      <AddHighlightSheet open={addSheetOpen} onOpenChange={setAddSheetOpen} />
 
       {/* Fullscreen View - Story-like with animation and swipe-to-close */}
       <HighlightFullscreenView

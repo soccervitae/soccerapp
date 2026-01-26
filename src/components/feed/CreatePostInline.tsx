@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useUploadMedia } from "@/hooks/useUploadMedia";
@@ -63,9 +63,9 @@ type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "
 const MAX_PHOTOS = 10;
 
 export const CreatePostInline = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile();
-  const [isReplayOpen, setIsReplayOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   
   // Post content states
@@ -869,7 +869,7 @@ export const CreatePostInline = () => {
               <span className="hidden sm:inline">Gravar</span>
             </button>
             <button
-              onClick={() => setIsReplayOpen(true)}
+              onClick={() => navigate("/create-replay")}
               disabled={isPublishing}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
             >
@@ -907,10 +907,8 @@ export const CreatePostInline = () => {
       {/* Editor Dialogs */}
       {renderEditorDialog()}
 
-      {/* Replay Sheet */}
-      <CreateReplaySheet open={isReplayOpen} onOpenChange={setIsReplayOpen} />
-
       {/* Moderation Info Sheet */}
+      <ModerationInfoSheet open={showModerationSheet} onOpenChange={setShowModerationSheet} />
       <ModerationInfoSheet open={showModerationSheet} onOpenChange={setShowModerationSheet} />
     </>
   );

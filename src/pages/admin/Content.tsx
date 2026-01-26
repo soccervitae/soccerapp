@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, FileText, Star, Image, Video } from "lucide-react";
 import { CreatePostSheet } from "@/components/feed/CreatePostSheet";
-import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
 import { ScheduledPostsSection } from "@/components/admin/ScheduledPostsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,8 +13,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function AdminContent() {
+  const navigate = useNavigate();
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [addHighlightOpen, setAddHighlightOpen] = useState(false);
 
   // Get official account ID
   const { data: officialAccount } = useQuery({
@@ -107,7 +107,7 @@ export default function AdminContent() {
             </CardContent>
           </Card>
 
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setAddHighlightOpen(true)}>
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate("/create-highlight")}>
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
@@ -264,12 +264,6 @@ export default function AdminContent() {
       <CreatePostSheet
         open={createPostOpen}
         onOpenChange={setCreatePostOpen}
-      />
-
-      {/* Add Highlight Sheet */}
-      <AddHighlightSheet
-        open={addHighlightOpen}
-        onOpenChange={setAddHighlightOpen}
       />
     </AdminLayout>
   );

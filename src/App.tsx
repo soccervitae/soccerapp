@@ -60,6 +60,8 @@ import { AdminRoute } from "@/components/admin/AdminRoute";
 
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
+import CreateReplay from "./pages/CreateReplay";
+import CreateHighlight from "./pages/CreateHighlight";
 import Post from "./pages/Post";
 import CreatePost from "./pages/CreatePost";
 
@@ -174,6 +176,16 @@ const AnimatedRoutes = () => {
       <Route path="/create-post" element={
         <ProtectedRoute>
           <PageTransition><CreatePost /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/create-replay" element={
+        <ProtectedRoute>
+          <PageTransition><CreateReplay /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/create-highlight" element={
+        <ProtectedRoute>
+          <PageTransition><CreateHighlight /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/explore" element={
