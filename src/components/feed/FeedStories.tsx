@@ -1,11 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { StoryViewer } from "./StoryViewer";
-import { CreateReplaySheet } from "./CreateReplaySheet";
 import { useStories, useCreateStory, type GroupedStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "react-router-dom";
 import { MediaPreview } from "@/components/common/MediaPreview";
 
 export const FeedStories = () => {
@@ -17,7 +16,6 @@ export const FeedStories = () => {
   
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
-  const [createReplayOpen, setCreateReplayOpen] = useState(false);
   const [clickOrigin, setClickOrigin] = useState<DOMRect | null>(null);
 
   const handleStoryClick = (groupIndex: number, e: React.MouseEvent<HTMLDivElement>) => {
@@ -31,16 +29,7 @@ export const FeedStories = () => {
       navigate("/login");
       return;
     }
-    setCreateReplayOpen(true);
-  };
-
-  const handleReplayCreated = async (replay: { image: string; caption: string; isVideo?: boolean }) => {
-    await createStory.mutateAsync({
-      mediaUrl: replay.image,
-      mediaType: replay.isVideo ? "video" : "image",
-      duration: replay.isVideo ? 15 : 5,
-    });
-    setCreateReplayOpen(false);
+    navigate("/create-replay");
   };
 
   if (isLoading) {
@@ -181,12 +170,6 @@ export const FeedStories = () => {
           originRect={clickOrigin}
         />
       )}
-
-      <CreateReplaySheet
-        open={createReplayOpen}
-        onOpenChange={setCreateReplayOpen}
-        onReplayCreated={handleReplayCreated}
-      />
     </>
   );
 };

@@ -2,17 +2,12 @@ import { forwardRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
-import { CreateReplaySheet } from "@/components/feed/CreateReplaySheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
-import { AddHighlightSheet } from "@/components/profile/AddHighlightSheet";
-import { SelectHighlightSheet } from "@/components/profile/SelectHighlightSheet";
-import { EditHighlightSheet } from "@/components/profile/EditHighlightSheet";
 
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserTeams } from "@/hooks/useTeams";
-import { useUserHighlights, UserHighlight } from "@/hooks/useProfile";
 
 const NavIcon = ({ 
   isActive, 
@@ -61,15 +56,8 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const { totalUnread } = useConversations();
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
-  const { data: highlights = [] } = useUserHighlights(user?.id);
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isReplayOpen, setIsReplayOpen] = useState(false);
-  const [isSelectHighlightOpen, setIsSelectHighlightOpen] = useState(false);
-  const [isAddHighlightOpen, setIsAddHighlightOpen] = useState(false);
-  const [isEditHighlightOpen, setIsEditHighlightOpen] = useState(false);
-  const [selectedHighlightToEdit, setSelectedHighlightToEdit] = useState<UserHighlight | null>(null);
-  
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
   
@@ -156,10 +144,10 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         navigate("/create-post");
         break;
       case "replay":
-        setIsReplayOpen(true);
+        navigate("/create-replay");
         break;
       case "highlight":
-        setIsSelectHighlightOpen(true);
+        navigate("/create-highlight");
         break;
       case "times":
         navigate("/select-teams");
@@ -171,12 +159,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         setIsAchievementOpen(true);
         break;
     }
-  };
-
-  const handleSelectExistingHighlight = (highlight: UserHighlight) => {
-    setSelectedHighlightToEdit(highlight);
-    setIsSelectHighlightOpen(false);
-    setIsEditHighlightOpen(true);
   };
 
   return (
@@ -230,31 +212,6 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         open={isMenuOpen} 
         onOpenChange={setIsMenuOpen}
         onSelectOption={handleSelectOption}
-      />
-
-
-      <CreateReplaySheet 
-        open={isReplayOpen} 
-        onOpenChange={setIsReplayOpen} 
-      />
-
-      <SelectHighlightSheet
-        open={isSelectHighlightOpen}
-        onOpenChange={setIsSelectHighlightOpen}
-        highlights={highlights}
-        onSelectHighlight={handleSelectExistingHighlight}
-        onCreateNew={() => setIsAddHighlightOpen(true)}
-      />
-
-      <AddHighlightSheet 
-        open={isAddHighlightOpen} 
-        onOpenChange={setIsAddHighlightOpen} 
-      />
-
-      <EditHighlightSheet
-        open={isEditHighlightOpen}
-        onOpenChange={setIsEditHighlightOpen}
-        highlight={selectedHighlightToEdit}
       />
 
 
