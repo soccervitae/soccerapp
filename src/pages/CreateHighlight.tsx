@@ -68,7 +68,7 @@ const SortableMedia = ({
         <>
           <video
             src={media.preview}
-            className="w-full h-full object-cover rounded-lg border-2 border-border"
+            className="w-full h-full object-cover rounded-lg border-2 border-white/20"
             muted
           />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -81,22 +81,22 @@ const SortableMedia = ({
         <img
           src={media.preview}
           alt="Preview"
-          className="w-full h-full object-cover rounded-lg border-2 border-border"
+          className="w-full h-full object-cover rounded-lg border-2 border-white/20"
         />
       )}
       <button
         type="button"
         onClick={onRemove}
-        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <X className="w-3 h-3 text-destructive-foreground" />
+        <X className="w-3 h-3 text-white" />
       </button>
       <div
         {...attributes}
         {...listeners}
-        className="absolute bottom-1 right-1 w-5 h-5 rounded bg-background/80 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute bottom-1 right-1 w-5 h-5 rounded bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <GripVertical className="w-3 h-3 text-muted-foreground" />
+        <GripVertical className="w-3 h-3 text-white/60" />
       </div>
     </div>
   );
@@ -137,7 +137,7 @@ const SortableExistingMedia = ({
         <>
           <video
             src={image.image_url}
-            className="w-full h-full object-cover rounded-lg border-2 border-border"
+            className="w-full h-full object-cover rounded-lg border-2 border-white/20"
             muted
           />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -150,27 +150,27 @@ const SortableExistingMedia = ({
         <img
           src={image.image_url}
           alt="Highlight media"
-          className="w-full h-full object-cover rounded-lg border-2 border-border"
+          className="w-full h-full object-cover rounded-lg border-2 border-white/20"
         />
       )}
       <button
         type="button"
         onClick={onRemove}
         disabled={isDeleting}
-        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
       >
         {isDeleting ? (
-          <Loader2 className="w-3 h-3 text-destructive-foreground animate-spin" />
+          <Loader2 className="w-3 h-3 text-white animate-spin" />
         ) : (
-          <X className="w-3 h-3 text-destructive-foreground" />
+          <X className="w-3 h-3 text-white" />
         )}
       </button>
       <div
         {...attributes}
         {...listeners}
-        className="absolute bottom-1 right-1 w-5 h-5 rounded bg-background/80 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute bottom-1 right-1 w-5 h-5 rounded bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <GripVertical className="w-3 h-3 text-muted-foreground" />
+        <GripVertical className="w-3 h-3 text-white/60" />
       </div>
     </div>
   );
@@ -493,24 +493,45 @@ const CreateHighlight = () => {
     ? Math.round((uploadProgress.current / uploadProgress.total) * 100) 
     : 0;
 
+  const canSave = viewMode === "create" && title.trim() && mediaItems.length > 0 && !isUploading;
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-border bg-background">
+    <div className="min-h-screen bg-black">
+      {/* Header - Glassmorphism style */}
+      <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-black/60 backdrop-blur-xl">
         <button 
           onClick={handleBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-200"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         
-        <span className="text-base font-semibold">
+        <span className="text-base font-semibold text-white">
           {viewMode === "select" && "Destaques"}
           {viewMode === "create" && "Novo Destaque"}
           {viewMode === "edit" && "Editar Destaque"}
         </span>
         
-        <div className="w-10" />
+        {viewMode === "create" ? (
+          <Button 
+            onClick={handleSubmitCreate}
+            size="sm" 
+            className={`rounded-full px-5 font-semibold text-sm transition-all duration-200 ${
+              canSave
+                ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25' 
+                : 'bg-white/10 text-white/40 hover:bg-white/10'
+            }`}
+            disabled={!canSave}
+          >
+            {isUploading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              "Salvar"
+            )}
+          </Button>
+        ) : (
+          <div className="w-10" />
+        )}
       </div>
 
       <div className="p-4">
@@ -520,43 +541,43 @@ const CreateHighlight = () => {
             {/* Create New Option */}
             <button
               onClick={() => setViewMode("create")}
-              className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+              className="w-full flex items-center gap-4 p-4 rounded-xl bg-zinc-900/80 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200"
             >
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary">
+              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border-2 border-dashed border-primary/60 shadow-lg shadow-primary/10">
                 <Plus className="h-6 w-6 text-primary" />
               </div>
               <div className="text-left">
-                <p className="font-semibold">Criar novo destaque</p>
-                <p className="text-xs text-muted-foreground">Adicione um novo destaque ao seu perfil</p>
+                <p className="font-semibold text-white">Criar novo destaque</p>
+                <p className="text-xs text-white/60">Adicione um novo destaque ao seu perfil</p>
               </div>
             </button>
 
             {/* Existing Highlights */}
             {highlights.length > 0 && (
               <>
-                <div className="mt-4 mb-2">
-                  <p className="text-sm font-medium text-muted-foreground">Seus Destaques</p>
+                <div className="mt-6 mb-3">
+                  <p className="text-sm font-medium text-white/60">Seus Destaques</p>
                 </div>
                 
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {highlights.map((highlight) => (
                     <button
                       key={highlight.id}
                       onClick={() => handleSelectHighlight(highlight)}
-                      className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-zinc-900/80 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200"
                     >
-                      <Avatar className="h-14 w-14 border-2 border-border">
+                      <Avatar className="h-14 w-14 border-2 border-white/20">
                         <AvatarImage 
                           src={highlight.image_url} 
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-muted">
-                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        <AvatarFallback className="bg-zinc-800">
+                          <ImageIcon className="h-6 w-6 text-white/40" />
                         </AvatarFallback>
                       </Avatar>
                       <div className="text-left flex-1">
-                        <p className="font-semibold">{highlight.title}</p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <p className="font-semibold text-white">{highlight.title}</p>
+                        <div className="flex items-center gap-1 text-xs text-white/60">
                           <Film className="h-3 w-3" />
                           <span>{getMediaCount(highlight)} {getMediaCount(highlight) === 1 ? 'mídia' : 'mídias'}</span>
                         </div>
@@ -568,9 +589,9 @@ const CreateHighlight = () => {
             )}
 
             {highlights.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Você ainda não tem destaques</p>
+              <div className="text-center py-12 text-white/40">
+                <ImageIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-white/60">Você ainda não tem destaques</p>
                 <p className="text-xs">Crie seu primeiro destaque acima</p>
               </div>
             )}
@@ -579,20 +600,21 @@ const CreateHighlight = () => {
 
         {/* Create Mode */}
         {viewMode === "create" && (
-          <form onSubmit={handleSubmitCreate} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmitCreate} className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="title">Título</Label>
+              <Label htmlFor="title" className="text-white/80">Título</Label>
               <Input
                 id="title"
                 placeholder="Ex: Gols, Treinos, Prêmios..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={20}
+                className="bg-zinc-900 border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label>Fotos e Vídeos ({mediaItems.length}/10)</Label>
+            <div className="flex flex-col gap-3">
+              <Label className="text-white/80">Fotos e Vídeos ({mediaItems.length}/10)</Label>
               
               <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                 <DndContext
@@ -623,39 +645,26 @@ const CreateHighlight = () => {
                       onChange={handleMediaChange}
                       className="hidden"
                     />
-                    <div className="w-20 h-20 rounded-lg bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors">
-                      <Film className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground">Mídia</span>
+                    <div className="w-20 h-20 rounded-lg bg-zinc-900/80 border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 hover:border-white/40 transition-all duration-200 backdrop-blur-sm">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shadow-lg shadow-primary/10">
+                        <Film className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-[10px] text-white/60 font-medium">Mídia</span>
                     </div>
                   </label>
                 )}
               </div>
               
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/40">
                 Arraste para reordenar. O primeiro item será a capa.
               </p>
             </div>
-
-            <Button 
-              type="submit" 
-              disabled={isUploading || !title.trim() || mediaItems.length === 0}
-              className="w-full"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                "Salvar Destaque"
-              )}
-            </Button>
           </form>
         )}
 
         {/* Edit Mode */}
         {viewMode === "edit" && selectedHighlight && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             {/* Title Section */}
             <div className="flex items-center gap-2">
               {isEditingTitle ? (
@@ -664,7 +673,7 @@ const CreateHighlight = () => {
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
                     maxLength={20}
-                    className="h-10"
+                    className="h-10 bg-zinc-900 border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveTitle();
@@ -679,6 +688,7 @@ const CreateHighlight = () => {
                     variant="ghost"
                     onClick={handleSaveTitle}
                     disabled={updateHighlight.isPending || !editedTitle.trim()}
+                    className="hover:bg-white/10 text-white"
                   >
                     {updateHighlight.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -689,11 +699,11 @@ const CreateHighlight = () => {
                 </div>
               ) : (
                 <>
-                  <h2 className="text-lg font-semibold">{selectedHighlight.title}</h2>
+                  <h2 className="text-lg font-semibold text-white">{selectedHighlight.title}</h2>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-white/10 text-white/60"
                     onClick={() => setIsEditingTitle(true)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -702,8 +712,8 @@ const CreateHighlight = () => {
               )}
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label>Fotos e Vídeos ({localImages.length}/10)</Label>
+            <div className="flex flex-col gap-3">
+              <Label className="text-white/80">Fotos e Vídeos ({localImages.length}/10)</Label>
               
               <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                 <DndContext
@@ -737,27 +747,29 @@ const CreateHighlight = () => {
                       className="hidden"
                       disabled={isUploading}
                     />
-                    <div className="w-20 h-20 rounded-lg bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:bg-muted/80 transition-colors">
-                      <Film className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground">Adicionar</span>
+                    <div className="w-20 h-20 rounded-lg bg-zinc-900/80 border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 hover:border-white/40 transition-all duration-200 backdrop-blur-sm">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shadow-lg shadow-primary/10">
+                        <Plus className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-[10px] text-white/60 font-medium">Adicionar</span>
                     </div>
                   </label>
                 )}
               </div>
               
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/40">
                 Arraste para reordenar. O primeiro item será a capa.
               </p>
             </div>
 
             {/* Upload Progress */}
             {isUploading && (
-              <div className="flex flex-col gap-2 p-3 bg-muted rounded-lg">
+              <div className="flex flex-col gap-2 p-4 bg-zinc-900/80 backdrop-blur-sm rounded-xl border border-white/10">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
+                  <span className="text-white/60">
                     Enviando {uploadProgress.current} de {uploadProgress.total}...
                   </span>
-                  <span className="font-medium">{progressPercentage}%</span>
+                  <span className="font-medium text-white">{progressPercentage}%</span>
                 </div>
                 <Progress value={progressPercentage} className="h-2" />
               </div>
@@ -765,7 +777,7 @@ const CreateHighlight = () => {
 
             <Button 
               onClick={handleBack}
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl transition-all duration-200"
               disabled={isUploading}
             >
               Concluído
