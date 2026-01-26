@@ -69,7 +69,7 @@ export const FeedPost = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [isMusicMuted, setIsMusicMuted] = useState(false);
+ const [isMusicMuted, setIsMusicMuted] = useState(true);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -105,18 +105,6 @@ export const FeedPost = ({
   // Music info for header alternation
   const musicTitle = post.music_title || post.music_track?.title;
   const musicArtist = post.music_artist || post.music_track?.artist;
-  
-  // Debug music data
-  useEffect(() => {
-    if (post.music_title || post.music_track) {
-      console.log('[FeedPost] Music data for post:', post.id, {
-        music_title: post.music_title,
-        music_artist: post.music_artist,
-        music_audio_url: post.music_audio_url,
-        music_track: post.music_track,
-      });
-    }
-  }, [post.id, post.music_title, post.music_artist, post.music_audio_url, post.music_track]);
 
   // Carousel effect
   useEffect(() => {
