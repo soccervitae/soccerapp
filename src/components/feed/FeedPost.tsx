@@ -167,15 +167,14 @@ export const FeedPost = ({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-            // Start playing music when visible
+            // Start playing music when visible (muted by default for autoplay policy)
             if (!musicAudioRef.current) {
               musicAudioRef.current = new Audio(musicAudioUrl);
               musicAudioRef.current.loop = true;
-              musicAudioRef.current.currentTime = musicStartSeconds;
             }
-            if (!isMusicMuted) {
-              musicAudioRef.current.play().catch(() => {});
-            }
+            musicAudioRef.current.currentTime = musicStartSeconds;
+            musicAudioRef.current.muted = isMusicMuted;
+            musicAudioRef.current.play().catch(() => {});
           } else {
             // Pause music when not visible
             if (musicAudioRef.current) {
@@ -195,16 +194,12 @@ export const FeedPost = ({
         musicAudioRef.current = null;
       }
     };
-  }, [hasMusicTrack, musicAudioUrl, post.media_type, musicStartSeconds]);
+  }, [hasMusicTrack, musicAudioUrl, post.media_type, musicStartSeconds, isMusicMuted]);
 
   // Handle music mute toggle
   useEffect(() => {
     if (!musicAudioRef.current) return;
-    if (isMusicMuted) {
-      musicAudioRef.current.pause();
-    } else {
-      musicAudioRef.current.play().catch(() => {});
-    }
+    musicAudioRef.current.muted = isMusicMuted;
   }, [isMusicMuted]);
 
   // Helper to parse media URLs
