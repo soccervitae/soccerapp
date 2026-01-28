@@ -246,11 +246,34 @@ export interface UserPost {
   media_type: string | null;
   likes_count: number | null;
   comments_count: number | null;
+  shares_count: number | null;
   created_at: string;
   updated_at: string | null;
   liked_by_user?: boolean;
   saved_by_user?: boolean;
   recent_likes?: RecentLikeUser[];
+  // Location fields
+  location_name: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+  // Music fields
+  music_track_id: string | null;
+  music_start_seconds: number | null;
+  music_end_seconds: number | null;
+  music_title: string | null;
+  music_artist: string | null;
+  music_audio_url: string | null;
+  music_cover_url: string | null;
+  music_duration_seconds: number | null;
+  music_source: string | null;
+  music_track?: {
+    id: string;
+    title: string;
+    artist: string;
+    audio_url: string;
+    cover_url: string | null;
+    duration_seconds: number;
+  } | null;
 }
 
 export const useUserPosts = (userId?: string) => {
@@ -277,7 +300,7 @@ export const useUserPosts = (userId?: string) => {
 
       const { data: posts, error } = await supabase
         .from("posts")
-        .select("*")
+        .select("*, music_track:music_tracks(*)")
         .eq("user_id", targetUserId)
         .order("created_at", { ascending: false });
 
@@ -355,7 +378,7 @@ export const useInfiniteUserPosts = (userId?: string) => {
 
       const { data: posts, error } = await supabase
         .from("posts")
-        .select("*")
+        .select("*, music_track:music_tracks(*)")
         .eq("user_id", targetUserId)
         .eq("is_published", true)
         .order("created_at", { ascending: false })
