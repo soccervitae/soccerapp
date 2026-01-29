@@ -8,10 +8,6 @@ import { CommentsSheet } from "./CommentsSheet";
 import { LikesSheet } from "./LikesSheet";
 import { MusicDetailsSheet } from "./MusicDetailsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
-
-// Module-level variables to track currently playing music across all FeedPost instances
-let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
-let currentlyPlayingFeedMusicStop: (() => void) | null = null;
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
 import { FullscreenImageViewer } from "./FullscreenImageViewer";
 import { useStories } from "@/hooks/useStories";
@@ -26,6 +22,10 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
+
+// Module-level variables to track currently playing music across all FeedPost instances
+let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
+let currentlyPlayingFeedMusicStop: (() => void) | null = null;
 interface FeedPostProps {
   post: Post;
   disableVideoViewer?: boolean;
