@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, Bookmark } from "lucide-react";
@@ -9,6 +9,9 @@ import { LikesSheet } from "./LikesSheet";
 import { MusicDetailsSheet } from "./MusicDetailsSheet";
 import { usePostTags } from "@/hooks/usePostTags";
 
+// Module-level variables to track currently playing music across all FeedPost instances
+let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
+let currentlyPlayingFeedMusicStop: (() => void) | null = null;
 import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
 import { FullscreenImageViewer } from "./FullscreenImageViewer";
 import { useStories } from "@/hooks/useStories";
@@ -69,7 +72,8 @@ export const FeedPost = ({
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
- const [isMusicMuted, setIsMusicMuted] = useState(true);
+  const [isMusicMuted, setIsMusicMuted] = useState(true);
+  const [isMusicInView, setIsMusicInView] = useState(false);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -83,6 +87,7 @@ export const FeedPost = ({
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const mediaContainerRef = useRef<HTMLDivElement>(null);
+  const isMusicMutedRef = useRef(isMusicMuted);
   const {
     data: postTags = []
   } = usePostTags(post.id);
@@ -158,6 +163,26 @@ export const FeedPost = ({
     return () => observer.disconnect();
   }, [post.media_type]);
 
+  // Keep isMusicMutedRef in sync with state (so observer doesn't need to re-create)
+  useEffect(() => {
+    isMusicMutedRef.current = isMusicMuted;
+    if (musicAudioRef.current) {
+      musicAudioRef.current.muted = isMusicMuted;
+    }
+  }, [isMusicMuted]);
+
+  // Stop music playback function for global coordination
+  const stopMusicPlayback = useCallback(() => {
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      // Clear global reference if this was the playing audio
+      if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+        currentlyPlayingFeedMusic = null;
+        currentlyPlayingFeedMusicStop = null;
+      }
+    }
+  }, []);
+
   // Music autoplay on viewport intersection (for image posts with music)
   useEffect(() => {
     if (!hasMusicTrack || !musicAudioUrl || post.media_type === "video") return;
@@ -167,18 +192,42 @@ export const FeedPost = ({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            setIsMusicInView(true);
+            
             // Start playing music when visible (muted by default for autoplay policy)
             if (!musicAudioRef.current) {
               musicAudioRef.current = new Audio(musicAudioUrl);
               musicAudioRef.current.loop = true;
+              
+              // Add timeupdate listener for precise looping within start/end bounds
+              musicAudioRef.current.addEventListener('timeupdate', () => {
+                if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
+                  musicAudioRef.current.currentTime = musicStartSeconds;
+                }
+              });
             }
+            
+            // Stop any other currently playing music
+            if (currentlyPlayingFeedMusicStop && currentlyPlayingFeedMusic !== musicAudioRef.current) {
+              currentlyPlayingFeedMusicStop();
+            }
+            
             musicAudioRef.current.currentTime = musicStartSeconds;
-            musicAudioRef.current.muted = isMusicMuted;
+            musicAudioRef.current.muted = isMusicMutedRef.current;
             musicAudioRef.current.play().catch(() => {});
+            
+            // Set global references
+            currentlyPlayingFeedMusic = musicAudioRef.current;
+            currentlyPlayingFeedMusicStop = stopMusicPlayback;
           } else {
+            setIsMusicInView(false);
             // Pause music when not visible
             if (musicAudioRef.current) {
               musicAudioRef.current.pause();
+              if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+                currentlyPlayingFeedMusic = null;
+                currentlyPlayingFeedMusicStop = null;
+              }
             }
           }
         });
@@ -191,16 +240,54 @@ export const FeedPost = ({
       observer.disconnect();
       if (musicAudioRef.current) {
         musicAudioRef.current.pause();
+        if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+          currentlyPlayingFeedMusic = null;
+          currentlyPlayingFeedMusicStop = null;
+        }
         musicAudioRef.current = null;
       }
     };
-  }, [hasMusicTrack, musicAudioUrl, post.media_type, musicStartSeconds, isMusicMuted]);
+  }, [hasMusicTrack, musicAudioUrl, post.media_type, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
 
-  // Handle music mute toggle
-  useEffect(() => {
-    if (!musicAudioRef.current) return;
-    musicAudioRef.current.muted = isMusicMuted;
-  }, [isMusicMuted]);
+  // Handle music mute toggle with explicit play() for user gesture compliance
+  const handleMusicToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const nextMuted = !isMusicMuted;
+    setIsMusicMuted(nextMuted);
+    
+    // Force play on user interaction (required for iOS/Safari)
+    if (!musicAudioRef.current && musicAudioUrl) {
+      musicAudioRef.current = new Audio(musicAudioUrl);
+      musicAudioRef.current.loop = true;
+      
+      // Add timeupdate listener for precise looping
+      musicAudioRef.current.addEventListener('timeupdate', () => {
+        if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
+          musicAudioRef.current.currentTime = musicStartSeconds;
+        }
+      });
+    }
+    
+    if (musicAudioRef.current) {
+      // Stop any other currently playing music
+      if (currentlyPlayingFeedMusicStop && currentlyPlayingFeedMusic !== musicAudioRef.current) {
+        currentlyPlayingFeedMusicStop();
+      }
+      
+      musicAudioRef.current.currentTime = musicStartSeconds;
+      musicAudioRef.current.muted = nextMuted;
+      
+      // Always call play() on user gesture - this is the key fix
+      musicAudioRef.current.play().catch((err) => {
+        console.error("Music playback failed:", err);
+      });
+      
+      // Set global references
+      currentlyPlayingFeedMusic = musicAudioRef.current;
+      currentlyPlayingFeedMusicStop = stopMusicPlayback;
+    }
+  }, [isMusicMuted, musicAudioUrl, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
 
   // Helper to parse media URLs
   const getMediaUrls = (): string[] => {
@@ -674,10 +761,7 @@ export const FeedPost = ({
           {/* Music volume button for image posts */}
           {hasMusicTrack && post.media_type !== "video" && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsMusicMuted(!isMusicMuted);
-              }}
+              onClick={handleMusicToggle}
               className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-95"
             >
               <span className="material-symbols-outlined text-white text-lg">
