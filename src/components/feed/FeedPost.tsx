@@ -26,6 +26,7 @@ import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 // Module-level variables to track currently playing music across all FeedPost instances
 let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
 let currentlyPlayingFeedMusicStop: (() => void) | null = null;
+
 interface FeedPostProps {
   post: Post;
   disableVideoViewer?: boolean;
