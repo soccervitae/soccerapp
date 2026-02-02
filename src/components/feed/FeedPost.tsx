@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
+import { fetchFreshDeezerPreviewUrl, isDeezerSignedUrlExpired } from "@/lib/deezer";
 
 // Module-level variables to track currently playing music across all FeedPost instances
 let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
@@ -128,6 +129,13 @@ export const FeedPost = ({
   const musicStartSeconds = post.music_start_seconds ?? 0;
   const musicEndSeconds = post.music_end_seconds ?? (post.music_duration_seconds || post.music_track?.duration_seconds || 30);
 
+  // Keep a mutable reference to the latest known playable URL.
+  // Deezer preview URLs can be signed and expire; we may swap them on playback failure.
+  const effectiveMusicUrlRef = useRef<string | null>(musicAudioUrl ?? null);
+  useEffect(() => {
+    effectiveMusicUrlRef.current = musicAudioUrl ?? null;
+  }, [musicAudioUrl]);
+
   // Alternate between position and music info every 4 seconds
   useEffect(() => {
     if (!hasMusicTrack || !musicTitle) return;
@@ -197,7 +205,10 @@ export const FeedPost = ({
             
             // Start playing music when visible (muted by default for autoplay policy)
             if (!musicAudioRef.current) {
-              musicAudioRef.current = new Audio(musicAudioUrl);
+              const url = effectiveMusicUrlRef.current;
+              if (!url) return;
+
+              musicAudioRef.current = new Audio(url);
               musicAudioRef.current.loop = true;
               
               // Add timeupdate listener for precise looping within start/end bounds
@@ -213,9 +224,9 @@ export const FeedPost = ({
               currentlyPlayingFeedMusicStop();
             }
             
-            musicAudioRef.current.currentTime = musicStartSeconds;
-            musicAudioRef.current.muted = isMusicMutedRef.current;
-            musicAudioRef.current.play().catch(() => {});
+             musicAudioRef.current.currentTime = musicStartSeconds;
+             musicAudioRef.current.muted = isMusicMutedRef.current;
+             musicAudioRef.current.play().catch(() => {});
             
             // Set global references
             currentlyPlayingFeedMusic = musicAudioRef.current;
@@ -258,16 +269,19 @@ export const FeedPost = ({
     setIsMusicMuted(nextMuted);
     
     // Force play on user interaction (required for iOS/Safari)
-    if (!musicAudioRef.current && musicAudioUrl) {
-      musicAudioRef.current = new Audio(musicAudioUrl);
-      musicAudioRef.current.loop = true;
-      
-      // Add timeupdate listener for precise looping
-      musicAudioRef.current.addEventListener('timeupdate', () => {
-        if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
-          musicAudioRef.current.currentTime = musicStartSeconds;
-        }
-      });
+    if (!musicAudioRef.current) {
+      const url = effectiveMusicUrlRef.current;
+      if (url) {
+        musicAudioRef.current = new Audio(url);
+        musicAudioRef.current.loop = true;
+
+        // Add timeupdate listener for precise looping
+        musicAudioRef.current.addEventListener('timeupdate', () => {
+          if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
+            musicAudioRef.current.currentTime = musicStartSeconds;
+          }
+        });
+      }
     }
     
     if (musicAudioRef.current) {
@@ -279,16 +293,73 @@ export const FeedPost = ({
       musicAudioRef.current.currentTime = musicStartSeconds;
       musicAudioRef.current.muted = nextMuted;
       
-      // Always call play() on user gesture - this is the key fix
-      musicAudioRef.current.play().catch((err) => {
+      // If Deezer URL is already expired, refresh before trying.
+      if (!nextMuted && effectiveMusicUrlRef.current && isDeezerSignedUrlExpired(effectiveMusicUrlRef.current)) {
+        fetchFreshDeezerPreviewUrl({ title: musicTitle, artist: musicArtist })
+          .then((freshUrl) => {
+            if (!freshUrl) return;
+            effectiveMusicUrlRef.current = freshUrl;
+            if (musicAudioRef.current) {
+              musicAudioRef.current.pause();
+              musicAudioRef.current = null;
+            }
+
+            const a = new Audio(freshUrl);
+            a.loop = true;
+            a.addEventListener('timeupdate', () => {
+              if (a.currentTime >= musicEndSeconds) {
+                a.currentTime = musicStartSeconds;
+              }
+            });
+            musicAudioRef.current = a;
+          })
+          .catch(() => {
+            // ignore
+          });
+      }
+
+      // Always call play() on user gesture - this is the key fix.
+      // If it fails (common: expired Deezer signed URL), fetch a fresh preview and retry once.
+      musicAudioRef.current.play().catch(async (err) => {
         console.error("Music playback failed:", err);
+
+        try {
+          const freshUrl = await fetchFreshDeezerPreviewUrl({ title: musicTitle, artist: musicArtist });
+          if (!freshUrl) return;
+
+          effectiveMusicUrlRef.current = freshUrl;
+          const freshAudio = new Audio(freshUrl);
+          freshAudio.loop = true;
+          freshAudio.currentTime = musicStartSeconds;
+          freshAudio.muted = nextMuted;
+          freshAudio.addEventListener('timeupdate', () => {
+            if (freshAudio.currentTime >= musicEndSeconds) {
+              freshAudio.currentTime = musicStartSeconds;
+            }
+          });
+
+          if (musicAudioRef.current) {
+            musicAudioRef.current.pause();
+          }
+          musicAudioRef.current = freshAudio;
+
+          if (currentlyPlayingFeedMusicStop && currentlyPlayingFeedMusic !== freshAudio) {
+            currentlyPlayingFeedMusicStop();
+          }
+
+          await freshAudio.play();
+          currentlyPlayingFeedMusic = freshAudio;
+          currentlyPlayingFeedMusicStop = stopMusicPlayback;
+        } catch {
+          // ignore
+        }
       });
       
       // Set global references
       currentlyPlayingFeedMusic = musicAudioRef.current;
       currentlyPlayingFeedMusicStop = stopMusicPlayback;
     }
-  }, [isMusicMuted, musicAudioUrl, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
+  }, [isMusicMuted, musicStartSeconds, musicEndSeconds, stopMusicPlayback, musicTitle, musicArtist]);
 
   // Helper to parse media URLs
   const getMediaUrls = (): string[] => {
