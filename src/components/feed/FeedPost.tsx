@@ -54,6 +54,7 @@ export const FeedPost = ({
   disableVideoViewer = false
 }: FeedPostProps) => {
   const isMobile = useIsMobile();
+  const isLandscapeMobile = isMobile && window.innerWidth > window.innerHeight;
   const navigate = useNavigate();
   const {
     user
