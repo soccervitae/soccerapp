@@ -560,7 +560,7 @@ export const HighlightFullscreenView = ({
                         )}
                       </div>
                     </div>
-                  ) : (
+                  ) : user ? (
                     // Visitor footer: reply input and action icons like replay
                     <div className="flex items-center gap-2">
                       <div className="flex-1 relative">
