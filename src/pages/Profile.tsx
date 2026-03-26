@@ -400,8 +400,8 @@ const Profile = () => {
 
   // Tab order for swipe navigation (exclude championships/achievements for official accounts)
   const tabOrder = isOfficialAccount 
-    ? ["profile", "videos", "photos"]
-    : ["profile", "teams", "videos", "championships", "achievements", "photos"];
+    ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
+    : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
   
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
