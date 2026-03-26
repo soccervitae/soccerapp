@@ -790,7 +790,7 @@ export default function AdminUsers() {
           toggleAdminMutation.mutate({ userId, isAdmin });
         }}
         onDelete={(userId) => {
-          const user = (usersData as any[])?.find((u: any) => u.id === userId);
+          const user = (users as any[])?.find((u: any) => u.id === userId);
           setUserToDelete({ id: userId, username: user?.username || "" });
           setDeleteDialogOpen(true);
         }}
