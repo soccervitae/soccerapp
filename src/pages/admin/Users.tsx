@@ -36,6 +36,16 @@ import { Link } from "react-router-dom";
 import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
 import { BanUserDialog } from "@/components/admin/BanUserDialog";
 import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = 20;
 
