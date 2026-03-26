@@ -423,11 +423,11 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList className={`w-full h-auto bg-transparent p-0 border-b border-border flex overflow-x-auto scrollbar-hide ${isOfficialAccount ? 'justify-center' : 'justify-start'}`}>
+      <TabsList className={`w-full h-auto bg-transparent p-0 border-b border-border flex overflow-x-auto scrollbar-hide ${isOfficialAccount || !isMobile ? 'justify-center' : 'justify-start'}`}>
         {!isGuest && (
           <TabsTrigger 
             value="profile" 
-            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount ? 'flex-1 px-2' : 'px-4'}`}
+            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount || !isMobile ? 'flex-1 px-2' : 'px-4'}`}
           >
             <span className="material-symbols-outlined text-[20px]">grid_on</span>
             Posts
@@ -436,7 +436,7 @@ const Profile = () => {
         {!isOfficialAccount && (
           <TabsTrigger 
             value="teams" 
-            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${!isMobile ? 'flex-1 px-2' : 'px-4'}`}
           >
             <span className="material-symbols-outlined text-[20px]">shield</span>
             Times
@@ -444,7 +444,7 @@ const Profile = () => {
         )}
         <TabsTrigger 
           value="videos" 
-          className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount ? 'flex-1 px-2' : 'px-4'}`}
+          className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount || !isMobile ? 'flex-1 px-2' : 'px-4'}`}
         >
           <span className="material-symbols-outlined text-[20px]">play_circle</span>
           Vídeos
@@ -452,7 +452,7 @@ const Profile = () => {
         {!isOfficialAccount && (
           <TabsTrigger 
             value="championships" 
-            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${!isMobile ? 'flex-1 px-2' : 'px-4'}`}
           >
             <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
             Campeonatos
@@ -461,7 +461,7 @@ const Profile = () => {
         {!isOfficialAccount && (
           <TabsTrigger 
             value="achievements"
-            className="flex-col gap-0.5 text-xs py-2 px-4 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground"
+            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${!isMobile ? 'flex-1 px-2' : 'px-4'}`}
           >
             <span className="material-symbols-outlined text-[20px]">trophy</span>
             Conquistas
@@ -469,7 +469,7 @@ const Profile = () => {
         )}
         <TabsTrigger 
           value="photos" 
-          className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount ? 'flex-1 px-2' : 'px-4'}`}
+          className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount || !isMobile ? 'flex-1 px-2' : 'px-4'}`}
         >
           <span className="material-symbols-outlined text-[20px]">photo_library</span>
           Fotos
