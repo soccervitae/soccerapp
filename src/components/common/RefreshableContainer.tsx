@@ -96,7 +96,7 @@ export const RefreshableContainer = ({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-auto ${className}`}
+      className={`relative overflow-x-visible overflow-y-auto ${className}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
