@@ -1,101 +1,38 @@
 
-## Plano: Corrigir Erro de Sintaxe no FeedPost.tsx
 
-### Problema Identificado
-O arquivo `src/components/feed/FeedPost.tsx` tem **imports declarados depois de variáveis de módulo (`let`)**, o que viola a especificação ES modules e causa falha silenciosa em Safari e Chrome:
+## Plano: Layout Desktop para Página de Perfil
 
-```tsx
-// Linha 11
-import { usePostTags } from "@/hooks/usePostTags";
+### Objetivo
+Aplicar o mesmo layout de 3 colunas usado na página Home (Index.tsx) à página de Perfil quando acessada por desktop: sidebar esquerda com menu, conteúdo do perfil centralizado, e sidebar direita com sugestões de usuários e trending.
 
-// Linhas 12-14 - variáveis de módulo
-let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
-let currentlyPlayingFeedMusicStop: (() => void) | null = null;
+### Layout Desktop (≥768px)
 
-// Linhas 15+ - IMPORTS DEPOIS DAS VARIÁVEIS (ERRO!)
-import { FullscreenVideoViewer } from "./FullscreenVideoViewer";
+```text
+┌─────────────────────────────────────────────────────┐
+│                   DesktopHeader                     │
+├──────────┬────────────────────────┬─────────────────┤
+│          │                        │                 │
+│ Desktop  │   Conteúdo do Perfil   │  RightSidebar   │
+│ Sidebar  │   (max-w-2xl, centro)  │  (sugestões +   │
+│ (menu)   │                        │   trending)     │
+│  w-64    │  ProfileHeader         │    w-80         │
+│          │  ProfileInfo           │                 │
+│          │  Highlights            │                 │
+│          │  Tabs + Feed           │                 │
+│          │                        │                 │
+└──────────┴────────────────────────┴─────────────────┘
 ```
 
-Em ES modules, todos os `import` devem estar no topo do arquivo, antes de qualquer outra declaração de código.
+### Mudanças
 
----
+**Arquivo: `src/pages/Profile.tsx`**
 
-### Solução
+1. Importar `useIsMobile`, `DesktopHeader`, `DesktopSidebar`, `RightSidebar`
+2. No retorno final, detectar se é desktop com `useIsMobile()`
+3. Se desktop: renderizar o layout com `DesktopHeader` + 3 colunas (`DesktopSidebar` | conteúdo centralizado em `max-w-2xl` | `RightSidebar`), sem `BottomNavigation` e sem `ProfileHeader` fixo (usar o do DesktopHeader)
+4. Se mobile: manter o layout atual sem mudanças
+5. Remover `pb-24` no desktop (não tem bottom nav)
 
-Mover todas as declarações `import` para o topo do arquivo, antes das variáveis de módulo.
+### Resultado
+A página de perfil no desktop terá a mesma estrutura visual do feed principal, com navegação lateral e sidebar de sugestões, semelhante a redes sociais como Twitter/X.
 
----
-
-### Mudanças no Arquivo
-
-**Arquivo:** `src/components/feed/FeedPost.tsx`
-
-**Antes (linhas 1-28):**
-```tsx
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-// ... outros imports ...
-import { usePostTags } from "@/hooks/usePostTags";
-
-// Module-level variables
-let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
-let currentlyPlayingFeedMusicStop: (() => void) | null = null;
-
-import { FullscreenVideoViewer } from "./FullscreenVideoViewer";  // ❌ ERRO
-import { FullscreenImageViewer } from "./FullscreenImageViewer";  // ❌ ERRO
-// ... mais imports ...
-```
-
-**Depois (estrutura correta):**
-```tsx
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Send, Bookmark } from "lucide-react";
-import { useLikePost, useSavePost, useUpdatePost, useDeletePost, useReportPost, type Post } from "@/hooks/usePosts";
-import { useAuth } from "@/contexts/AuthContext";
-import { CommentsSheet } from "./CommentsSheet";
-import { LikesSheet } from "./LikesSheet";
-import { MusicDetailsSheet } from "./MusicDetailsSheet";
-import { usePostTags } from "@/hooks/usePostTags";
-import { FullscreenVideoViewer } from "./FullscreenVideoViewer";      // ✅ Movido para cima
-import { FullscreenImageViewer } from "./FullscreenImageViewer";      // ✅ Movido para cima
-import { useStories } from "@/hooks/useStories";                      // ✅ Movido para cima
-import { StoryViewer } from "./StoryViewer";                          // ✅ Movido para cima
-import { ShareToChatSheet } from "@/components/common/ShareToChatSheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
-import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
-
-// Module-level variables to track currently playing music across all FeedPost instances
-let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;       // ✅ Depois dos imports
-let currentlyPlayingFeedMusicStop: (() => void) | null = null;       // ✅ Depois dos imports
-
-interface FeedPostProps {
-  post: Post;
-  disableVideoViewer?: boolean;
-}
-// ... resto do código
-```
-
----
-
-### Por que isso resolve o problema?
-
-1. **ES Modules Specification**: Os `import` são "hoisted" (elevados) semanticamente, mas declarações mistas podem causar comportamento inconsistente entre navegadores
-2. **Safari/Chrome strict mode**: Esses navegadores podem falhar silenciosamente quando encontram código estruturado incorretamente
-3. **Build tooling**: Mesmo que Vite/ESBuild processem o código, a estrutura incorreta pode gerar bundles problemáticos
-
----
-
-### Arquivos a Modificar
-
-1. **`src/components/feed/FeedPost.tsx`**
-   - Reorganizar imports para o topo do arquivo
-   - Mover variáveis de módulo (`let currentlyPlayingFeedMusic...`) para depois de todos os imports
