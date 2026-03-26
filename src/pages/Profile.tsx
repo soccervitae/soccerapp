@@ -25,14 +25,18 @@ import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-// ProfileFeedSheet removed - using FeedPost directly in profile tab
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
   const { user } = useAuth();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
@@ -531,40 +535,108 @@ const Profile = () => {
     </Tabs>
   );
 
-  const MainContent = () => (
+  const ProfileContent = () => (
     <>
-      <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
-      
-      <div className="pt-12 flex flex-col gap-4">
-        <ProfileInfo 
-          profile={profile} 
-          followStats={followStats}
-          isOwnProfile={isOwnProfile}
+      <ProfileInfo 
+        profile={profile} 
+        followStats={followStats}
+        isOwnProfile={isOwnProfile}
+      />
+      {isOfficialAccount ? (
+        <OfficialHighlightsSection 
+          highlights={highlights || []} 
+          isLoading={highlightsLoading}
+          profileUsername={profile.username}
+          profileAvatarUrl={profile.avatar_url}
         />
-        {isOfficialAccount ? (
-          <OfficialHighlightsSection 
+      ) : (
+        <div className="px-4">
+          <HighlightsSection 
             highlights={highlights || []} 
             isLoading={highlightsLoading}
+            isOwnProfile={isOwnProfile}
             profileUsername={profile.username}
             profileAvatarUrl={profile.avatar_url}
           />
-        ) : (
-          <div className="px-4">
-            <HighlightsSection 
-              highlights={highlights || []} 
-              isLoading={highlightsLoading}
-              isOwnProfile={isOwnProfile}
-              profileUsername={profile.username}
-              profileAvatarUrl={profile.avatar_url}
-            />
-          </div>
-        )}
-        <ProfileTabs />
+        </div>
+      )}
+      <ProfileTabs />
+    </>
+  );
+
+  const MainContent = () => (
+    <>
+      <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} />
+      <div className="pt-12 flex flex-col gap-4">
+        <ProfileContent />
       </div>
     </>
   );
 
-  // Only show RefreshableContainer for own profile
+  const MediaViewers = () => (
+    <>
+      <FullscreenImageViewer
+        images={mediaViewerImages}
+        initialIndex={mediaViewerInitialIndex}
+        isOpen={mediaViewerOpen}
+        onClose={() => setMediaViewerOpen(false)}
+        originRect={mediaViewerOriginRect}
+      />
+      <FullscreenVideoViewer
+        videos={videoViewerVideos}
+        initialIndex={videoViewerInitialIndex}
+        isOpen={videoViewerOpen}
+        onClose={() => setVideoViewerOpen(false)}
+        originRect={videoViewerOriginRect}
+      />
+    </>
+  );
+
+  // Desktop Layout
+  if (!isMobile) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex flex-col gap-4">
+                <ProfileInfo 
+                  profile={profile} 
+                  followStats={followStats}
+                  isOwnProfile={isOwnProfile}
+                />
+                {isOfficialAccount ? (
+                  <OfficialHighlightsSection 
+                    highlights={highlights || []} 
+                    isLoading={highlightsLoading}
+                    profileUsername={profile.username}
+                    profileAvatarUrl={profile.avatar_url}
+                  />
+                ) : (
+                  <div className="px-4">
+                    <HighlightsSection 
+                      highlights={highlights || []} 
+                      isLoading={highlightsLoading}
+                      isOwnProfile={isOwnProfile}
+                      profileUsername={profile.username}
+                      profileAvatarUrl={profile.avatar_url}
+                    />
+                  </div>
+                )}
+                <ProfileTabs />
+              </div>
+            </div>
+          </main>
+          <RightSidebar />
+        </div>
+        <MediaViewers />
+      </div>
+    );
+  }
+
+  // Mobile Layout
   const ContentWrapper = isOwnProfile ? RefreshableContainer : 'div';
   const wrapperProps = isOwnProfile 
     ? { onRefresh: handleRefresh, isRefreshing: isRefetching, className: "bg-background min-h-screen relative pb-24" }
@@ -627,25 +699,7 @@ const Profile = () => {
         <GuestBanner />
       )}
 
-      {/* ProfileFeedSheet removed - posts now render directly as FeedPost */}
-
-      {/* Fullscreen Image Viewer for Photos/Videos tabs */}
-      <FullscreenImageViewer
-        images={mediaViewerImages}
-        initialIndex={mediaViewerInitialIndex}
-        isOpen={mediaViewerOpen}
-        onClose={() => setMediaViewerOpen(false)}
-        originRect={mediaViewerOriginRect}
-      />
-
-      {/* Fullscreen Video Viewer for Videos tab */}
-      <FullscreenVideoViewer
-        videos={videoViewerVideos}
-        initialIndex={videoViewerInitialIndex}
-        isOpen={videoViewerOpen}
-        onClose={() => setVideoViewerOpen(false)}
-        originRect={videoViewerOriginRect}
-      />
+      <MediaViewers />
     </ContentWrapper>
   );
 };
