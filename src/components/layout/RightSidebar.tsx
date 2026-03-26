@@ -20,7 +20,41 @@ const trendingTopics = [
 
 export const RightSidebar = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const followUser = useFollowUser();
+  const { isUserOnline } = usePresenceContext();
+  const { totalUnread } = useConversations();
+
+  // Fetch following users for online section
+  const { data: followingUsers } = useQuery({
+    queryKey: ["following-users-sidebar", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data: following } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+      
+      if (!following || following.length === 0) return [];
+      
+      const followingIds = following.map(f => f.following_id);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url")
+        .in("id", followingIds);
+      
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const onlineFollowing = useMemo(() => {
+    return followingUsers?.filter(u => isUserOnline(u.id)) || [];
+  }, [followingUsers, isUserOnline]);
+
+  const handleStartChat = async (userId: string) => {
+    navigate(`/chat/${userId}`);
+  };
 
   const { data: suggestions, isLoading } = useQuery({
     queryKey: ["profile-suggestions", user?.id],
