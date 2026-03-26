@@ -40,7 +40,8 @@ const Profile = () => {
   
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
+  const isGuest = !user;
+  const [activeTab, setActiveTab] = useState(isGuest ? "teams" : "profile");
   // Grid refs removed - using FeedPost directly
   
   // Media viewer states
