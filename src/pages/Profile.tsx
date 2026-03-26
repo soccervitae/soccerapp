@@ -603,9 +603,9 @@ const Profile = () => {
   if (!isMobile) {
     return (
       <div className="min-h-screen bg-muted/30">
-        <DesktopHeader />
-        <div className="flex pt-14 max-w-screen-2xl mx-auto">
-          <DesktopSidebar />
+        {isAdminViewingProfile ? null : <DesktopHeader />}
+        <div className={`flex ${isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
+          {isAdminViewingProfile ? <AdminSidebar /> : <DesktopSidebar />}
           <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <div className="flex flex-col gap-4">
