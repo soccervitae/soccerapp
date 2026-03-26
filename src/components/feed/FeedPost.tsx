@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, Bookmark } from "lucide-react";
@@ -52,6 +53,7 @@ export const FeedPost = ({
   post,
   disableVideoViewer = false
 }: FeedPostProps) => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const {
     user
@@ -693,7 +695,7 @@ export const FeedPost = ({
       {post.media_url && <div
         ref={post.media_type !== "video" ? mediaContainerRef : undefined}
         data-no-pull="true"
-        className={`relative -mx-4 ${
+        className={`relative ${isMobile ? '-mx-4' : ''} ${
         post.media_type === "video" 
           ? "" 
           : "bg-muted overflow-hidden aspect-[4/5] max-h-[75vh]"
@@ -880,7 +882,7 @@ export const FeedPost = ({
         </div>}
 
       {/* Actions */}
-      <div className="pt-3 py-[4px] -mx-4">
+      <div className={`pt-3 py-[4px] ${isMobile ? '-mx-4' : ''}`}>
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
             <AnimatePresence mode="wait" initial={false}>
