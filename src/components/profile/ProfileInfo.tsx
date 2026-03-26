@@ -30,7 +30,8 @@ interface ProfileInfoProps {
 export const ProfileInfo = ({
   profile,
   followStats,
-  isOwnProfile = false
+  isOwnProfile = false,
+  isDesktop = false
 }: ProfileInfoProps) => {
   const navigate = useNavigate();
   const {
