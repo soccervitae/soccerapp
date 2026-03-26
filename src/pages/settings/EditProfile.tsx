@@ -268,6 +268,7 @@ const EditProfile = () => {
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
+        nickname: profile.nickname || "",
         bio: profile.bio || "",
         position: positionValue,
         role: isComissaoTecnica ? 'comissao_tecnica' : "",
