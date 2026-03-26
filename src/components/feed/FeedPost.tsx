@@ -53,6 +53,7 @@ export const FeedPost = ({
   post,
   disableVideoViewer = false
 }: FeedPostProps) => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const {
     user
