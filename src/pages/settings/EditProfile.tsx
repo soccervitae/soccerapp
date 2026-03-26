@@ -713,6 +713,21 @@ const EditProfile = () => {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="nickname">Apelido</Label>
+            <Input
+              id="nickname"
+              value={formData.nickname}
+              onChange={(e) => {
+                if (e.target.value.length <= 30) {
+                  setFormData({ ...formData, nickname: e.target.value });
+                }
+              }}
+              placeholder="Como querem te chamar?"
+              maxLength={30}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="gender" className="flex items-center gap-1">
               Sexo <span className="text-destructive">*</span>
             </Label>
