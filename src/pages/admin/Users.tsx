@@ -66,6 +66,8 @@ export default function AdminUsers() {
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [userToBan, setUserToBan] = useState<{ id: string; username: string } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; username: string } | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     status: "all",
     gender: "all",
