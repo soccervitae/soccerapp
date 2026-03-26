@@ -54,6 +54,7 @@ export const FeedPost = ({
   disableVideoViewer = false
 }: FeedPostProps) => {
   const isMobile = useIsMobile();
+  const isLandscapeMobile = isMobile && window.innerWidth > window.innerHeight;
   const navigate = useNavigate();
   const {
     user
@@ -698,14 +699,14 @@ export const FeedPost = ({
         className={`relative ${isMobile ? '-mx-4' : ''} ${
         post.media_type === "video" 
           ? "" 
-          : `bg-muted overflow-hidden ${isMobile ? 'aspect-[4/5] max-h-[75vh]' : 'aspect-[16/9] max-h-[60vh]'}`
+          : `bg-muted overflow-hidden ${isMobile ? (isLandscapeMobile ? 'w-full aspect-[16/9]' : 'w-full aspect-[4/5] max-h-[75vh]') : 'aspect-[16/9] max-h-[60vh]'}`
       }`}>
           {post.media_type === "video" ? <div
         ref={videoContainerRef}
         className="relative w-full cursor-pointer"
         style={{
-          aspectRatio: isMobile ? '4/5' : '16/9',
-          maxHeight: isMobile ? '75vh' : '60vh'
+          aspectRatio: isMobile ? (isLandscapeMobile ? '16/9' : '4/5') : '16/9',
+          maxHeight: isMobile ? (isLandscapeMobile ? 'none' : '75vh') : '60vh'
         }}
         onClick={() => {
           if (disableVideoViewer) {
