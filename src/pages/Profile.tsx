@@ -156,12 +156,19 @@ const Profile = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const pendingScrollRestoreRef = useRef<Array<{ element: HTMLElement; top: number; left: number }> | null>(null);
+  const tabScrollMemoryRef = useRef<Record<string, number>>({});
 
   const isScrollableElement = (element: HTMLElement) => {
     const style = window.getComputedStyle(element);
     const canScrollY = /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight;
     const canScrollX = /(auto|scroll)/.test(style.overflowX) && element.scrollWidth > element.clientWidth;
     return canScrollX || canScrollY;
+  };
+
+  // Save current document scroll position for the active tab
+  const saveCurrentTabScroll = () => {
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    tabScrollMemoryRef.current[activeTab] = scrollY;
   };
 
   const collectScrollTargets = () => {
@@ -200,25 +207,34 @@ const Profile = () => {
   };
 
   useLayoutEffect(() => {
-    const targets = pendingScrollRestoreRef.current;
-    if (!targets || targets.length === 0) return;
+    const savedY = tabScrollMemoryRef.current[activeTab];
+    const targetY = savedY !== undefined ? savedY : 0;
 
     let raf1 = 0;
     let raf2 = 0;
     let raf3 = 0;
-    const timeout1 = window.setTimeout(() => restoreScrollTargets(targets), 80);
+
+    const restoreAll = () => {
+      const targets = pendingScrollRestoreRef.current;
+      if (targets && targets.length > 0) {
+        restoreScrollTargets(targets);
+      }
+      window.scrollTo({ top: targetY, behavior: "auto" });
+    };
+
+    const timeout1 = window.setTimeout(restoreAll, 80);
     const timeout2 = window.setTimeout(() => {
-      restoreScrollTargets(targets);
+      restoreAll();
       pendingScrollRestoreRef.current = null;
     }, 180);
 
-    restoreScrollTargets(targets);
+    restoreAll();
     raf1 = requestAnimationFrame(() => {
-      restoreScrollTargets(targets);
+      restoreAll();
       raf2 = requestAnimationFrame(() => {
-        restoreScrollTargets(targets);
+        restoreAll();
         raf3 = requestAnimationFrame(() => {
-          restoreScrollTargets(targets);
+          restoreAll();
         });
       });
     });
@@ -487,6 +503,7 @@ const Profile = () => {
   // Handle tab change without moving page scroll
   const changeTabPreservingScroll = (nextTab: string) => {
     if (nextTab === activeTab) return;
+    saveCurrentTabScroll();
     pendingScrollRestoreRef.current = collectScrollTargets();
     setActiveTab(nextTab);
   };
