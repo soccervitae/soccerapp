@@ -700,7 +700,9 @@ const Profile = () => {
         <MainContent />
       )}
       
-      {user ? (
+      {isAdminViewingProfile ? (
+        <AdminMobileHeader />
+      ) : user ? (
         <BottomNavigation activeTab="profile" />
       ) : (
         <GuestBanner />
