@@ -80,15 +80,6 @@ export const DesktopHeader = () => {
           <div className="flex items-center gap-2">
             <NotificationBell />
 
-            <button
-              onClick={() => navigate("/messages")}
-              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-            >
-              <span className="material-symbols-outlined text-[24px]">chat</span>
-              {totalUnread > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
-              )}
-            </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
