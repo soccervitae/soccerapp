@@ -688,11 +688,13 @@ export default function AdminUsers() {
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => {
-                                  if (confirm("Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.")) {
-                                    deleteUserMutation.mutate(user.id);
-                                  }
+                                  setUserToDelete({ id: user.id, username: user.username });
+                                  setDeleteDialogOpen(true);
                                 }}
                               >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir permanentemente
+                              </DropdownMenuItem>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir permanentemente
                               </DropdownMenuItem>
