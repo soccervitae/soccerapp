@@ -698,15 +698,14 @@ export const FeedPost = ({
         className={`relative ${isMobile ? '-mx-4' : ''} ${
         post.media_type === "video" 
           ? "" 
-          : "bg-muted overflow-hidden aspect-[4/5] max-h-[75vh]"
+          : `bg-muted overflow-hidden ${isMobile ? 'aspect-[4/5] max-h-[75vh]' : 'aspect-[16/9] max-h-[60vh]'}`
       }`}>
           {post.media_type === "video" ? <div
         ref={videoContainerRef}
         className="relative w-full cursor-pointer"
         style={{
-          // Use 4:5 aspect ratio for all videos to fill full width
-          aspectRatio: '4/5',
-          maxHeight: '75vh'
+          aspectRatio: isMobile ? '4/5' : '16/9',
+          maxHeight: isMobile ? '75vh' : '60vh'
         }}
         onClick={() => {
           if (disableVideoViewer) {
