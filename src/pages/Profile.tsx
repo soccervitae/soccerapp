@@ -636,7 +636,7 @@ const Profile = () => {
               </div>
             </div>
           </main>
-          <RightSidebar />
+          {isAdminViewingProfile ? null : <RightSidebar />}
         </div>
         <MediaViewers />
       </div>
