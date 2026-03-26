@@ -40,7 +40,8 @@ const Profile = () => {
   
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
+  const isGuest = !user;
+  const [activeTab, setActiveTab] = useState(isGuest ? "teams" : "profile");
   // Grid refs removed - using FeedPost directly
   
   // Media viewer states
@@ -399,8 +400,8 @@ const Profile = () => {
 
   // Tab order for swipe navigation (exclude championships/achievements for official accounts)
   const tabOrder = isOfficialAccount 
-    ? ["profile", "videos", "photos"]
-    : ["profile", "teams", "videos", "championships", "achievements", "photos"];
+    ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
+    : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
   
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
@@ -419,13 +420,15 @@ const Profile = () => {
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
       <TabsList className={`w-full h-auto bg-transparent p-0 border-b border-border flex overflow-x-auto scrollbar-hide ${isOfficialAccount ? 'justify-center' : 'justify-start'}`}>
-        <TabsTrigger 
-          value="profile" 
-          className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount ? 'flex-1 px-2' : 'px-4'}`}
-        >
-          <span className="material-symbols-outlined text-[20px]">grid_on</span>
-          Posts
-        </TabsTrigger>
+        {!isGuest && (
+          <TabsTrigger 
+            value="profile" 
+            className={`flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground ${isOfficialAccount ? 'flex-1 px-2' : 'px-4'}`}
+          >
+            <span className="material-symbols-outlined text-[20px]">grid_on</span>
+            Posts
+          </TabsTrigger>
+        )}
         {!isOfficialAccount && (
           <TabsTrigger 
             value="teams" 
