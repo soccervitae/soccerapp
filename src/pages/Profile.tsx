@@ -429,7 +429,7 @@ const Profile = () => {
             value="profile" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
           >
-            <span className="material-symbols-outlined text-[20px]">grid_on</span>
+            <span className="material-symbols-outlined text-[26px]">grid_on</span>
             {!isMobile && 'Posts'}
           </TabsTrigger>
         )}
@@ -438,7 +438,7 @@ const Profile = () => {
             value="teams" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
           >
-            <span className="material-symbols-outlined text-[20px]">shield</span>
+            <span className="material-symbols-outlined text-[26px]">shield</span>
             {!isMobile && 'Times'}
           </TabsTrigger>
         )}
@@ -446,7 +446,7 @@ const Profile = () => {
           value="videos" 
           className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
         >
-          <span className="material-symbols-outlined text-[20px]">play_circle</span>
+          <span className="material-symbols-outlined text-[26px]">play_circle</span>
           {!isMobile && 'Vídeos'}
         </TabsTrigger>
         {!isOfficialAccount && (
@@ -454,7 +454,7 @@ const Profile = () => {
             value="championships" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
           >
-            <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
+            <span className="material-symbols-outlined text-[26px]">sports_soccer</span>
             {!isMobile && 'Campeonatos'}
           </TabsTrigger>
         )}
@@ -463,7 +463,7 @@ const Profile = () => {
             value="achievements"
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
           >
-            <span className="material-symbols-outlined text-[20px]">trophy</span>
+            <span className="material-symbols-outlined text-[26px]">trophy</span>
             {!isMobile && 'Conquistas'}
           </TabsTrigger>
         )}
@@ -471,7 +471,7 @@ const Profile = () => {
           value="photos" 
           className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-0.5 text-xs py-2 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
         >
-          <span className="material-symbols-outlined text-[20px]">photo_library</span>
+          <span className="material-symbols-outlined text-[26px]">photo_library</span>
           {!isMobile && 'Fotos'}
         </TabsTrigger>
       </TabsList>
