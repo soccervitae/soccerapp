@@ -192,24 +192,184 @@ export const ProfileInfo = ({
     setFullscreenImageOpen(true);
   };
 
-  // Desktop layout
+  // Desktop layout - MatDash inspired
   if (isDesktop) {
     return (
-      <section className="bg-card rounded-xl shadow-sm overflow-hidden border border-border/50">
-        {/* Cover Photo - taller on desktop */}
+      <section className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border/50">
+        {/* Cover Photo - wide banner */}
         <div 
-          className={`w-full h-48 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
+          className={`w-full h-52 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
           onClick={handleCoverClick}
         >
           {profile.cover_url ? (
             <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-muted/30 flex flex-col items-center justify-center gap-1">
-              <span className="material-symbols-outlined text-3xl text-muted-foreground/50">add_photo_alternate</span>
-              {isOwnProfile && <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>}
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-muted/30" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+        </div>
+
+        {/* Centered profile info */}
+        <div className="flex flex-col items-center -mt-16 relative z-10 pb-6">
+          {/* Avatar - centered, overlapping banner */}
+          <div 
+            className={`w-32 h-32 rounded-full p-[3px] transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : profile.avatar_url ? 'cursor-pointer' : ''}`} 
+            onClick={handleAvatarClick}
+          >
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-card bg-muted object-cover" />
+            ) : (
+              <div className="w-full h-full rounded-full border-4 border-card bg-muted flex items-center justify-center">
+                <span className="material-symbols-outlined text-5xl text-muted-foreground">person</span>
+              </div>
+            )}
+          </div>
+
+          {/* Name & role - centered */}
+          <div className="mt-3 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-2xl font-bold text-foreground">
+                {profile.full_name || profile.username}
+              </h2>
+              {(profile as any).is_official_account ? (
+                <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-[14px] font-bold">star</span>
+                </div>
+              ) : profile.conta_verificada && (
+                <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
+                </div>
+              )}
+            </div>
+            <p className="text-muted-foreground font-medium text-sm mt-0.5">
+              {(() => {
+                const displayRole = profile.position_name;
+                if (displayRole && profile.team) return `${displayRole} · ${profile.team}`;
+                return displayRole || profile.team || `@${profile.username}`;
+              })()}
+            </p>
+            {profile.bio && (
+              <p className="text-muted-foreground/80 text-sm mt-2 max-w-md mx-auto leading-relaxed line-clamp-3 px-6">
+                {profile.bio}
+              </p>
+            )}
+          </div>
+
+          {/* Stats counters - prominent row */}
+          <div className="flex items-center gap-0 mt-5">
+            {followStats && user && (
+              <>
+                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex flex-col items-center px-8 hover:opacity-70 transition-opacity">
+                  <span className="text-2xl font-bold text-foreground">{followStats.followers}</span>
+                  <span className="text-muted-foreground text-xs mt-0.5">Torcedores</span>
+                </button>
+                <div className="w-px h-10 bg-border" />
+                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex flex-col items-center px-8 hover:opacity-70 transition-opacity">
+                  <span className="text-2xl font-bold text-foreground">{followStats.following}</span>
+                  <span className="text-muted-foreground text-xs mt-0.5">Torcendo</span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Physical stats chips */}
+          {(profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
+            <div className="flex items-center gap-2 mt-4">
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">cake</span>
+                <span className="font-semibold text-foreground">{age || "-"} anos</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">height</span>
+                <span className="font-semibold text-foreground">{formatHeight(profile.height)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">monitor_weight</span>
+                <span className="font-semibold text-foreground">{formatWeight(profile.weight ? Number(profile.weight) : null)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">footprint</span>
+                <span className="font-semibold text-foreground">{formatFoot(profile.preferred_foot)}</span>
+              </div>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent pointer-events-none" />
+
+          {/* Action buttons - centered */}
+          <div className="flex gap-3 mt-5">
+            {isOwnProfile ? (
+              <>
+                <button onClick={() => navigate("/settings/profile")} className="bg-primary text-primary-foreground h-10 px-6 rounded-full font-semibold text-sm transition-colors hover:bg-primary/90 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">edit</span>
+                  Editar Perfil
+                </button>
+                
+                {useSheet ? (
+                  <>
+                    <button onClick={() => setShareSheetOpen(true)} className="bg-muted hover:bg-muted/80 text-foreground h-10 px-6 rounded-full font-semibold text-sm transition-colors border border-border flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">share</span>
+                      Compartilhar
+                    </button>
+                    <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+                      <DrawerContent>
+                        <DrawerHeader className="pb-2">
+                          <DrawerTitle className="text-center">Compartilhar Perfil</DrawerTitle>
+                        </DrawerHeader>
+                        <div className="flex flex-col gap-2 py-4 px-4">
+                          <button onClick={() => { handleShareProfile(); setShareSheetOpen(false); }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
+                            <span className="material-symbols-outlined text-[22px]">link</span>
+                            <span className="font-medium">Copiar link</span>
+                          </button>
+                          <button onClick={() => { setShareSheetOpen(false); setQrDialogOpen(true); }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
+                            <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
+                            <span className="font-medium">QR Code</span>
+                          </button>
+                        </div>
+                      </DrawerContent>
+                    </Drawer>
+                  </>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="bg-muted hover:bg-muted/80 text-foreground h-10 px-6 rounded-full font-semibold text-sm transition-colors border border-border flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">share</span>
+                        Compartilhar
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-48">
+                      <DropdownMenuItem onClick={handleShareProfile} className="cursor-pointer">
+                        <span className="material-symbols-outlined text-[18px] mr-2">link</span>
+                        Copiar link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setQrDialogOpen(true)} className="cursor-pointer">
+                        <span className="material-symbols-outlined text-[18px] mr-2">qr_code_2</span>
+                        QR Code
+                      </DropdownMenuItem>
+                      {typeof navigator.share === "function" && (
+                        <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                          <span className="material-symbols-outlined text-[18px] mr-2">ios_share</span>
+                          Compartilhar
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </>
+            ) : (
+              <>
+                <button ref={buttonRef} onClick={handleFollowClick} disabled={followUser.isPending} className={`h-10 px-6 rounded-full font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-2 disabled:opacity-50 ${isCheering ? "bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"}`}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}>
+                      {isCheering ? "✓ Torcendo" : "Torcer"}
+                    </motion.span>
+                  </AnimatePresence>
+                </button>
+                <button onClick={handleMessageClick} disabled={isStartingChat} className="bg-muted text-foreground h-10 px-6 rounded-full font-semibold text-sm transition-all duration-200 ease-out border border-border flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]">
+                  <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+                  Mensagem
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Profile info - horizontal layout */}
