@@ -25,6 +25,7 @@ interface ProfileInfoProps {
     isFollowing: boolean;
   };
   isOwnProfile?: boolean;
+  isDesktop?: boolean;
 }
 export const ProfileInfo = ({
   profile,
