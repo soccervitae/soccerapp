@@ -36,6 +36,16 @@ import { Link } from "react-router-dom";
 import { ViewUserSheet } from "@/components/admin/ViewUserSheet";
 import { BanUserDialog } from "@/components/admin/BanUserDialog";
 import { useAdminPageRefresh } from "@/hooks/useAdminPageRefresh";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -56,6 +66,8 @@ export default function AdminUsers() {
   const [viewSheetOpen, setViewSheetOpen] = useState(false);
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [userToBan, setUserToBan] = useState<{ id: string; username: string } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; username: string } | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     status: "all",
     gender: "all",
@@ -676,9 +688,8 @@ export default function AdminUsers() {
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => {
-                                  if (confirm("Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.")) {
-                                    deleteUserMutation.mutate(user.id);
-                                  }
+                                  setUserToDelete({ id: user.id, username: user.username });
+                                  setDeleteDialogOpen(true);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -779,9 +790,9 @@ export default function AdminUsers() {
           toggleAdminMutation.mutate({ userId, isAdmin });
         }}
         onDelete={(userId) => {
-          if (confirm("Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita e removerá todos os dados do usuário.")) {
-            deleteUserMutation.mutate(userId);
-          }
+          const user = (users as any[])?.find((u: any) => u.id === userId);
+          setUserToDelete({ id: userId, username: user?.username || "" });
+          setDeleteDialogOpen(true);
         }}
         isBanning={banUserMutation.isPending || unbanUserMutation.isPending}
         isDeleting={deleteUserMutation.isPending}
@@ -798,6 +809,56 @@ export default function AdminUsers() {
           }
         }}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              Excluir usuário permanentemente
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                Você está prestes a excluir permanentemente o usuário{" "}
+                <strong className="text-foreground">@{userToDelete?.username}</strong>.
+              </p>
+              <p className="font-medium text-destructive">
+                Esta ação é irreversível e removerá:
+              </p>
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                <li>Perfil, avatar e capa</li>
+                <li>Todas as postagens, fotos e vídeos</li>
+                <li>Stories e replays</li>
+                <li>Destaques e imagens</li>
+                <li>Comentários e aplausos</li>
+                <li>Mensagens e conversas</li>
+                <li>Seguidores e seguindo</li>
+                <li>Times, conquistas e campeonatos</li>
+                <li>Notificações e denúncias</li>
+                <li>Tickets de suporte</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteUserMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteUserMutation.isPending}
+              onClick={() => {
+                if (userToDelete) {
+                  deleteUserMutation.mutate(userToDelete.id);
+                  setDeleteDialogOpen(false);
+                  setUserToDelete(null);
+                }
+              }}
+            >
+              {deleteUserMutation.isPending ? "Excluindo..." : "Excluir permanentemente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
