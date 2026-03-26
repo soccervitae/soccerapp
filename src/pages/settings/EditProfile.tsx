@@ -86,6 +86,7 @@ const EditProfile = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     username: "",
+    nickname: "",
     bio: "",
     position: "",
     role: "",
@@ -267,6 +268,7 @@ const EditProfile = () => {
       setFormData({
         full_name: profile.full_name || "",
         username: profile.username || "",
+        nickname: profile.nickname || "",
         bio: profile.bio || "",
         position: positionValue,
         role: isComissaoTecnica ? 'comissao_tecnica' : "",
@@ -489,6 +491,7 @@ const EditProfile = () => {
       const updateData: Record<string, unknown> = {
         full_name: formData.full_name || null,
         username: formData.username,
+        nickname: formData.nickname || null,
         bio: formData.bio || null,
         role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
         team: formData.team || null,
@@ -707,6 +710,21 @@ const EditProfile = () => {
             <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
               @{formData.username}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nickname">Apelido</Label>
+            <Input
+              id="nickname"
+              value={formData.nickname}
+              onChange={(e) => {
+                if (e.target.value.length <= 30) {
+                  setFormData({ ...formData, nickname: e.target.value });
+                }
+              }}
+              placeholder="Como querem te chamar?"
+              maxLength={30}
+            />
           </div>
 
           <div className="space-y-2">
