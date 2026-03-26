@@ -705,8 +705,8 @@ export const FeedPost = ({
         ref={videoContainerRef}
         className="relative w-full cursor-pointer"
         style={{
-          aspectRatio: isMobile ? '4/5' : '16/9',
-          maxHeight: isMobile ? '75vh' : '60vh'
+          aspectRatio: isMobile ? (isLandscapeMobile ? '16/9' : '4/5') : '16/9',
+          maxHeight: isMobile ? (isLandscapeMobile ? 'none' : '75vh') : '60vh'
         }}
         onClick={() => {
           if (disableVideoViewer) {
