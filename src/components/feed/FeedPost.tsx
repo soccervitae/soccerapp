@@ -882,7 +882,7 @@ export const FeedPost = ({
         </div>}
 
       {/* Actions */}
-      <div className="pt-3 py-[4px] -mx-4">
+      <div className={`pt-3 py-[4px] ${isMobile ? '-mx-4' : ''}`}>
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
             <AnimatePresence mode="wait" initial={false}>
