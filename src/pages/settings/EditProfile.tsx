@@ -491,6 +491,7 @@ const EditProfile = () => {
       const updateData: Record<string, unknown> = {
         full_name: formData.full_name || null,
         username: formData.username,
+        nickname: formData.nickname || null,
         bio: formData.bio || null,
         role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
         team: formData.team || null,
