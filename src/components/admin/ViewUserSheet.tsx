@@ -258,6 +258,9 @@ export function ViewUserSheet({
                     )}
                   </div>
                   <p className="text-muted-foreground">@{user.username}</p>
+                  {user.nickname && (
+                    <p className="text-sm text-muted-foreground/70">Apelido: {user.nickname}</p>
+                  )}
                   {user.bio && (
                     <p className="text-sm mt-2">{user.bio}</p>
                   )}
