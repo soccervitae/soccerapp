@@ -39,7 +39,7 @@ export function PostMusicPlayer({
   const [hasAutoPlayed, setHasAutoPlayed] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const stopPlayback = useCallback(() => {

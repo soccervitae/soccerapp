@@ -116,7 +116,7 @@ const EditProfile = () => {
   const [nationalityOpen, setNationalityOpen] = useState(false);
   const [statePickerOpen, setStatePickerOpen] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
-  const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+  const usernameCheckTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check if Brazil is selected
   const isBrazilSelected = countries.find(c => c.id.toString() === formData.nationality)?.nome?.toLowerCase() === "brasil";
