@@ -1,9 +1,13 @@
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useFollowUser } from "@/hooks/useProfile";
+import { usePresenceContext } from "@/contexts/PresenceContext";
+import { useConversations } from "@/hooks/useConversations";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const trendingTopics = [
