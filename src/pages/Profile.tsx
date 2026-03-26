@@ -28,9 +28,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { RightSidebar } from "@/components/layout/RightSidebar";
+import { AdminSidebar, AdminMobileHeader } from "@/components/admin/AdminSidebar";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
@@ -100,6 +102,8 @@ const Profile = () => {
   const profileView = useProfileView();
 
   const isOwnProfile = user?.id === targetUserId;
+  const { isAdmin } = useIsAdmin();
+  const isAdminViewingProfile = isAdmin && !isOwnProfile && !!username;
 
   // Record profile view
   useEffect(() => {
@@ -599,9 +603,9 @@ const Profile = () => {
   if (!isMobile) {
     return (
       <div className="min-h-screen bg-muted/30">
-        <DesktopHeader />
-        <div className="flex pt-14 max-w-screen-2xl mx-auto">
-          <DesktopSidebar />
+        {isAdminViewingProfile ? null : <DesktopHeader />}
+        <div className={`flex ${isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
+          {isAdminViewingProfile ? <AdminSidebar /> : <DesktopSidebar />}
           <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <div className="flex flex-col gap-4">
@@ -632,7 +636,7 @@ const Profile = () => {
               </div>
             </div>
           </main>
-          <RightSidebar />
+          {isAdminViewingProfile ? null : <RightSidebar />}
         </div>
         <MediaViewers />
       </div>
@@ -696,7 +700,9 @@ const Profile = () => {
         <MainContent />
       )}
       
-      {user ? (
+      {isAdminViewingProfile ? (
+        <AdminMobileHeader />
+      ) : user ? (
         <BottomNavigation activeTab="profile" />
       ) : (
         <GuestBanner />
