@@ -86,6 +86,7 @@ const EditProfile = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     username: "",
+    nickname: "",
     bio: "",
     position: "",
     role: "",
