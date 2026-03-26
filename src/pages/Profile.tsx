@@ -421,8 +421,17 @@ const Profile = () => {
   const hasHighlights = highlights && highlights.length > 0;
 
   // Profile tabs component
+  const handleTabChange = (value: string) => {
+    const scrollY = window.scrollY;
+    setActiveTab(value);
+    // Restore scroll position after React re-render
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollY);
+    });
+  };
+
   const ProfileTabs = () => (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
+    <Tabs value={activeTab} onValueChange={handleTabChange} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
       <TabsList className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-12 z-30 bg-background' : 'justify-center bg-transparent'}`}>
         {!isGuest && (
           <TabsTrigger 
