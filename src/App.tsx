@@ -307,7 +307,7 @@ const App = () => {
               <AnimatePresence mode="wait">
                 {showSplash && <SplashScreen key="splash" />}
               </AnimatePresence>
-              <OrientationLock />
+              
               {/* PWA auto-update hook */}
               <PwaAutoUpdate />
               <BrowserRouter>
