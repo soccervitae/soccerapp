@@ -661,7 +661,7 @@ export default function AdminUsers() {
                             Ver detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link to={`/profile/${user.username}`}>
+                            <Link to={`/${user.username}`}>
                               <Eye className="h-4 w-4 mr-2" />
                               Ver perfil público
                             </Link>
