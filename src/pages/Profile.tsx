@@ -613,6 +613,7 @@ const Profile = () => {
                   profile={profile} 
                   followStats={followStats}
                   isOwnProfile={isOwnProfile}
+                  isDesktop={true}
                 />
                 {isOfficialAccount ? (
                   <OfficialHighlightsSection 
