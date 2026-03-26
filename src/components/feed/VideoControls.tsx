@@ -22,7 +22,7 @@ export const VideoControls = ({
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
 
   // Auto-hide controls after 3 seconds
