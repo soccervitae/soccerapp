@@ -25,9 +25,12 @@ import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-// ProfileFeedSheet removed - using FeedPost directly in profile tab
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
