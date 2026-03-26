@@ -696,7 +696,7 @@ export const FeedPost = ({
       {post.media_url && <div
         ref={post.media_type !== "video" ? mediaContainerRef : undefined}
         data-no-pull="true"
-        className={`relative ${isMobile ? '-mx-4' : ''} ${
+        className={`relative ${isMobile ? 'w-screen ml-[calc(50%-50vw)] mr-[calc(50%-50vw)]' : ''} ${
         post.media_type === "video" 
           ? "" 
           : `bg-muted overflow-hidden ${isMobile ? (isLandscapeMobile ? 'w-full aspect-[16/9]' : 'w-full aspect-[4/5] max-h-[75vh]') : 'aspect-[16/9] max-h-[60vh]'}`
