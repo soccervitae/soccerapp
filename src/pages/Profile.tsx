@@ -623,15 +623,13 @@ const Profile = () => {
                     profileAvatarUrl={profile.avatar_url}
                   />
                 ) : (
-                  <div className="px-4">
-                    <HighlightsSection 
-                      highlights={highlights || []} 
-                      isLoading={highlightsLoading}
-                      isOwnProfile={isOwnProfile}
-                      profileUsername={profile.username}
-                      profileAvatarUrl={profile.avatar_url}
-                    />
-                  </div>
+                  <HighlightsSection 
+                    highlights={highlights || []} 
+                    isLoading={highlightsLoading}
+                    isOwnProfile={isOwnProfile}
+                    profileUsername={profile.username}
+                    profileAvatarUrl={profile.avatar_url}
+                  />
                 )}
                 <ProfileTabs />
               </div>
