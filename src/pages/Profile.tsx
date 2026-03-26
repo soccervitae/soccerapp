@@ -601,13 +601,14 @@ const Profile = () => {
 
   // Desktop Layout
   if (!isMobile) {
+    const showSidebars = !isGuest && !isAdminViewingProfile;
     return (
       <div className="min-h-screen bg-muted/30">
-        {isAdminViewingProfile ? null : <DesktopHeader />}
-        <div className={`flex ${isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
-          {isAdminViewingProfile ? <AdminSidebar /> : <DesktopSidebar />}
+        {isGuest ? null : isAdminViewingProfile ? null : <DesktopHeader />}
+        <div className={`flex ${isGuest ? '' : isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
+          {isAdminViewingProfile ? <AdminSidebar /> : showSidebars ? <DesktopSidebar /> : null}
           <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
-            <div className="max-w-2xl mx-auto">
+            <div className={`${isGuest ? 'max-w-3xl' : 'max-w-2xl'} mx-auto`}>
               <div className="flex flex-col gap-4">
                 <ProfileInfo 
                   profile={profile} 
@@ -635,7 +636,7 @@ const Profile = () => {
               </div>
             </div>
           </main>
-          {isAdminViewingProfile ? null : <RightSidebar />}
+          {showSidebars ? <RightSidebar /> : null}
         </div>
         <MediaViewers />
       </div>
