@@ -289,20 +289,6 @@ const App = () => {
   const [showSplash, setShowSplash] = useState(isFirstOpen);
 
   useEffect(() => {
-    // Lock screen orientation to portrait on supported browsers
-    const lockOrientation = async () => {
-      try {
-        const orientation = screen.orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
-        if (orientation && orientation.lock) {
-          await orientation.lock('portrait');
-        }
-      } catch {
-        // Silent fail - API not supported or not allowed
-      }
-    };
-    lockOrientation();
-
-    // Hide splash screen after 2.5 seconds (only if showing)
     if (showSplash) {
       const timer = setTimeout(() => {
         setShowSplash(false);
