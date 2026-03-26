@@ -623,7 +623,7 @@ export const HighlightFullscreenView = ({
                         <Send className="w-5 h-5" strokeWidth={1.5} />
                       </button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Highlight dots */}
