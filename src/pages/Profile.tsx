@@ -102,6 +102,8 @@ const Profile = () => {
   const profileView = useProfileView();
 
   const isOwnProfile = user?.id === targetUserId;
+  const { isAdmin } = useIsAdmin();
+  const isAdminViewingProfile = isAdmin && !isOwnProfile && !!username;
 
   // Record profile view
   useEffect(() => {
