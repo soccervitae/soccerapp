@@ -423,7 +423,7 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList className={`w-full h-auto bg-transparent p-0 border-b border-border flex ${isMobile ? 'justify-center' : 'justify-center'}`}>
+      <TabsList className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-12 z-30 bg-background' : 'justify-center bg-transparent'}`}>
         {!isGuest && (
           <TabsTrigger 
             value="profile" 
