@@ -407,13 +407,57 @@ const Profile = () => {
     ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
     : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
   
+  // Handle tab change without moving page scroll
+  const changeTabPreservingScroll = (nextTab: string) => {
+    if (nextTab === activeTab) return;
+
+    const scrollTargets: Array<{ element: HTMLElement; top: number; left: number }> = [];
+    const tabsListElement = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+
+    let currentElement: HTMLElement | null = tabsListElement;
+    while (currentElement) {
+      const style = window.getComputedStyle(currentElement);
+      const canScrollY = /(auto|scroll)/.test(style.overflowY) && currentElement.scrollHeight > currentElement.clientHeight;
+      const canScrollX = /(auto|scroll)/.test(style.overflowX) && currentElement.scrollWidth > currentElement.clientWidth;
+
+      if (canScrollY || canScrollX) {
+        scrollTargets.push({
+          element: currentElement,
+          top: currentElement.scrollTop,
+          left: currentElement.scrollLeft,
+        });
+      }
+
+      currentElement = currentElement.parentElement;
+    }
+
+    const documentScroller = document.scrollingElement as HTMLElement | null;
+    if (documentScroller) {
+      scrollTargets.push({
+        element: documentScroller,
+        top: documentScroller.scrollTop,
+        left: documentScroller.scrollLeft,
+      });
+    }
+
+    setActiveTab(nextTab);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollTargets.forEach(({ element, top, left }) => {
+          element.scrollTo({ top, left, behavior: "auto" });
+        });
+      });
+    });
+  };
+
   // Handle swipe gesture
   const handleSwipe = (direction: "left" | "right") => {
     const currentIndex = tabOrder.indexOf(activeTab);
     if (direction === "left" && currentIndex < tabOrder.length - 1) {
-      setActiveTab(tabOrder[currentIndex + 1]);
+      changeTabPreservingScroll(tabOrder[currentIndex + 1]);
     } else if (direction === "right" && currentIndex > 0) {
-      setActiveTab(tabOrder[currentIndex - 1]);
+      changeTabPreservingScroll(tabOrder[currentIndex - 1]);
     }
   };
 
@@ -421,18 +465,9 @@ const Profile = () => {
   const hasHighlights = highlights && highlights.length > 0;
 
   // Profile tabs component
-  const handleTabChange = (value: string) => {
-    const scrollY = window.scrollY;
-    setActiveTab(value);
-    // Restore scroll position after React re-render
-    requestAnimationFrame(() => {
-      window.scrollTo(0, scrollY);
-    });
-  };
-
   const ProfileTabs = () => (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-12 z-30 bg-background' : 'justify-center bg-transparent'}`}>
+    <Tabs value={activeTab} onValueChange={changeTabPreservingScroll} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
+      <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-12 z-30 bg-background' : 'justify-center bg-transparent'}`}>
         {!isGuest && (
           <TabsTrigger 
             value="profile" 
@@ -486,7 +521,7 @@ const Profile = () => {
       </TabsList>
 
       <motion.div
-        key={activeTab}
+        
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
