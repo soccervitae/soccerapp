@@ -36,6 +36,7 @@ const Profile = () => {
   const { username } = useParams<{ username?: string }>();
   const { user } = useAuth();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
