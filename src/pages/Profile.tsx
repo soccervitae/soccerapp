@@ -28,9 +28,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
 import { FullscreenVideoViewer } from "@/components/feed/FullscreenVideoViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { RightSidebar } from "@/components/layout/RightSidebar";
+import { AdminSidebar, AdminMobileHeader } from "@/components/admin/AdminSidebar";
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
