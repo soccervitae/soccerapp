@@ -1,38 +1,58 @@
 
 
-## Plano: Layout Desktop para Página de Perfil
+## Plano: Design Moderno Desktop para Página de Perfil
 
-### Objetivo
-Aplicar o mesmo layout de 3 colunas usado na página Home (Index.tsx) à página de Perfil quando acessada por desktop: sidebar esquerda com menu, conteúdo do perfil centralizado, e sidebar direita com sugestões de usuários e trending.
+### Problema Atual
+A página de perfil no desktop está com layout vertical centralizado "esticado" — parece uma versão mobile ampliada. Falta a estrutura horizontal típica de redes sociais como Twitter/Instagram desktop.
 
-### Layout Desktop (≥768px)
+### Design Proposto
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│                   DesktopHeader                     │
-├──────────┬────────────────────────┬─────────────────┤
-│          │                        │                 │
-│ Desktop  │   Conteúdo do Perfil   │  RightSidebar   │
-│ Sidebar  │   (max-w-2xl, centro)  │  (sugestões +   │
-│ (menu)   │                        │   trending)     │
-│  w-64    │  ProfileHeader         │    w-80         │
-│          │  ProfileInfo           │                 │
-│          │  Highlights            │                 │
-│          │  Tabs + Feed           │                 │
-│          │                        │                 │
-└──────────┴────────────────────────┴─────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                      DesktopHeader                           │
+├─────────┬────────────────────────────────────────┬───────────┤
+│         │  ┌──────────────────────────────────┐   │           │
+│ Desktop │  │  Cover Photo (h-48, rounded-xl)  │   │  Right    │
+│ Sidebar │  ├──────────────────────────────────┤   │  Sidebar  │
+│         │  │ [Avatar]  Nome Completo           │   │           │
+│         │  │           @username | Posição     │   │           │
+│         │  │           Bio                     │   │           │
+│         │  │  123 Torcedores  45 Torcendo      │   │           │
+│         │  │  [Idade][Altura][Peso][Pé]        │   │           │
+│         │  │  [Editar Perfil] [Compartilhar]   │   │           │
+│         │  ├──────────────────────────────────┤   │           │
+│         │  │  Highlights (horizontal scroll)   │   │           │
+│         │  ├──────────────────────────────────┤   │           │
+│         │  │  [Posts] [Times] [Vídeos] [...]   │   │           │
+│         │  │  ─────────────────────────────    │   │           │
+│         │  │  Feed / Grid content              │   │           │
+│         │  └──────────────────────────────────┘   │           │
+└─────────┴────────────────────────────────────────┴───────────┘
 ```
+
+**Diferenças-chave vs atual (mobile-like):**
+- Avatar ao lado esquerdo do nome (layout horizontal), não centralizado em cima
+- Cover photo mais alta (h-48) com bordas arredondadas
+- Stats e botões em linha horizontal, não empilhados
+- Card com fundo e sombra envolvendo o perfil
+- Physical stats em card mais compacto e horizontal
 
 ### Mudanças
 
-**Arquivo: `src/pages/Profile.tsx`**
+**Arquivo: `src/components/profile/ProfileInfo.tsx`**
+1. Receber prop `isDesktop` (boolean)
+2. Quando `isDesktop=true`, renderizar layout alternativo:
+   - Cover photo com `h-48 rounded-xl`
+   - Avatar posicionado à esquerda com nome/bio ao lado (flexbox horizontal)
+   - Stats (torcedores/torcendo) e physical stats inline
+   - Botões de ação com tamanho adequado para desktop
+   - Tudo dentro de um card com `bg-card rounded-xl shadow-sm`
 
-1. Importar `useIsMobile`, `DesktopHeader`, `DesktopSidebar`, `RightSidebar`
-2. No retorno final, detectar se é desktop com `useIsMobile()`
-3. Se desktop: renderizar o layout com `DesktopHeader` + 3 colunas (`DesktopSidebar` | conteúdo centralizado em `max-w-2xl` | `RightSidebar`), sem `BottomNavigation` e sem `ProfileHeader` fixo (usar o do DesktopHeader)
-4. Se mobile: manter o layout atual sem mudanças
-5. Remover `pb-24` no desktop (não tem bottom nav)
+**Arquivo: `src/pages/Profile.tsx`**
+1. Passar `isDesktop={!isMobile}` para `ProfileInfo` no desktop layout
+2. Remover `px-4` extra no container desktop do highlights
+3. Envolver o conteúdo desktop em card arredondado
 
 ### Resultado
-A página de perfil no desktop terá a mesma estrutura visual do feed principal, com navegação lateral e sidebar de sugestões, semelhante a redes sociais como Twitter/X.
+O perfil desktop terá aparência de rede social moderna com layout horizontal para info do usuário, cover photo destacada, e visual com cards arredondados — sem parecer uma tela mobile esticada.
 
