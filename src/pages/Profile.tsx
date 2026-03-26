@@ -155,6 +155,83 @@ const Profile = () => {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const pendingScrollRestoreRef = useRef<Array<{ element: HTMLElement; top: number; left: number }> | null>(null);
+
+  const isScrollableElement = (element: HTMLElement) => {
+    const style = window.getComputedStyle(element);
+    const canScrollY = /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight;
+    const canScrollX = /(auto|scroll)/.test(style.overflowX) && element.scrollWidth > element.clientWidth;
+    return canScrollX || canScrollY;
+  };
+
+  const collectScrollTargets = () => {
+    const scrollTargets: Array<{ element: HTMLElement; top: number; left: number }> = [];
+    const visited = new Set<HTMLElement>();
+
+    const addTarget = (element: HTMLElement | null) => {
+      if (!element || visited.has(element) || !isScrollableElement(element)) return;
+      visited.add(element);
+      scrollTargets.push({
+        element,
+        top: element.scrollTop,
+        left: element.scrollLeft,
+      });
+    };
+
+    const tabsListElement = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+
+    let currentElement: HTMLElement | null = tabsListElement;
+    while (currentElement) {
+      addTarget(currentElement);
+      currentElement = currentElement.parentElement;
+    }
+
+    addTarget(document.scrollingElement as HTMLElement | null);
+    addTarget(document.documentElement);
+    addTarget(document.body);
+
+    return scrollTargets;
+  };
+
+  const restoreScrollTargets = (targets: Array<{ element: HTMLElement; top: number; left: number }>) => {
+    targets.forEach(({ element, top, left }) => {
+      element.scrollTo({ top, left, behavior: "auto" });
+    });
+  };
+
+  useLayoutEffect(() => {
+    const targets = pendingScrollRestoreRef.current;
+    if (!targets || targets.length === 0) return;
+
+    let raf1 = 0;
+    let raf2 = 0;
+    let raf3 = 0;
+    const timeout1 = window.setTimeout(() => restoreScrollTargets(targets), 80);
+    const timeout2 = window.setTimeout(() => {
+      restoreScrollTargets(targets);
+      pendingScrollRestoreRef.current = null;
+    }, 180);
+
+    restoreScrollTargets(targets);
+    raf1 = requestAnimationFrame(() => {
+      restoreScrollTargets(targets);
+      raf2 = requestAnimationFrame(() => {
+        restoreScrollTargets(targets);
+        raf3 = requestAnimationFrame(() => {
+          restoreScrollTargets(targets);
+        });
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      cancelAnimationFrame(raf3);
+      window.clearTimeout(timeout1);
+      window.clearTimeout(timeout2);
+    };
+  }, [activeTab]);
+
   if (isLoading) {
     return (
       <main className="bg-background min-h-screen relative pb-24">
@@ -406,83 +483,6 @@ const Profile = () => {
   const tabOrder = isOfficialAccount 
     ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
     : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
-
-  const pendingScrollRestoreRef = useRef<Array<{ element: HTMLElement; top: number; left: number }> | null>(null);
-
-  const isScrollableElement = (element: HTMLElement) => {
-    const style = window.getComputedStyle(element);
-    const canScrollY = /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight;
-    const canScrollX = /(auto|scroll)/.test(style.overflowX) && element.scrollWidth > element.clientWidth;
-    return canScrollX || canScrollY;
-  };
-
-  const collectScrollTargets = () => {
-    const scrollTargets: Array<{ element: HTMLElement; top: number; left: number }> = [];
-    const visited = new Set<HTMLElement>();
-
-    const addTarget = (element: HTMLElement | null) => {
-      if (!element || visited.has(element) || !isScrollableElement(element)) return;
-      visited.add(element);
-      scrollTargets.push({
-        element,
-        top: element.scrollTop,
-        left: element.scrollLeft,
-      });
-    };
-
-    const tabsListElement = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
-
-    let currentElement: HTMLElement | null = tabsListElement;
-    while (currentElement) {
-      addTarget(currentElement);
-      currentElement = currentElement.parentElement;
-    }
-
-    addTarget(document.scrollingElement as HTMLElement | null);
-    addTarget(document.documentElement);
-    addTarget(document.body);
-
-    return scrollTargets;
-  };
-
-  const restoreScrollTargets = (targets: Array<{ element: HTMLElement; top: number; left: number }>) => {
-    targets.forEach(({ element, top, left }) => {
-      element.scrollTo({ top, left, behavior: "auto" });
-    });
-  };
-
-  useLayoutEffect(() => {
-    const targets = pendingScrollRestoreRef.current;
-    if (!targets || targets.length === 0) return;
-
-    let raf1 = 0;
-    let raf2 = 0;
-    let raf3 = 0;
-    const timeout1 = window.setTimeout(() => restoreScrollTargets(targets), 80);
-    const timeout2 = window.setTimeout(() => {
-      restoreScrollTargets(targets);
-      pendingScrollRestoreRef.current = null;
-    }, 180);
-
-    restoreScrollTargets(targets);
-    raf1 = requestAnimationFrame(() => {
-      restoreScrollTargets(targets);
-      raf2 = requestAnimationFrame(() => {
-        restoreScrollTargets(targets);
-        raf3 = requestAnimationFrame(() => {
-          restoreScrollTargets(targets);
-        });
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      cancelAnimationFrame(raf3);
-      window.clearTimeout(timeout1);
-      window.clearTimeout(timeout2);
-    };
-  }, [activeTab]);
   
   // Handle tab change without moving page scroll
   const changeTabPreservingScroll = (nextTab: string) => {
