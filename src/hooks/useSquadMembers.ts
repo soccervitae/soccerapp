@@ -173,6 +173,13 @@ export const useRequestJoinSquad = () => {
         });
 
       if (error) throw error;
+
+      // Create notification for the team/school owner
+      await supabase.rpc("create_notification", {
+        p_user_id: teamProfileId,
+        p_type: "squad_request",
+        p_actor_id: user.id,
+      });
     },
     onSuccess: (_, teamProfileId) => {
       queryClient.invalidateQueries({ queryKey: ["squad-my-request", teamProfileId] });

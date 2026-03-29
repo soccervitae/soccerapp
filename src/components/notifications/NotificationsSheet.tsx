@@ -36,6 +36,8 @@ const NotificationIcon = ({ type }: { type: string }) => {
       return <UserPlus className="w-4 h-4 text-primary" />;
     case "mention":
       return <AtSign className="w-4 h-4 text-orange-500" />;
+    case "squad_request":
+      return <UserPlus className="w-4 h-4 text-emerald-500" />;
     default:
       return <Bell className="w-4 h-4 text-muted-foreground" />;
   }
@@ -53,6 +55,8 @@ const getNotificationText = (notification: Notification) => {
       return `${actorName} começou a torcer por você`;
     case "mention":
       return `${actorName} mencionou você em um comentário`;
+    case "squad_request":
+      return `${actorName} quer fazer parte do seu elenco`;
     default:
       return notification.content || "Nova notificação";
   }
@@ -79,7 +83,7 @@ const NotificationItem = ({
     // Navigate based on notification type
     switch (notification.type) {
       case "follow":
-        // Navigate to the profile of the user who started following
+      case "squad_request":
         if (notification.actor?.username) {
           navigate(`/${notification.actor.username}`);
         }
@@ -87,7 +91,6 @@ const NotificationItem = ({
       case "like":
       case "comment":
       case "mention":
-        // Navigate to the post where the interaction occurred
         if (notification.post_id) {
           navigate(`/post/${notification.post_id}`);
         }
