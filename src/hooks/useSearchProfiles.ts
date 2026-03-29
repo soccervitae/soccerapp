@@ -90,7 +90,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
     queryFn: async () => {
       let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, birth_date, nationality")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, birth_date, nationality, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
