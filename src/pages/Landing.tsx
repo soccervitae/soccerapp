@@ -75,7 +75,7 @@ const Landing = () => {
       ],
     },
     {
-      emoji: "🎓",
+      emoji: "⚽",
       accountType: "Escolinha de Futebol",
       accountDescription: "Escolas de futebol divulgando seu trabalho e resultados.",
       features: [
