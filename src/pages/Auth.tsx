@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,7 +99,9 @@ const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }
 };
 
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const location = useLocation();
+  const initialTab = (location.state as any)?.tab === "signup" ? "signup" : "login";
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
   const [socialError, setSocialError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();

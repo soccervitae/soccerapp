@@ -39,6 +39,7 @@ import Teams from "./pages/Teams";
 import SelectTeams from "./pages/SelectTeams";
 import Install from "./pages/Install";
 import Landing from "./pages/Landing";
+import PwaHome from "./pages/PwaHome";
 import Guidelines from "./pages/Guidelines";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/Privacy";
@@ -94,10 +95,9 @@ const LandingOrIndex = () => {
     );
   }
   
-  // If not logged in and in PWA mode, redirect to auth
   if (!user) {
     if (isPWA()) {
-      return <Navigate to="/auth" replace />;
+      return <PageTransition><PwaHome /></PageTransition>;
     }
     return <PageTransition><Landing /></PageTransition>;
   }
