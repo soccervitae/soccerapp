@@ -83,7 +83,7 @@ const NotificationItem = ({
     // Navigate based on notification type
     switch (notification.type) {
       case "follow":
-        // Navigate to the profile of the user who started following
+      case "squad_request":
         if (notification.actor?.username) {
           navigate(`/${notification.actor.username}`);
         }
@@ -91,7 +91,6 @@ const NotificationItem = ({
       case "like":
       case "comment":
       case "mention":
-        // Navigate to the post where the interaction occurred
         if (notification.post_id) {
           navigate(`/post/${notification.post_id}`);
         }
