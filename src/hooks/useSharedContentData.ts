@@ -262,6 +262,7 @@ export function storyToPost(story: SharedStory): Post {
     liked_by_user: false,
     saved_by_user: false,
     recent_likes: [],
+  };
 }
 
 // Convert SharedHighlight to Post format for PostMediaViewer
