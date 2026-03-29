@@ -81,8 +81,13 @@ export const CreateMenuSheet = ({
   const isOfficialAccount = profile?.is_official_account === true;
   
   // Admin users (except official account) can't create posts/replays/highlights from public app
+  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+  
   const filteredOptions = allMenuOptions.filter(option => {
     if (isAdmin && !isOfficialAccount && contentCreationOptions.includes(option.id)) {
+      return false;
+    }
+    if (isTeamOrSchool && option.id === 'times') {
       return false;
     }
     return true;
