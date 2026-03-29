@@ -99,7 +99,9 @@ const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }
 };
 
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const location = useLocation();
+  const initialTab = (location.state as any)?.tab === "signup" ? "signup" : "login";
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
   const [socialError, setSocialError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
