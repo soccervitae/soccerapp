@@ -745,6 +745,7 @@ const EditProfile = () => {
             />
           </div>
 
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="gender" className="flex items-center gap-1">
               Sexo <span className="text-destructive">*</span>
@@ -762,6 +763,7 @@ const EditProfile = () => {
               <p className="text-sm text-destructive">{validationErrors.gender}</p>
             )}
           </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
