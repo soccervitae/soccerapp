@@ -5,6 +5,8 @@ import { OfficialHighlightsSection } from "@/components/profile/OfficialHighligh
 import { ChampionshipsTab } from "@/components/profile/ChampionshipsTab";
 import { AchievementsTab } from "@/components/profile/AchievementsTab";
 import { TeamsTab } from "@/components/profile/TeamsTab";
+import { SquadTab } from "@/components/profile/SquadTab";
+import { AboutTab } from "@/components/profile/AboutTab";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { useUserChampionships, useUserAchievements, useUserPosts, useInfiniteUserPosts } from "@/hooks/useProfile";
