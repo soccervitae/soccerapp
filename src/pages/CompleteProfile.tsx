@@ -617,7 +617,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Preferred Foot - Only for Athletes */}
-        {isAthlete && (
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="space-y-2">
             <Label htmlFor="preferredFoot">
               Pé preferido <span className="text-destructive">*</span>
