@@ -539,6 +539,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     email: false,
     password: false,
     confirmPassword: false,
+    accountType: false,
   });
   
   const { signUp } = useAuth();
