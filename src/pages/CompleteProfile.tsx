@@ -180,7 +180,7 @@ const CompleteProfile = () => {
   const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
   
   const isGenderValid = !!gender;
-  const isProfileTypeValid = !!profileType;
+  const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
   // Minimum age: 16 years
   const getMaxBirthDate = () => {
     const today = new Date();
@@ -189,13 +189,14 @@ const CompleteProfile = () => {
   };
   const maxBirthDate = getMaxBirthDate();
   
-  const isBirthDateValid = !!birthDate && birthDate <= maxBirthDate;
-  const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
-  const isStaffFunctionValid = isStaff ? !!staffFunction : true; // Only required for staff
+  const isBirthDateValid = isTeamOrSchoolAccount || (!!birthDate && birthDate <= maxBirthDate);
+  const isPositionValid = isTeamOrSchoolAccount || (isAthlete ? !!position : true);
+  const isStaffFunctionValid = isTeamOrSchoolAccount || (isStaff ? !!staffFunction : true);
   const isNationalityValid = !!nationality;
-  const isHeightValid = isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true;
-  const isWeightValid = isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true;
-  const isPreferredFootValid = isAthlete ? !!preferredFoot : true;
+  const isHeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
+  const isWeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
+  const isPreferredFootValid = isTeamOrSchoolAccount || (isAthlete ? !!preferredFoot : true);
+  const isGenderValid = isTeamOrSchoolAccount || !!gender;
 
   const isFormValid =
     isNicknameValid &&
