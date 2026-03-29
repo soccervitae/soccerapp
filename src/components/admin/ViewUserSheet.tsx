@@ -329,7 +329,58 @@ export function ViewUserSheet({
                 </TabsList>
 
                 <TabsContent value="info" className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Team/School specific info */}
+                  {(user.account_type === 'time' || user.account_type === 'escolinha') ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Responsável (email):</span>
+                        <span className="font-medium">{user.username}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Flag className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Nacionalidade:</span>
+                        <span className="flex items-center gap-1">
+                          {user.nationality?.bandeira_url && (
+                            <img src={user.nationality.bandeira_url} alt="" className="h-4 w-auto" />
+                          )}
+                          {user.nationality?.nome || "-"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Estado:</span>
+                        <span>{user.estado?.nome || "-"}</span>
+                      </div>
+                      {(user as any).city && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Cidade:</span>
+                          <span>{(user as any).city}</span>
+                        </div>
+                      )}
+                      {(user as any).foundation_year && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Fundação:</span>
+                          <span>{(user as any).foundation_year}</span>
+                        </div>
+                      )}
+                      {(user as any).team_category && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Trophy className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Categoria:</span>
+                          <span className="capitalize">{(user as any).team_category}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Cadastro:</span>
+                        <span>{format(new Date(user.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />
