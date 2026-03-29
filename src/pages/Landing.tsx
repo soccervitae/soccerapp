@@ -98,7 +98,7 @@ const Landing = () => {
             }}
           />
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#102216] via-[#102216]/60 to-[#102216]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-white/20" />
           
           {/* Content */}
           <motion.div 
