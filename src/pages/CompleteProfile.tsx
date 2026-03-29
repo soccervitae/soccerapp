@@ -158,7 +158,15 @@ const CompleteProfile = () => {
       if (profile.height) setHeight(profile.height.toString());
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
-      if (profile.nickname) setNickname(profile.nickname);
+      if (profile.nickname) {
+        setNickname(profile.nickname);
+        if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
+          setTeamName(profile.nickname);
+        }
+      }
+      if (profile.avatar_url && (profile.account_type === 'time' || profile.account_type === 'escolinha')) {
+        setEmblemPreview(profile.avatar_url);
+      }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
       if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
     }
