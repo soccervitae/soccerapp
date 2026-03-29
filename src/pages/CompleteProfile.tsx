@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, ChevronRight } from "lucide-react";
+import { Loader2, Check, ChevronRight, Shield, Upload } from "lucide-react";
 import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
 import { StatePickerSheet } from "@/components/profile/StatePickerSheet";
 
@@ -45,6 +45,10 @@ const CompleteProfile = () => {
   const [estado, setEstado] = useState<string>("");
   const [foundationYear, setFoundationYear] = useState("");
   const [teamCategory, setTeamCategory] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [emblemFile, setEmblemFile] = useState<File | null>(null);
+  const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
+  const [uploadingEmblem, setUploadingEmblem] = useState(false);
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
@@ -154,7 +158,15 @@ const CompleteProfile = () => {
       if (profile.height) setHeight(profile.height.toString());
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
-      if (profile.nickname) setNickname(profile.nickname);
+      if (profile.nickname) {
+        setNickname(profile.nickname);
+        if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
+          setTeamName(profile.nickname);
+        }
+      }
+      if (profile.avatar_url && (profile.account_type === 'time' || profile.account_type === 'escolinha')) {
+        setEmblemPreview(profile.avatar_url);
+      }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
       if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
     }
@@ -181,7 +193,8 @@ const CompleteProfile = () => {
   // Validations
   // Nickname validation: required, min 2 chars, only letters, numbers, spaces and common accents
   const nicknameRegex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
-  const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
+  const isTeamNameValid = teamName.trim().length >= 2 && teamName.trim().length <= 50;
+  const isNicknameValid = isTeamOrSchoolAccount ? isTeamNameValid : (nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim()));
   
   const isGenderValid = isTeamOrSchoolAccount || !!gender;
   const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
@@ -234,17 +247,39 @@ const CompleteProfile = () => {
 
     setIsSubmitting(true);
     try {
+      // Upload emblem if selected
+      let emblemUrl: string | null = null;
+      if (isTeamOrSchoolAccount && emblemFile) {
+        setUploadingEmblem(true);
+        const fileExt = emblemFile.name.split('.').pop();
+        const filePath = `${user.id}/emblem.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, emblemFile, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: publicData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+        emblemUrl = publicData.publicUrl;
+        setUploadingEmblem(false);
+      }
+
       const updateData: Record<string, unknown> = {
         gender: isTeamOrSchoolAccount ? null : gender,
         role: isTeamOrSchoolAccount ? null : profileType,
         birth_date: isTeamOrSchoolAccount ? null : birthDate,
         nationality: Number(nationality),
-        nickname: nickname.trim() || null,
+        nickname: isTeamOrSchoolAccount ? teamName.trim() : (nickname.trim() || null),
+        full_name: isTeamOrSchoolAccount ? teamName.trim() : undefined,
         profile_completed: true,
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
         foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
         team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
       };
+
+      if (emblemUrl) {
+        updateData.avatar_url = emblemUrl;
+      }
 
       const isMale = gender === "homem" || gender === "masculino" || gender === "male";
       const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
@@ -338,32 +373,87 @@ const CompleteProfile = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
-        {/* Nickname - Required */}
-        <div className="space-y-2">
-          <Label htmlFor="nickname">
-            Apelido <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="nickname"
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onBlur={() => handleBlur("nickname")}
-            placeholder="Como você é conhecido"
-            maxLength={50}
-            className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
-          />
-          <p className="text-xs text-muted-foreground">
-            O apelido é como te chamam no futebol.
-          </p>
-          {touched.nickname && !isNicknameValid && (
-            <p className="text-xs text-destructive">
-              {nickname.trim().length < 2 
-                ? "Mínimo de 2 caracteres." 
-                : "Apenas letras, números e espaços são permitidos."}
+        {/* Team/School Name + Emblem OR Nickname */}
+        {isTeamOrSchoolAccount ? (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="teamName">
+                {profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha'} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="teamName"
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                onBlur={() => handleBlur("nickname")}
+                placeholder={profile?.account_type === 'time' ? 'Ex: FC Barcelona' : 'Ex: Escolinha do Neymar'}
+                maxLength={50}
+                className={getInputClass(getFieldStatus(isTeamNameValid, touched.nickname))}
+              />
+              {touched.nickname && !isTeamNameValid && (
+                <p className="text-xs text-destructive">Mínimo de 2 caracteres.</p>
+              )}
+            </div>
+
+            {/* Emblem Upload */}
+            <div className="space-y-2">
+              <Label>Escudo</Label>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted/50">
+                  {emblemPreview ? (
+                    <img src={emblemPreview} alt="Escudo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Shield className="w-8 h-8 text-muted-foreground/50" />
+                  )}
+                </div>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEmblemFile(file);
+                        setEmblemPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <div className="flex items-center gap-2 text-sm text-primary font-medium hover:underline">
+                    <Upload className="w-4 h-4" />
+                    {emblemPreview ? 'Alterar escudo' : 'Adicionar escudo'}
+                  </div>
+                </label>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="nickname">
+              Apelido <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              onBlur={() => handleBlur("nickname")}
+              placeholder="Como você é conhecido"
+              maxLength={50}
+              className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
+            />
+            <p className="text-xs text-muted-foreground">
+              O apelido é como te chamam no futebol.
             </p>
-          )}
-        </div>
+            {touched.nickname && !isNicknameValid && (
+              <p className="text-xs text-destructive">
+                {nickname.trim().length < 2 
+                  ? "Mínimo de 2 caracteres." 
+                  : "Apenas letras, números e espaços são permitidos."}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Team/School specific fields */}
         {isTeamOrSchoolAccount && (
