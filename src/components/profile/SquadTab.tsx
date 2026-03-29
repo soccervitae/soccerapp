@@ -152,7 +152,7 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
 
       {/* Members list */}
       {filteredMembers.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2 px-0">
+        <div className="grid grid-cols-4 gap-1.5 px-0">
           {filteredMembers.map((member) => (
             <div
               key={member.id}
