@@ -34,11 +34,14 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
   const removeMember = useRemoveSquadMember();
   const [filter, setFilter] = useState<string>("all");
 
-  const filteredMembers = filter === "all"
-    ? members
-    : members.filter(m => getPositionGroup(m.athlete?.position_name) === filter);
+  // Only show members with avatar for the grid
+  const membersWithAvatar = members.filter(m => !!m.athlete?.avatar_url);
 
-  const availableGroups = [...new Set(members.map(m => getPositionGroup(m.athlete?.position_name)))];
+  const filteredMembers = filter === "all"
+    ? membersWithAvatar
+    : membersWithAvatar.filter(m => getPositionGroup(m.athlete?.position_name) === filter);
+
+  const availableGroups = [...new Set(membersWithAvatar.map(m => getPositionGroup(m.athlete?.position_name)))];
 
   if (isLoading) {
     return (
