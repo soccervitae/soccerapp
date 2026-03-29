@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async ({ email, password, firstName, lastName }: SignUpData) => {
+  const signUp = async ({ email, password, firstName, lastName, accountType }: SignUpData) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -143,6 +143,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         data: {
           first_name: firstName,
           last_name: lastName,
+          account_type: accountType || null,
         },
       },
     });

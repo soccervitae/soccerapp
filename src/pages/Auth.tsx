@@ -691,6 +691,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       password,
       firstName: signUpFirstName,
       lastName: signUpLastName,
+      accountType: accountType || undefined,
     });
 
     if (error) {
