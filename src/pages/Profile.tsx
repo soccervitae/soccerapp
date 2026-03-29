@@ -500,7 +500,7 @@ const Profile = () => {
 
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
-    ? (isGuest ? ["videos", "photos", "squad", "championships", "about"] : ["profile", "videos", "photos", "squad", "championships", "about"])
+    ? (isGuest ? ["videos", "photos", "squad", "championships", "achievements"] : ["profile", "videos", "photos", "squad", "championships", "achievements"])
     : isOfficialAccount 
       ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
       : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
@@ -591,11 +591,11 @@ const Profile = () => {
         )}
         {isTeamOrSchool && (
           <TabsTrigger 
-            value="about" 
+            value="achievements" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
           >
-            <span className="material-symbols-outlined text-[26px]">info</span>
-            {!isMobile && 'Sobre'}
+            <span className="material-symbols-outlined text-[26px]">trophy</span>
+            {!isMobile && 'Conquistas'}
           </TabsTrigger>
         )}
       </TabsList>
@@ -672,9 +672,14 @@ const Profile = () => {
         )}
 
         {isTeamOrSchool && (
-          <TabsContent value="about" className="mt-4" forceMount={activeTab === "about" ? true : undefined}>
-            {activeTab === "about" && profile && (
-              <AboutTab profile={profile} />
+          <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
+            {activeTab === "achievements" && (
+              <AchievementsTab 
+                achievements={achievements || []} 
+                isLoading={achievementsLoading} 
+                isOwnProfile={isOwnProfile}
+                userId={targetUserId}
+              />
             )}
           </TabsContent>
         )}
