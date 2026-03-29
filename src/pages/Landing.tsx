@@ -210,10 +210,10 @@ const Landing = () => {
         {/* CTA Section */}
         <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-white text-2xl md:text-3xl font-black mb-4">
+            <h2 className="text-foreground text-2xl md:text-3xl font-black mb-4">
               Pronto para entrar em campo?
             </h2>
-            <p className="text-white/60 mb-8">
+            <p className="text-muted-foreground mb-8">
               Junte-se a milhares de jogadores e comece sua jornada profissional hoje.
             </p>
             {isMobile ? (
