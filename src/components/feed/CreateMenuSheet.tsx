@@ -103,9 +103,9 @@ export const CreateMenuSheet = ({
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
-      <ResponsiveModalContent className="sm:max-w-md" useFullHeight>
+      <ResponsiveModalContent className="sm:max-w-md !bg-black !border-zinc-800" useFullHeight overlayClassName="bg-black/80">
         <ResponsiveModalHeader className="pb-4">
-          <ResponsiveModalTitle className="text-center">O que você quer criar?</ResponsiveModalTitle>
+          <ResponsiveModalTitle className="text-center text-white">O que você quer criar?</ResponsiveModalTitle>
         </ResponsiveModalHeader>
 
         <div className="flex flex-col gap-2 px-2">
@@ -113,7 +113,7 @@ export const CreateMenuSheet = ({
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors active:scale-[0.98]"
+              className="flex items-center gap-4 p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition-colors active:scale-[0.98]"
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${option.colorClass}`}>
                 <span className="material-symbols-outlined text-[24px]">
@@ -121,8 +121,8 @@ export const CreateMenuSheet = ({
                 </span>
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">{option.label}</p>
-                <p className="text-sm text-muted-foreground">{option.description}</p>
+                <p className="font-medium text-white">{option.label}</p>
+                <p className="text-sm text-zinc-400">{option.description}</p>
               </div>
             </button>
           ))}
