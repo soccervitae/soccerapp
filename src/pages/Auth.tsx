@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw, Shield, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -531,6 +531,9 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accountType, setAccountType] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [emblemFile, setEmblemFile] = useState<File | null>(null);
+  const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -540,17 +543,29 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     password: false,
     confirmPassword: false,
     accountType: false,
+    teamName: false,
   });
   
   const { signUp } = useAuth();
   
+  const isTeamOrSchool = accountType === "time" || accountType === "escolinha";
+  
   // Validações individuais
-  const isFirstNameValid = firstName.trim().length >= 2;
-  const isLastNameValid = lastName.trim().length >= 2;
+  const isFirstNameValid = isTeamOrSchool ? teamName.trim().length >= 2 : firstName.trim().length >= 2;
+  const isLastNameValid = isTeamOrSchool ? true : lastName.trim().length >= 2;
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
   const isAccountTypeValid = accountType.length > 0;
 
+  const handleEmblemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEmblemFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setEmblemPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -630,14 +645,20 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (firstName.trim().length < 2) {
-      setErrorMessage("O nome deve ter pelo menos 2 caracteres");
-      return;
-    }
-
-    if (lastName.trim().length < 2) {
-      setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
-      return;
+    if (isTeamOrSchool) {
+      if (teamName.trim().length < 2) {
+        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
+        return;
+      }
+    } else {
+      if (firstName.trim().length < 2) {
+        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
+        return;
+      }
+      if (lastName.trim().length < 2) {
+        setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
+        return;
+      }
     }
 
     if (!validateEmail(email)) {
@@ -662,11 +683,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
     setLoading(true);
 
+    const signUpFirstName = isTeamOrSchool ? teamName.trim() : firstName.trim();
+    const signUpLastName = isTeamOrSchool ? "" : lastName.trim();
+
     const { error } = await signUp({
       email,
       password,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      firstName: signUpFirstName,
+      lastName: signUpLastName,
     });
 
     if (error) {
@@ -684,20 +708,44 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    // Save account type to profile
-    if (accountType) {
-      await supabase
-        .from("profiles")
-        .update({ account_type: accountType } as any)
-        .eq("id", user.id);
+    // Upload emblem if provided
+    let emblemUrl: string | null = null;
+    if (isTeamOrSchool && emblemFile) {
+      const fileExt = emblemFile.name.split(".").pop();
+      const filePath = `${user.id}/emblem.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, emblemFile, { upsert: true });
+      
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+        emblemUrl = urlData.publicUrl;
+      }
     }
+
+    // Save account type and team info to profile
+    const profileUpdate: Record<string, any> = { account_type: accountType };
+    if (isTeamOrSchool) {
+      profileUpdate.nickname = teamName.trim();
+      profileUpdate.full_name = teamName.trim();
+      if (emblemUrl) {
+        profileUpdate.avatar_url = emblemUrl;
+      }
+    }
+
+    await supabase
+      .from("profiles")
+      .update(profileUpdate as any)
+      .eq("id", user.id);
 
     // Send verification code
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
       body: {
         email: email,
         user_id: user.id,
-        first_name: firstName.trim(),
+        first_name: isTeamOrSchool ? teamName.trim() : firstName.trim(),
       },
     });
 
@@ -740,13 +788,18 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   }
 
 
-  const isFormValid = 
-    firstName.trim().length >= 2 && 
-    lastName.trim().length >= 2 &&
-    emailStatus === "valid" &&
-    isPasswordValid &&
-    password === confirmPassword &&
-    accountType.length > 0;
+  const isFormValid = isTeamOrSchool
+    ? teamName.trim().length >= 2 &&
+      emailStatus === "valid" &&
+      isPasswordValid &&
+      password === confirmPassword &&
+      accountType.length > 0
+    : firstName.trim().length >= 2 && 
+      lastName.trim().length >= 2 &&
+      emailStatus === "valid" &&
+      isPasswordValid &&
+      password === confirmPassword &&
+      accountType.length > 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -757,90 +810,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
           <p className="text-sm text-destructive">{errorMessage}</p>
         </div>
       )}
-
-      {/* Nome e Sobrenome em linha */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Nome <span className="text-destructive">*</span>
-          </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              id="signup-firstname"
-              type="text"
-              placeholder="João"
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                setErrorMessage(null);
-              }}
-              onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
-              className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
-                touched.firstName 
-                  ? isFirstNameValid 
-                    ? "border-emerald-500 border" 
-                    : "border-destructive border"
-                  : "border-0"
-              }`}
-              maxLength={30}
-              required
-            />
-            {touched.firstName && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {isFirstNameValid ? (
-                  <Check className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <X className="h-4 w-4 text-destructive" />
-                )}
-              </div>
-            )}
-          </div>
-          {touched.firstName && !isFirstNameValid && (
-            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Sobrenome <span className="text-destructive">*</span>
-          </Label>
-          <div className="relative">
-            <Input
-              id="signup-lastname"
-              type="text"
-              placeholder="Silva"
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                setErrorMessage(null);
-              }}
-              onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
-              className={`pr-10 h-12 bg-muted/50 transition-colors ${
-                touched.lastName 
-                  ? isLastNameValid 
-                    ? "border-emerald-500 border" 
-                    : "border-destructive border"
-                  : "border-0"
-              }`}
-              maxLength={50}
-              required
-            />
-            {touched.lastName && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {isLastNameValid ? (
-                  <Check className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <X className="h-4 w-4 text-destructive" />
-                )}
-              </div>
-            )}
-          </div>
-          {touched.lastName && !isLastNameValid && (
-            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
-          )}
-        </div>
-      </div>
 
       {/* Tipo de Conta */}
       <div className="space-y-2">
@@ -875,6 +844,173 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
           <p className="text-xs text-destructive">Selecione um tipo de conta</p>
         )}
       </div>
+
+      {/* Campos condicionais baseados no tipo de conta */}
+      {isTeamOrSchool ? (
+        <>
+          {/* Nome do Time/Escolinha */}
+          <div className="space-y-2">
+            <Label htmlFor="signup-teamname" className="text-xs font-semibold uppercase text-muted-foreground">
+              {accountType === "time" ? "Nome do Time" : "Nome da Escolinha"} <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="signup-teamname"
+                type="text"
+                placeholder={accountType === "time" ? "Ex: FC Barcelona" : "Ex: Escolinha Craque do Futuro"}
+                value={teamName}
+                onChange={(e) => {
+                  setTeamName(e.target.value);
+                  setErrorMessage(null);
+                }}
+                onBlur={() => setTouched(prev => ({ ...prev, teamName: true }))}
+                className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+                  touched.teamName
+                    ? isFirstNameValid
+                      ? "border-emerald-500 border"
+                      : "border-destructive border"
+                    : "border-0"
+                }`}
+                maxLength={60}
+                required
+              />
+              {touched.teamName && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isFirstNameValid ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <X className="h-4 w-4 text-destructive" />
+                  )}
+                </div>
+              )}
+            </div>
+            {touched.teamName && !isFirstNameValid && (
+              <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+            )}
+          </div>
+
+          {/* Escudo */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase text-muted-foreground">
+              Escudo (opcional)
+            </Label>
+            <div className="flex items-center gap-4">
+              {emblemPreview ? (
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted/50">
+                  <img src={emblemPreview} alt="Escudo" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setEmblemFile(null); setEmblemPreview(null); }}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/50 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEmblemChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+              <p className="text-xs text-muted-foreground flex-1">
+                Envie o escudo do seu {accountType === "time" ? "time" : "escolinha"}. Formato: JPG, PNG.
+              </p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Nome e Sobrenome em linha */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
+                Nome <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="signup-firstname"
+                  type="text"
+                  placeholder="João"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
+                  className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+                    touched.firstName 
+                      ? isFirstNameValid 
+                        ? "border-emerald-500 border" 
+                        : "border-destructive border"
+                      : "border-0"
+                  }`}
+                  maxLength={30}
+                  required
+                />
+                {touched.firstName && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isFirstNameValid ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-destructive" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {touched.firstName && !isFirstNameValid && (
+                <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
+                Sobrenome <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="signup-lastname"
+                  type="text"
+                  placeholder="Silva"
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
+                  className={`pr-10 h-12 bg-muted/50 transition-colors ${
+                    touched.lastName 
+                      ? isLastNameValid 
+                        ? "border-emerald-500 border" 
+                        : "border-destructive border"
+                      : "border-0"
+                  }`}
+                  maxLength={50}
+                  required
+                />
+                {touched.lastName && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isLastNameValid ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-destructive" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {touched.lastName && !isLastNameValid && (
+                <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Email */}
       <div className="space-y-2">
