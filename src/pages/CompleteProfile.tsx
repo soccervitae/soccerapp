@@ -305,8 +305,9 @@ const CompleteProfile = () => {
   const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
   const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
-  const completedFields = (isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isTeamOrSchoolAccount ? 2 : isAthlete ? 9 : 6;
+  const activeFields = isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields;
+  const completedFields = activeFields.filter(Boolean).length;
+  const totalFields = activeFields.length;
 
   return (
     <div className="min-h-screen bg-background">
