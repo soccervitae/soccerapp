@@ -60,7 +60,7 @@ const Landing = () => {
       ],
     },
     {
-      emoji: "🏟️",
+      emoji: "🛡️",
       accountType: "Time de Futebol",
       accountDescription: "Clubes e equipes com presença na plataforma.",
       features: [
