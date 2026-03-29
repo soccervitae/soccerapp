@@ -295,11 +295,12 @@ const CompleteProfile = () => {
   }
 
   // Calculate completed fields based on profile type
+  const teamFields = [isNicknameValid, isNationalityValid];
   const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
   const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
-  const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isAthlete ? 9 : 6;
+  const completedFields = (isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields).filter(Boolean).length;
+  const totalFields = isTeamOrSchoolAccount ? 2 : isAthlete ? 9 : 6;
 
   return (
     <div className="min-h-screen bg-background">
