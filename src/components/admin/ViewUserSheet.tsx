@@ -85,6 +85,18 @@ export function ViewUserSheet({
     enabled: !!userId && open,
   });
 
+  // Fetch user email (admin only)
+  const { data: userEmail } = useQuery({
+    queryKey: ["adminUserEmail", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const { data, error } = await supabase.rpc("get_user_email", { _user_id: userId });
+      if (error) throw error;
+      return data as string | null;
+    },
+    enabled: !!userId && open,
+  });
+
   // Fetch user roles separately
   const { data: userRoles } = useQuery({
     queryKey: ["adminUserRoles", userId],
