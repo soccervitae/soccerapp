@@ -38,6 +38,7 @@ interface Profile {
   posicaofem?: number | null;
   funcao?: number | null;
   position_name?: string | null;
+  account_type?: string | null;
 }
 
 interface ProfileFeedSheetProps {
