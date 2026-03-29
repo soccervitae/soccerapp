@@ -235,13 +235,15 @@ const CompleteProfile = () => {
     setIsSubmitting(true);
     try {
       const updateData: Record<string, unknown> = {
-        gender: gender,
-        role: profileType,
-        birth_date: birthDate,
+        gender: isTeamOrSchoolAccount ? null : gender,
+        role: isTeamOrSchoolAccount ? null : profileType,
+        birth_date: isTeamOrSchoolAccount ? null : birthDate,
         nationality: Number(nationality),
         nickname: nickname.trim() || null,
         profile_completed: true,
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
+        foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
+        team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
       };
 
       const isMale = gender === "homem" || gender === "masculino" || gender === "male";
