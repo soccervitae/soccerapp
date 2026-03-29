@@ -138,17 +138,17 @@ const Landing = () => {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   {feature.customIcon ? (
                     <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
                   ) : (
-                    <feature.icon className="w-6 h-6 text-[#1cb15c]" />
+                    <feature.icon className="w-6 h-6 text-primary" />
                   )}
                 </div>
-                <h3 className="text-white text-lg font-bold">{feature.title}</h3>
-                <p className="text-white/60 text-sm">
+                <h3 className="text-foreground text-lg font-bold">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm">
                   {feature.description}
                 </p>
               </div>
