@@ -151,6 +151,36 @@ export const FeedPost = ({
     return () => clearInterval(interval);
   }, [hasMusicTrack, musicTitle]);
 
+  // Listen for global mute changes from other posts
+  useEffect(() => {
+    const handleGlobalMuteChange = (e: Event) => {
+      const { muted } = (e as CustomEvent).detail;
+      setIsMuted(muted);
+      setIsMusicMuted(muted);
+    };
+    window.addEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+    return () => window.removeEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+  }, []);
+
+  // Keep isMusicMutedRef in sync with state
+  useEffect(() => {
+    isMusicMutedRef.current = isMusicMuted;
+    if (musicAudioRef.current) {
+      musicAudioRef.current.muted = isMusicMuted;
+    }
+  }, [isMusicMuted]);
+
+  // Stop music playback function for global coordination
+  const stopMusicPlayback = useCallback(() => {
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+        currentlyPlayingFeedMusic = null;
+        currentlyPlayingFeedMusicStop = null;
+      }
+    }
+  }, []);
+
   // Video autoplay on viewport intersection (also handles music for video posts)
   useEffect(() => {
     if (post.media_type !== "video" || !videoContainerRef.current) return;
@@ -222,37 +252,6 @@ export const FeedPost = ({
       }
     };
   }, [post.media_type, hasMusicTrack, musicAudioUrl, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
-
-  // Listen for global mute changes from other posts
-  useEffect(() => {
-    const handleGlobalMuteChange = (e: Event) => {
-      const { muted } = (e as CustomEvent).detail;
-      setIsMuted(muted);
-      setIsMusicMuted(muted);
-    };
-    window.addEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
-    return () => window.removeEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
-  }, []);
-
-  // Keep isMusicMutedRef in sync with state (so observer doesn't need to re-create)
-  useEffect(() => {
-    isMusicMutedRef.current = isMusicMuted;
-    if (musicAudioRef.current) {
-      musicAudioRef.current.muted = isMusicMuted;
-    }
-  }, [isMusicMuted]);
-
-  // Stop music playback function for global coordination
-  const stopMusicPlayback = useCallback(() => {
-    if (musicAudioRef.current) {
-      musicAudioRef.current.pause();
-      // Clear global reference if this was the playing audio
-      if (currentlyPlayingFeedMusic === musicAudioRef.current) {
-        currentlyPlayingFeedMusic = null;
-        currentlyPlayingFeedMusicStop = null;
-      }
-    }
-  }, []);
 
   // Music autoplay on viewport intersection (for image posts with music)
   useEffect(() => {
