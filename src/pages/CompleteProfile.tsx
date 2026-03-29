@@ -451,29 +451,31 @@ const CompleteProfile = () => {
           </div>
         )}
 
-        {/* Birth Date */}
-        <div className="space-y-2">
-          <Label htmlFor="birthDate">
-            Data de nascimento <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="birthDate"
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            onBlur={() => handleBlur("birthDate")}
-            className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
-            max={maxBirthDate}
-          />
-          <p className="text-xs text-muted-foreground">
-            Você deve ter no mínimo 16 anos.
-          </p>
-          {touched.birthDate && !isBirthDateValid && (
-            <p className="text-xs text-destructive">
-              {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+        {/* Birth Date (hidden for team/school) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="birthDate">
+              Data de nascimento <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="birthDate"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              onBlur={() => handleBlur("birthDate")}
+              className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
+              max={maxBirthDate}
+            />
+            <p className="text-xs text-muted-foreground">
+              Você deve ter no mínimo 16 anos.
             </p>
-          )}
-        </div>
+            {touched.birthDate && !isBirthDateValid && (
+              <p className="text-xs text-destructive">
+                {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Nationality */}
         <div className="space-y-2">
