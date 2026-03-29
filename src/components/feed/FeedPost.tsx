@@ -176,6 +176,17 @@ export const FeedPost = ({
     return () => observer.disconnect();
   }, [post.media_type]);
 
+  // Listen for global mute changes from other posts
+  useEffect(() => {
+    const handleGlobalMuteChange = (e: Event) => {
+      const { muted } = (e as CustomEvent).detail;
+      setIsMuted(muted);
+      setIsMusicMuted(muted);
+    };
+    window.addEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+    return () => window.removeEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+  }, []);
+
   // Keep isMusicMutedRef in sync with state (so observer doesn't need to re-create)
   useEffect(() => {
     isMusicMutedRef.current = isMusicMuted;
