@@ -530,6 +530,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [showVerification, setShowVerification] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState("");
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
