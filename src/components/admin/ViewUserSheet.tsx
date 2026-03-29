@@ -344,6 +344,20 @@ export function ViewUserSheet({
                   {/* Team/School specific info */}
                   {(user.account_type === 'time' || user.account_type === 'escolinha') ? (
                     <div className="space-y-3">
+                      {userEmail && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Email:</span>
+                          <span className="font-medium">{userEmail}</span>
+                        </div>
+                      )}
+                      {user.full_name && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Nome completo:</span>
+                          <span className="font-medium">{user.full_name}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Responsável (email):</span>
