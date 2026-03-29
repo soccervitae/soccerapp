@@ -531,6 +531,9 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accountType, setAccountType] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [emblemFile, setEmblemFile] = useState<File | null>(null);
+  const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -540,6 +543,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     password: false,
     confirmPassword: false,
     accountType: false,
+    teamName: false,
   });
   
   const { signUp } = useAuth();
