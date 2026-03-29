@@ -160,6 +160,7 @@ export const FeedPost = ({
         entries.forEach((entry) => {
           if (videoRef.current) {
             if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              videoRef.current.muted = getGlobalMuteState();
               videoRef.current.play().catch(() => {});
               setIsVideoPlaying(true);
             } else {
