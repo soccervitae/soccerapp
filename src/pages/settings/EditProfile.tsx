@@ -516,6 +516,9 @@ const EditProfile = () => {
         avatar_url: avatarUrl,
         cover_url: coverUrl,
         estado_id: isBrazilSelected && formData.estado_id ? Number(formData.estado_id) : null,
+        foundation_year: formData.foundation_year ? Number(formData.foundation_year) : null,
+        city: formData.city || null,
+        team_category: formData.team_category || null,
       };
       
       // Set position/function based on user type and gender
