@@ -88,6 +88,7 @@ const NotificationItem = ({
     switch (notification.type) {
       case "follow":
       case "squad_request":
+      case "squad_accepted":
         if (notification.actor?.username) {
           navigate(`/${notification.actor.username}`);
         }
