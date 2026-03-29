@@ -649,10 +649,6 @@ export const FeedPost = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground uppercase">
-            {getTimeAgo()}
-          </span>
-          
           {isOwner && <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="p-2 hover:bg-muted rounded-full transition-colors">
