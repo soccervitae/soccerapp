@@ -24,6 +24,7 @@ export interface SearchProfile {
   followers_count?: number;
   role?: string | null;
   gender?: string | null;
+  account_type?: string | null;
 }
 
 const fetchPositionNames = async (profiles: SearchProfile[]): Promise<SearchProfile[]> => {
