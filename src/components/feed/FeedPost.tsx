@@ -688,23 +688,6 @@ export const FeedPost = ({
         </div>
       </div>
 
-      {/* Caption */}
-      {post.content && <div className="pb-3">
-        <p className="text-sm text-foreground">
-          {post.content.length > 150 && !isContentExpanded 
-            ? post.content.slice(0, 150).trim() + "..." 
-            : post.content}
-        </p>
-        {post.content.length > 150 && (
-          <button 
-            onClick={() => setIsContentExpanded(!isContentExpanded)}
-            className="text-sm text-muted-foreground hover:text-foreground mt-1 transition-colors"
-          >
-            {isContentExpanded ? "Ver menos" : "Ver mais"}
-          </button>
-        )}
-      </div>}
-
       {/* Media */}
       {post.media_url && <div
         ref={post.media_type !== "video" ? mediaContainerRef : undefined}
