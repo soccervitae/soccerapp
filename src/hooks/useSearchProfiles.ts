@@ -156,7 +156,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       // Fetch verified profiles first
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
