@@ -373,32 +373,87 @@ const CompleteProfile = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 max-w-md mx-auto">
-        {/* Nickname - Required */}
-        <div className="space-y-2">
-          <Label htmlFor="nickname">
-            Apelido <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="nickname"
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onBlur={() => handleBlur("nickname")}
-            placeholder="Como você é conhecido"
-            maxLength={50}
-            className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
-          />
-          <p className="text-xs text-muted-foreground">
-            O apelido é como te chamam no futebol.
-          </p>
-          {touched.nickname && !isNicknameValid && (
-            <p className="text-xs text-destructive">
-              {nickname.trim().length < 2 
-                ? "Mínimo de 2 caracteres." 
-                : "Apenas letras, números e espaços são permitidos."}
+        {/* Team/School Name + Emblem OR Nickname */}
+        {isTeamOrSchoolAccount ? (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="teamName">
+                {profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha'} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="teamName"
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                onBlur={() => handleBlur("nickname")}
+                placeholder={profile?.account_type === 'time' ? 'Ex: FC Barcelona' : 'Ex: Escolinha do Neymar'}
+                maxLength={50}
+                className={getInputClass(getFieldStatus(isTeamNameValid, touched.nickname))}
+              />
+              {touched.nickname && !isTeamNameValid && (
+                <p className="text-xs text-destructive">Mínimo de 2 caracteres.</p>
+              )}
+            </div>
+
+            {/* Emblem Upload */}
+            <div className="space-y-2">
+              <Label>Escudo</Label>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted/50">
+                  {emblemPreview ? (
+                    <img src={emblemPreview} alt="Escudo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Shield className="w-8 h-8 text-muted-foreground/50" />
+                  )}
+                </div>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEmblemFile(file);
+                        setEmblemPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <div className="flex items-center gap-2 text-sm text-primary font-medium hover:underline">
+                    <Upload className="w-4 h-4" />
+                    {emblemPreview ? 'Alterar escudo' : 'Adicionar escudo'}
+                  </div>
+                </label>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="nickname">
+              Apelido <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              onBlur={() => handleBlur("nickname")}
+              placeholder="Como você é conhecido"
+              maxLength={50}
+              className={getInputClass(getFieldStatus(isNicknameValid, touched.nickname))}
+            />
+            <p className="text-xs text-muted-foreground">
+              O apelido é como te chamam no futebol.
             </p>
-          )}
-        </div>
+            {touched.nickname && !isNicknameValid && (
+              <p className="text-xs text-destructive">
+                {nickname.trim().length < 2 
+                  ? "Mínimo de 2 caracteres." 
+                  : "Apenas letras, números e espaços são permitidos."}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Team/School specific fields */}
         {isTeamOrSchoolAccount && (
