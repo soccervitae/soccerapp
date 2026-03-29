@@ -152,27 +152,29 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
 
       {/* Members list */}
       {filteredMembers.length > 0 ? (
-        <div className="grid grid-cols-3 gap-0.5">
+        <div className="grid grid-cols-3 gap-2 px-0">
           {filteredMembers.map((member) => (
             <div
               key={member.id}
-              className="relative aspect-square cursor-pointer group"
+              className="relative cursor-pointer group overflow-hidden rounded-lg border border-border/50 bg-card"
               onClick={() => member.athlete && navigate(`/${member.athlete.username}`)}
             >
-              <img
-                src={member.athlete?.avatar_url!}
-                alt={member.athlete?.username || ""}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity pb-2 text-center px-1">
-                  <p className="text-white text-xs font-semibold truncate">
-                    {member.athlete?.nickname || member.athlete?.full_name || member.athlete?.username}
+              <div className="aspect-[3/4] overflow-hidden">
+                <img
+                  src={member.athlete?.avatar_url!}
+                  alt={member.athlete?.username || ""}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <div className="px-1.5 py-1.5 bg-card text-center">
+                <p className="text-[11px] font-bold text-foreground truncate leading-tight">
+                  {member.athlete?.nickname || member.athlete?.full_name || member.athlete?.username}
+                </p>
+                {member.athlete?.position_name && (
+                  <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
+                    {member.athlete.position_name}
                   </p>
-                  {member.athlete?.position_name && (
-                    <p className="text-white/70 text-[10px] truncate">{member.athlete.position_name}</p>
-                  )}
-                </div>
+                )}
               </div>
               {isOwnProfile && (
                 <button
