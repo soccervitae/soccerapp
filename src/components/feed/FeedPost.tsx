@@ -855,17 +855,34 @@ export const FeedPost = ({
         </a>}
 
 
+      {/* Caption - below media */}
+      {post.content && <div className="pt-2 pb-1">
+        <p className="text-sm text-foreground">
+          <span className="font-semibold mr-1 cursor-pointer hover:underline" onClick={handleProfileClick}>
+            {post.profile.username}
+          </span>
+          {post.content.length > 150 && !isContentExpanded 
+            ? post.content.slice(0, 150).trim() + "..." 
+            : post.content}
+        </p>
+        {post.content.length > 150 && (
+          <button 
+            onClick={() => setIsContentExpanded(!isContentExpanded)}
+            className="text-sm text-muted-foreground hover:text-foreground mt-1 transition-colors"
+          >
+            {isContentExpanded ? "Ver menos" : "Ver mais"}
+          </button>
+        )}
+      </div>}
+
       {/* Liked by section */}
-      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-2 pb-1">
+      {post.likes_count > 0 && post.recent_likes && post.recent_likes.length > 0 && <div className="pt-1 pb-1">
           <button onClick={() => setIsLikesSheetOpen(true)} className="flex items-center gap-2 group text-left">
-            {/* Stacked avatars */}
             <div className="flex -space-x-2">
               {post.recent_likes.slice(0, 3).map((like, index) => <img key={like.user_id} src={like.avatar_url || "/placeholder.svg"} alt={like.username} className="w-6 h-6 rounded-full border-2 border-background object-cover" style={{
             zIndex: 3 - index
           }} />)}
             </div>
-            
-            {/* Text */}
             <p className="text-sm text-foreground">
               Aplaudido por{" "}
               <span className="font-semibold group-hover:underline" onClick={e => {
@@ -885,7 +902,7 @@ export const FeedPost = ({
         </div>}
 
       {/* Actions */}
-      <div className={`pt-3 py-[4px] ${isMobile ? '-mx-4' : ''}`}>
+      <div className={`pt-2 py-[4px] ${isMobile ? '-mx-4' : ''}`}>
         <div className="grid grid-cols-4">
           <button onClick={handleLike} disabled={likePost.isPending} className={`flex items-center justify-center p-3 gap-1.5 transition-all active:scale-110 text-foreground hover:text-muted-foreground`}>
             <AnimatePresence mode="wait" initial={false}>
@@ -926,26 +943,6 @@ export const FeedPost = ({
           </div>
         </div>
       </div>
-
-      {/* Caption - below actions, Instagram style */}
-      {post.content && <div className="pt-1 pb-1">
-        <p className="text-sm text-foreground">
-          <span className="font-semibold mr-1 cursor-pointer hover:underline" onClick={handleProfileClick}>
-            {post.profile.username}
-          </span>
-          {post.content.length > 150 && !isContentExpanded 
-            ? post.content.slice(0, 150).trim() + "..." 
-            : post.content}
-        </p>
-        {post.content.length > 150 && (
-          <button 
-            onClick={() => setIsContentExpanded(!isContentExpanded)}
-            className="text-sm text-muted-foreground hover:text-foreground mt-1 transition-colors"
-          >
-            {isContentExpanded ? "Ver menos" : "Ver mais"}
-          </button>
-        )}
-      </div>}
 
       {/* Post date */}
       <p className="text-[11px] text-muted-foreground pb-3">{getTimeAgo()}</p>
