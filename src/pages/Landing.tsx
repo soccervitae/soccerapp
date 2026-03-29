@@ -240,7 +240,7 @@ const Landing = () => {
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
             ) : (
-              <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-full">
+              <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-lg">
                 Cadastrar
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
