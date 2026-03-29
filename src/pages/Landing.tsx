@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
+import footballFieldIcon from "@/assets/football-field-icon.png";
 
 const useDeviceType = () => {
   return useMemo(() => {
