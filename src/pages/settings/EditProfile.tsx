@@ -504,14 +504,14 @@ const EditProfile = () => {
       
       // Build update data with correct position/function columns
       const updateData: Record<string, unknown> = {
-        full_name: formData.full_name || null,
+        full_name: isTeamOrSchool ? (formData.full_name.trim().toUpperCase() || null) : (formData.full_name || null),
         username: formData.username,
-        nickname: formData.nickname || null,
+        nickname: isTeamOrSchool ? (formData.full_name.trim().toUpperCase() || null) : (formData.nickname || null),
         bio: formData.bio || null,
-        role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
+        role: isTeamOrSchool ? null : (userType === 'comissao_tecnica' ? 'comissao_tecnica' : null),
         team: formData.team || null,
-        birth_date: formData.birth_date || null,
-        gender: formData.gender || null,
+        birth_date: isTeamOrSchool ? null : (formData.birth_date || null),
+        gender: isTeamOrSchool ? null : (formData.gender || null),
         nationality: formData.nationality ? Number(formData.nationality) : null,
         avatar_url: avatarUrl,
         cover_url: coverUrl,
@@ -697,13 +697,19 @@ const EditProfile = () => {
         <div className="px-4 mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="full_name" className="flex items-center gap-1">
-              Nome Completo <span className="text-destructive">*</span>
+              {isTeamOrSchool 
+                ? (profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha')
+                : 'Nome Completo'
+              } <span className="text-destructive">*</span>
             </Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder="Seu nome completo"
+              placeholder={isTeamOrSchool 
+                ? (profile?.account_type === 'time' ? 'Nome do time' : 'Nome da escolinha')
+                : 'Seu nome completo'
+              }
               className={showValidationErrors && validationErrors.full_name ? "border-destructive" : ""}
             />
             {showValidationErrors && validationErrors.full_name && (
@@ -730,20 +736,22 @@ const EditProfile = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="nickname">Apelido</Label>
-            <Input
-              id="nickname"
-              value={formData.nickname}
-              onChange={(e) => {
-                if (e.target.value.length <= 30) {
-                  setFormData({ ...formData, nickname: e.target.value });
-                }
-              }}
-              placeholder="Como querem te chamar?"
-              maxLength={30}
-            />
-          </div>
+          {!isTeamOrSchool && (
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Apelido</Label>
+              <Input
+                id="nickname"
+                value={formData.nickname}
+                onChange={(e) => {
+                  if (e.target.value.length <= 30) {
+                    setFormData({ ...formData, nickname: e.target.value });
+                  }
+                }}
+                placeholder="Como querem te chamar?"
+                maxLength={30}
+              />
+            </div>
+          )}
 
           {!isTeamOrSchool && (
           <div className="space-y-2">
@@ -793,12 +801,15 @@ const EditProfile = () => {
                 <Label htmlFor="foundation_year">Ano de Fundação</Label>
                 <Input
                   id="foundation_year"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.foundation_year}
-                  onChange={(e) => setFormData({ ...formData, foundation_year: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setFormData({ ...formData, foundation_year: val });
+                  }}
                   placeholder="Ex: 1990"
-                  min={1800}
-                  max={new Date().getFullYear()}
+                  maxLength={4}
                 />
               </div>
 
