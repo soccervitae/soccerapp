@@ -84,7 +84,7 @@ const Landing = () => {
         <meta name="description" content="A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal." />
       </Helmet>
       
-      <div className="min-h-screen bg-[#102216] text-white font-sans">
+      <div className="min-h-screen bg-white text-foreground font-sans">
 
         {/* Hero Section with Parallax */}
         <section ref={heroRef} className="w-full relative overflow-hidden min-h-[320px] md:min-h-[400px]">
