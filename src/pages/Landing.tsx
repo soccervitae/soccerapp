@@ -262,6 +262,88 @@ const Landing = () => {
           </div>
         </section>
 
+        {/* Install PWA Sheet */}
+        <Sheet open={showInstallSheet} onOpenChange={setShowInstallSheet}>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader className="text-left mb-4">
+              <SheetTitle className="text-lg font-bold">Como instalar o app</SheetTitle>
+            </SheetHeader>
+
+            {/* Native install button for Android */}
+            {isInstallable && deviceType !== "ios" && (
+              <div className="mb-6">
+                <Button onClick={async () => { await promptInstall(); setShowInstallSheet(false); }} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-12 rounded-lg gap-2" size="lg">
+                  <Download className="w-5 h-5" />
+                  Instalar Agora
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">Ou siga os passos abaixo</p>
+              </div>
+            )}
+
+            {/* iOS Instructions */}
+            {(deviceType === "ios" || deviceType === "unknown") && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">🍎</span>
+                  <h3 className="font-semibold text-foreground">iPhone / iPad</h3>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { step: 1, title: "Abra no Safari", desc: "Use o navegador Safari", icon: null },
+                    { step: 2, title: "Toque em Compartilhar", desc: "Ícone na barra inferior", icon: Share },
+                    { step: 3, title: "Adicionar à Tela Inicial", desc: "Role e selecione a opção", icon: Plus },
+                    { step: 4, title: "Confirme", desc: "Toque em 'Adicionar'", icon: null },
+                  ].map((item) => (
+                    <div key={item.step} className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-primary">{item.step}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      {item.icon && <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Android Instructions */}
+            {(deviceType === "android" || deviceType === "unknown") && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">🤖</span>
+                  <h3 className="font-semibold text-foreground">Android</h3>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { step: 1, title: "Abra no Chrome", desc: "Use o Google Chrome", icon: null },
+                    { step: 2, title: "Toque no menu", desc: "Três pontos (⋮)", icon: MoreVertical },
+                    { step: 3, title: "Instalar aplicativo", desc: "Ou 'Adicionar à tela inicial'", icon: null },
+                    { step: 4, title: "Confirme", desc: "Toque em 'Instalar'", icon: null },
+                  ].map((item) => (
+                    <div key={item.step} className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-primary">{item.step}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      {item.icon && <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground text-center">
+              📱 Após instalar, abra o app pela tela inicial do seu celular
+            </p>
+          </SheetContent>
+        </Sheet>
+
         {/* Footer */}
         <footer className="border-t border-border/30 py-8 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
