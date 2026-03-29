@@ -127,9 +127,7 @@ const Landing = () => {
             <div className="flex flex-col gap-4 text-center z-10 max-w-[600px] items-center">
               <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14" />
               <h1 className="text-foreground text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase my-0 py-[16px]">
-                Jogue.
-                <br />
-                Brilhe.
+                Jogue. Brilhe.
                 <br />
                 Conquiste.
               </h1>
