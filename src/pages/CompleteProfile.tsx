@@ -559,7 +559,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Height & Weight Row - Only for Athletes */}
-        {isAthlete && (
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="grid grid-cols-2 gap-4">
             {/* Height */}
             <div className="space-y-2">
