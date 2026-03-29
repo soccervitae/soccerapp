@@ -156,7 +156,7 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
           {filteredMembers.map((member) => (
             <div
               key={member.id}
-              className="relative cursor-pointer group overflow-hidden rounded-lg border border-border/50 bg-card"
+              className="relative cursor-pointer group overflow-hidden border border-border/50 bg-card"
               onClick={() => member.athlete && navigate(`/${member.athlete.username}`)}
             >
               <div className="aspect-[3/4] overflow-hidden">
