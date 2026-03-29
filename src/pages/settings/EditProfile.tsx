@@ -697,13 +697,19 @@ const EditProfile = () => {
         <div className="px-4 mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="full_name" className="flex items-center gap-1">
-              Nome Completo <span className="text-destructive">*</span>
+              {isTeamOrSchool 
+                ? (profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha')
+                : 'Nome Completo'
+              } <span className="text-destructive">*</span>
             </Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder="Seu nome completo"
+              placeholder={isTeamOrSchool 
+                ? (profile?.account_type === 'time' ? 'Nome do time' : 'Nome da escolinha')
+                : 'Seu nome completo'
+              }
               className={showValidationErrors && validationErrors.full_name ? "border-destructive" : ""}
             />
             {showValidationErrors && validationErrors.full_name && (
@@ -730,20 +736,22 @@ const EditProfile = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="nickname">Apelido</Label>
-            <Input
-              id="nickname"
-              value={formData.nickname}
-              onChange={(e) => {
-                if (e.target.value.length <= 30) {
-                  setFormData({ ...formData, nickname: e.target.value });
-                }
-              }}
-              placeholder="Como querem te chamar?"
-              maxLength={30}
-            />
-          </div>
+          {!isTeamOrSchool && (
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Apelido</Label>
+              <Input
+                id="nickname"
+                value={formData.nickname}
+                onChange={(e) => {
+                  if (e.target.value.length <= 30) {
+                    setFormData({ ...formData, nickname: e.target.value });
+                  }
+                }}
+                placeholder="Como querem te chamar?"
+                maxLength={30}
+              />
+            </div>
+          )}
 
           {!isTeamOrSchool && (
           <div className="space-y-2">
