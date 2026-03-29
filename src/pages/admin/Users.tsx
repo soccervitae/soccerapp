@@ -55,6 +55,7 @@ interface FilterState {
   status: UserFilter;
   gender: string;
   profileType: string;
+  accountType: string;
   country: string;
   state: string;
 }
@@ -72,6 +73,7 @@ export default function AdminUsers() {
     status: "all",
     gender: "all",
     profileType: "all",
+    accountType: "all",
     country: "all",
     state: "all",
   });
@@ -153,6 +155,11 @@ export default function AdminUsers() {
     // Profile type filter (funcao column references funcaoperfil)
     if (filters.profileType !== "all") {
       query = query.eq("funcao", parseInt(filters.profileType));
+    }
+
+    // Account type filter
+    if (filters.accountType !== "all") {
+      query = query.eq("account_type", filters.accountType);
     }
 
     // Country filter
@@ -387,6 +394,7 @@ export default function AdminUsers() {
       status: "all",
       gender: "all",
       profileType: "all",
+      accountType: "all",
       country: "all",
       state: "all",
     });
@@ -397,6 +405,7 @@ export default function AdminUsers() {
   const hasActiveFilters = filters.status !== "all" || 
     filters.gender !== "all" || 
     filters.profileType !== "all" || 
+    filters.accountType !== "all" ||
     filters.country !== "all" || 
     filters.state !== "all" ||
     search !== "";
@@ -507,6 +516,20 @@ export default function AdminUsers() {
               </SelectContent>
             </Select>
 
+            {/* Account Type Filter */}
+            <Select value={filters.accountType} onValueChange={(v) => handleFilterChange("accountType", v)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Tipo de conta" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as contas</SelectItem>
+                <SelectItem value="atleta">Atleta</SelectItem>
+                <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+                <SelectItem value="time">Time</SelectItem>
+                <SelectItem value="escolinha">Escolinha</SelectItem>
+              </SelectContent>
+            </Select>
+
             {/* Country Filter */}
             <Select value={filters.country} onValueChange={(v) => handleFilterChange("country", v)}>
               <SelectTrigger className="w-[180px]">
@@ -564,10 +587,11 @@ export default function AdminUsers() {
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <Table>
-            <TableHeader>
+             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
                 <TableHead>Username</TableHead>
+                <TableHead>Tipo de Conta</TableHead>
                 <TableHead>Função</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Cadastro</TableHead>
@@ -584,7 +608,8 @@ export default function AdminUsers() {
                         <Skeleton className="h-4 w-32" />
                       </div>
                     </TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
@@ -593,7 +618,7 @@ export default function AdminUsers() {
                 ))
               ) : users?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Nenhum usuário encontrado
                   </TableCell>
                 </TableRow>
@@ -615,6 +640,17 @@ export default function AdminUsers() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       @{user.username}
+                    </TableCell>
+                    <TableCell>
+                      {user.account_type === 'time' ? (
+                        <Badge variant="outline" className="border-blue-500 text-blue-500">Time</Badge>
+                      ) : user.account_type === 'escolinha' ? (
+                        <Badge variant="outline" className="border-orange-500 text-orange-500">Escolinha</Badge>
+                      ) : user.account_type === 'comissao_tecnica' ? (
+                        <Badge variant="outline" className="border-purple-500 text-purple-500">Comissão</Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-emerald-500 text-emerald-500">Atleta</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {isUserAdmin(user) ? (
