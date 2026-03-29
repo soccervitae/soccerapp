@@ -95,10 +95,9 @@ const LandingOrIndex = () => {
     );
   }
   
-  // If not logged in and in PWA mode, redirect to auth
   if (!user) {
     if (isPWA()) {
-      return <Navigate to="/auth" replace />;
+      return <PageTransition><PwaHome /></PageTransition>;
     }
     return <PageTransition><Landing /></PageTransition>;
   }
