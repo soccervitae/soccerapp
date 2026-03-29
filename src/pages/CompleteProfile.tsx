@@ -247,17 +247,39 @@ const CompleteProfile = () => {
 
     setIsSubmitting(true);
     try {
+      // Upload emblem if selected
+      let emblemUrl: string | null = null;
+      if (isTeamOrSchoolAccount && emblemFile) {
+        setUploadingEmblem(true);
+        const fileExt = emblemFile.name.split('.').pop();
+        const filePath = `${user.id}/emblem.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, emblemFile, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: publicData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+        emblemUrl = publicData.publicUrl;
+        setUploadingEmblem(false);
+      }
+
       const updateData: Record<string, unknown> = {
         gender: isTeamOrSchoolAccount ? null : gender,
         role: isTeamOrSchoolAccount ? null : profileType,
         birth_date: isTeamOrSchoolAccount ? null : birthDate,
         nationality: Number(nationality),
-        nickname: nickname.trim() || null,
+        nickname: isTeamOrSchoolAccount ? teamName.trim() : (nickname.trim() || null),
+        full_name: isTeamOrSchoolAccount ? teamName.trim() : undefined,
         profile_completed: true,
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
         foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
         team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
       };
+
+      if (emblemUrl) {
+        updateData.avatar_url = emblemUrl;
+      }
 
       const isMale = gender === "homem" || gender === "masculino" || gender === "male";
       const isFemale = gender === "mulher" || gender === "feminino" || gender === "female";
