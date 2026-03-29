@@ -394,6 +394,7 @@ export default function AdminUsers() {
       status: "all",
       gender: "all",
       profileType: "all",
+      accountType: "all",
       country: "all",
       state: "all",
     });
@@ -404,6 +405,7 @@ export default function AdminUsers() {
   const hasActiveFilters = filters.status !== "all" || 
     filters.gender !== "all" || 
     filters.profileType !== "all" || 
+    filters.accountType !== "all" ||
     filters.country !== "all" || 
     filters.state !== "all" ||
     search !== "";
