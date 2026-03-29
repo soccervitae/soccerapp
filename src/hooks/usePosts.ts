@@ -91,7 +91,8 @@ export const usePostById = (postId: string | undefined) => {
             role,
             posicaomas,
             posicaofem,
-            funcao
+            funcao,
+            account_type
           ),
           music_track:music_tracks (
             id,
