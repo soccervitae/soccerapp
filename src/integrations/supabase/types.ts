@@ -1063,6 +1063,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string | null
           avatar_url: string | null
           ban_reason: string | null
           banned_at: string | null
@@ -1114,6 +1115,7 @@ export type Database = {
           weight: number | null
         }
         Insert: {
+          account_type?: string | null
           avatar_url?: string | null
           ban_reason?: string | null
           banned_at?: string | null
@@ -1165,6 +1167,7 @@ export type Database = {
           weight?: number | null
         }
         Update: {
+          account_type?: string | null
           avatar_url?: string | null
           ban_reason?: string | null
           banned_at?: string | null

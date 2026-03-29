@@ -530,6 +530,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [showVerification, setShowVerification] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState("");
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -538,6 +539,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     email: false,
     password: false,
     confirmPassword: false,
+    accountType: false,
   });
   
   const { signUp } = useAuth();
@@ -547,6 +549,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const isLastNameValid = lastName.trim().length >= 2;
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
+  const isAccountTypeValid = accountType.length > 0;
 
 
   const validateEmail = (email: string): boolean => {
@@ -652,6 +655,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
+    if (!accountType) {
+      setErrorMessage("Selecione o tipo de conta");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await signUp({
@@ -674,6 +682,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       setErrorMessage("Erro ao criar conta. Tente novamente.");
       setLoading(false);
       return;
+    }
+
+    // Save account type to profile
+    if (accountType) {
+      await supabase
+        .from("profiles")
+        .update({ account_type: accountType } as any)
+        .eq("id", user.id);
     }
 
     // Send verification code
@@ -729,7 +745,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     lastName.trim().length >= 2 &&
     emailStatus === "valid" &&
     isPasswordValid &&
-    password === confirmPassword;
+    password === confirmPassword &&
+    accountType.length > 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -823,6 +840,40 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
           )}
         </div>
+      </div>
+
+      {/* Tipo de Conta */}
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold uppercase text-muted-foreground">
+          Tipo de Conta <span className="text-destructive">*</span>
+        </Label>
+        <Select
+          value={accountType}
+          onValueChange={(value) => {
+            setAccountType(value);
+            setTouched(prev => ({ ...prev, accountType: true }));
+            setErrorMessage(null);
+          }}
+        >
+          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+            touched.accountType
+              ? isAccountTypeValid
+                ? "border-emerald-500 border"
+                : "border-destructive border"
+              : "border-0"
+          }`}>
+            <SelectValue placeholder="Selecione o tipo de conta" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="atleta">Atleta</SelectItem>
+            <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+            <SelectItem value="time">Time</SelectItem>
+            <SelectItem value="escolinha">Escolinha de Futebol</SelectItem>
+          </SelectContent>
+        </Select>
+        {touched.accountType && !isAccountTypeValid && (
+          <p className="text-xs text-destructive">Selecione um tipo de conta</p>
+        )}
       </div>
 
       {/* Email */}
