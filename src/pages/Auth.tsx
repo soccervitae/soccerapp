@@ -549,6 +549,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const isLastNameValid = lastName.trim().length >= 2;
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
+  const isAccountTypeValid = accountType.length > 0;
 
 
   const validateEmail = (email: string): boolean => {
