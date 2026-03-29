@@ -65,6 +65,36 @@ export const AboutTab = ({ profile }: AboutTabProps) => {
             </div>
           </div>
         )}
+
+        {(profile as any).foundation_year && (
+          <div className="bg-card rounded-xl p-4 border border-border/50 flex items-center gap-3">
+            <span className="material-symbols-outlined text-[22px] text-primary">event</span>
+            <div>
+              <p className="text-xs text-muted-foreground">Ano de Fundação</p>
+              <p className="text-sm font-semibold text-foreground">{(profile as any).foundation_year}</p>
+            </div>
+          </div>
+        )}
+
+        {(profile as any).city && (
+          <div className="bg-card rounded-xl p-4 border border-border/50 flex items-center gap-3">
+            <span className="material-symbols-outlined text-[22px] text-primary">location_city</span>
+            <div>
+              <p className="text-xs text-muted-foreground">Cidade</p>
+              <p className="text-sm font-semibold text-foreground">{(profile as any).city}</p>
+            </div>
+          </div>
+        )}
+
+        {(profile as any).team_category && (
+          <div className="bg-card rounded-xl p-4 border border-border/50 flex items-center gap-3">
+            <span className="material-symbols-outlined text-[22px] text-primary">category</span>
+            <div>
+              <p className="text-xs text-muted-foreground">Categoria</p>
+              <p className="text-sm font-semibold text-foreground capitalize">{(profile as any).team_category}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Empty state if no info */}

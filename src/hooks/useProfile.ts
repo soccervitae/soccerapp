@@ -38,6 +38,9 @@ export interface Profile {
   nationality?: number | null;
   is_official_account?: boolean;
   account_type?: string | null;
+  foundation_year?: number | null;
+  city?: string | null;
+  team_category?: string | null;
 }
 
 export const useProfile = (userId?: string) => {

@@ -98,6 +98,9 @@ const EditProfile = () => {
     gender: "",
     nationality: "",
     estado_id: "",
+    foundation_year: "",
+    city: "",
+    team_category: "",
   });
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -153,10 +156,19 @@ const EditProfile = () => {
   };
 
   // Validation errors
+  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
     
     if (!formData.full_name.trim()) errors.full_name = "Nome completo é obrigatório";
+    
+    if (isTeamOrSchool) {
+      // Team/school only needs name and nationality
+      if (!formData.nationality) errors.nationality = "Nacionalidade é obrigatória";
+      return errors;
+    }
+    
     if (!formData.gender) errors.gender = "Sexo é obrigatório";
     if (!formData.position) errors.position = userType === 'comissao_tecnica' ? "Função é obrigatória" : "Posição é obrigatória";
     
@@ -177,7 +189,7 @@ const EditProfile = () => {
     }
     
     return errors;
-  }, [formData, userType]);
+  }, [formData, userType, isTeamOrSchool]);
 
   const isFormValid = Object.keys(validationErrors).length === 0;
 
@@ -280,6 +292,9 @@ const EditProfile = () => {
         gender: profile.gender || "",
         nationality: profile.nationality?.toString() || "",
         estado_id: (profile as any).estado_id?.toString() || "",
+        foundation_year: (profile as any).foundation_year?.toString() || "",
+        city: (profile as any).city || "",
+        team_category: (profile as any).team_category || "",
       });
       // Set user type based on normalized role
       setUserType(isComissaoTecnica ? 'comissao_tecnica' : 'atleta');
@@ -501,6 +516,9 @@ const EditProfile = () => {
         avatar_url: avatarUrl,
         cover_url: coverUrl,
         estado_id: isBrazilSelected && formData.estado_id ? Number(formData.estado_id) : null,
+        foundation_year: formData.foundation_year ? Number(formData.foundation_year) : null,
+        city: formData.city || null,
+        team_category: formData.team_category || null,
       };
       
       // Set position/function based on user type and gender
@@ -727,6 +745,7 @@ const EditProfile = () => {
             />
           </div>
 
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="gender" className="flex items-center gap-1">
               Sexo <span className="text-destructive">*</span>
@@ -744,6 +763,7 @@ const EditProfile = () => {
               <p className="text-sm text-destructive">{validationErrors.gender}</p>
             )}
           </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -766,7 +786,67 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* Profile Type Selector */}
+          {/* Team/School specific fields */}
+          {isTeamOrSchool && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="foundation_year">Ano de Fundação</Label>
+                <Input
+                  id="foundation_year"
+                  type="number"
+                  value={formData.foundation_year}
+                  onChange={(e) => setFormData({ ...formData, foundation_year: e.target.value })}
+                  placeholder="Ex: 1990"
+                  min={1800}
+                  max={new Date().getFullYear()}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 100) {
+                      setFormData({ ...formData, city: e.target.value });
+                    }
+                  }}
+                  placeholder="Cidade do time/escolinha"
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="team_category">Categoria</Label>
+                <Select
+                  value={formData.team_category}
+                  onValueChange={(value) => setFormData({ ...formData, team_category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sub-7">Sub-7</SelectItem>
+                    <SelectItem value="sub-9">Sub-9</SelectItem>
+                    <SelectItem value="sub-11">Sub-11</SelectItem>
+                    <SelectItem value="sub-13">Sub-13</SelectItem>
+                    <SelectItem value="sub-15">Sub-15</SelectItem>
+                    <SelectItem value="sub-17">Sub-17</SelectItem>
+                    <SelectItem value="sub-20">Sub-20</SelectItem>
+                    <SelectItem value="sub-23">Sub-23</SelectItem>
+                    <SelectItem value="profissional">Profissional</SelectItem>
+                    <SelectItem value="amador">Amador</SelectItem>
+                    <SelectItem value="feminino">Feminino</SelectItem>
+                    <SelectItem value="todas">Todas as categorias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {/* Profile Type Selector - only for athletes/staff */}
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="profile_type">Tipo de Perfil</Label>
             <Select 
@@ -782,111 +862,118 @@ const EditProfile = () => {
               </SelectContent>
             </Select>
           </div>
+          )}
 
-          {/* Position for athletes, Function (Função) for technical staff - both use position field */}
-          <div className="space-y-2">
-            <Label htmlFor="position" className="flex items-center gap-1">
-              {userType === 'comissao_tecnica' ? 'Função' : 'Posição'} <span className="text-destructive">*</span>
-            </Label>
-            {userType === 'comissao_tecnica' ? (
-              <Select
-                value={formData.position}
-                onValueChange={(value) => setFormData({ ...formData, position: value })}
-              >
-                <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Selecione a função" />
-                </SelectTrigger>
-                <SelectContent>
-                  {functions.map((func) => (
-                    <SelectItem key={func.id} value={func.id.toString()}>
-                      {func.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Select
-                value={formData.position}
-                onValueChange={(value) => setFormData({ ...formData, position: value })}
-              >
-                <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Selecione a posição" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positions.map((pos) => (
-                    <SelectItem key={pos.id} value={pos.id.toString()}>
-                      {pos.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {showValidationErrors && validationErrors.position && (
-              <p className="text-sm text-destructive">{validationErrors.position}</p>
-            )}
-          </div>
-
-          {/* Physical Stats - Only for athletes */}
-          {userType === 'atleta' && (
+          {/* Position, Physical Stats, etc - Only for athletes/staff */}
+          {!isTeamOrSchool && (
             <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="height" className="flex items-center gap-1">
-                    Altura (cm) <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="height"
-                    type="number"
-                    value={formData.height}
-                    onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                    placeholder="175"
-                    className={showValidationErrors && validationErrors.height ? "border-destructive" : ""}
-                  />
-                  {showValidationErrors && validationErrors.height && (
-                    <p className="text-sm text-destructive">{validationErrors.height}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="weight" className="flex items-center gap-1">
-                    Peso (kg) <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                    placeholder="70"
-                    className={showValidationErrors && validationErrors.weight ? "border-destructive" : ""}
-                  />
-                  {showValidationErrors && validationErrors.weight && (
-                    <p className="text-sm text-destructive">{validationErrors.weight}</p>
-                  )}
-                </div>
-              </div>
-
+              {/* Position for athletes, Function for staff */}
               <div className="space-y-2">
-                <Label htmlFor="preferred_foot" className="flex items-center gap-1">
-                  Pé Preferido <span className="text-destructive">*</span>
+                <Label htmlFor="position" className="flex items-center gap-1">
+                  {userType === 'comissao_tecnica' ? 'Função' : 'Posição'} <span className="text-destructive">*</span>
                 </Label>
-                <select
-                  id="preferred_foot"
-                  value={formData.preferred_foot}
-                  onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
-                  className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${showValidationErrors && validationErrors.preferred_foot ? "border-destructive" : "border-input"}`}
-                >
-                  <option value="">Selecione</option>
-                  <option value="right">Direito</option>
-                  <option value="left">Esquerdo</option>
-                  <option value="both">Ambos</option>
-                </select>
-                {showValidationErrors && validationErrors.preferred_foot && (
-                  <p className="text-sm text-destructive">{validationErrors.preferred_foot}</p>
+                {userType === 'comissao_tecnica' ? (
+                  <Select
+                    value={formData.position}
+                    onValueChange={(value) => setFormData({ ...formData, position: value })}
+                  >
+                    <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Selecione a função" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {functions.map((func) => (
+                        <SelectItem key={func.id} value={func.id.toString()}>
+                          {func.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Select
+                    value={formData.position}
+                    onValueChange={(value) => setFormData({ ...formData, position: value })}
+                  >
+                    <SelectTrigger className={showValidationErrors && validationErrors.position ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Selecione a posição" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {positions.map((pos) => (
+                        <SelectItem key={pos.id} value={pos.id.toString()}>
+                          {pos.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {showValidationErrors && validationErrors.position && (
+                  <p className="text-sm text-destructive">{validationErrors.position}</p>
                 )}
               </div>
+
+              {/* Physical Stats - Only for athletes */}
+              {userType === 'atleta' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="height" className="flex items-center gap-1">
+                        Altura (cm) <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={formData.height}
+                        onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                        placeholder="175"
+                        className={showValidationErrors && validationErrors.height ? "border-destructive" : ""}
+                      />
+                      {showValidationErrors && validationErrors.height && (
+                        <p className="text-sm text-destructive">{validationErrors.height}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="weight" className="flex items-center gap-1">
+                        Peso (kg) <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={formData.weight}
+                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                        placeholder="70"
+                        className={showValidationErrors && validationErrors.weight ? "border-destructive" : ""}
+                      />
+                      {showValidationErrors && validationErrors.weight && (
+                        <p className="text-sm text-destructive">{validationErrors.weight}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="preferred_foot" className="flex items-center gap-1">
+                      Pé Preferido <span className="text-destructive">*</span>
+                    </Label>
+                    <select
+                      id="preferred_foot"
+                      value={formData.preferred_foot}
+                      onChange={(e) => setFormData({ ...formData, preferred_foot: e.target.value })}
+                      className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${showValidationErrors && validationErrors.preferred_foot ? "border-destructive" : "border-input"}`}
+                    >
+                      <option value="">Selecione</option>
+                      <option value="right">Direito</option>
+                      <option value="left">Esquerdo</option>
+                      <option value="both">Ambos</option>
+                    </select>
+                    {showValidationErrors && validationErrors.preferred_foot && (
+                      <p className="text-sm text-destructive">{validationErrors.preferred_foot}</p>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
 
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="birth_date" className="flex items-center gap-1">
               Data de Nascimento <span className="text-destructive">*</span>
@@ -907,6 +994,7 @@ const EditProfile = () => {
               <p className="text-sm text-destructive">{validationErrors.birth_date}</p>
             )}
           </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="nationality" className="flex items-center gap-1">
