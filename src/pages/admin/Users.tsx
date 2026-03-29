@@ -55,6 +55,7 @@ interface FilterState {
   status: UserFilter;
   gender: string;
   profileType: string;
+  accountType: string;
   country: string;
   state: string;
 }
