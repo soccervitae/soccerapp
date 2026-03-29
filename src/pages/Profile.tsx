@@ -5,6 +5,8 @@ import { OfficialHighlightsSection } from "@/components/profile/OfficialHighligh
 import { ChampionshipsTab } from "@/components/profile/ChampionshipsTab";
 import { AchievementsTab } from "@/components/profile/AchievementsTab";
 import { TeamsTab } from "@/components/profile/TeamsTab";
+import { SquadTab } from "@/components/profile/SquadTab";
+import { AboutTab } from "@/components/profile/AboutTab";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { FeedPost } from "@/components/feed/FeedPost";
 import { useUserChampionships, useUserAchievements, useUserPosts, useInfiniteUserPosts } from "@/hooks/useProfile";
@@ -494,11 +496,14 @@ const Profile = () => {
 
   // Check if official account (simplified layout without championships/achievements)
   const isOfficialAccount = (profile as any)?.is_official_account === true;
+  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
 
-  // Tab order for swipe navigation (exclude championships/achievements for official accounts)
-  const tabOrder = isOfficialAccount 
-    ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
-    : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
+  // Tab order for swipe navigation
+  const tabOrder = isTeamOrSchool
+    ? (isGuest ? ["videos", "photos", "squad", "championships", "about"] : ["profile", "videos", "photos", "squad", "championships", "about"])
+    : isOfficialAccount 
+      ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
+      : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
   
   // Handle tab change without moving page scroll
   const changeTabPreservingScroll = (nextTab: string) => {
@@ -534,7 +539,7 @@ const Profile = () => {
             {!isMobile && 'Posts'}
           </TabsTrigger>
         )}
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsTrigger 
             value="teams" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
@@ -550,7 +555,23 @@ const Profile = () => {
           <span className="material-symbols-outlined text-[26px]">play_circle</span>
           {!isMobile && 'Vídeos'}
         </TabsTrigger>
-        {!isOfficialAccount && (
+        <TabsTrigger 
+          value="photos" 
+          className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
+        >
+          <span className="material-symbols-outlined text-[26px]">photo_library</span>
+          {!isMobile && 'Fotos'}
+        </TabsTrigger>
+        {isTeamOrSchool && (
+          <TabsTrigger 
+            value="squad" 
+            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
+          >
+            <span className="material-symbols-outlined text-[26px]">groups</span>
+            {!isMobile && 'Elenco'}
+          </TabsTrigger>
+        )}
+        {(!isOfficialAccount || isTeamOrSchool) && (
           <TabsTrigger 
             value="championships" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
@@ -559,7 +580,7 @@ const Profile = () => {
             {!isMobile && 'Campeonatos'}
           </TabsTrigger>
         )}
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsTrigger 
             value="achievements"
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
@@ -568,13 +589,15 @@ const Profile = () => {
             {!isMobile && 'Conquistas'}
           </TabsTrigger>
         )}
-        <TabsTrigger 
-          value="photos" 
-          className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
-        >
-          <span className="material-symbols-outlined text-[26px]">photo_library</span>
-          {!isMobile && 'Fotos'}
-        </TabsTrigger>
+        {isTeamOrSchool && (
+          <TabsTrigger 
+            value="about" 
+            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
+          >
+            <span className="material-symbols-outlined text-[26px]">info</span>
+            {!isMobile && 'Sobre'}
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <motion.div
@@ -602,7 +625,7 @@ const Profile = () => {
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
         </TabsContent>
 
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsContent value="teams" className="mt-4 px-4" forceMount={activeTab === "teams" ? true : undefined}>
             {activeTab === "teams" && (
               <TeamsTab userId={targetUserId} />
@@ -610,7 +633,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        {!isOfficialAccount && (
+        {(!isOfficialAccount || isTeamOrSchool) && (
           <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
             {activeTab === "championships" && (
               <ChampionshipsTab 
@@ -623,7 +646,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
             {activeTab === "achievements" && (
               <AchievementsTab 
@@ -639,6 +662,22 @@ const Profile = () => {
         <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
+
+        {isTeamOrSchool && (
+          <TabsContent value="squad" className="mt-4" forceMount={activeTab === "squad" ? true : undefined}>
+            {activeTab === "squad" && (
+              <SquadTab userId={targetUserId} isOwnProfile={isOwnProfile} />
+            )}
+          </TabsContent>
+        )}
+
+        {isTeamOrSchool && (
+          <TabsContent value="about" className="mt-4" forceMount={activeTab === "about" ? true : undefined}>
+            {activeTab === "about" && profile && (
+              <AboutTab profile={profile} />
+            )}
+          </TabsContent>
+        )}
       </motion.div>
     </Tabs>
   );
