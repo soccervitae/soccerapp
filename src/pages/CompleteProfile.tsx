@@ -156,6 +156,9 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
+  // Check if account type is time or escolinha (set during signup)
+  const isTeamOrSchoolAccount = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+
   // Map UI "Tipo de perfil" labels to canonical values stored in profiles.role
   const mapProfileTypeValue = (typeName: string) => {
     const n = typeName.trim().toLowerCase();
@@ -176,8 +179,8 @@ const CompleteProfile = () => {
   const nicknameRegex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
   const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
   
-  const isGenderValid = !!gender;
-  const isProfileTypeValid = !!profileType;
+  const isGenderValid = isTeamOrSchoolAccount || !!gender;
+  const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
   // Minimum age: 16 years
   const getMaxBirthDate = () => {
     const today = new Date();
@@ -186,13 +189,13 @@ const CompleteProfile = () => {
   };
   const maxBirthDate = getMaxBirthDate();
   
-  const isBirthDateValid = !!birthDate && birthDate <= maxBirthDate;
-  const isPositionValid = isAthlete ? !!position : true; // Only required for athletes
-  const isStaffFunctionValid = isStaff ? !!staffFunction : true; // Only required for staff
+  const isBirthDateValid = isTeamOrSchoolAccount || (!!birthDate && birthDate <= maxBirthDate);
+  const isPositionValid = isTeamOrSchoolAccount || (isAthlete ? !!position : true);
+  const isStaffFunctionValid = isTeamOrSchoolAccount || (isStaff ? !!staffFunction : true);
   const isNationalityValid = !!nationality;
-  const isHeightValid = isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true;
-  const isWeightValid = isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true;
-  const isPreferredFootValid = isAthlete ? !!preferredFoot : true;
+  const isHeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
+  const isWeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
+  const isPreferredFootValid = isTeamOrSchoolAccount || (isAthlete ? !!preferredFoot : true);
 
   const isFormValid =
     isNicknameValid &&
@@ -292,11 +295,12 @@ const CompleteProfile = () => {
   }
 
   // Calculate completed fields based on profile type
+  const teamFields = [isNicknameValid, isNationalityValid];
   const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
   const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
-  const completedFields = (isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isAthlete ? 9 : 6;
+  const completedFields = (isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields).filter(Boolean).length;
+  const totalFields = isTeamOrSchoolAccount ? 2 : isAthlete ? 9 : 6;
 
   return (
     <div className="min-h-screen bg-background">
@@ -354,49 +358,53 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* Gender - Sexo */}
-        <div className="space-y-2">
-          <Label htmlFor="gender">
-            Sexo <span className="text-destructive">*</span>
-          </Label>
-          <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
-              <SelectValue placeholder="Selecione seu sexo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="homem">Homem</SelectItem>
-              <SelectItem value="mulher">Mulher</SelectItem>
-            </SelectContent>
-          </Select>
-          {touched.gender && !isGenderValid && (
-            <p className="text-xs text-destructive">Selecione seu sexo.</p>
-          )}
-        </div>
+        {/* Gender - Sexo (hidden for team/school accounts) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="gender">
+              Sexo <span className="text-destructive">*</span>
+            </Label>
+            <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
+                <SelectValue placeholder="Selecione seu sexo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="homem">Homem</SelectItem>
+                <SelectItem value="mulher">Mulher</SelectItem>
+              </SelectContent>
+            </Select>
+            {touched.gender && !isGenderValid && (
+              <p className="text-xs text-destructive">Selecione seu sexo.</p>
+            )}
+          </div>
+        )}
 
-        {/* Profile Type - Atleta ou Comissão Técnica */}
-        <div className="space-y-2">
-          <Label htmlFor="profileType">
-            Tipo de perfil <span className="text-destructive">*</span>
-          </Label>
-          <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
-              <SelectValue placeholder="Selecione o tipo de perfil" />
-            </SelectTrigger>
-            <SelectContent>
-              {profileTypes.map((type) => (
-                <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {touched.profileType && !isProfileTypeValid && (
-            <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
-          )}
-        </div>
+        {/* Profile Type - Atleta ou Comissão Técnica (hidden for team/school accounts) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="profileType">
+              Tipo de perfil <span className="text-destructive">*</span>
+            </Label>
+            <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
+                <SelectValue placeholder="Selecione o tipo de perfil" />
+              </SelectTrigger>
+              <SelectContent>
+                {profileTypes.map((type) => (
+                  <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {touched.profileType && !isProfileTypeValid && (
+              <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
+            )}
+          </div>
+        )}
 
-        {/* Position - Only for Athletes (moved right after profile type) */}
-        {isAthlete && (
+        {/* Position - Only for Athletes */}
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="space-y-2">
             <Label htmlFor="position">
               Posição <span className="text-destructive">*</span>
@@ -420,7 +428,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Function - Only for Technical Staff */}
-        {isStaff && (
+        {!isTeamOrSchoolAccount && isStaff && (
           <div className="space-y-2">
             <Label htmlFor="staffFunction">
               Função <span className="text-destructive">*</span>
@@ -443,29 +451,31 @@ const CompleteProfile = () => {
           </div>
         )}
 
-        {/* Birth Date */}
-        <div className="space-y-2">
-          <Label htmlFor="birthDate">
-            Data de nascimento <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="birthDate"
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            onBlur={() => handleBlur("birthDate")}
-            className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
-            max={maxBirthDate}
-          />
-          <p className="text-xs text-muted-foreground">
-            Você deve ter no mínimo 16 anos.
-          </p>
-          {touched.birthDate && !isBirthDateValid && (
-            <p className="text-xs text-destructive">
-              {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+        {/* Birth Date (hidden for team/school) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="birthDate">
+              Data de nascimento <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="birthDate"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              onBlur={() => handleBlur("birthDate")}
+              className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}
+              max={maxBirthDate}
+            />
+            <p className="text-xs text-muted-foreground">
+              Você deve ter no mínimo 16 anos.
             </p>
-          )}
-        </div>
+            {touched.birthDate && !isBirthDateValid && (
+              <p className="text-xs text-destructive">
+                {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Nationality */}
         <div className="space-y-2">
@@ -549,7 +559,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Height & Weight Row - Only for Athletes */}
-        {isAthlete && (
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="grid grid-cols-2 gap-4">
             {/* Height */}
             <div className="space-y-2">
@@ -607,7 +617,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Preferred Foot - Only for Athletes */}
-        {isAthlete && (
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="space-y-2">
             <Label htmlFor="preferredFoot">
               Pé preferido <span className="text-destructive">*</span>
