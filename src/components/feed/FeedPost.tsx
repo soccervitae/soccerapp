@@ -77,8 +77,8 @@ export const FeedPost = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [isMusicMuted, setIsMusicMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(() => getGlobalMuteState());
+  const [isMusicMuted, setIsMusicMuted] = useState(() => getGlobalMuteState());
   const [isMusicInView, setIsMusicInView] = useState(false);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
