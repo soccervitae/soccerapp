@@ -155,6 +155,8 @@ const CompleteProfile = () => {
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
       if (profile.nickname) setNickname(profile.nickname);
+      if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
+      if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
     }
   }, [profile]);
 
