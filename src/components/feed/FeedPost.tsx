@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { fetchFreshDeezerPreviewUrl, isDeezerSignedUrlExpired } from "@/lib/deezer";
+import { getGlobalMuteState, setGlobalMuteState, GLOBAL_MUTE_EVENT } from "@/lib/globalMuteState";
 
 // Module-level variables to track currently playing music across all FeedPost instances
 let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
