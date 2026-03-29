@@ -924,7 +924,7 @@ export const FeedPost = ({
       {post.content && <div className="pt-1 pb-1">
         <p className="text-sm text-foreground">
           <span className="font-semibold mr-1 cursor-pointer hover:underline" onClick={handleProfileClick}>
-            {post.profile.nickname || post.profile.full_name || post.profile.username}
+            {post.profile.username}
           </span>
           {post.content.length > 150 && !isContentExpanded 
             ? post.content.slice(0, 150).trim() + "..." 
