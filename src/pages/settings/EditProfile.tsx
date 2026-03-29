@@ -801,12 +801,15 @@ const EditProfile = () => {
                 <Label htmlFor="foundation_year">Ano de Fundação</Label>
                 <Input
                   id="foundation_year"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.foundation_year}
-                  onChange={(e) => setFormData({ ...formData, foundation_year: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setFormData({ ...formData, foundation_year: val });
+                  }}
                   placeholder="Ex: 1990"
-                  min={1800}
-                  max={new Date().getFullYear()}
+                  maxLength={4}
                 />
               </div>
 
