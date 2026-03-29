@@ -548,13 +548,24 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   
   const { signUp } = useAuth();
   
+  const isTeamOrSchool = accountType === "time" || accountType === "escolinha";
+  
   // Validações individuais
-  const isFirstNameValid = firstName.trim().length >= 2;
-  const isLastNameValid = lastName.trim().length >= 2;
+  const isFirstNameValid = isTeamOrSchool ? teamName.trim().length >= 2 : firstName.trim().length >= 2;
+  const isLastNameValid = isTeamOrSchool ? true : lastName.trim().length >= 2;
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
   const isAccountTypeValid = accountType.length > 0;
 
+  const handleEmblemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEmblemFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setEmblemPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
