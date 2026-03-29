@@ -151,7 +151,7 @@ export const FeedPost = ({
     return () => clearInterval(interval);
   }, [hasMusicTrack, musicTitle]);
 
-  // Video autoplay on viewport intersection
+  // Video autoplay on viewport intersection (also handles music for video posts)
   useEffect(() => {
     if (post.media_type !== "video" || !videoContainerRef.current) return;
 
@@ -163,9 +163,46 @@ export const FeedPost = ({
               videoRef.current.muted = getGlobalMuteState();
               videoRef.current.play().catch(() => {});
               setIsVideoPlaying(true);
+
+              // Also start music for video posts with music
+              if (hasMusicTrack && musicAudioUrl) {
+                if (!musicAudioRef.current) {
+                  const url = effectiveMusicUrlRef.current;
+                  if (url) {
+                    musicAudioRef.current = new Audio(url);
+                    musicAudioRef.current.loop = true;
+                    musicAudioRef.current.addEventListener('timeupdate', () => {
+                      if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
+                        musicAudioRef.current.currentTime = musicStartSeconds;
+                      }
+                    });
+                  }
+                }
+                if (musicAudioRef.current) {
+                  if (currentlyPlayingFeedMusicStop && currentlyPlayingFeedMusic !== musicAudioRef.current) {
+                    currentlyPlayingFeedMusicStop();
+                  }
+                  musicAudioRef.current.currentTime = musicStartSeconds;
+                  musicAudioRef.current.muted = isMusicMutedRef.current;
+                  musicAudioRef.current.play().catch(() => {});
+                  currentlyPlayingFeedMusic = musicAudioRef.current;
+                  currentlyPlayingFeedMusicStop = stopMusicPlayback;
+                }
+                setIsMusicInView(true);
+              }
             } else {
               videoRef.current.pause();
               setIsVideoPlaying(false);
+
+              // Also pause music for video posts
+              if (musicAudioRef.current) {
+                musicAudioRef.current.pause();
+                if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+                  currentlyPlayingFeedMusic = null;
+                  currentlyPlayingFeedMusicStop = null;
+                }
+              }
+              setIsMusicInView(false);
             }
           }
         });
@@ -174,8 +211,17 @@ export const FeedPost = ({
     );
 
     observer.observe(videoContainerRef.current);
-    return () => observer.disconnect();
-  }, [post.media_type]);
+    return () => {
+      observer.disconnect();
+      if (musicAudioRef.current && post.media_type === "video") {
+        musicAudioRef.current.pause();
+        if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+          currentlyPlayingFeedMusic = null;
+          currentlyPlayingFeedMusicStop = null;
+        }
+      }
+    };
+  }, [post.media_type, hasMusicTrack, musicAudioUrl, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
 
   // Listen for global mute changes from other posts
   useEffect(() => {
