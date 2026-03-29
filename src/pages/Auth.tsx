@@ -645,14 +645,20 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (firstName.trim().length < 2) {
-      setErrorMessage("O nome deve ter pelo menos 2 caracteres");
-      return;
-    }
-
-    if (lastName.trim().length < 2) {
-      setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
-      return;
+    if (isTeamOrSchool) {
+      if (teamName.trim().length < 2) {
+        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
+        return;
+      }
+    } else {
+      if (firstName.trim().length < 2) {
+        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
+        return;
+      }
+      if (lastName.trim().length < 2) {
+        setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
+        return;
+      }
     }
 
     if (!validateEmail(email)) {
