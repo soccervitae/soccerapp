@@ -340,25 +340,17 @@ const Security = () => {
     setIsVerifying2FA(true);
 
     try {
-      const { data: profileData, error } = await supabase
-        .from("profiles")
-        .select("codigo, codigo_expira_em")
-        .eq("id", user?.id)
-        .single();
+      const { data, error } = await supabase.functions.invoke("verify-2fa-code", {
+        body: {
+          user_id: user?.id,
+          code,
+          code_type: "2fa_enable",
+        },
+      });
 
       if (error) throw error;
 
-      if (profileData.codigo_expira_em && new Date(profileData.codigo_expira_em) < new Date()) {
-        toast({
-          variant: "destructive",
-          title: "Código expirado",
-          description: "Solicite um novo código de verificação.",
-        });
-        setIsVerifying2FA(false);
-        return;
-      }
-
-      if (profileData.codigo !== code) {
+      if (!data?.success) {
         toast({
           variant: "destructive",
           title: "Código inválido",
@@ -368,16 +360,6 @@ const Security = () => {
         return;
       }
 
-      // Enable 2FA
-      await supabase
-        .from("profiles")
-        .update({ 
-          two_factor_enabled: true,
-          codigo: null, 
-          codigo_expira_em: null 
-        })
-        .eq("id", user?.id);
-
       setTwoFactorEnabled(true);
       setShowEnableTwoFactorDialog(false);
       queryClient.invalidateQueries({ queryKey: ["profile-security"] });
@@ -386,12 +368,12 @@ const Security = () => {
         title: "Verificação em duas etapas ativada!",
         description: "Sua conta está mais segura agora.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error verifying 2FA code:", error);
       toast({
         variant: "destructive",
         title: "Erro na verificação",
-        description: "Ocorreu um erro ao verificar o código.",
+        description: error?.message || "Ocorreu um erro ao verificar o código.",
       });
     }
 
