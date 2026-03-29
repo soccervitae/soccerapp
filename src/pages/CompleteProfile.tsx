@@ -43,6 +43,8 @@ const CompleteProfile = () => {
   const [preferredFoot, setPreferredFoot] = useState("");
   const [nickname, setNickname] = useState("");
   const [estado, setEstado] = useState<string>("");
+  const [foundationYear, setFoundationYear] = useState("");
+  const [teamCategory, setTeamCategory] = useState("");
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
@@ -153,6 +155,8 @@ const CompleteProfile = () => {
       if (profile.weight) setWeight(profile.weight.toString());
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
       if (profile.nickname) setNickname(profile.nickname);
+      if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
+      if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
     }
   }, [profile]);
 
@@ -231,13 +235,15 @@ const CompleteProfile = () => {
     setIsSubmitting(true);
     try {
       const updateData: Record<string, unknown> = {
-        gender: gender,
-        role: profileType,
-        birth_date: birthDate,
+        gender: isTeamOrSchoolAccount ? null : gender,
+        role: isTeamOrSchoolAccount ? null : profileType,
+        birth_date: isTeamOrSchoolAccount ? null : birthDate,
         nationality: Number(nationality),
         nickname: nickname.trim() || null,
         profile_completed: true,
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
+        foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
+        team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
       };
 
       const isMale = gender === "homem" || gender === "masculino" || gender === "male";
@@ -299,8 +305,9 @@ const CompleteProfile = () => {
   const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
   const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
-  const completedFields = (isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields).filter(Boolean).length;
-  const totalFields = isTeamOrSchoolAccount ? 2 : isAthlete ? 9 : 6;
+  const activeFields = isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields;
+  const completedFields = activeFields.filter(Boolean).length;
+  const totalFields = activeFields.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -357,6 +364,47 @@ const CompleteProfile = () => {
             </p>
           )}
         </div>
+
+        {/* Team/School specific fields */}
+        {isTeamOrSchoolAccount && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="foundationYear">Ano de Fundação</Label>
+              <Input
+                id="foundationYear"
+                type="number"
+                value={foundationYear}
+                onChange={(e) => setFoundationYear(e.target.value)}
+                placeholder="Ex: 1990"
+                min={1800}
+                max={new Date().getFullYear()}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="teamCategory">Categoria</Label>
+              <Select value={teamCategory} onValueChange={(value) => setTeamCategory(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sub-7">Sub-7</SelectItem>
+                  <SelectItem value="sub-9">Sub-9</SelectItem>
+                  <SelectItem value="sub-11">Sub-11</SelectItem>
+                  <SelectItem value="sub-13">Sub-13</SelectItem>
+                  <SelectItem value="sub-15">Sub-15</SelectItem>
+                  <SelectItem value="sub-17">Sub-17</SelectItem>
+                  <SelectItem value="sub-20">Sub-20</SelectItem>
+                  <SelectItem value="sub-23">Sub-23</SelectItem>
+                  <SelectItem value="profissional">Profissional</SelectItem>
+                  <SelectItem value="amador">Amador</SelectItem>
+                  <SelectItem value="feminino">Feminino</SelectItem>
+                  <SelectItem value="todas">Todas as categorias</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
 
         {/* Gender - Sexo (hidden for team/school accounts) */}
         {!isTeamOrSchoolAccount && (
