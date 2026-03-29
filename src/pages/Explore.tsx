@@ -128,13 +128,17 @@ const Explore = () => {
                     <h3 className="font-semibold text-foreground text-sm truncate">
                       {profile.full_name || profile.username}
                     </h3>
-                    {(profile.position_name || profile.team) && (
+                    {(profile.account_type === 'time' || profile.account_type === 'escolinha') ? (
+                      <span className="text-xs text-muted-foreground">
+                        {profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
+                      </span>
+                    ) : (profile.position_name || profile.team) ? (
                       <span className="text-xs text-primary font-medium">
                         {profile.position_name}
                         {profile.position_name && profile.team && ` • `}
                         {profile.team}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))

@@ -24,6 +24,7 @@ export interface SearchProfile {
   followers_count?: number;
   role?: string | null;
   gender?: string | null;
+  account_type?: string | null;
 }
 
 const fetchPositionNames = async (profiles: SearchProfile[]): Promise<SearchProfile[]> => {
@@ -89,7 +90,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
     queryFn: async () => {
       let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, birth_date, nationality")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, birth_date, nationality, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
@@ -155,7 +156,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       // Fetch verified profiles first
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, role, gender, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
