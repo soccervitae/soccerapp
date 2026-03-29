@@ -59,6 +59,8 @@ const getNotificationText = (notification: Notification) => {
       return `${actorName} mencionou você em um comentário`;
     case "squad_request":
       return `${actorName} quer fazer parte do seu elenco`;
+    case "squad_accepted":
+      return `${actorName} aceitou você no elenco`;
     default:
       return notification.content || "Nova notificação";
   }
