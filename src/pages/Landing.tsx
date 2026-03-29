@@ -232,7 +232,7 @@ const Landing = () => {
               Pronto para entrar em campo?
             </h2>
             <p className="text-muted-foreground mb-8">
-              Junte-se a milhares de jogadores e comece sua jornada profissional hoje.
+              Junte-se e comece sua jornada profissional hoje.
             </p>
             {isMobile ? (
               <Button onClick={() => navigate("/install")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-lg">
