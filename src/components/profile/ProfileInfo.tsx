@@ -5,6 +5,7 @@ import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStories } from "@/hooks/useStories";
+import { useMySquadRequest, useRequestJoinSquad, useCancelSquadRequest } from "@/hooks/useSquadMembers";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,6 +50,12 @@ export const ProfileInfo = ({
   const [isStartingChat, setIsStartingChat] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Squad request hooks (for team/school profiles)
+  const isTeamOrSchool = profile.account_type === 'time' || profile.account_type === 'escolinha';
+  const { data: mySquadRequest } = useMySquadRequest(isTeamOrSchool && !isOwnProfile ? profile.id : undefined);
+  const requestJoin = useRequestJoinSquad();
+  const cancelRequest = useCancelSquadRequest();
 
   // Fullscreen image viewer state
   const [fullscreenImageOpen, setFullscreenImageOpen] = useState(false);
@@ -370,6 +377,31 @@ export const ProfileInfo = ({
                   <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                   Mensagem
                 </button>
+                {isTeamOrSchool && user && (
+                  mySquadRequest?.status === 'pending' ? (
+                    <button
+                      onClick={() => cancelRequest.mutate({ requestId: mySquadRequest.id, teamProfileId: profile.id })}
+                      disabled={cancelRequest.isPending}
+                      className="bg-muted text-muted-foreground h-10 px-6 rounded-full font-semibold text-sm transition-all border border-border flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-muted/80"
+                    >
+                      Solicitado
+                    </button>
+                  ) : mySquadRequest?.status === 'approved' ? (
+                    <div className="bg-primary/10 text-primary h-10 px-6 rounded-full font-semibold text-sm flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-[16px]">check</span>
+                      No elenco
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => requestJoin.mutate(profile.id)}
+                      disabled={requestJoin.isPending}
+                      className="bg-primary text-primary-foreground h-10 px-6 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-primary/90"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">group_add</span>
+                      Fazer parte do elenco
+                    </button>
+                  )
+                )}
               </>
             )}
           </div>
@@ -534,6 +566,32 @@ export const ProfileInfo = ({
             <button onClick={handleMessageClick} disabled={isStartingChat} className="flex-1 bg-background text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/50 active:scale-[0.98]">
               Mensagem
             </button>
+            {/* Join squad button for team/school profiles */}
+            {isTeamOrSchool && user && (
+              mySquadRequest?.status === 'pending' ? (
+                <button
+                  onClick={() => cancelRequest.mutate({ requestId: mySquadRequest.id, teamProfileId: profile.id })}
+                  disabled={cancelRequest.isPending}
+                  className="bg-muted text-muted-foreground h-9 px-3 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98] whitespace-nowrap"
+                >
+                  Solicitado
+                </button>
+              ) : mySquadRequest?.status === 'approved' ? (
+                <div className="bg-primary/10 text-primary h-9 px-3 rounded font-semibold text-xs tracking-wide flex items-center justify-center whitespace-nowrap">
+                  <span className="material-symbols-outlined text-[14px] mr-1">check</span>
+                  No elenco
+                </div>
+              ) : (
+                <button
+                  onClick={() => requestJoin.mutate(profile.id)}
+                  disabled={requestJoin.isPending}
+                  className="bg-primary text-primary-foreground h-9 px-3 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 hover:brightness-110 active:scale-[0.98] whitespace-nowrap"
+                >
+                  <span className="material-symbols-outlined text-[14px] mr-1">group_add</span>
+                  Elenco
+                </button>
+              )
+            )}
           </>}
       </div>
 
