@@ -220,7 +220,8 @@ export const usePosts = () => {
             role,
             posicaomas,
             posicaofem,
-            funcao
+            funcao,
+            account_type
           ),
           music_track:music_tracks (
             id,
