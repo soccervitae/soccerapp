@@ -319,6 +319,7 @@ const Security = () => {
         body: {
           email: user.email,
           user_id: user.id,
+          code_type: "2fa_enable",
         },
       });
 
