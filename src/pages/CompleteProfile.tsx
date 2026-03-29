@@ -428,7 +428,7 @@ const CompleteProfile = () => {
         )}
 
         {/* Function - Only for Technical Staff */}
-        {isStaff && (
+        {!isTeamOrSchoolAccount && isStaff && (
           <div className="space-y-2">
             <Label htmlFor="staffFunction">
               Função <span className="text-destructive">*</span>
