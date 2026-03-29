@@ -123,13 +123,13 @@ const Landing = () => {
         {/* Features Section */}
         <section className="py-8 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-12">
-            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+            <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
-            <h2 className="text-white text-3xl md:text-4xl font-black max-w-[720px]">
+            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
               Tudo que você precisa para evoluir
             </h2>
-            <p className="text-white/60 text-base max-w-[720px]">
+            <p className="text-muted-foreground text-base max-w-[720px]">
               Ferramentas profissionais desenhadas especificamente para o ecossistema do futebol amador e profissional.
             </p>
           </div>
