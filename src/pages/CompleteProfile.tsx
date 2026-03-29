@@ -358,46 +358,50 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* Gender - Sexo */}
-        <div className="space-y-2">
-          <Label htmlFor="gender">
-            Sexo <span className="text-destructive">*</span>
-          </Label>
-          <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
-              <SelectValue placeholder="Selecione seu sexo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="homem">Homem</SelectItem>
-              <SelectItem value="mulher">Mulher</SelectItem>
-            </SelectContent>
-          </Select>
-          {touched.gender && !isGenderValid && (
-            <p className="text-xs text-destructive">Selecione seu sexo.</p>
-          )}
-        </div>
+        {/* Gender - Sexo (hidden for team/school accounts) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="gender">
+              Sexo <span className="text-destructive">*</span>
+            </Label>
+            <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
+                <SelectValue placeholder="Selecione seu sexo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="homem">Homem</SelectItem>
+                <SelectItem value="mulher">Mulher</SelectItem>
+              </SelectContent>
+            </Select>
+            {touched.gender && !isGenderValid && (
+              <p className="text-xs text-destructive">Selecione seu sexo.</p>
+            )}
+          </div>
+        )}
 
-        {/* Profile Type - Atleta ou Comissão Técnica */}
-        <div className="space-y-2">
-          <Label htmlFor="profileType">
-            Tipo de perfil <span className="text-destructive">*</span>
-          </Label>
-          <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
-            <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
-              <SelectValue placeholder="Selecione o tipo de perfil" />
-            </SelectTrigger>
-            <SelectContent>
-              {profileTypes.map((type) => (
-                <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {touched.profileType && !isProfileTypeValid && (
-            <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
-          )}
-        </div>
+        {/* Profile Type - Atleta ou Comissão Técnica (hidden for team/school accounts) */}
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label htmlFor="profileType">
+              Tipo de perfil <span className="text-destructive">*</span>
+            </Label>
+            <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
+              <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
+                <SelectValue placeholder="Selecione o tipo de perfil" />
+              </SelectTrigger>
+              <SelectContent>
+                {profileTypes.map((type) => (
+                  <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {touched.profileType && !isProfileTypeValid && (
+              <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
+            )}
+          </div>
+        )}
 
         {/* Position - Only for Athletes (moved right after profile type) */}
         {isAthlete && (
