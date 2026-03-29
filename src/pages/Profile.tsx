@@ -496,11 +496,14 @@ const Profile = () => {
 
   // Check if official account (simplified layout without championships/achievements)
   const isOfficialAccount = (profile as any)?.is_official_account === true;
+  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
 
-  // Tab order for swipe navigation (exclude championships/achievements for official accounts)
-  const tabOrder = isOfficialAccount 
-    ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
-    : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
+  // Tab order for swipe navigation
+  const tabOrder = isTeamOrSchool
+    ? (isGuest ? ["videos", "photos", "squad", "championships", "about"] : ["profile", "videos", "photos", "squad", "championships", "about"])
+    : isOfficialAccount 
+      ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
+      : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
   
   // Handle tab change without moving page scroll
   const changeTabPreservingScroll = (nextTab: string) => {
