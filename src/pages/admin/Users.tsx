@@ -73,6 +73,7 @@ export default function AdminUsers() {
     status: "all",
     gender: "all",
     profileType: "all",
+    accountType: "all",
     country: "all",
     state: "all",
   });
