@@ -106,14 +106,14 @@ const Landing = () => {
             style={{ opacity }}
           >
             <div className="flex flex-col gap-4 text-center z-10 max-w-[600px]">
-              <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+              <h1 className="text-foreground text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
                 Jogue.
                 <br />
                 Brilhe.
                 <br />
                 Conquiste.
               </h1>
-              <p className="text-white/80 text-base md:text-lg">
+              <p className="text-muted-foreground text-base md:text-lg">
                 Mostre seu talento e conecte-se com o mundo do futebol.
               </p>
             </div>
