@@ -121,12 +121,12 @@ const Landing = () => {
           
           {/* Content */}
           <motion.div 
-            className="relative flex min-h-[320px] md:min-h-[400px] flex-col gap-6 md:gap-8 items-center justify-center p-4"
+            className="relative min-h-[320px] md:min-h-[400px] flex-col gap-6 md:gap-8 p-4 flex items-center justify-end"
             style={{ opacity }}
           >
             <div className="flex flex-col gap-4 text-center z-10 max-w-[600px] items-center">
               <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14" />
-              <h1 className="text-foreground text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+              <h1 className="text-foreground text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase my-0 py-[16px]">
                 Jogue.
                 <br />
                 Brilhe.
