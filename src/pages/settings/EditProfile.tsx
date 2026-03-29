@@ -156,10 +156,19 @@ const EditProfile = () => {
   };
 
   // Validation errors
+  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
     
     if (!formData.full_name.trim()) errors.full_name = "Nome completo é obrigatório";
+    
+    if (isTeamOrSchool) {
+      // Team/school only needs name and nationality
+      if (!formData.nationality) errors.nationality = "Nacionalidade é obrigatória";
+      return errors;
+    }
+    
     if (!formData.gender) errors.gender = "Sexo é obrigatório";
     if (!formData.position) errors.position = userType === 'comissao_tecnica' ? "Função é obrigatória" : "Posição é obrigatória";
     
@@ -180,7 +189,7 @@ const EditProfile = () => {
     }
     
     return errors;
-  }, [formData, userType]);
+  }, [formData, userType, isTeamOrSchool]);
 
   const isFormValid = Object.keys(validationErrors).length === 0;
 
