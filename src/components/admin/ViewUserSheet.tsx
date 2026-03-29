@@ -405,9 +405,23 @@ export function ViewUserSheet({
                         <span>{format(new Date(user.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}</span>
                       </div>
                     </div>
-                  ) : (
+                   ) : (
                     <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
+                      {userEmail && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Email:</span>
+                          <span className="font-medium">{userEmail}</span>
+                        </div>
+                      )}
+                      {user.full_name && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Nome:</span>
+                          <span className="font-medium">{user.full_name}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Gênero:</span>
