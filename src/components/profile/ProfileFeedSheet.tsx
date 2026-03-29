@@ -38,6 +38,7 @@ interface Profile {
   posicaofem?: number | null;
   funcao?: number | null;
   position_name?: string | null;
+  account_type?: string | null;
 }
 
 interface ProfileFeedSheetProps {
@@ -230,6 +231,7 @@ export const ProfileFeedSheet = ({
       posicaofem: profile.posicaofem || null,
       funcao: profile.funcao || null,
       position_name: profile.position_name || null,
+      account_type: profile.account_type || null,
     },
     liked_by_user: post.liked_by_user ?? false,
     saved_by_user: post.saved_by_user ?? false,

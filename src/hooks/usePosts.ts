@@ -60,6 +60,7 @@ export interface Post {
     posicaofem: number | null;
     funcao: number | null;
     position_name: string | null;
+    account_type: string | null;
   };
   liked_by_user: boolean;
   saved_by_user: boolean;
@@ -90,7 +91,8 @@ export const usePostById = (postId: string | undefined) => {
             role,
             posicaomas,
             posicaofem,
-            funcao
+            funcao,
+            account_type
           ),
           music_track:music_tracks (
             id,
@@ -218,7 +220,8 @@ export const usePosts = () => {
             role,
             posicaomas,
             posicaofem,
-            funcao
+            funcao,
+            account_type
           ),
           music_track:music_tracks (
             id,

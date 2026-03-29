@@ -583,6 +583,11 @@ export const FeedPost = ({
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
             </div>
+            {(post.profile.account_type === 'time' || post.profile.account_type === 'escolinha') && (
+              <span className="text-[10px] text-muted-foreground leading-tight">
+                {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
+              </span>
+            )}
             {/* Alternating position/music info */}
             <div className="h-4 overflow-hidden relative">
               <AnimatePresence mode="wait">

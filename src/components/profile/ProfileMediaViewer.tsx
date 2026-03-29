@@ -64,6 +64,7 @@ interface Profile {
   posicaofem?: number | null;
   funcao?: number | null;
   position_name?: string | null;
+  account_type?: string | null;
 }
 
 interface ProfileMediaViewerProps {
@@ -227,6 +228,7 @@ export const ProfileMediaViewer = ({
       posicaofem: profile.posicaofem || null,
       funcao: profile.funcao || null,
       position_name: profile.position_name || null,
+      account_type: profile.account_type || null,
     },
     liked_by_user: currentPost?.liked_by_user ?? false,
     saved_by_user: currentPost?.saved_by_user ?? false,
