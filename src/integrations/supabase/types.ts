@@ -1070,12 +1070,14 @@ export type Database = {
           banned_until: string | null
           bio: string | null
           birth_date: string | null
+          city: string | null
           codigo: string | null
           codigo_expira_em: string | null
           conta_verificada: boolean
           cover_url: string | null
           created_at: string
           estado_id: number | null
+          foundation_year: number | null
           full_name: string | null
           funcao: number | null
           gender: string | null
@@ -1106,6 +1108,7 @@ export type Database = {
           show_activity_status: boolean | null
           show_profile_to: string | null
           team: string | null
+          team_category: string | null
           two_factor_enabled: boolean | null
           updated_at: string
           username: string
@@ -1122,12 +1125,14 @@ export type Database = {
           banned_until?: string | null
           bio?: string | null
           birth_date?: string | null
+          city?: string | null
           codigo?: string | null
           codigo_expira_em?: string | null
           conta_verificada?: boolean
           cover_url?: string | null
           created_at?: string
           estado_id?: number | null
+          foundation_year?: number | null
           full_name?: string | null
           funcao?: number | null
           gender?: string | null
@@ -1158,6 +1163,7 @@ export type Database = {
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null
+          team_category?: string | null
           two_factor_enabled?: boolean | null
           updated_at?: string
           username: string
@@ -1174,12 +1180,14 @@ export type Database = {
           banned_until?: string | null
           bio?: string | null
           birth_date?: string | null
+          city?: string | null
           codigo?: string | null
           codigo_expira_em?: string | null
           conta_verificada?: boolean
           cover_url?: string | null
           created_at?: string
           estado_id?: number | null
+          foundation_year?: number | null
           full_name?: string | null
           funcao?: number | null
           gender?: string | null
@@ -1210,6 +1218,7 @@ export type Database = {
           show_activity_status?: boolean | null
           show_profile_to?: string | null
           team?: string | null
+          team_category?: string | null
           two_factor_enabled?: boolean | null
           updated_at?: string
           username?: string
