@@ -159,7 +159,7 @@ const Landing = () => {
               >
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
                   {type.customEmoji ? (
-                    <img src={type.customEmoji} alt={type.accountType} className="w-8 h-8" loading="lazy" />
+                    <img src={type.customEmoji} alt={type.accountType} className="w-11 h-11" loading="lazy" />
                   ) : (
                     type.emoji
                   )}
