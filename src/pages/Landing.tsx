@@ -159,13 +159,13 @@ const Landing = () => {
         {/* Account Types Section */}
         <section className="py-12 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
-            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+            <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Para Todos do Futebol
             </p>
-            <h2 className="text-white text-3xl md:text-4xl font-black max-w-[720px]">
+            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
               Crie sua conta e faça parte
             </h2>
-            <p className="text-white/60 text-base max-w-[720px]">
+            <p className="text-muted-foreground text-base max-w-[720px]">
               A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
             </p>
           </div>
