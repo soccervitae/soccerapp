@@ -9,6 +9,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
+import playerKickingIcon from "@/assets/player-kicking-icon.png";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -32,7 +33,8 @@ const Landing = () => {
   const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
   const featuresByAccount = [
     {
-      emoji: "⚽",
+      emoji: "",
+      customEmoji: playerKickingIcon,
       accountType: "Atleta",
       accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
       features: [
@@ -156,7 +158,11 @@ const Landing = () => {
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
-                  {type.emoji}
+                  {type.customEmoji ? (
+                    <img src={type.customEmoji} alt={type.accountType} className="w-8 h-8" loading="lazy" />
+                  ) : (
+                    type.emoji
+                  )}
                 </div>
                 <h3 className="text-foreground text-lg font-bold">{type.accountType}</h3>
                 <p className="text-muted-foreground text-sm">{type.accountDescription}</p>
@@ -184,7 +190,11 @@ const Landing = () => {
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                    {account.emoji}
+                    {account.customEmoji ? (
+                      <img src={account.customEmoji} alt={account.accountType} className="w-6 h-6" loading="lazy" />
+                    ) : (
+                      account.emoji
+                    )}
                   </div>
                   <h3 className="text-foreground text-xl font-bold">{account.accountType}</h3>
                 </div>
