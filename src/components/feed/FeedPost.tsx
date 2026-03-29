@@ -785,7 +785,7 @@ export const FeedPost = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsMuted(!isMuted);
+                  setGlobalMuteState(!isMuted);
                 }}
                 className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-95"
               >
