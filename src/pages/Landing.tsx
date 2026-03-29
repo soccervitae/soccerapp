@@ -249,7 +249,7 @@ const Landing = () => {
               Junte-se e comece sua jornada profissional hoje.
             </p>
             {isMobile ? (
-              <Button onClick={() => navigate("/install")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-lg">
+              <Button onClick={() => setShowInstallSheet(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-lg">
                 Baixar App
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
