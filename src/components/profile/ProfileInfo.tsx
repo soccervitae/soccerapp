@@ -51,6 +51,12 @@ export const ProfileInfo = ({
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Squad request hooks (for team/school profiles)
+  const isTeamOrSchool = profile.account_type === 'time' || profile.account_type === 'escolinha';
+  const { data: mySquadRequest } = useMySquadRequest(isTeamOrSchool && !isOwnProfile ? profile.id : undefined);
+  const requestJoin = useRequestJoinSquad();
+  const cancelRequest = useCancelSquadRequest();
+
   // Fullscreen image viewer state
   const [fullscreenImageOpen, setFullscreenImageOpen] = useState(false);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
