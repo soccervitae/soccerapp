@@ -500,7 +500,7 @@ const Profile = () => {
 
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
-    ? (isGuest ? ["videos", "photos", "squad", "championships", "achievements"] : ["profile", "videos", "photos", "squad", "championships", "achievements"])
+    ? (isGuest ? ["videos", "photos", "championships", "achievements", "squad"] : ["profile", "videos", "photos", "championships", "achievements", "squad"])
     : isOfficialAccount 
       ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
       : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
@@ -562,15 +562,6 @@ const Profile = () => {
           <span className="material-symbols-outlined text-[26px]">photo_library</span>
           {!isMobile && 'Fotos'}
         </TabsTrigger>
-        {isTeamOrSchool && (
-          <TabsTrigger 
-            value="squad" 
-            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
-          >
-            <span className="material-symbols-outlined text-[26px]">groups</span>
-            {!isMobile && 'Elenco'}
-          </TabsTrigger>
-        )}
         {(!isOfficialAccount || isTeamOrSchool) && (
           <TabsTrigger 
             value="championships" 
@@ -596,6 +587,15 @@ const Profile = () => {
           >
             <span className="material-symbols-outlined text-[26px]">trophy</span>
             {!isMobile && 'Conquistas'}
+          </TabsTrigger>
+        )}
+        {isTeamOrSchool && (
+          <TabsTrigger 
+            value="squad" 
+            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
+          >
+            <span className="material-symbols-outlined text-[26px]">groups</span>
+            {!isMobile && 'Elenco'}
           </TabsTrigger>
         )}
       </TabsList>
