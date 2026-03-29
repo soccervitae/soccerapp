@@ -1,15 +1,50 @@
 
 
-## Plano: Remover Bloqueio de Orientação Paisagem
+## Plano: Perfil diferenciado para Time e Escolinha
 
-### O que será feito
-Remover o overlay que aparece quando o usuário gira o dispositivo para paisagem, e remover o CSS associado. O site funcionará normalmente em qualquer orientação.
+### Resumo
+Criar um layout de perfil adaptado para contas do tipo `time` e `escolinha`, removendo informações pessoais de atleta e adicionando abas específicas como Elenco/Atletas e Sobre/Informações.
 
-### Alterações
+### Detecção do tipo de conta
+- Ler `account_type` do perfil (`atleta`, `comissao_tecnica`, `time`, `escolinha`)
+- Criar helper: `isTeamOrSchool = account_type === 'time' || account_type === 'escolinha'`
 
-1. **`src/App.tsx`** — Remover import e uso do `<OrientationLock />`, remover a função `lockOrientation` do useEffect
+### Alterações no ProfileInfo
 
-2. **`src/index.css`** — Remover o bloco CSS `@media (orientation: landscape)` que exibe o overlay
+**`src/components/profile/ProfileInfo.tsx`**
+- Ocultar stats físicos (idade, altura, peso, pé) quando `isTeamOrSchool`
+- Ocultar posição/função no subtítulo — mostrar apenas `@username` ou bio
+- No header, manter avatar/capa mas pode usar emblema como avatar (sem mudança estrutural, o time configura seu avatar normalmente)
 
-3. **`src/components/OrientationLock.tsx`** — Pode ser deletado (arquivo não mais usado)
+### Alterações nas abas do perfil
+
+**`src/pages/Profile.tsx`**
+- Quando `isTeamOrSchool`, usar abas: **Posts**, **Vídeos**, **Fotos**, **Elenco**, **Campeonatos**, **Sobre**
+- Remover abas: Times, Conquistas
+- Adicionar novas `TabsTrigger` e `TabsContent` para:
+  - **Elenco** (icon: `groups`) — lista de atletas vinculados
+  - **Sobre** (icon: `info`) — informações do time/escolinha
+
+### Novos componentes
+
+1. **`src/components/profile/SquadTab.tsx`** (Elenco)
+   - Por enquanto, exibir placeholder "Elenco em breve" ou lista simples
+   - Futuramente poderá vincular atletas ao time via tabela de relacionamento
+
+2. **`src/components/profile/AboutTab.tsx`** (Sobre)
+   - Exibir informações do perfil: bio completa, localização (estado), data de criação
+   - Layout em cards com ícones
+
+### Detalhes técnicos
+
+- O `account_type` já existe na tabela `profiles` e nos types do Supabase
+- Não precisa de migração — apenas leitura do campo existente
+- A lógica de `isOfficialAccount` existente serve de modelo para a condicional `isTeamOrSchool`
+- O `tabOrder` será ajustado dinamicamente baseado no `account_type`
+
+### Arquivos modificados
+- `src/components/profile/ProfileInfo.tsx` — ocultar stats e posição
+- `src/pages/Profile.tsx` — abas condicionais + novos tab contents
+- `src/components/profile/SquadTab.tsx` — novo componente
+- `src/components/profile/AboutTab.tsx` — novo componente
 
