@@ -120,42 +120,6 @@ const Landing = () => {
           </motion.div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-8 px-4 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-12">
-            <p className="text-primary text-sm font-medium uppercase tracking-wider">
-              Recursos Principais
-            </p>
-            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
-              Tudo que você precisa para evoluir
-            </h2>
-            <p className="text-muted-foreground text-base max-w-[720px]">
-              Ferramentas profissionais desenhadas especificamente para o ecossistema do futebol amador e profissional.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  {feature.customIcon ? (
-                    <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
-                  ) : (
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-                <h3 className="text-foreground text-lg font-bold">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Account Types Section */}
         <section className="py-12 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
@@ -202,6 +166,42 @@ const Landing = () => {
                 </div>
                 <h3 className="text-foreground text-lg font-bold">{type.title}</h3>
                 <p className="text-muted-foreground text-sm">{type.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-8 px-4 max-w-7xl mx-auto">
+          <div className="flex flex-col items-center text-center gap-4 mb-12">
+            <p className="text-primary text-sm font-medium uppercase tracking-wider">
+              Recursos Principais
+            </p>
+            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
+              Tudo que você precisa para evoluir
+            </h2>
+            <p className="text-muted-foreground text-base max-w-[720px]">
+              Ferramentas profissionais desenhadas especificamente para o ecossistema do futebol amador e profissional.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {features.map((feature, index) => (
+              <div 
+                key={index} 
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  {feature.customIcon ? (
+                    <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
+                  ) : (
+                    <feature.icon className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <h3 className="text-foreground text-lg font-bold">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
