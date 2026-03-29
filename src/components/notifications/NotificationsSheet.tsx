@@ -55,6 +55,8 @@ const getNotificationText = (notification: Notification) => {
       return `${actorName} começou a torcer por você`;
     case "mention":
       return `${actorName} mencionou você em um comentário`;
+    case "squad_request":
+      return `${actorName} quer fazer parte do seu elenco`;
     default:
       return notification.content || "Nova notificação";
   }
