@@ -438,8 +438,8 @@ export function ViewUserSheet({
                         <span className="text-muted-foreground">Pé preferido:</span>
                         <span>{user.preferred_foot || "-"}</span>
                       </div>
-                    </div>
-                  </div>
+                   </div>
+                  )}
 
                   <Separator />
 
