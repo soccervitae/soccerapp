@@ -973,6 +973,7 @@ const EditProfile = () => {
             </>
           )}
 
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="birth_date" className="flex items-center gap-1">
               Data de Nascimento <span className="text-destructive">*</span>
@@ -993,6 +994,7 @@ const EditProfile = () => {
               <p className="text-sm text-destructive">{validationErrors.birth_date}</p>
             )}
           </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="nationality" className="flex items-center gap-1">
