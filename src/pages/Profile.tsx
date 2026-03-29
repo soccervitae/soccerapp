@@ -625,7 +625,7 @@ const Profile = () => {
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
         </TabsContent>
 
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsContent value="teams" className="mt-4 px-4" forceMount={activeTab === "teams" ? true : undefined}>
             {activeTab === "teams" && (
               <TeamsTab userId={targetUserId} />
@@ -633,7 +633,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        {!isOfficialAccount && (
+        {(!isOfficialAccount || isTeamOrSchool) && (
           <TabsContent value="championships" className="mt-4" forceMount={activeTab === "championships" ? true : undefined}>
             {activeTab === "championships" && (
               <ChampionshipsTab 
@@ -646,7 +646,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        {!isOfficialAccount && (
+        {!isOfficialAccount && !isTeamOrSchool && (
           <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
             {activeTab === "achievements" && (
               <AchievementsTab 
@@ -662,6 +662,22 @@ const Profile = () => {
         <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
+
+        {isTeamOrSchool && (
+          <TabsContent value="squad" className="mt-4" forceMount={activeTab === "squad" ? true : undefined}>
+            {activeTab === "squad" && (
+              <SquadTab userId={targetUserId} isOwnProfile={isOwnProfile} />
+            )}
+          </TabsContent>
+        )}
+
+        {isTeamOrSchool && (
+          <TabsContent value="about" className="mt-4" forceMount={activeTab === "about" ? true : undefined}>
+            {activeTab === "about" && profile && (
+              <AboutTab profile={profile} />
+            )}
+          </TabsContent>
+        )}
       </motion.div>
     </Tabs>
   );
