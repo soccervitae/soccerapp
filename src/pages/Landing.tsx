@@ -190,7 +190,11 @@ const Landing = () => {
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                    {account.emoji}
+                    {account.customEmoji ? (
+                      <img src={account.customEmoji} alt={account.accountType} className="w-6 h-6" loading="lazy" />
+                    ) : (
+                      account.emoji
+                    )}
                   </div>
                   <h3 className="text-foreground text-xl font-bold">{account.accountType}</h3>
                 </div>
