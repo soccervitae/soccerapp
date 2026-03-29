@@ -156,6 +156,57 @@ const Landing = () => {
           </div>
         </section>
 
+        {/* Account Types Section */}
+        <section className="py-12 px-4 max-w-7xl mx-auto">
+          <div className="flex flex-col items-center text-center gap-4 mb-10">
+            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+              Para Todos do Futebol
+            </p>
+            <h2 className="text-white text-3xl md:text-4xl font-black max-w-[720px]">
+              Crie sua conta e faça parte
+            </h2>
+            <p className="text-white/60 text-base max-w-[720px]">
+              A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                emoji: "⚽",
+                title: "Atleta",
+                description: "Crie seu currículo esportivo, registre campeonatos, conquistas e mostre seu talento para o mundo.",
+              },
+              {
+                emoji: "📋",
+                title: "Comissão Técnica",
+                description: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional e expandir sua rede.",
+              },
+              {
+                emoji: "🏟️",
+                title: "Time de Futebol",
+                description: "Clubes e equipes podem ter presença na plataforma, compartilhar novidades e encontrar novos talentos.",
+              },
+              {
+                emoji: "🎓",
+                title: "Escolinha de Futebol",
+                description: "Escolas de futebol podem divulgar seu trabalho, mostrar resultados e atrair novos alunos.",
+              },
+            ].map((type, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+              >
+                <div className="w-14 h-14 rounded-full bg-[#1cb15c]/20 flex items-center justify-center text-2xl">
+                  {type.emoji}
+                </div>
+                <h3 className="text-white text-lg font-bold">{type.title}</h3>
+                <p className="text-white/60 text-sm">{type.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
