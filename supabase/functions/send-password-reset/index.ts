@@ -70,6 +70,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Always return the same response shape regardless of user existence
     if (!user) {
+      // Perform a fake DB read to equalize timing with the real-user path
+      await supabaseAdmin
+        .from("verification_codes")
+        .select("id")
+        .eq("code_type", "password_reset")
+        .limit(1)
+        .single();
+
       return new Response(
         JSON.stringify({
           success: true,
