@@ -10,10 +10,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
 import clappingLanding from "@/assets/clapping-landing.png";
 
+const useDeviceType = () => {
+  return useMemo(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) return "ios" as const;
+    if (/android/.test(ua)) return "android" as const;
+    return "unknown" as const;
+  }, []);
+};
+
 const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const heroRef = useRef<HTMLElement>(null);
+  const [showInstallSheet, setShowInstallSheet] = useState(false);
+  const deviceType = useDeviceType();
+  const { isInstallable, promptInstall } = usePwaInstall();
   
   const { scrollY } = useScroll();
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
