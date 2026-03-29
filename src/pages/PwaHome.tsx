@@ -5,12 +5,12 @@ const PwaHome = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-16 px-6">
-      <div className="flex-1 flex items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-12 px-6">
+      <div className="pt-8">
         <img 
           src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png" 
           alt="Soccer Vitae"
-          className="h-16 object-contain"
+          className="h-10 object-contain"
         />
       </div>
       
