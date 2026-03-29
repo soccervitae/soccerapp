@@ -920,9 +920,30 @@ export const FeedPost = ({
         </div>
       </div>
 
-      
+      {/* Caption - below actions, Instagram style */}
+      {post.content && <div className="pt-1 pb-1">
+        <p className="text-sm text-foreground">
+          <span className="font-semibold mr-1 cursor-pointer hover:underline" onClick={handleProfileClick}>
+            {post.profile.nickname || post.profile.full_name || post.profile.username}
+          </span>
+          {post.content.length > 150 && !isContentExpanded 
+            ? post.content.slice(0, 150).trim() + "..." 
+            : post.content}
+        </p>
+        {post.content.length > 150 && (
+          <button 
+            onClick={() => setIsContentExpanded(!isContentExpanded)}
+            className="text-sm text-muted-foreground hover:text-foreground mt-1 transition-colors"
+          >
+            {isContentExpanded ? "Ver menos" : "Ver mais"}
+          </button>
+        )}
+      </div>}
 
-      {/* Edit Dialog */}
+      {/* Post date */}
+      <p className="text-[11px] text-muted-foreground pb-3">{getTimeAgo()}</p>
+
+
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
