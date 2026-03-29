@@ -564,10 +564,11 @@ export default function AdminUsers() {
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <Table>
-            <TableHeader>
+             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
                 <TableHead>Username</TableHead>
+                <TableHead>Tipo de Conta</TableHead>
                 <TableHead>Função</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Cadastro</TableHead>
