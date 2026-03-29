@@ -5,6 +5,7 @@ import { useCreateConversation } from "@/hooks/useMessages";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStories } from "@/hooks/useStories";
+import { useMySquadRequest, useRequestJoinSquad, useCancelSquadRequest } from "@/hooks/useSquadMembers";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
