@@ -16,68 +16,73 @@ const Landing = () => {
   const { scrollY } = useScroll();
   const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
-  const features = [{
-    icon: User,
-    title: "Perfil",
-    description: "Crie seu perfil completo com ano, posição, altura, peso, perna predominante e histórico de clubes."
-  }, {
-    icon: Newspaper,
-    title: "Feed",
-    description: "Compartilhe fotos e vídeos da sua carreira, treinos conquistas e as resenhas."
-  }, {
-    icon: Camera,
-    title: "Replays",
-    description: "Publique seus treinos, jogadas, lances e resenhas do dia a dia que ficam disponíveis por 24 horas."
-  }, {
-    icon: Film,
-    title: "Destaques",
-    description: "Crie álbuns permanentes com seus melhores momentos, gols e jogadas para mostrar seu talento."
-  }, {
-    icon: MessageCircle,
-    title: "Mensagens Diretas",
-    description: "Converse no chat com jogadores e treinadores que fazem parte da SOCCER VITAE e aumente sua rede de contatos."
-  }, {
-    icon: Shield,
-    title: "Times",
-    description: "Adicione todos os clubes por onde passou e construa sua trajetória completa."
-  }, {
-    icon: Trophy,
-    title: "Campeonatos",
-    description: "Registre os campeonatos disputados, gols marcados, jogos e colocação alcançada."
-  }, {
-    icon: Medal,
-    title: "Conquistas",
-    description: "Exiba suas medalhas, títulos e prêmios individuais conquistados ao longo da carreira."
-  }, {
-    icon: Users,
-    title: "Torcedores",
-    description: "Construa sua base de fãs. Acompanhe quem torce por você e quem você está torcendo."
-  }, {
-    icon: Search,
-    title: "Explorar",
-    description: "Descubra novos atletas, busque por posição, região ou habilidades específicas."
-  }, {
-    icon: Bell,
-    title: "Notificações",
-    description: "Receba alertas em tempo real sobre curtidas, comentários, novos torcedores e mensagens."
-  }, {
-    icon: null,
-    customIcon: clappingLanding,
-    title: "Aplausos",
-    description: "Interaja com publicações através do sistema de aplausos exclusivo da plataforma."
-  }, {
-    icon: Send,
-    title: "Compartilhamento",
-    description: "Envie posts, perfis e destaques diretamente para conversas no chat."
-  }, {
-    icon: MapPin,
-    title: "Localização",
-    description: "Adicione localização às suas publicações para mostrar onde você está jogando, treinando ou resenhando."
-  }, {
-    icon: Lock,
-    title: "Privacidade",
-    description: "Controle quem pode ver seu perfil, status de atividade e configure autenticação em duas etapas."
-  }];
+  const featuresByAccount = [
+    {
+      emoji: "⚽",
+      accountType: "Atleta",
+      accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
+      features: [
+        { icon: User, title: "Perfil Completo", description: "Ano, posição, altura, peso, perna predominante e histórico de clubes." },
+        { icon: Newspaper, title: "Feed", description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas." },
+        { icon: Camera, title: "Replays", description: "Publique treinos e jogadas que ficam disponíveis por 24 horas." },
+        { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos e gols." },
+        { icon: Shield, title: "Times", description: "Adicione todos os clubes por onde passou." },
+        { icon: Trophy, title: "Campeonatos", description: "Registre campeonatos, gols marcados e colocação." },
+        { icon: Medal, title: "Conquistas", description: "Exiba medalhas, títulos e prêmios individuais." },
+        { icon: Users, title: "Torcedores", description: "Construa sua base de fãs e acompanhe quem torce por você." },
+      ],
+    },
+    {
+      emoji: "📋",
+      accountType: "Comissão Técnica",
+      accountDescription: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional.",
+      features: [
+        { icon: User, title: "Perfil Profissional", description: "Crie seu perfil com função, histórico e experiência." },
+        { icon: Newspaper, title: "Feed", description: "Compartilhe conteúdo sobre treinos, táticas e bastidores." },
+        { icon: Camera, title: "Replays", description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas." },
+        { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos profissionais." },
+        { icon: MessageCircle, title: "Mensagens", description: "Converse com atletas e outros profissionais." },
+        { icon: Users, title: "Torcedores", description: "Acompanhe quem segue seu trabalho." },
+      ],
+    },
+    {
+      emoji: "🏟️",
+      accountType: "Time de Futebol",
+      accountDescription: "Clubes e equipes com presença na plataforma.",
+      features: [
+        { icon: User, title: "Perfil do Clube", description: "Página oficial com escudo, informações e história." },
+        { icon: Newspaper, title: "Feed", description: "Compartilhe novidades, resultados e bastidores do clube." },
+        { icon: Camera, title: "Replays", description: "Publique momentos dos jogos e treinos por 24 horas." },
+        { icon: Film, title: "Destaques", description: "Álbuns permanentes com os melhores momentos do time." },
+        { icon: UserPlus, title: "Elenco", description: "Gerencie o elenco e receba solicitações de atletas." },
+        { icon: Search, title: "Buscar Talentos", description: "Encontre novos atletas por posição e região." },
+      ],
+    },
+    {
+      emoji: "🎓",
+      accountType: "Escolinha de Futebol",
+      accountDescription: "Escolas de futebol divulgando seu trabalho e resultados.",
+      features: [
+        { icon: User, title: "Perfil da Escola", description: "Página oficial com informações e metodologia." },
+        { icon: Newspaper, title: "Feed", description: "Compartilhe treinos, eventos e resultados dos alunos." },
+        { icon: Camera, title: "Replays", description: "Publique momentos das aulas e jogos por 24 horas." },
+        { icon: Film, title: "Destaques", description: "Álbuns permanentes com os melhores momentos." },
+        { icon: UserPlus, title: "Elenco", description: "Gerencie os alunos matriculados na escolinha." },
+        { icon: Users, title: "Comunidade", description: "Atraia novos alunos e construa sua comunidade." },
+      ],
+    },
+  ];
+
+  const sharedFeatures = [
+    { icon: MessageCircle, title: "Mensagens Diretas", description: "Converse no chat com outros usuários da plataforma." },
+    { icon: Bell, title: "Notificações", description: "Alertas em tempo real sobre curtidas, comentários e mensagens." },
+    { icon: null as LucideIcon | null, customIcon: clappingLanding, title: "Aplausos", description: "Interaja com publicações através do sistema exclusivo de aplausos." },
+    { icon: Send, title: "Compartilhamento", description: "Envie posts, perfis e destaques diretamente para conversas." },
+    { icon: MapPin, title: "Localização", description: "Adicione localização às suas publicações." },
+    { icon: Lock, title: "Privacidade", description: "Controle quem pode ver seu perfil e configure segurança." },
+    { icon: Search, title: "Explorar", description: "Descubra novos perfis por posição, região ou habilidades." },
+  ];
+
   return <>
       <Helmet>
         <title>SOCCER VITAE - A Rede Social do Atleta Profissional</title>
@@ -135,28 +140,7 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                emoji: "⚽",
-                title: "Atleta",
-                description: "Crie seu currículo esportivo, registre campeonatos, conquistas e mostre seu talento para o mundo.",
-              },
-              {
-                emoji: "📋",
-                title: "Comissão Técnica",
-                description: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional e expandir sua rede.",
-              },
-              {
-                emoji: "🏟️",
-                title: "Time de Futebol",
-                description: "Clubes e equipes podem ter presença na plataforma, compartilhar novidades e encontrar novos talentos.",
-              },
-              {
-                emoji: "🎓",
-                title: "Escolinha de Futebol",
-                description: "Escolas de futebol podem divulgar seu trabalho, mostrar resultados e atrair novos alunos.",
-              },
-            ].map((type, index) => (
+            {featuresByAccount.map((type, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
@@ -164,46 +148,80 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
                   {type.emoji}
                 </div>
-                <h3 className="text-foreground text-lg font-bold">{type.title}</h3>
-                <p className="text-muted-foreground text-sm">{type.description}</p>
+                <h3 className="text-foreground text-lg font-bold">{type.accountType}</h3>
+                <p className="text-muted-foreground text-sm">{type.accountDescription}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Features by Account Type */}
         <section className="py-8 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-12">
             <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
             <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
-              Tudo que você precisa para evoluir
+              O que cada conta oferece
             </h2>
             <p className="text-muted-foreground text-base max-w-[720px]">
-              Ferramentas profissionais desenhadas especificamente para o ecossistema do futebol amador e profissional.
+              Ferramentas profissionais desenhadas para cada tipo de perfil no ecossistema do futebol.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  {feature.customIcon ? (
-                    <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
-                  ) : (
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  )}
+          <div className="flex flex-col gap-12">
+            {featuresByAccount.map((account, idx) => (
+              <div key={idx}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
+                    {account.emoji}
+                  </div>
+                  <h3 className="text-foreground text-xl font-bold">{account.accountType}</h3>
                 </div>
-                <h3 className="text-foreground text-lg font-bold">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {feature.description}
-                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {account.features.map((feature, fIdx) => (
+                    <div
+                      key={fIdx}
+                      className="flex flex-col gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                        <feature.icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <h4 className="text-foreground text-sm font-semibold">{feature.title}</h4>
+                      <p className="text-muted-foreground text-xs leading-relaxed">{feature.description}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Shared Features */}
+          <div className="mt-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
+                ✨
+              </div>
+              <h3 className="text-foreground text-xl font-bold">Disponível para todos</h3>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {sharedFeatures.map((feature, fIdx) => (
+                <div
+                  key={fIdx}
+                  className="flex flex-col gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
+                >
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    {feature.customIcon ? (
+                      <img src={feature.customIcon} alt={feature.title} className="w-4 h-4" />
+                    ) : feature.icon ? (
+                      <feature.icon className="w-4 h-4 text-primary" />
+                    ) : null}
+                  </div>
+                  <h4 className="text-foreground text-sm font-semibold">{feature.title}</h4>
+                  <p className="text-muted-foreground text-xs leading-relaxed">{feature.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
