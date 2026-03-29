@@ -672,9 +672,14 @@ const Profile = () => {
         )}
 
         {isTeamOrSchool && (
-          <TabsContent value="about" className="mt-4" forceMount={activeTab === "about" ? true : undefined}>
-            {activeTab === "about" && profile && (
-              <AboutTab profile={profile} />
+          <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
+            {activeTab === "achievements" && (
+              <AchievementsTab 
+                achievements={achievements || []} 
+                isLoading={achievementsLoading} 
+                isOwnProfile={isOwnProfile}
+                userId={targetUserId}
+              />
             )}
           </TabsContent>
         )}
