@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/
 import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
 import { toast } from "sonner";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   Select,
   SelectContent,
