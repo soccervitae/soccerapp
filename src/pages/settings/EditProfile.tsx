@@ -736,11 +736,9 @@ const EditProfile = () => {
             </div>
             {isTeamOrSchool ? (
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
                 <Input
                   value={formData.username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
-                  className="pl-8"
                   placeholder="nome_de_usuario"
                 />
                 {usernameStatus === "checking" && (
