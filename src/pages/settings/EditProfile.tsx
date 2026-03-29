@@ -98,6 +98,9 @@ const EditProfile = () => {
     gender: "",
     nationality: "",
     estado_id: "",
+    foundation_year: "",
+    city: "",
+    team_category: "",
   });
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
