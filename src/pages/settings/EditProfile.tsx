@@ -283,6 +283,9 @@ const EditProfile = () => {
         gender: profile.gender || "",
         nationality: profile.nationality?.toString() || "",
         estado_id: (profile as any).estado_id?.toString() || "",
+        foundation_year: (profile as any).foundation_year?.toString() || "",
+        city: (profile as any).city || "",
+        team_category: (profile as any).team_category || "",
       });
       // Set user type based on normalized role
       setUserType(isComissaoTecnica ? 'comissao_tecnica' : 'atleta');
