@@ -133,9 +133,6 @@ const Landing = () => {
                 <br />
                 Conquiste.
               </h1>
-              <p className="text-muted-foreground text-base md:text-lg">
-                Mostre seu talento e conecte-se com o mundo do futebol.
-              </p>
             </div>
           </motion.div>
         </section>
