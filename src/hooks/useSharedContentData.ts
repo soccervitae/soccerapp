@@ -214,6 +214,7 @@ export function sharedPostToPost(shared: SharedPost): Post {
     liked_by_user: false,
     saved_by_user: false,
     recent_likes: [],
+  };
 }
 
 // Convert SharedStory to Post format for PostMediaViewer
