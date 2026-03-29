@@ -179,7 +179,7 @@ const CompleteProfile = () => {
   const nicknameRegex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
   const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim());
   
-  const isGenderValid = !!gender;
+  const isGenderValid = isTeamOrSchoolAccount || !!gender;
   const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
   // Minimum age: 16 years
   const getMaxBirthDate = () => {
@@ -196,7 +196,6 @@ const CompleteProfile = () => {
   const isHeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
   const isWeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
   const isPreferredFootValid = isTeamOrSchoolAccount || (isAthlete ? !!preferredFoot : true);
-  const isGenderValid = isTeamOrSchoolAccount || !!gender;
 
   const isFormValid =
     isNicknameValid &&
