@@ -43,6 +43,8 @@ const CompleteProfile = () => {
   const [preferredFoot, setPreferredFoot] = useState("");
   const [nickname, setNickname] = useState("");
   const [estado, setEstado] = useState<string>("");
+  const [foundationYear, setFoundationYear] = useState("");
+  const [teamCategory, setTeamCategory] = useState("");
   
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
