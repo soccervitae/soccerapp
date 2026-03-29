@@ -1,33 +1,38 @@
 
 
-## Plano: Página Home branca e suave + tipo de conta para atletas
+## Plano: Landing Page com tema branco e visual suave
 
 ### O que muda
+Converter a Landing Page do tema escuro (verde escuro `#102216`, cards `#1a3d26`) para um tema branco/claro, suave e moderno, mantendo o verde como cor de destaque.
 
-1. **Cor de fundo branca e visual mais suave** — remover tons escuros/verdes do feed, suavizar bordas e separadores
-2. **Mostrar tipo de conta para atletas** — exibir "Atleta" antes da posição no header dos posts de atletas
+### Alterações em `src/pages/Landing.tsx`
 
-### Alterações
+1. **Container principal** (linha 87): `bg-[#102216] text-white` → `bg-white text-foreground`
 
-#### 1. `src/components/feed/FeedPost.tsx`
-- Na seção do header do post (linha ~658-702), adicionar lógica para perfis de atleta: mostrar "Atleta" como tipo de conta quando `account_type` for `'atleta'` ou quando não for `time`/`escolinha` e tiver `position_name`
-- Formato: `Atleta · Meio-campista` em vez de apenas `Meio-campista`
-- Trocar `border-b border-border` do `<article>` por `border-b border-border/40` para separadores mais suaves
+2. **Hero Section** (linhas 100-119):
+   - Gradient overlay: trocar `from-[#102216]` por `from-white`
+   - Título: `text-white` → `text-foreground`
+   - Subtítulo: `text-white/80` → `text-muted-foreground`
 
-#### 2. `src/components/feed/FeedHeader.tsx`
-- Manter fundo branco `bg-background/95`, trocar borda para `border-border/30` — mais suave
+3. **Features Section** (linhas 124-156):
+   - Label "Recursos": `text-[#1cb15c]` → `text-primary` (manter verde como accent)
+   - Título da seção: `text-white` → `text-foreground`
+   - Descrição da seção: `text-white/60` → `text-muted-foreground`
+   - Cards: `border-white/10 bg-[#1a3d26]` → `border-border/40 bg-card shadow-sm`
+   - Hover dos cards: `hover:border-[#1cb15c]/50` → `hover:border-primary/30`
+   - Ícone circle: `bg-[#1cb15c]/20` → `bg-primary/10`
+   - Ícone cor: `text-[#1cb15c]` → `text-primary`
+   - Título do card: `text-white` → `text-foreground`
+   - Descrição do card: `text-white/60` → `text-muted-foreground`
 
-#### 3. `src/components/feed/FeedStories.tsx`
-- Trocar `border-b border-border` por `border-b border-border/30` para suavizar
-- O botão "+" do replay já usa `bg-nav-active` (verde) — manter, é um accent
+4. **Account Types Section** (linhas 160-208): mesmas trocas dos cards de features
 
-#### 4. `src/pages/Index.tsx`
-- Manter `bg-background` (já é branco no light mode)
+5. **CTA Section** (linhas 211-231):
+   - Título/texto: `text-white` → `text-foreground`, `text-white/60` → `text-muted-foreground`
+   - Botões: `bg-[#1cb15c]` → `bg-primary hover:bg-primary/90`
 
-### Detalhes técnicos
-
-No header do post, a lógica de exibição abaixo do nome ficará:
-- **Time/Escolinha**: "Time de Futebol" ou "Escolinha de Futebol" (sem mudança)
-- **Atleta** (account_type === 'atleta' ou perfil com position_name): "Atleta · {posição}"
-- **Sem tipo**: mostrar apenas posição ou música como já está
+6. **Footer** (linhas 234-249):
+   - Border: `border-white/10` → `border-border/30`
+   - Links: `text-white/60 hover:text-white` → `text-muted-foreground hover:text-foreground`
+   - Copyright: `text-white/40` → `text-muted-foreground/60`
 
