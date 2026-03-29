@@ -151,32 +151,6 @@ export const FeedPost = ({
     return () => clearInterval(interval);
   }, [hasMusicTrack, musicTitle]);
 
-  // Video autoplay on viewport intersection
-  useEffect(() => {
-    if (post.media_type !== "video" || !videoContainerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (videoRef.current) {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-              videoRef.current.muted = getGlobalMuteState();
-              videoRef.current.play().catch(() => {});
-              setIsVideoPlaying(true);
-            } else {
-              videoRef.current.pause();
-              setIsVideoPlaying(false);
-            }
-          }
-        });
-      },
-      { threshold: [0, 0.6, 1] }
-    );
-
-    observer.observe(videoContainerRef.current);
-    return () => observer.disconnect();
-  }, [post.media_type]);
-
   // Listen for global mute changes from other posts
   useEffect(() => {
     const handleGlobalMuteChange = (e: Event) => {
@@ -188,7 +162,7 @@ export const FeedPost = ({
     return () => window.removeEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
   }, []);
 
-  // Keep isMusicMutedRef in sync with state (so observer doesn't need to re-create)
+  // Keep isMusicMutedRef in sync with state
   useEffect(() => {
     isMusicMutedRef.current = isMusicMuted;
     if (musicAudioRef.current) {
@@ -200,13 +174,84 @@ export const FeedPost = ({
   const stopMusicPlayback = useCallback(() => {
     if (musicAudioRef.current) {
       musicAudioRef.current.pause();
-      // Clear global reference if this was the playing audio
       if (currentlyPlayingFeedMusic === musicAudioRef.current) {
         currentlyPlayingFeedMusic = null;
         currentlyPlayingFeedMusicStop = null;
       }
     }
   }, []);
+
+  // Video autoplay on viewport intersection (also handles music for video posts)
+  useEffect(() => {
+    if (post.media_type !== "video" || !videoContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (videoRef.current) {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              videoRef.current.muted = getGlobalMuteState();
+              videoRef.current.play().catch(() => {});
+              setIsVideoPlaying(true);
+
+              // Also start music for video posts with music
+              if (hasMusicTrack && musicAudioUrl) {
+                if (!musicAudioRef.current) {
+                  const url = effectiveMusicUrlRef.current;
+                  if (url) {
+                    musicAudioRef.current = new Audio(url);
+                    musicAudioRef.current.loop = true;
+                    musicAudioRef.current.addEventListener('timeupdate', () => {
+                      if (musicAudioRef.current && musicAudioRef.current.currentTime >= musicEndSeconds) {
+                        musicAudioRef.current.currentTime = musicStartSeconds;
+                      }
+                    });
+                  }
+                }
+                if (musicAudioRef.current) {
+                  if (currentlyPlayingFeedMusicStop && currentlyPlayingFeedMusic !== musicAudioRef.current) {
+                    currentlyPlayingFeedMusicStop();
+                  }
+                  musicAudioRef.current.currentTime = musicStartSeconds;
+                  musicAudioRef.current.muted = isMusicMutedRef.current;
+                  musicAudioRef.current.play().catch(() => {});
+                  currentlyPlayingFeedMusic = musicAudioRef.current;
+                  currentlyPlayingFeedMusicStop = stopMusicPlayback;
+                }
+                setIsMusicInView(true);
+              }
+            } else {
+              videoRef.current.pause();
+              setIsVideoPlaying(false);
+
+              // Also pause music for video posts
+              if (musicAudioRef.current) {
+                musicAudioRef.current.pause();
+                if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+                  currentlyPlayingFeedMusic = null;
+                  currentlyPlayingFeedMusicStop = null;
+                }
+              }
+              setIsMusicInView(false);
+            }
+          }
+        });
+      },
+      { threshold: [0, 0.6, 1] }
+    );
+
+    observer.observe(videoContainerRef.current);
+    return () => {
+      observer.disconnect();
+      if (musicAudioRef.current && post.media_type === "video") {
+        musicAudioRef.current.pause();
+        if (currentlyPlayingFeedMusic === musicAudioRef.current) {
+          currentlyPlayingFeedMusic = null;
+          currentlyPlayingFeedMusicStop = null;
+        }
+      }
+    };
+  }, [post.media_type, hasMusicTrack, musicAudioUrl, musicStartSeconds, musicEndSeconds, stopMusicPlayback]);
 
   // Music autoplay on viewport intersection (for image posts with music)
   useEffect(() => {
