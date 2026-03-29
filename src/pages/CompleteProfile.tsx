@@ -403,8 +403,8 @@ const CompleteProfile = () => {
           </div>
         )}
 
-        {/* Position - Only for Athletes (moved right after profile type) */}
-        {isAthlete && (
+        {/* Position - Only for Athletes */}
+        {!isTeamOrSchoolAccount && isAthlete && (
           <div className="space-y-2">
             <Label htmlFor="position">
               Posição <span className="text-destructive">*</span>
