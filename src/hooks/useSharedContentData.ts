@@ -254,10 +254,7 @@ export function storyToPost(story: SharedStory): Post {
       posicaomas: null,
       posicaofem: null,
       funcao: null,
-    },
-    liked_by_user: false,
-    saved_by_user: false,
-    recent_likes: [],
+      account_type: null,
   };
 }
 
