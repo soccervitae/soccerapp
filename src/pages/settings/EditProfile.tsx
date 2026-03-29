@@ -784,7 +784,67 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* Profile Type Selector */}
+          {/* Team/School specific fields */}
+          {isTeamOrSchool && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="foundation_year">Ano de Fundação</Label>
+                <Input
+                  id="foundation_year"
+                  type="number"
+                  value={formData.foundation_year}
+                  onChange={(e) => setFormData({ ...formData, foundation_year: e.target.value })}
+                  placeholder="Ex: 1990"
+                  min={1800}
+                  max={new Date().getFullYear()}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 100) {
+                      setFormData({ ...formData, city: e.target.value });
+                    }
+                  }}
+                  placeholder="Cidade do time/escolinha"
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="team_category">Categoria</Label>
+                <Select
+                  value={formData.team_category}
+                  onValueChange={(value) => setFormData({ ...formData, team_category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sub-7">Sub-7</SelectItem>
+                    <SelectItem value="sub-9">Sub-9</SelectItem>
+                    <SelectItem value="sub-11">Sub-11</SelectItem>
+                    <SelectItem value="sub-13">Sub-13</SelectItem>
+                    <SelectItem value="sub-15">Sub-15</SelectItem>
+                    <SelectItem value="sub-17">Sub-17</SelectItem>
+                    <SelectItem value="sub-20">Sub-20</SelectItem>
+                    <SelectItem value="sub-23">Sub-23</SelectItem>
+                    <SelectItem value="profissional">Profissional</SelectItem>
+                    <SelectItem value="amador">Amador</SelectItem>
+                    <SelectItem value="feminino">Feminino</SelectItem>
+                    <SelectItem value="todas">Todas as categorias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {/* Profile Type Selector - only for athletes/staff */}
+          {!isTeamOrSchool && (
           <div className="space-y-2">
             <Label htmlFor="profile_type">Tipo de Perfil</Label>
             <Select 
@@ -800,6 +860,7 @@ const EditProfile = () => {
               </SelectContent>
             </Select>
           </div>
+          )}
 
           {/* Position for athletes, Function (Função) for technical staff - both use position field */}
           <div className="space-y-2">
