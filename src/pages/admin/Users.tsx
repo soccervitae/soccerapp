@@ -157,6 +157,11 @@ export default function AdminUsers() {
       query = query.eq("funcao", parseInt(filters.profileType));
     }
 
+    // Account type filter
+    if (filters.accountType !== "all") {
+      query = query.eq("account_type", filters.accountType);
+    }
+
     // Country filter
     if (filters.country !== "all") {
       query = query.eq("nationality", parseInt(filters.country));
