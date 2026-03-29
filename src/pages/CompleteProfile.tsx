@@ -365,6 +365,47 @@ const CompleteProfile = () => {
           )}
         </div>
 
+        {/* Team/School specific fields */}
+        {isTeamOrSchoolAccount && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="foundationYear">Ano de Fundação</Label>
+              <Input
+                id="foundationYear"
+                type="number"
+                value={foundationYear}
+                onChange={(e) => setFoundationYear(e.target.value)}
+                placeholder="Ex: 1990"
+                min={1800}
+                max={new Date().getFullYear()}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="teamCategory">Categoria</Label>
+              <Select value={teamCategory} onValueChange={(value) => setTeamCategory(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sub-7">Sub-7</SelectItem>
+                  <SelectItem value="sub-9">Sub-9</SelectItem>
+                  <SelectItem value="sub-11">Sub-11</SelectItem>
+                  <SelectItem value="sub-13">Sub-13</SelectItem>
+                  <SelectItem value="sub-15">Sub-15</SelectItem>
+                  <SelectItem value="sub-17">Sub-17</SelectItem>
+                  <SelectItem value="sub-20">Sub-20</SelectItem>
+                  <SelectItem value="sub-23">Sub-23</SelectItem>
+                  <SelectItem value="profissional">Profissional</SelectItem>
+                  <SelectItem value="amador">Amador</SelectItem>
+                  <SelectItem value="feminino">Feminino</SelectItem>
+                  <SelectItem value="todas">Todas as categorias</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
         {/* Gender - Sexo (hidden for team/school accounts) */}
         {!isTeamOrSchoolAccount && (
           <div className="space-y-2">
