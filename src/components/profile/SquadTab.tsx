@@ -34,11 +34,14 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
   const removeMember = useRemoveSquadMember();
   const [filter, setFilter] = useState<string>("all");
 
-  const filteredMembers = filter === "all"
-    ? members
-    : members.filter(m => getPositionGroup(m.athlete?.position_name) === filter);
+  // Only show members with avatar for the grid
+  const membersWithAvatar = members.filter(m => !!m.athlete?.avatar_url);
 
-  const availableGroups = [...new Set(members.map(m => getPositionGroup(m.athlete?.position_name)))];
+  const filteredMembers = filter === "all"
+    ? membersWithAvatar
+    : membersWithAvatar.filter(m => getPositionGroup(m.athlete?.position_name) === filter);
+
+  const availableGroups = [...new Set(membersWithAvatar.map(m => getPositionGroup(m.athlete?.position_name)))];
 
   if (isLoading) {
     return (
@@ -126,10 +129,10 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            Todos ({members.length})
+            Todos ({membersWithAvatar.length})
           </button>
           {availableGroups.map(group => {
-            const count = members.filter(m => getPositionGroup(m.athlete?.position_name) === group).length;
+            const count = membersWithAvatar.filter(m => getPositionGroup(m.athlete?.position_name) === group).length;
             return (
               <button
                 key={group}
@@ -149,43 +152,39 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
 
       {/* Members list */}
       {filteredMembers.length > 0 ? (
-        <div className="bg-card rounded-xl border border-border/50 overflow-hidden">
-          {filteredMembers.map((member, i) => (
+        <div className="grid grid-cols-3 gap-0.5">
+          {filteredMembers.map((member) => (
             <div
               key={member.id}
-              className={`flex items-center gap-3 px-4 py-3 ${i < filteredMembers.length - 1 ? "border-b border-border/30" : ""}`}
+              className="relative aspect-square cursor-pointer group"
+              onClick={() => member.athlete && navigate(`/${member.athlete.username}`)}
             >
-              <div
-                className="w-12 h-12 rounded-full bg-muted overflow-hidden flex-shrink-0 cursor-pointer"
-                onClick={() => member.athlete && navigate(`/${member.athlete.username}`)}
-              >
-                {member.athlete?.avatar_url ? (
-                  <img src={member.athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[24px] text-muted-foreground">person</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p
-                  className="text-sm font-semibold text-foreground truncate cursor-pointer hover:underline"
-                  onClick={() => member.athlete && navigate(`/${member.athlete.username}`)}
-                >
-                  {member.athlete?.nickname || member.athlete?.full_name || member.athlete?.username}
-                </p>
-                {member.athlete?.position_name && (
-                  <p className="text-xs text-muted-foreground">{member.athlete.position_name}</p>
-                )}
+              <img
+                src={member.athlete?.avatar_url!}
+                alt={member.athlete?.username || ""}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pb-2 text-center px-1">
+                  <p className="text-white text-xs font-semibold truncate">
+                    {member.athlete?.nickname || member.athlete?.full_name || member.athlete?.username}
+                  </p>
+                  {member.athlete?.position_name && (
+                    <p className="text-white/70 text-[10px] truncate">{member.athlete.position_name}</p>
+                  )}
+                </div>
               </div>
               {isOwnProfile && (
                 <button
-                  onClick={() => removeMember.mutate({ memberId: member.id, teamProfileId: userId! })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeMember.mutate({ memberId: member.id, teamProfileId: userId! });
+                  }}
                   disabled={removeMember.isPending}
-                  className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                  className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
                   title="Remover do elenco"
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  <span className="material-symbols-outlined text-[14px]">close</span>
                 </button>
               )}
             </div>
