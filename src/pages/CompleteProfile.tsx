@@ -462,12 +462,15 @@ const CompleteProfile = () => {
               <Label htmlFor="foundationYear">Ano de Fundação</Label>
               <Input
                 id="foundationYear"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={foundationYear}
-                onChange={(e) => setFoundationYear(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setFoundationYear(val);
+                }}
                 placeholder="Ex: 1990"
-                min={1800}
-                max={new Date().getFullYear()}
+                maxLength={4}
               />
             </div>
 
