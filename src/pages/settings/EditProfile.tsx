@@ -721,20 +721,46 @@ const EditProfile = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Label>Nome de Usuário</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="material-symbols-outlined text-muted-foreground text-[16px] cursor-help">info</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>O nome de usuário não pode ser alterado</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {!isTeamOrSchool && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="material-symbols-outlined text-muted-foreground text-[16px] cursor-help">info</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>O nome de usuário não pode ser alterado</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
-            <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
-              @{formData.username}
-            </div>
+            {isTeamOrSchool ? (
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                <Input
+                  value={formData.username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  className="pl-8"
+                  placeholder="nome_de_usuario"
+                />
+                {usernameStatus === "checking" && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                )}
+                {usernameStatus === "available" && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                )}
+                {usernameStatus === "taken" && (
+                  <X className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
+                @{formData.username}
+              </div>
+            )}
+            {usernameStatus === "taken" && isTeamOrSchool && (
+              <p className="text-sm text-destructive">Este nome de usuário já está em uso</p>
+            )}
           </div>
 
           {!isTeamOrSchool && (
