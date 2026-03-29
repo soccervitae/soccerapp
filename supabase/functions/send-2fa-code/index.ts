@@ -29,6 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     const body = await req.json();
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const user_id = typeof body.user_id === "string" ? body.user_id.trim() : "";
+    const code_type = typeof body.code_type === "string" ? body.code_type.trim() : "2fa";
 
     if (!email || !user_id) {
       return new Response(
