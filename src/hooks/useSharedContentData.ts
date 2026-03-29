@@ -300,9 +300,7 @@ export function highlightToPost(highlight: SharedHighlight): Post {
       posicaomas: null,
       posicaofem: null,
       funcao: null,
-    },
-    liked_by_user: false,
-    saved_by_user: false,
+      account_type: null,
     recent_likes: [],
   };
 }

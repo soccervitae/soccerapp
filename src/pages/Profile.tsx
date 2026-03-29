@@ -340,6 +340,7 @@ const Profile = () => {
       posicaofem: profile?.posicaofem || null,
       funcao: profile?.funcao || null,
       position_name: profile?.position_name || null,
+      account_type: profile?.account_type || null,
     },
     music_track: post.music_track || null,
     // Campos para músicas externas
