@@ -413,13 +413,11 @@ export function ViewUserSheet({
                           <span className="font-medium">{userEmail}</span>
                         </div>
                       )}
-                      {user.full_name && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Nome:</span>
-                          <span className="font-medium">{user.full_name}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Nome de cadastro:</span>
+                        <span className="font-medium">{user.full_name || "Não informado"}</span>
+                      </div>
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Gênero:</span>
