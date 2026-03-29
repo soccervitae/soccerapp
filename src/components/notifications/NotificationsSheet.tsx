@@ -38,6 +38,8 @@ const NotificationIcon = ({ type }: { type: string }) => {
       return <AtSign className="w-4 h-4 text-orange-500" />;
     case "squad_request":
       return <UserPlus className="w-4 h-4 text-emerald-500" />;
+    case "squad_accepted":
+      return <UserPlus className="w-4 h-4 text-primary" />;
     default:
       return <Bell className="w-4 h-4 text-muted-foreground" />;
   }
@@ -57,6 +59,8 @@ const getNotificationText = (notification: Notification) => {
       return `${actorName} mencionou você em um comentário`;
     case "squad_request":
       return `${actorName} quer fazer parte do seu elenco`;
+    case "squad_accepted":
+      return `${actorName} aceitou você no elenco`;
     default:
       return notification.content || "Nova notificação";
   }
@@ -84,6 +88,7 @@ const NotificationItem = ({
     switch (notification.type) {
       case "follow":
       case "squad_request":
+      case "squad_accepted":
         if (notification.actor?.username) {
           navigate(`/${notification.actor.username}`);
         }

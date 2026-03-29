@@ -218,9 +218,17 @@ export const useCancelSquadRequest = () => {
 // Approve or reject a request (team owner)
 export const useUpdateSquadRequest = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ requestId, status, teamProfileId }: { requestId: string; status: "approved" | "rejected"; teamProfileId: string }) => {
+      // Get athlete id before updating
+      const { data: requestData } = await supabase
+        .from("squad_members")
+        .select("athlete_profile_id")
+        .eq("id", requestId)
+        .single();
+
       if (status === "rejected") {
         const { error } = await supabase
           .from("squad_members")
@@ -233,6 +241,15 @@ export const useUpdateSquadRequest = () => {
           .update({ status, updated_at: new Date().toISOString() })
           .eq("id", requestId);
         if (error) throw error;
+
+        // Notify the athlete they were added to the squad
+        if (requestData?.athlete_profile_id && user?.id) {
+          await supabase.rpc("create_notification", {
+            p_user_id: requestData.athlete_profile_id,
+            p_type: "squad_accepted",
+            p_actor_id: user.id,
+          });
+        }
       }
       return teamProfileId;
     },
