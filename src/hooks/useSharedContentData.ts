@@ -210,7 +210,10 @@ export function sharedPostToPost(shared: SharedPost): Post {
       posicaofem: null,
       funcao: null,
       account_type: null,
-  };
+    },
+    liked_by_user: false,
+    saved_by_user: false,
+    recent_likes: [],
 }
 
 // Convert SharedStory to Post format for PostMediaViewer
