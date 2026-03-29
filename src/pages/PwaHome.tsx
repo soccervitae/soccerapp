@@ -12,6 +12,7 @@ const PwaHome = () => {
           alt="Soccer Vitae"
           className="h-10 object-contain"
         />
+        <p className="text-muted-foreground text-sm mt-3 text-center">Onde talentos encontram oportunidades</p>
       </div>
       
       <div className="flex flex-col gap-3 w-full max-w-sm">
