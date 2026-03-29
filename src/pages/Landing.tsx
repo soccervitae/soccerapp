@@ -195,13 +195,13 @@ const Landing = () => {
             ].map((type, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                <div className="w-14 h-14 rounded-full bg-[#1cb15c]/20 flex items-center justify-center text-2xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
                   {type.emoji}
                 </div>
-                <h3 className="text-white text-lg font-bold">{type.title}</h3>
-                <p className="text-white/60 text-sm">{type.description}</p>
+                <h3 className="text-foreground text-lg font-bold">{type.title}</h3>
+                <p className="text-muted-foreground text-sm">{type.description}</p>
               </div>
             ))}
           </div>
