@@ -36,6 +36,8 @@ const NotificationIcon = ({ type }: { type: string }) => {
       return <UserPlus className="w-4 h-4 text-primary" />;
     case "mention":
       return <AtSign className="w-4 h-4 text-orange-500" />;
+    case "squad_request":
+      return <UserPlus className="w-4 h-4 text-emerald-500" />;
     default:
       return <Bell className="w-4 h-4 text-muted-foreground" />;
   }
