@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
         {
           user_id,
           code,
-          code_type: "2fa",
+          code_type,
           expires_at: expiresAt,
           attempts: 0,
           locked_until: null,
