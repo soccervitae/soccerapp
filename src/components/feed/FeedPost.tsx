@@ -583,12 +583,7 @@ export const FeedPost = ({
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
             </div>
-            {(post.profile.account_type === 'time' || post.profile.account_type === 'escolinha') && (
-              <span className="text-[10px] text-muted-foreground leading-none -mt-0.5 block">
-                {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
-              </span>
-            )}
-            {/* Alternating position/music info */}
+            {/* Alternating position/account type/music info */}
             <div className="h-4 overflow-hidden relative">
               <AnimatePresence mode="wait">
                 {hasMusicTrack && musicTitle && showMusicInfo ? (
@@ -614,7 +609,18 @@ export const FeedPost = ({
                     )}
                   </motion.button>
                 ) : (
-                  post.profile.position_name ? (
+                  (post.profile.account_type === 'time' || post.profile.account_type === 'escolinha') ? (
+                    <motion.p
+                      key="account-type"
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -10, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
+                    </motion.p>
+                  ) : post.profile.position_name ? (
                     <motion.p
                       key="position"
                       initial={{ y: 10, opacity: 0 }}
