@@ -38,32 +38,20 @@ const TwoFactorVerify = () => {
     setIsVerifying(true);
 
     try {
-      // Verify the code against the stored code in profiles
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("codigo, codigo_expira_em")
-        .eq("id", state.userId)
-        .single();
+      const { data, error } = await supabase.functions.invoke("verify-2fa-code", {
+        body: {
+          user_id: state.userId,
+          code,
+          code_type: "2fa",
+        },
+      });
 
       if (error) throw error;
 
-      // Check if code is expired
-      if (profile.codigo_expira_em && new Date(profile.codigo_expira_em) < new Date()) {
+      if (!data?.success) {
         setIsVerifying(false);
         return;
       }
-
-      // Check if code matches
-      if (profile.codigo !== code) {
-        setIsVerifying(false);
-        return;
-      }
-
-      // Clear the code from the database
-      await supabase
-        .from("profiles")
-        .update({ codigo: null, codigo_expira_em: null })
-        .eq("id", state.userId);
 
       // If remember device is checked, trust the device for 30 days
       if (rememberDevice) {

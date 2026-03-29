@@ -1999,6 +1999,39 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_codes: {
+        Row: {
+          attempts: number
+          code: string
+          code_type: string
+          created_at: string
+          expires_at: string
+          id: string
+          locked_until: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code: string
+          code_type?: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          locked_until?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code?: string
+          code_type?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          locked_until?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

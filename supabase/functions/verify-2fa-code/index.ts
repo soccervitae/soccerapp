@@ -19,7 +19,9 @@ const handler = async (req: Request): Promise<Response> => {
     const body = await req.json();
     const user_id = typeof body.user_id === "string" ? body.user_id.trim() : "";
     const code = typeof body.code === "string" ? body.code.trim() : "";
+    const code_type = typeof body.code_type === "string" ? body.code_type.trim() : "2fa";
 
+    // Validate input format
     if (!user_id || !code) {
       return new Response(
         JSON.stringify({ error: "user_id e código são obrigatórios" }),
@@ -39,12 +41,12 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get verification code from secure table
+    // Get the stored code from verification_codes table
     const { data: vcRecord, error: fetchError } = await supabaseAdmin
       .from("verification_codes")
       .select("*")
       .eq("user_id", user_id)
-      .eq("code_type", "signup")
+      .eq("code_type", code_type)
       .single();
 
     if (fetchError || !vcRecord) {
@@ -68,6 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
           { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       } else {
+        // Lockout expired, reset
         await supabaseAdmin
           .from("verification_codes")
           .update({ attempts: 0, locked_until: null })
@@ -85,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Verify the code
+    // Verify code
     if (vcRecord.code !== code) {
       const newAttempts = (vcRecord.attempts || 0) + 1;
       const remainingAttempts = MAX_ATTEMPTS - newAttempts;
@@ -121,33 +124,25 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Code is valid - delete the record and mark account verified
+    // Code is valid - delete the record
     await supabaseAdmin.from("verification_codes").delete().eq("id", vcRecord.id);
 
-    const { error: updateError } = await supabaseAdmin
-      .from("profiles")
-      .update({ conta_verificada: true })
-      .eq("id", user_id);
-
-    if (updateError) {
-      console.error("Error updating profile:", updateError);
-    }
-
-    // Confirm email in auth
-    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(user_id, {
-      email_confirm: true,
-    });
-
-    if (authError) {
-      console.error("Error confirming email in auth:", authError);
+    // Handle specific code types
+    if (code_type === "2fa_enable") {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ two_factor_enabled: true })
+        .eq("id", user_id);
+    } else if (code_type === "delete_account") {
+      // Just verify - client will proceed to final confirmation
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: "Conta verificada com sucesso!" }),
+      JSON.stringify({ success: true, message: "Código verificado com sucesso" }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
-    console.error("Error in verify-signup-code function:", error);
+    console.error("Error in verify-2fa-code function:", error);
     return new Response(
       JSON.stringify({ error: "Erro interno do servidor" }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
