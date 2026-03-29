@@ -9,6 +9,7 @@ interface SignUpData {
   password: string;
   firstName: string;
   lastName: string;
+  accountType?: string;
 }
 
 interface AuthContextType {
