@@ -683,11 +683,14 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
     setLoading(true);
 
+    const signUpFirstName = isTeamOrSchool ? teamName.trim() : firstName.trim();
+    const signUpLastName = isTeamOrSchool ? "" : lastName.trim();
+
     const { error } = await signUp({
       email,
       password,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      firstName: signUpFirstName,
+      lastName: signUpLastName,
     });
 
     if (error) {
@@ -705,20 +708,44 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    // Save account type to profile
-    if (accountType) {
-      await supabase
-        .from("profiles")
-        .update({ account_type: accountType } as any)
-        .eq("id", user.id);
+    // Upload emblem if provided
+    let emblemUrl: string | null = null;
+    if (isTeamOrSchool && emblemFile) {
+      const fileExt = emblemFile.name.split(".").pop();
+      const filePath = `${user.id}/emblem.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, emblemFile, { upsert: true });
+      
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+        emblemUrl = urlData.publicUrl;
+      }
     }
+
+    // Save account type and team info to profile
+    const profileUpdate: Record<string, any> = { account_type: accountType };
+    if (isTeamOrSchool) {
+      profileUpdate.nickname = teamName.trim();
+      profileUpdate.full_name = teamName.trim();
+      if (emblemUrl) {
+        profileUpdate.avatar_url = emblemUrl;
+      }
+    }
+
+    await supabase
+      .from("profiles")
+      .update(profileUpdate as any)
+      .eq("id", user.id);
 
     // Send verification code
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
       body: {
         email: email,
         user_id: user.id,
-        first_name: firstName.trim(),
+        first_name: isTeamOrSchool ? teamName.trim() : firstName.trim(),
       },
     });
 
