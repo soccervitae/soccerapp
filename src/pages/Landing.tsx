@@ -143,7 +143,7 @@ const Landing = () => {
             <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Para Todos do Futebol
             </p>
-            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
+            <h2 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
             </h2>
             <p className="text-muted-foreground text-base max-w-[720px]">
