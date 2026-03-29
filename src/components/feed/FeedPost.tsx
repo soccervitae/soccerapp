@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ClappingHandsIcon } from "@/components/icons/ClappingHandsIcon";
 import { fetchFreshDeezerPreviewUrl, isDeezerSignedUrlExpired } from "@/lib/deezer";
+import { getGlobalMuteState, setGlobalMuteState, GLOBAL_MUTE_EVENT } from "@/lib/globalMuteState";
 
 // Module-level variables to track currently playing music across all FeedPost instances
 let currentlyPlayingFeedMusic: HTMLAudioElement | null = null;
@@ -76,8 +77,8 @@ export const FeedPost = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [isMusicMuted, setIsMusicMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(() => getGlobalMuteState());
+  const [isMusicMuted, setIsMusicMuted] = useState(() => getGlobalMuteState());
   const [isMusicInView, setIsMusicInView] = useState(false);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
@@ -175,6 +176,17 @@ export const FeedPost = ({
     return () => observer.disconnect();
   }, [post.media_type]);
 
+  // Listen for global mute changes from other posts
+  useEffect(() => {
+    const handleGlobalMuteChange = (e: Event) => {
+      const { muted } = (e as CustomEvent).detail;
+      setIsMuted(muted);
+      setIsMusicMuted(muted);
+    };
+    window.addEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+    return () => window.removeEventListener(GLOBAL_MUTE_EVENT, handleGlobalMuteChange);
+  }, []);
+
   // Keep isMusicMutedRef in sync with state (so observer doesn't need to re-create)
   useEffect(() => {
     isMusicMutedRef.current = isMusicMuted;
@@ -269,7 +281,7 @@ export const FeedPost = ({
     e.stopPropagation();
     
     const nextMuted = !isMusicMuted;
-    setIsMusicMuted(nextMuted);
+    setGlobalMuteState(nextMuted);
     
     // Force play on user interaction (required for iOS/Safari)
     if (!musicAudioRef.current) {
@@ -773,7 +785,7 @@ export const FeedPost = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsMuted(!isMuted);
+                  setGlobalMuteState(!isMuted);
                 }}
                 className="absolute bottom-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-95"
               >
