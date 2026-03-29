@@ -33,7 +33,8 @@ const Landing = () => {
   const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
   const featuresByAccount = [
     {
-      emoji: "⚽",
+      emoji: "",
+      customEmoji: playerKickingIcon,
       accountType: "Atleta",
       accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
       features: [
