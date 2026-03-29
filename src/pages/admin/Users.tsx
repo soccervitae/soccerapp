@@ -516,6 +516,20 @@ export default function AdminUsers() {
               </SelectContent>
             </Select>
 
+            {/* Account Type Filter */}
+            <Select value={filters.accountType} onValueChange={(v) => handleFilterChange("accountType", v)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Tipo de conta" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as contas</SelectItem>
+                <SelectItem value="atleta">Atleta</SelectItem>
+                <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+                <SelectItem value="time">Time</SelectItem>
+                <SelectItem value="escolinha">Escolinha</SelectItem>
+              </SelectContent>
+            </Select>
+
             {/* Country Filter */}
             <Select value={filters.country} onValueChange={(v) => handleFilterChange("country", v)}>
               <SelectTrigger className="w-[180px]">
