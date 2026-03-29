@@ -129,10 +129,10 @@ export const SquadTab = ({ userId, isOwnProfile }: SquadTabProps) => {
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            Todos ({members.length})
+            Todos ({membersWithAvatar.length})
           </button>
           {availableGroups.map(group => {
-            const count = members.filter(m => getPositionGroup(m.athlete?.position_name) === group).length;
+            const count = membersWithAvatar.filter(m => getPositionGroup(m.athlete?.position_name) === group).length;
             return (
               <button
                 key={group}
