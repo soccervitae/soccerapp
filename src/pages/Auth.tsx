@@ -842,6 +842,40 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       </div>
 
+      {/* Tipo de Conta */}
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold uppercase text-muted-foreground">
+          Tipo de Conta <span className="text-destructive">*</span>
+        </Label>
+        <Select
+          value={accountType}
+          onValueChange={(value) => {
+            setAccountType(value);
+            setTouched(prev => ({ ...prev, accountType: true }));
+            setErrorMessage(null);
+          }}
+        >
+          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+            touched.accountType
+              ? isAccountTypeValid
+                ? "border-emerald-500 border"
+                : "border-destructive border"
+              : "border-0"
+          }`}>
+            <SelectValue placeholder="Selecione o tipo de conta" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="atleta">Atleta</SelectItem>
+            <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+            <SelectItem value="time">Time</SelectItem>
+            <SelectItem value="escolinha">Escolinha de Futebol</SelectItem>
+          </SelectContent>
+        </Select>
+        {touched.accountType && !isAccountTypeValid && (
+          <p className="text-xs text-destructive">Selecione um tipo de conta</p>
+        )}
+      </div>
+
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
