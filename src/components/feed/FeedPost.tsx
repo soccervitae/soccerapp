@@ -666,7 +666,7 @@ export const FeedPost = ({
                     >
                       {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
                     </motion.p>
-                  ) : (post.profile.account_type === 'atleta' || post.profile.position_name) ? (
+                  ) : post.profile.position_name ? (
                     <motion.p
                       key="position"
                       initial={{ y: 10, opacity: 0 }}
@@ -675,7 +675,7 @@ export const FeedPost = ({
                       transition={{ duration: 0.3 }}
                       className="text-xs text-muted-foreground"
                     >
-                      Atleta{post.profile.position_name ? ` · ${post.profile.position_name}` : ''}
+                      {post.profile.position_name}
                     </motion.p>
                   ) : hasMusicTrack && musicTitle ? (
                     <motion.button
