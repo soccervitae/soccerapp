@@ -12,6 +12,7 @@ import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/
 import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
 import { toast } from "sonner";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import {
   Select,
   SelectContent,
