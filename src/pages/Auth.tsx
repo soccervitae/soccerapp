@@ -811,90 +811,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       )}
 
-      {/* Nome e Sobrenome em linha */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Nome <span className="text-destructive">*</span>
-          </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              id="signup-firstname"
-              type="text"
-              placeholder="João"
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                setErrorMessage(null);
-              }}
-              onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
-              className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
-                touched.firstName 
-                  ? isFirstNameValid 
-                    ? "border-emerald-500 border" 
-                    : "border-destructive border"
-                  : "border-0"
-              }`}
-              maxLength={30}
-              required
-            />
-            {touched.firstName && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {isFirstNameValid ? (
-                  <Check className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <X className="h-4 w-4 text-destructive" />
-                )}
-              </div>
-            )}
-          </div>
-          {touched.firstName && !isFirstNameValid && (
-            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
-            Sobrenome <span className="text-destructive">*</span>
-          </Label>
-          <div className="relative">
-            <Input
-              id="signup-lastname"
-              type="text"
-              placeholder="Silva"
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                setErrorMessage(null);
-              }}
-              onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
-              className={`pr-10 h-12 bg-muted/50 transition-colors ${
-                touched.lastName 
-                  ? isLastNameValid 
-                    ? "border-emerald-500 border" 
-                    : "border-destructive border"
-                  : "border-0"
-              }`}
-              maxLength={50}
-              required
-            />
-            {touched.lastName && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {isLastNameValid ? (
-                  <Check className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <X className="h-4 w-4 text-destructive" />
-                )}
-              </div>
-            )}
-          </div>
-          {touched.lastName && !isLastNameValid && (
-            <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
-          )}
-        </div>
-      </div>
-
       {/* Tipo de Conta */}
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -928,6 +844,173 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
           <p className="text-xs text-destructive">Selecione um tipo de conta</p>
         )}
       </div>
+
+      {/* Campos condicionais baseados no tipo de conta */}
+      {isTeamOrSchool ? (
+        <>
+          {/* Nome do Time/Escolinha */}
+          <div className="space-y-2">
+            <Label htmlFor="signup-teamname" className="text-xs font-semibold uppercase text-muted-foreground">
+              {accountType === "time" ? "Nome do Time" : "Nome da Escolinha"} <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="signup-teamname"
+                type="text"
+                placeholder={accountType === "time" ? "Ex: FC Barcelona" : "Ex: Escolinha Craque do Futuro"}
+                value={teamName}
+                onChange={(e) => {
+                  setTeamName(e.target.value);
+                  setErrorMessage(null);
+                }}
+                onBlur={() => setTouched(prev => ({ ...prev, teamName: true }))}
+                className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+                  touched.teamName
+                    ? isFirstNameValid
+                      ? "border-emerald-500 border"
+                      : "border-destructive border"
+                    : "border-0"
+                }`}
+                maxLength={60}
+                required
+              />
+              {touched.teamName && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isFirstNameValid ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <X className="h-4 w-4 text-destructive" />
+                  )}
+                </div>
+              )}
+            </div>
+            {touched.teamName && !isFirstNameValid && (
+              <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+            )}
+          </div>
+
+          {/* Escudo */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase text-muted-foreground">
+              Escudo (opcional)
+            </Label>
+            <div className="flex items-center gap-4">
+              {emblemPreview ? (
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted/50">
+                  <img src={emblemPreview} alt="Escudo" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setEmblemFile(null); setEmblemPreview(null); }}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/50 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEmblemChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+              <p className="text-xs text-muted-foreground flex-1">
+                Envie o escudo do seu {accountType === "time" ? "time" : "escolinha"}. Formato: JPG, PNG.
+              </p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Nome e Sobrenome em linha */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="signup-firstname" className="text-xs font-semibold uppercase text-muted-foreground">
+                Nome <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="signup-firstname"
+                  type="text"
+                  placeholder="João"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  onBlur={() => setTouched(prev => ({ ...prev, firstName: true }))}
+                  className={`pl-10 pr-10 h-12 bg-muted/50 transition-colors ${
+                    touched.firstName 
+                      ? isFirstNameValid 
+                        ? "border-emerald-500 border" 
+                        : "border-destructive border"
+                      : "border-0"
+                  }`}
+                  maxLength={30}
+                  required
+                />
+                {touched.firstName && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isFirstNameValid ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-destructive" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {touched.firstName && !isFirstNameValid && (
+                <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-lastname" className="text-xs font-semibold uppercase text-muted-foreground">
+                Sobrenome <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="signup-lastname"
+                  type="text"
+                  placeholder="Silva"
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  onBlur={() => setTouched(prev => ({ ...prev, lastName: true }))}
+                  className={`pr-10 h-12 bg-muted/50 transition-colors ${
+                    touched.lastName 
+                      ? isLastNameValid 
+                        ? "border-emerald-500 border" 
+                        : "border-destructive border"
+                      : "border-0"
+                  }`}
+                  maxLength={50}
+                  required
+                />
+                {touched.lastName && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isLastNameValid ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-destructive" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {touched.lastName && !isLastNameValid && (
+                <p className="text-xs text-destructive">Mínimo 2 caracteres</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Email */}
       <div className="space-y-2">
