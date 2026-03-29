@@ -34,7 +34,7 @@ export const FeedStories = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-background border-b border-border">
+      <div className="bg-background border-b border-border/30">
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex-none w-28">
@@ -57,7 +57,7 @@ export const FeedStories = () => {
 
   return (
     <>
-      <div className="bg-background border-b border-border">
+      <div className="bg-background border-b border-border/30">
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
           {/* Add Story Button - Instagram Style */}
           <div className="flex-none w-28 group">
