@@ -1375,6 +1375,48 @@ export type Database = {
           },
         ]
       }
+      squad_members: {
+        Row: {
+          athlete_profile_id: string
+          created_at: string
+          id: string
+          status: string
+          team_profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          athlete_profile_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          team_profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          athlete_profile_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          team_profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "squad_members_athlete_profile_id_fkey"
+            columns: ["athlete_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_members_team_profile_id_fkey"
+            columns: ["team_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stories: {
         Row: {
           created_at: string
