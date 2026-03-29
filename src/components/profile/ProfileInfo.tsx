@@ -273,7 +273,7 @@ export const ProfileInfo = ({
           </div>
 
           {/* Physical stats chips */}
-          {(profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
+          {profile.account_type !== 'time' && profile.account_type !== 'escolinha' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
             <div className="flex items-center gap-2 mt-4">
               <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
                 <span className="material-symbols-outlined text-[14px] text-muted-foreground">cake</span>
