@@ -84,7 +84,7 @@ const Landing = () => {
         <meta name="description" content="A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal." />
       </Helmet>
       
-      <div className="min-h-screen bg-[#102216] text-white font-sans">
+      <div className="min-h-screen bg-white text-foreground font-sans">
 
         {/* Hero Section with Parallax */}
         <section ref={heroRef} className="w-full relative overflow-hidden min-h-[320px] md:min-h-[400px]">
@@ -98,7 +98,7 @@ const Landing = () => {
             }}
           />
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#102216] via-[#102216]/60 to-[#102216]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-white/20" />
           
           {/* Content */}
           <motion.div 
@@ -106,14 +106,14 @@ const Landing = () => {
             style={{ opacity }}
           >
             <div className="flex flex-col gap-4 text-center z-10 max-w-[600px]">
-              <h1 className="text-white text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+              <h1 className="text-foreground text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase">
                 Jogue.
                 <br />
                 Brilhe.
                 <br />
                 Conquiste.
               </h1>
-              <p className="text-white/80 text-base md:text-lg">
+              <p className="text-muted-foreground text-base md:text-lg">
                 Mostre seu talento e conecte-se com o mundo do futebol.
               </p>
             </div>
@@ -123,13 +123,13 @@ const Landing = () => {
         {/* Features Section */}
         <section className="py-8 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-12">
-            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+            <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
-            <h2 className="text-white text-3xl md:text-4xl font-black max-w-[720px]">
+            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
               Tudo que você precisa para evoluir
             </h2>
-            <p className="text-white/60 text-base max-w-[720px]">
+            <p className="text-muted-foreground text-base max-w-[720px]">
               Ferramentas profissionais desenhadas especificamente para o ecossistema do futebol amador e profissional.
             </p>
           </div>
@@ -138,17 +138,17 @@ const Landing = () => {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                <div className="w-12 h-12 rounded-full bg-[#1cb15c]/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   {feature.customIcon ? (
                     <img src={feature.customIcon} alt={feature.title} className="w-6 h-6" />
                   ) : (
-                    <feature.icon className="w-6 h-6 text-[#1cb15c]" />
+                    <feature.icon className="w-6 h-6 text-primary" />
                   )}
                 </div>
-                <h3 className="text-white text-lg font-bold">{feature.title}</h3>
-                <p className="text-white/60 text-sm">
+                <h3 className="text-foreground text-lg font-bold">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm">
                   {feature.description}
                 </p>
               </div>
@@ -159,13 +159,13 @@ const Landing = () => {
         {/* Account Types Section */}
         <section className="py-12 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
-            <p className="text-[#1cb15c] text-sm font-medium uppercase tracking-wider">
+            <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Para Todos do Futebol
             </p>
-            <h2 className="text-white text-3xl md:text-4xl font-black max-w-[720px]">
+            <h2 className="text-foreground text-3xl md:text-4xl font-black max-w-[720px]">
               Crie sua conta e faça parte
             </h2>
-            <p className="text-white/60 text-base max-w-[720px]">
+            <p className="text-muted-foreground text-base max-w-[720px]">
               A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
             </p>
           </div>
@@ -195,13 +195,13 @@ const Landing = () => {
             ].map((type, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center text-center gap-4 rounded-xl border border-white/10 bg-[#1a3d26] p-6 hover:border-[#1cb15c]/50 transition-colors"
+                className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                <div className="w-14 h-14 rounded-full bg-[#1cb15c]/20 flex items-center justify-center text-2xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
                   {type.emoji}
                 </div>
-                <h3 className="text-white text-lg font-bold">{type.title}</h3>
-                <p className="text-white/60 text-sm">{type.description}</p>
+                <h3 className="text-foreground text-lg font-bold">{type.title}</h3>
+                <p className="text-muted-foreground text-sm">{type.description}</p>
               </div>
             ))}
           </div>
@@ -210,19 +210,19 @@ const Landing = () => {
         {/* CTA Section */}
         <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-white text-2xl md:text-3xl font-black mb-4">
+            <h2 className="text-foreground text-2xl md:text-3xl font-black mb-4">
               Pronto para entrar em campo?
             </h2>
-            <p className="text-white/60 mb-8">
+            <p className="text-muted-foreground mb-8">
               Junte-se a milhares de jogadores e comece sua jornada profissional hoje.
             </p>
             {isMobile ? (
-              <Button onClick={() => navigate("/install")} className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full">
+              <Button onClick={() => navigate("/install")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-full">
                 Baixar App
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
             ) : (
-              <Button onClick={() => navigate("/auth")} className="bg-[#1cb15c] hover:bg-[#1cb15c]/90 text-white font-medium px-8 h-12 rounded-full">
+              <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 h-12 rounded-full">
                 Cadastrar
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
@@ -231,18 +231,18 @@ const Landing = () => {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-white/10 py-8 px-4">
+        <footer className="border-t border-border/30 py-8 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src={logoText} alt="SOCCER VITAE" className="h-6" />
             </div>
-            <div className="flex gap-6 text-white/60 text-sm">
-              <a href="/sobre" className="hover:text-white transition-colors">Sobre</a>
-              <a href="/terms" className="hover:text-white transition-colors">Termos</a>
-              <a href="/privacy-policy" className="hover:text-white transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-white transition-colors">Suporte</a>
+            <div className="flex gap-6 text-muted-foreground text-sm">
+              <a href="/sobre" className="hover:text-foreground transition-colors">Sobre</a>
+              <a href="/terms" className="hover:text-foreground transition-colors">Termos</a>
+              <a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacidade</a>
+              <a href="#" className="hover:text-foreground transition-colors">Suporte</a>
             </div>
-            <p className="text-white/40 text-xs">
+            <p className="text-muted-foreground/60 text-xs">
               © {new Date().getFullYear()} SOCCER VITAE. Todos os direitos reservados.
             </p>
           </div>
