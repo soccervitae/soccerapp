@@ -281,7 +281,7 @@ export const FeedPost = ({
     e.stopPropagation();
     
     const nextMuted = !isMusicMuted;
-    setIsMusicMuted(nextMuted);
+    setGlobalMuteState(nextMuted);
     
     // Force play on user interaction (required for iOS/Safari)
     if (!musicAudioRef.current) {
