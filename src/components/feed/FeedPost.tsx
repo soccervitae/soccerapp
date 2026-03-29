@@ -584,7 +584,7 @@ export const FeedPost = ({
               </span>
             </div>
             {(post.profile.account_type === 'time' || post.profile.account_type === 'escolinha') && (
-              <span className="text-[10px] text-muted-foreground leading-tight">
+              <span className="text-[10px] text-muted-foreground leading-none -mt-0.5 block">
                 {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
               </span>
             )}
