@@ -37,6 +37,7 @@ export interface Profile {
   onboarding_completed?: boolean;
   nationality?: number | null;
   is_official_account?: boolean;
+  account_type?: string | null;
 }
 
 export const useProfile = (userId?: string) => {
