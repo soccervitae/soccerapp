@@ -504,14 +504,14 @@ const EditProfile = () => {
       
       // Build update data with correct position/function columns
       const updateData: Record<string, unknown> = {
-        full_name: formData.full_name || null,
+        full_name: isTeamOrSchool ? (formData.full_name.trim().toUpperCase() || null) : (formData.full_name || null),
         username: formData.username,
-        nickname: formData.nickname || null,
+        nickname: isTeamOrSchool ? (formData.full_name.trim().toUpperCase() || null) : (formData.nickname || null),
         bio: formData.bio || null,
-        role: userType === 'comissao_tecnica' ? 'comissao_tecnica' : null,
+        role: isTeamOrSchool ? null : (userType === 'comissao_tecnica' ? 'comissao_tecnica' : null),
         team: formData.team || null,
-        birth_date: formData.birth_date || null,
-        gender: formData.gender || null,
+        birth_date: isTeamOrSchool ? null : (formData.birth_date || null),
+        gender: isTeamOrSchool ? null : (formData.gender || null),
         nationality: formData.nationality ? Number(formData.nationality) : null,
         avatar_url: avatarUrl,
         cover_url: coverUrl,
