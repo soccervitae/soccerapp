@@ -382,23 +382,23 @@ export const ProfileInfo = ({
                     <button
                       onClick={() => cancelRequest.mutate({ requestId: mySquadRequest.id, teamProfileId: profile.id })}
                       disabled={cancelRequest.isPending}
-                      className="bg-muted text-muted-foreground h-10 px-6 rounded-full font-semibold text-sm transition-all border border-border flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-muted/80"
+                      className="bg-muted text-muted-foreground h-10 w-10 rounded-full font-semibold text-sm transition-all border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80"
+                      title="Solicitado"
                     >
-                      Solicitado
+                      <span className="material-symbols-outlined text-[20px]">hourglass_top</span>
                     </button>
                   ) : mySquadRequest?.status === 'approved' ? (
-                    <div className="bg-primary/10 text-primary h-10 px-6 rounded-full font-semibold text-sm flex items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[16px]">check</span>
-                      No elenco
+                    <div className="bg-primary/10 text-primary h-10 w-10 rounded-full font-semibold text-sm flex items-center justify-center" title="No elenco">
+                      <span className="material-symbols-outlined text-[20px]">check</span>
                     </div>
                   ) : (
                     <button
                       onClick={() => requestJoin.mutate(profile.id)}
                       disabled={requestJoin.isPending}
-                      className="bg-primary text-primary-foreground h-10 px-6 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-primary/90"
+                      className="bg-primary text-primary-foreground h-10 w-10 rounded-full font-semibold text-sm transition-all flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
+                      title="Fazer parte do elenco"
                     >
-                      <span className="material-symbols-outlined text-[16px]">group_add</span>
-                      Fazer parte do elenco
+                      <span className="material-symbols-outlined text-[20px]">group_add</span>
                     </button>
                   )
                 )}
@@ -572,23 +572,23 @@ export const ProfileInfo = ({
                 <button
                   onClick={() => cancelRequest.mutate({ requestId: mySquadRequest.id, teamProfileId: profile.id })}
                   disabled={cancelRequest.isPending}
-                  className="bg-muted text-muted-foreground h-9 px-3 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98] whitespace-nowrap"
+                  className="bg-muted text-muted-foreground h-9 w-9 rounded font-semibold text-xs transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]"
+                  title="Solicitado"
                 >
-                  Solicitado
+                  <span className="material-symbols-outlined text-[18px]">hourglass_top</span>
                 </button>
               ) : mySquadRequest?.status === 'approved' ? (
-                <div className="bg-primary/10 text-primary h-9 px-3 rounded font-semibold text-xs tracking-wide flex items-center justify-center whitespace-nowrap">
-                  <span className="material-symbols-outlined text-[14px] mr-1">check</span>
-                  No elenco
+                <div className="bg-primary/10 text-primary h-9 w-9 rounded font-semibold text-xs flex items-center justify-center" title="No elenco">
+                  <span className="material-symbols-outlined text-[18px]">check</span>
                 </div>
               ) : (
                 <button
                   onClick={() => requestJoin.mutate(profile.id)}
                   disabled={requestJoin.isPending}
-                  className="bg-primary text-primary-foreground h-9 px-3 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 hover:brightness-110 active:scale-[0.98] whitespace-nowrap"
+                  className="bg-primary text-primary-foreground h-9 w-9 rounded font-semibold text-xs transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 hover:brightness-110 active:scale-[0.98]"
+                  title="Fazer parte do elenco"
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">group_add</span>
-                  Elenco
+                  <span className="material-symbols-outlined text-[18px]">group_add</span>
                 </button>
               )
             )}
