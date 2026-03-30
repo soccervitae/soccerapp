@@ -404,7 +404,7 @@ const Profile = () => {
   const renderMediaGrid = (posts: typeof userPosts, emptyMessage: string, emptyIcon: string) => {
     if (postsLoading) {
       return (
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-3 gap-[1px]">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="aspect-square bg-muted animate-pulse" />
           ))}
