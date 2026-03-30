@@ -117,7 +117,7 @@ const Landing = () => {
 
             {/* Right column - Desktop login card */}
             <div className="hidden md:flex items-center justify-center">
-              <DesktopLoginCard />
+              <DesktopLoginCard ref={loginCardRef} />
             </div>
           </div>
 
