@@ -61,7 +61,7 @@ const Landing = () => {
               Soccer
               <br />
               <span className="text-white/70 text-xl md:text-3xl font-bold tracking-[0.15em] not-italic">
-                Vitae
+                Onde talentos encontram oportunidades
               </span>
             </h1>
 
