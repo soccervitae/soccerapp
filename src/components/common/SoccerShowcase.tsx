@@ -9,7 +9,11 @@ const slides = [
   { src: kidsImg, label: "Base" },
 ];
 
-const SoccerShowcase = () => {
+interface SoccerShowcaseProps {
+  fullscreen?: boolean;
+}
+
+const SoccerShowcase = ({ fullscreen = false }: SoccerShowcaseProps) => {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -18,6 +22,24 @@ const SoccerShowcase = () => {
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  if (fullscreen) {
+    return (
+      <>
+        {slides.map((slide, i) => (
+          <img
+            key={i}
+            src={slide.src}
+            alt=""
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              i === active ? "opacity-40" : "opacity-0"
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
+      </>
+    );
+  }
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -40,7 +62,6 @@ const SoccerShowcase = () => {
           {slides[active].label}
         </p>
       </div>
-      {/* Dots */}
       <div className="flex justify-center gap-2 mt-3">
         {slides.map((_, i) => (
           <button

@@ -5,7 +5,6 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import SoccerShowcase from "@/components/common/SoccerShowcase";
-import soccerPlayerHero from "@/assets/soccer-player-hero.jpg";
 
 const PwaHome = () => {
   const navigate = useNavigate();
@@ -32,14 +31,7 @@ const PwaHome = () => {
     <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
       {/* Background player image */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={soccerPlayerHero}
-          alt=""
-          className="w-full h-full object-cover opacity-40"
-          width={768}
-          height={1024}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
+        <SoccerShowcase fullscreen />
       </div>
 
       {/* Content */}
@@ -56,10 +48,6 @@ const PwaHome = () => {
           </h1>
         </div>
 
-        {/* Soccer Showcase */}
-        <div className="px-2 mb-4">
-          <SoccerShowcase />
-        </div>
 
         {/* Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pb-4">
