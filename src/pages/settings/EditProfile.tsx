@@ -734,31 +734,9 @@ const EditProfile = () => {
                 </TooltipProvider>
               )}
             </div>
-            {isTeamOrSchool ? (
-              <div className="relative">
-                <Input
-                  value={formData.username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                  placeholder="nome_de_usuario"
-                />
-                {usernameStatus === "checking" && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
-                )}
-                {usernameStatus === "available" && (
-                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                )}
-                {usernameStatus === "taken" && (
-                  <X className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
-                @{formData.username}
-              </div>
-            )}
-            {usernameStatus === "taken" && isTeamOrSchool && (
-              <p className="text-sm text-destructive">Este nome de usuário já está em uso</p>
-            )}
+            <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
+              @{formData.username}
+            </div>
           </div>
 
           {!isTeamOrSchool && (
