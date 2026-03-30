@@ -848,7 +848,7 @@ const EditProfile = () => {
                       setFormData({ ...formData, city: e.target.value });
                     }
                   }}
-                  placeholder="Cidade do time/escolinha"
+                  placeholder="Cidade do time"
                   maxLength={100}
                 />
               </div>

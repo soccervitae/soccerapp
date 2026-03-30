@@ -131,9 +131,9 @@ const Explore = () => {
                         <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                       )}
                     </h3>
-                    {(profile.account_type === 'time' || profile.account_type === 'escolinha') ? (
+                    {profile.account_type === 'time' ? (
                       <span className="text-xs text-muted-foreground">
-                        {profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
+                        Time de Futebol
                       </span>
                     ) : (profile.position_name || profile.team) ? (
                       <span className="text-xs text-primary font-medium">

@@ -648,16 +648,16 @@ export const FeedPost = ({
                     )}
                   </motion.button>
                 ) : (
-                  (post.profile.account_type === 'time' || post.profile.account_type === 'escolinha') ? (
+                  post.profile.account_type === 'time' ? (
                     <motion.p
                       key="account-type"
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -10, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.25 }}
                       className="text-xs text-muted-foreground"
                     >
-                      {post.profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
+                      Time de Futebol
                     </motion.p>
                   ) : post.profile.position_name ? (
                     <motion.p

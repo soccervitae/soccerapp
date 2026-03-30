@@ -78,19 +78,6 @@ const Landing = () => {
         { icon: Search, title: "Buscar Talentos", description: "Encontre novos atletas por posição e região." },
       ],
     },
-    {
-      emoji: "⚽",
-      accountType: "Escolinha de Futebol",
-      accountDescription: "Escolas de futebol divulgando seu trabalho e resultados.",
-      features: [
-        { icon: User, title: "Perfil da Escola", description: "Página oficial com informações e metodologia." },
-        { icon: Newspaper, title: "Feed", description: "Compartilhe treinos, eventos e resultados dos alunos." },
-        { icon: Camera, title: "Replays", description: "Publique momentos das aulas e jogos por 24 horas." },
-        { icon: Film, title: "Destaques", description: "Álbuns permanentes com os melhores momentos." },
-        { icon: UserPlus, title: "Elenco", description: "Gerencie os alunos matriculados na escolinha." },
-        { icon: Users, title: "Comunidade", description: "Atraia novos alunos e construa sua comunidade." },
-      ],
-    },
   ];
 
   const sharedFeatures = [

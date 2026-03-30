@@ -340,7 +340,7 @@ export function ViewUserSheet({
 
                 <TabsContent value="info" className="space-y-4 mt-4">
                   {/* Team/School specific info */}
-                  {(user.account_type === 'time' || user.account_type === 'escolinha') ? (
+                  {user.account_type === 'time' ? (
                     <div className="space-y-3">
                       {userEmail && (
                         <div className="flex items-center gap-2 text-sm">

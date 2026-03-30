@@ -386,7 +386,7 @@ const CompleteProfile = () => {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 onBlur={() => handleBlur("nickname")}
-                placeholder={profile?.account_type === 'time' ? 'Ex: FC Barcelona' : 'Ex: Escolinha do Neymar'}
+                placeholder="Ex: FC Barcelona"
                 maxLength={50}
                 className={getInputClass(getFieldStatus(isTeamNameValid, touched.nickname))}
               />

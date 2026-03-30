@@ -922,7 +922,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
                 </label>
               )}
               <p className="text-xs text-muted-foreground flex-1">
-                Envie o escudo do seu {accountType === "time" ? "time" : "escolinha"}. Formato: JPG, PNG.
+                Envie o escudo do seu time. Formato: JPG, PNG.
               </p>
             </div>
           </div>
