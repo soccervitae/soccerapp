@@ -181,7 +181,7 @@ const Install = () => {
             ease: "easeOut"
           }} />
             <div className="absolute inset-0 flex items-center justify-center p-4">
-              <img src={logoText} alt="SOCCER VITAE" className="w-full h-auto brightness-0 invert" />
+              <img src={logoText} alt="SOCCER VITAE" className="w-full h-auto" />
             </div>
           </motion.div>
 
