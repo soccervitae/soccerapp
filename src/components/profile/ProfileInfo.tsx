@@ -508,9 +508,9 @@ export const ProfileInfo = ({
         <h2 className="font-bold text-foreground leading-tight text-lg">
           {profile.nickname || profile.full_name || profile.username}
         </h2>
-        {profile.nickname && (
-          <p className="text-muted-foreground font-semibold text-sm">
-            "{profile.nickname}"
+        {profile.nickname && profile.full_name && (
+          <p className="text-muted-foreground font-medium text-sm">
+            {profile.full_name}
           </p>
         )}
         {profile.position_name && profile.account_type !== 'time' && (
