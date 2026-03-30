@@ -96,8 +96,8 @@ export default function Verification() {
 function BenefitItem({ icon, text }: { icon: string; text: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-        <span className="material-symbols-outlined text-blue-500 text-[18px]">{icon}</span>
+      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <span className="material-symbols-outlined text-primary text-[18px]">{icon}</span>
       </div>
       <span className="text-sm text-foreground">{text}</span>
     </div>
