@@ -200,7 +200,7 @@ export const ProfileInfo = ({
   };
   const handleMessageClick = async () => {
     if (!user) {
-      setAuthPromptOpen(true);
+      navigate(`/${profile.username}/contact`);
       return;
     }
     setIsStartingChat(true);

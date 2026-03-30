@@ -122,6 +122,11 @@ export default function Settings() {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conteúdo</p>
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <SettingsItem 
+              icon="mail"
+              label="Mensagens de visitantes"
+              onClick={() => navigate("/settings/guest-messages")}
+            />
+            <SettingsItem 
               icon="bookmark"
               label="Salvos"
               onClick={() => navigate("/settings/saved")}

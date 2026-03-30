@@ -380,6 +380,53 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          profile_id: string
+          sender_email: string
+          sender_facebook: string | null
+          sender_instagram: string | null
+          sender_name: string
+          sender_whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          profile_id: string
+          sender_email: string
+          sender_facebook?: string | null
+          sender_instagram?: string | null
+          sender_name: string
+          sender_whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          profile_id?: string
+          sender_email?: string
+          sender_facebook?: string | null
+          sender_instagram?: string | null
+          sender_name?: string
+          sender_whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_messages_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       highlight_images: {
         Row: {
           created_at: string | null

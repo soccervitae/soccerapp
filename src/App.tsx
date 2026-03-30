@@ -48,6 +48,8 @@ import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/Privacy";
 import About from "./pages/About";
 import SaibaMais from "./pages/SaibaMais";
+import ContactProfile from "./pages/ContactProfile";
+import GuestMessages from "./pages/settings/GuestMessages";
 
 import AdminDashboard from "./pages/admin/Index";
 import AdminContent from "./pages/admin/Content";
@@ -164,6 +166,9 @@ const AnimatedRoutes = () => {
           <PageTransition><FollowList /></PageTransition>
         </ProtectedRoute>
       } />
+      <Route path="/:username/contact" element={
+        <PageTransition><ContactProfile /></PageTransition>
+      } />
       <Route path="/:username" element={
         <PageTransition><Profile /></PageTransition>
       } />
@@ -235,6 +240,11 @@ const AnimatedRoutes = () => {
       <Route path="/settings/favorites" element={
         <ProtectedRoute>
           <PageTransition><Favorites /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/guest-messages" element={
+        <ProtectedRoute>
+          <PageTransition><GuestMessages /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/settings/verification" element={
