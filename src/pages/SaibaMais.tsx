@@ -242,7 +242,7 @@ const SaibaMais = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* CTA Section */}
