@@ -206,7 +206,7 @@ const SaibaMais = () => {
                 </div>
               </div>
             ))}
-          </div>
+              </motion.div>
 
           {/* Shared Features */}
           <div className="mt-12">
