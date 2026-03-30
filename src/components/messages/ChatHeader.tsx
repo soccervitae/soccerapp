@@ -90,87 +90,89 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
         </div>
       </div>
 
-      {/* Call buttons and menu */}
-      <div className="flex items-center gap-1">
-        {/* Voice call button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onVoiceCall}
-          disabled={!participant || isCallActive}
-          className="text-primary hover:text-primary/80"
-        >
-          <Phone className="h-5 w-5" />
-        </Button>
+      {/* Call buttons and menu - hidden for deleted users */}
+      {!isDeletedUser && (
+        <div className="flex items-center gap-1">
+          {/* Voice call button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onVoiceCall}
+            disabled={!participant || isCallActive}
+            className="text-primary hover:text-primary/80"
+          >
+            <Phone className="h-5 w-5" />
+          </Button>
 
-        {/* Video call button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onVideoCall}
-          disabled={!participant || isCallActive}
-          className="text-primary hover:text-primary/80"
-        >
-          <Video className="h-5 w-5" />
-        </Button>
+          {/* Video call button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onVideoCall}
+            disabled={!participant || isCallActive}
+            className="text-primary hover:text-primary/80"
+          >
+            <Video className="h-5 w-5" />
+          </Button>
 
-        {/* Options menu (3 dots) */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-card">
-            <DropdownMenuItem onClick={onTogglePin} className="gap-2 cursor-pointer">
-              {isPinned ? (
-                <>
-                  <PinOff className="h-4 w-4" />
-                  Desafixar conversa
-                </>
-              ) : (
-                <>
-                  <Pin className="h-4 w-4" />
-                  Fixar conversa
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onToggleMute} className="gap-2 cursor-pointer">
-              {isMuted ? (
-                <>
-                  <BellRing className="h-4 w-4" />
-                  Ativar notificações
-                </>
-              ) : (
-                <>
-                  <BellOff className="h-4 w-4" />
-                  Silenciar notificações
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
-              {isArchived ? (
-                <>
-                  <ArchiveRestore className="h-4 w-4" />
-                  Desarquivar conversa
-                </>
-              ) : (
-                <>
-                  <Archive className="h-4 w-4" />
-                  Arquivar conversa
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-              <Trash2 className="h-4 w-4" />
-              Apagar conversa
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          {/* Options menu (3 dots) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-card">
+              <DropdownMenuItem onClick={onTogglePin} className="gap-2 cursor-pointer">
+                {isPinned ? (
+                  <>
+                    <PinOff className="h-4 w-4" />
+                    Desafixar conversa
+                  </>
+                ) : (
+                  <>
+                    <Pin className="h-4 w-4" />
+                    Fixar conversa
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onToggleMute} className="gap-2 cursor-pointer">
+                {isMuted ? (
+                  <>
+                    <BellRing className="h-4 w-4" />
+                    Ativar notificações
+                  </>
+                ) : (
+                  <>
+                    <BellOff className="h-4 w-4" />
+                    Silenciar notificações
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
+                {isArchived ? (
+                  <>
+                    <ArchiveRestore className="h-4 w-4" />
+                    Desarquivar conversa
+                  </>
+                ) : (
+                  <>
+                    <Archive className="h-4 w-4" />
+                    Arquivar conversa
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onDelete} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                <Trash2 className="h-4 w-4" />
+                Apagar conversa
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 };

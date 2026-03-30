@@ -442,14 +442,43 @@ const Chat = () => {
 
       {/* Fixed input at bottom */}
       <div className="fixed bottom-0 left-0 right-0">
-        <ChatInput
-          onSend={handleSend}
-          isSending={isSending}
-          replyTo={replyTo}
-          onCancelReply={() => setReplyTo(null)}
-          onTyping={handleTyping}
-        />
+        {isDeletedUser ? (
+          <div className="bg-background border-t border-border p-4 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Este usuário não está mais disponível na Soccer Vitae
+            </p>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowDeletedUserDeleteDialog(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Excluir conversa
+            </Button>
+          </div>
+        ) : (
+          <ChatInput
+            onSend={handleSend}
+            isSending={isSending}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
+            onTyping={handleTyping}
+          />
+        )}
       </div>
+
+      {/* Delete confirmation for deleted user */}
+      <ResponsiveAlertModal
+        open={showDeletedUserDeleteDialog}
+        onOpenChange={setShowDeletedUserDeleteDialog}
+        title="Excluir conversa?"
+        description="Essa ação não pode ser desfeita. Todas as suas mensagens nesta conversa serão apagadas permanentemente."
+        cancelText="Cancelar"
+        confirmText="Excluir"
+        onConfirm={handleDeleteConversation}
+        confirmVariant="destructive"
+      />
     </div>
   );
 };
