@@ -526,23 +526,16 @@ export const ProfileInfo = ({
           {profile.nickname || profile.full_name || profile.username}
         </h2>
         {profile.position_name && profile.account_type !== 'time' && (
-          <p className="text-muted-foreground/70 text-xs">
+          <p className="text-muted-foreground/70 text-sm">
             {profile.position_name}
           </p>
         )}
-        <p className="text-muted-foreground font-bold text-base">
-          {(() => {
-          if (profile.account_type === 'time') {
-            return 'Time de Futebol';
-          }
-          if (profile.nickname) {
-            return profile.team || `@${profile.username}`;
-          }
-          const displayRole = profile.position_name;
-          if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
-          return displayRole || profile.team || `@${profile.username}`;
-        })()}
-        </p>
+        {profile.account_type === 'time' && (
+          <p className="text-muted-foreground font-medium text-sm mt-0.5">Time de Futebol</p>
+        )}
+        {profile.team && profile.account_type !== 'time' && (
+          <p className="text-muted-foreground font-medium text-sm mt-0.5">{profile.team}</p>
+        )}
         {profile.bio && <p className="text-muted-foreground/80 text-sm px-4 max-w-xs mx-auto line-clamp-3 leading-relaxed">
             {profile.bio}
           </p>}
