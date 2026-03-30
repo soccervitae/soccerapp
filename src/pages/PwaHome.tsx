@@ -61,9 +61,6 @@ const PwaHome = () => {
             <br />
             <span className="text-white">Conquiste.</span>
           </h1>
-          <p className="text-white/70 text-base max-w-xs">
-            A evolução digital da sua carreira nos gramados começa aqui.
-          </p>
         </div>
 
         {/* Buttons */}
