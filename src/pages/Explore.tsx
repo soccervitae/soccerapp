@@ -125,8 +125,11 @@ const Explore = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-sm truncate">
+                    <h3 className="font-semibold text-foreground text-sm truncate flex items-center gap-1">
                       {profile.full_name || profile.username}
+                      {profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) && (
+                        <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                      )}
                     </h3>
                     {(profile.account_type === 'time' || profile.account_type === 'escolinha') ? (
                       <span className="text-xs text-muted-foreground">
