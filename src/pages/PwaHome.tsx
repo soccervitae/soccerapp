@@ -46,7 +46,7 @@ const PwaHome = () => {
 
         {/* Hero text */}
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-          <h1 className="text-5xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight uppercase">
             <span className="text-white">Jogue.</span>
             <br />
             <span className="text-primary">Brilhe.</span>
@@ -58,7 +58,7 @@ const PwaHome = () => {
         {/* Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pb-4">
           <Button
-            className="w-full h-14 text-lg font-bold tracking-wide rounded-xl flex items-center justify-center gap-2"
+            className="w-full h-14 text-lg font-bold tracking-wide rounded-lg flex items-center justify-center gap-2"
             onClick={() => navigate("/auth", { state: { tab: "signup" } })}
           >
             Criar Conta
@@ -66,7 +66,7 @@ const PwaHome = () => {
           </Button>
           <Button
             variant="outline"
-            className="w-full h-14 text-lg font-bold tracking-wide rounded-xl border-white/20 text-white hover:bg-white/10 bg-white/5"
+            className="w-full h-14 text-lg font-bold tracking-wide rounded-lg border-white/20 text-white hover:bg-white/10 bg-white/5"
             onClick={() => navigate("/auth", { state: { tab: "login" } })}
           >
             Entrar
