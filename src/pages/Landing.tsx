@@ -9,7 +9,7 @@ import { useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
-import DesktopLoginCard from "@/components/landing/DesktopLoginCard";
+import DesktopLoginCard, { DesktopLoginCardRef } from "@/components/landing/DesktopLoginCard";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -24,6 +24,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const heroRef = useRef<HTMLElement>(null);
+  const loginCardRef = useRef<DesktopLoginCardRef>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
   const deviceType = useDeviceType();
   const { isInstallable, promptInstall } = usePwaInstall();
@@ -98,7 +99,7 @@ const Landing = () => {
                 ) : (
                   <>
                     <Button
-                      onClick={() => navigate('/auth')}
+                      onClick={() => loginCardRef.current?.switchToSignup()}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
                     >
                       Começar Agora
@@ -117,7 +118,7 @@ const Landing = () => {
 
             {/* Right column - Desktop login card */}
             <div className="hidden md:flex items-center justify-center">
-              <DesktopLoginCard />
+              <DesktopLoginCard ref={loginCardRef} />
             </div>
           </div>
 
