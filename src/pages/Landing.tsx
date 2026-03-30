@@ -178,9 +178,9 @@ const Landing = () => {
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
                 {type.customEmoji ? (
-                  <img src={type.customEmoji} alt={type.accountType} className="w-11 h-11" loading="lazy" />
+                  <img src={type.customEmoji} alt={type.accountType} className="w-16 h-16" loading="lazy" />
                 ) : (
-                  <span className="text-3xl">{type.emoji}</span>
+                  <span className="text-5xl">{type.emoji}</span>
                 )}
                 <h3 className="text-foreground text-lg font-bold">{type.accountType}</h3>
                 <p className="text-muted-foreground text-sm">{type.accountDescription}</p>
