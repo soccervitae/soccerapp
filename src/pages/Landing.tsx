@@ -120,7 +120,7 @@ const Landing = () => {
           {/* Hero content */}
           <div className="relative z-20 flex flex-col justify-center px-5 md:px-12 pt-8 md:pt-16 pb-10 md:pb-20 max-w-[550px]">
             <img src={logoGreen} alt="SOCCER VITAE" className="h-5 md:h-8 w-fit mb-3 md:mb-4" />
-            <h1 className="text-3xl md:text-7xl font-black italic leading-[0.95] tracking-tight text-primary uppercase">
+            <h1 className="text-3xl md:text-7xl font-black italic leading-[0.95] tracking-tight text-primary">
               Onde talentos
               <br />
               <span className="text-white">encontram oportunidades</span>
