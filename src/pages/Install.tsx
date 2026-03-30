@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoText from "@/assets/soccervitae-logo-text.png";
+import logoText from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 type DeviceType = "ios" | "android" | "unknown";
 const useDeviceType = (): DeviceType => {
   return useMemo(() => {
@@ -181,7 +181,7 @@ const Install = () => {
             ease: "easeOut"
           }} />
             <div className="absolute inset-0 flex items-center justify-center p-4">
-              <img src={logoText} alt="SOCCER VITAE" className="w-full h-auto brightness-0 invert" />
+              <img src={logoText} alt="SOCCER VITAE" className="w-full h-auto" />
             </div>
           </motion.div>
 

@@ -189,7 +189,7 @@ const ForgotPassword = () => {
         <div className="absolute inset-0" />
         <div className="relative z-10 text-center">
           <img 
-            src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
+            src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png" 
             alt="Soccer Vitae" 
             className="h-10 w-auto mx-auto mb-4 object-contain"
           />

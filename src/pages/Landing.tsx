@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoText from "@/assets/soccervitae-logo-text.png";
+import logoWhite from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
+import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import stadiumHero from "@/assets/soccer-player-hero.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
@@ -102,7 +103,7 @@ const Landing = () => {
         <section className="w-full relative overflow-hidden h-[380px] md:h-[460px]">
           <SoccerShowcase banner />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center px-4 z-10">
-            <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14 brightness-0 invert" />
+            <img src={logoWhite} alt="SOCCER VITAE" className="h-10 md:h-14" />
             <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight mt-4 text-white text-center max-w-[600px]">
               Onde talentos encontram oportunidades
             </h1>
@@ -326,7 +327,7 @@ const Landing = () => {
         <footer className="border-t border-border/30 py-8 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={logoText} alt="SOCCER VITAE" className="h-6" />
+              <img src={logoGreen} alt="SOCCER VITAE" className="h-6" />
             </div>
             <div className="flex gap-6 text-muted-foreground text-sm">
               <a href="/sobre" className="hover:text-foreground transition-colors">Sobre</a>
