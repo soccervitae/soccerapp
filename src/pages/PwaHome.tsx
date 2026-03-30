@@ -31,14 +31,7 @@ const PwaHome = () => {
     <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
       {/* Background player image */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={soccerPlayerHero}
-          alt=""
-          className="w-full h-full object-cover opacity-40"
-          width={768}
-          height={1024}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
+        <SoccerShowcase fullscreen />
       </div>
 
       {/* Content */}
