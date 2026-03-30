@@ -39,7 +39,7 @@ const Landing = () => {
       <div className="min-h-screen bg-background text-foreground font-sans">
 
         {/* Hero Section - Split layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[280px] md:min-h-[420px]">
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-screen">
 
           {/* Background image - full width */}
           <div className="absolute inset-0">
