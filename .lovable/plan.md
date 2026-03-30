@@ -1,25 +1,45 @@
 
 
-## Plan: Show Posts tab for team profiles when guest + Auth prompt modal
+## Plan: Keep scroll position at tabs when switching tabs while sticky
 
-### Changes
+### Problem
+When the tabs bar is sticky at the top and the user clicks a different tab icon, the page scrolls back to the very top (position 0) if that tab has no saved scroll position. The user expects it to stay at the tabs level.
 
-**1. `src/pages/Profile.tsx`** — Show "profile" (Posts) tab for team profiles even when guest
+### Solution
+In `src/pages/Profile.tsx`, when restoring scroll for a tab that has no saved position, instead of scrolling to `0`, scroll to the **minimum of the tabs element's offset** — so the tabs remain visible at the top without showing the profile header above.
 
-- Update `tabOrder` for `isTeamOrSchool` guest case: change from `["videos", "photos", "championships", "achievements"]` to `["profile", "videos", "photos", "championships", "achievements"]`
-- Update `activeTab` default: when `isGuest` and `isTeamOrSchool`, default to `"profile"` instead of `"teams"`
-- In the TabsList rendering, show the Posts tab trigger for team profiles even when `isGuest` (currently hidden by `{!isGuest && ...}`)
+### Changes — single file: `src/pages/Profile.tsx`
 
-**2. `src/components/profile/ProfileInfo.tsx`** — Replace `navigate("/login")` with a ResponsiveModal prompt
+1. **In `useLayoutEffect` (line ~212-213)**: When `savedY` is `undefined`, calculate the tabs element's `offsetTop` minus the header height (50px) as the minimum scroll position:
 
-- Add state `authPromptOpen` to control the modal
-- In `handleFollowClick` and `handleMessageClick`, when `!user`, open the auth prompt modal instead of navigating to `/login`
-- Render a `ResponsiveModal` (drawer on mobile, dialog on desktop) with:
-  - Title: "Entre na Soccer Vitae"
-  - Message: "Você precisa estar logado ou criar sua conta para usar esta funcionalidade."
-  - Two buttons: "Entrar" (navigates to `/login`) and "Criar conta" (navigates to `/auth`)
+```tsx
+const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
 
-### Files to modify
-- `src/pages/Profile.tsx` (tab order + default tab + tab visibility)
-- `src/components/profile/ProfileInfo.tsx` (auth prompt modal)
+// If user was scrolled past the tabs (tabs were sticky), keep at tabs level
+const wasSticky = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
+const targetY = savedY !== undefined ? savedY : (wasSticky ? tabsOffsetY : 0);
+```
+
+2. **Save the "was sticky" state before tab switch** — in `handleTabChange` (line ~514), capture whether tabs are currently sticky before saving scroll and switching:
+
+```tsx
+const handleTabChange = (nextTab: string) => {
+  if (nextTab === activeTab) return;
+  saveCurrentTabScroll();
+  // Check if tabs are sticky before switching
+  const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+  const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
+  const wasSticky = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
+  wasStickyRef.current = wasSticky;
+  pendingScrollRestoreRef.current = collectScrollTargets();
+  setActiveTab(nextTab);
+};
+```
+
+3. **Add a ref** to pass the sticky state: `const wasStickyRef = useRef(false);`
+
+4. **Use it in restore**: Replace the `targetY` calculation to use `wasStickyRef.current` when no saved scroll exists.
+
+This ensures clicking a tab while the tabs bar is sticky keeps the page scrolled to the tabs position instead of jumping to the top.
 
