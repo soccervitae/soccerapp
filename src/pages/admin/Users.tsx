@@ -140,9 +140,9 @@ export default function AdminUsers() {
     if (filters.status === "banned") {
       query = query.not("banned_at", "is", null);
     } else if (filters.status === "verified") {
-      query = query.eq("conta_verificada", true).is("banned_at", null);
+      query = query.eq("is_verified_premium", true).is("banned_at", null);
     } else if (filters.status === "unverified") {
-      query = query.eq("conta_verificada", false).is("banned_at", null);
+      query = query.eq("is_verified_premium", false).is("banned_at", null);
     } else if (filters.status === "admin" && adminUserIds && adminUserIds.length > 0) {
       query = query.in("id", adminUserIds);
     }
@@ -211,7 +211,7 @@ export default function AdminUsers() {
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "homem"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "mulher"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).not("banned_at", "is", null),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("conta_verificada", true),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_verified_premium", true),
       ]);
 
       return {
@@ -413,8 +413,8 @@ export default function AdminUsers() {
   const statusOptions: { value: UserFilter; label: string }[] = [
     { value: "all", label: "Todos os status" },
     { value: "admin", label: `Administradores (${filterStats?.admins || 0})` },
-    { value: "verified", label: `Verificados (${filterStats?.verified || 0})` },
-    { value: "unverified", label: "Não verificados" },
+    { value: "verified", label: `Premium (${filterStats?.verified || 0})` },
+    { value: "unverified", label: "Não premium" },
     { value: "banned", label: `Banidos (${filterStats?.banned || 0})` },
   ];
 
@@ -449,7 +449,7 @@ export default function AdminUsers() {
             <p className="text-2xl font-bold text-pink-500">{filterStats?.female || 0}</p>
           </div>
           <div className="bg-card rounded-lg border border-border p-4">
-            <div className="text-muted-foreground text-sm">Verificados</div>
+            <div className="text-muted-foreground text-sm">Premium</div>
             <p className="text-2xl font-bold text-green-500">{filterStats?.verified || 0}</p>
           </div>
           <div className="bg-card rounded-lg border border-border p-4">
@@ -666,12 +666,12 @@ export default function AdminUsers() {
                         <Badge variant="destructive">
                           Banido
                         </Badge>
-                      ) : user.conta_verificada ? (
-                        <Badge variant="outline" className="border-green-500 text-green-500">
-                          Verificado
+                      ) : user.is_verified_premium && (!user.verified_premium_expires_at || new Date(user.verified_premium_expires_at) > new Date()) ? (
+                        <Badge variant="outline" className="border-primary text-primary">
+                          Premium
                         </Badge>
                       ) : (
-                        <Badge variant="outline">Não verificado</Badge>
+                        <Badge variant="outline">Não premium</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
