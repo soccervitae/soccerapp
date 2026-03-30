@@ -99,14 +99,37 @@ const Landing = () => {
       
       <div className="min-h-screen bg-white text-foreground font-sans">
 
-        {/* Banner Slide with overlaid logo and title */}
-        <section className="w-full relative overflow-hidden h-[200px] md:h-[460px]">
+        {/* Hero Banner */}
+        <section className="w-full relative overflow-hidden h-[280px] md:h-[520px]">
           <SoccerShowcase banner />
-          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center px-4 z-10">
-            <img src={logoWhite} alt="SOCCER VITAE" className="h-7 md:h-14" />
-            <h1 className="text-xl md:text-5xl font-black leading-tight tracking-tight mt-3 text-white text-center max-w-[600px]">
-              Onde talentos encontram oportunidades
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/60 to-transparent z-10" />
+          <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 max-w-7xl mx-auto">
+            <img src={logoWhite} alt="SOCCER VITAE" className="h-5 md:h-10 w-fit mb-3 md:mb-6" />
+            <h1 className="text-2xl md:text-6xl font-black leading-tight tracking-tight text-white max-w-[500px] md:max-w-[700px]">
+              MOSTRE SEU{" "}
+              <span className="text-amber-400">TALENTO</span>
             </h1>
+            <div className="w-12 md:w-20 h-1 bg-amber-400 mt-2 md:mt-4 mb-3 md:mb-5" />
+            <p className="text-white/80 text-xs md:text-lg max-w-[320px] md:max-w-[500px] leading-relaxed">
+              A plataforma onde atletas, clubes e comissões técnicas se conectam e encontram oportunidades no futebol.
+            </p>
+            {isMobile ? (
+              <Button
+                onClick={() => setShowInstallSheet(true)}
+                className="mt-4 w-fit bg-amber-400 hover:bg-amber-500 text-black font-bold px-6 h-10 rounded text-sm"
+              >
+                Baixar App
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate("/auth")}
+                className="mt-6 w-fit bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 h-12 rounded text-base"
+              >
+                Cadastrar Agora
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            )}
           </div>
         </section>
 
