@@ -508,10 +508,23 @@ export const ProfileInfo = ({
         <h2 className="font-bold text-foreground leading-tight text-lg">
           {profile.full_name || profile.username}
         </h2>
+        {profile.nickname && (
+          <p className="text-muted-foreground font-semibold text-sm">
+            "{profile.nickname}"
+          </p>
+        )}
+        {profile.nickname && profile.position_name && profile.account_type !== 'time' && (
+          <p className="text-muted-foreground/70 text-xs">
+            {profile.position_name}
+          </p>
+        )}
         <p className="text-muted-foreground font-bold text-base">
           {(() => {
           if (profile.account_type === 'time') {
             return 'Time de Futebol';
+          }
+          if (profile.nickname) {
+            return profile.team || `@${profile.username}`;
           }
           const displayRole = profile.position_name;
           if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
