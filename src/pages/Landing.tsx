@@ -128,9 +128,6 @@ const Landing = () => {
             <p className="text-white/60 text-xs md:text-base tracking-[0.2em] uppercase mt-2 md:mt-3 font-medium">
               A rede social do futebol
             </p>
-            <p className="text-white/70 text-xs md:text-base max-w-[360px] leading-relaxed mt-4 md:mt-6">
-              A plataforma onde atletas, clubes e comissões técnicas se conectam e encontram oportunidades.
-            </p>
             {isMobile ? (
               <Button
                 onClick={() => setShowInstallSheet(true)}
