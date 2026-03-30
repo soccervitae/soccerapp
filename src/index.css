@@ -173,7 +173,7 @@
 /* PWA header spacing */
 @media (display-mode: standalone) {
   .fixed.top-0 {
-    padding-top: 30px !important;
+    padding-top: 50px !important;
   }
 }
 
