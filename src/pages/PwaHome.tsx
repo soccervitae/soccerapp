@@ -99,11 +99,6 @@ const PwaHome = () => {
             </button>
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-white/30 text-[10px] uppercase tracking-[0.2em] mt-4">
-          The Beautiful Game • Premium Editorial Platform
-        </p>
       </div>
     </div>
   );
