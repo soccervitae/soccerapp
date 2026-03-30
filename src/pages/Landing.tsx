@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import logoWhite from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import stadiumHero from "@/assets/soccer-player-hero.jpg";
+import heroPlayer from "@/assets/hero-player.png";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
 import footballFieldIcon from "@/assets/football-field-icon.png";
@@ -99,27 +100,50 @@ const Landing = () => {
       
       <div className="min-h-screen bg-background text-foreground font-sans">
 
-        {/* Hero Section - Modern centered layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[240px] md:min-h-[360px]">
+        {/* Hero Section - Split layout like reference */}
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[420px]">
 
-          {/* Background image - full width */}
-          <div className="absolute inset-0">
-            <SoccerShowcase banner />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(0,0%,0%)_0%,_hsl(0,0%,0%)/70_50%,_hsl(0,0%,0%)/90_100%)]" />
+          {/* Dark textured background */}
+          <div className="absolute inset-0 bg-[hsl(0,0%,12%)]" />
+          
+          {/* Decorative circles */}
+          <div className="absolute top-12 left-8 w-24 h-24 rounded-full border border-white/10 hidden md:block" />
+          <div className="absolute bottom-16 left-20 w-16 h-16 rounded-full border border-white/8 hidden md:block" />
+          <div className="absolute top-24 left-[35%] w-12 h-12 rounded-full border border-white/5 hidden md:block" />
+
+          {/* Player image - right side */}
+          <div className="absolute right-0 top-0 bottom-0 w-[55%] hidden md:block">
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[hsl(0,0%,12%)] to-transparent z-10" />
+            <img 
+              src={heroPlayer} 
+              alt="Jogador" 
+              className="w-full h-full object-cover object-top"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0,0%,12%)]/60 to-transparent" />
           </div>
 
-          {/* Hero content - centered */}
-          <div className="relative z-20 flex flex-col items-center justify-center text-center px-8 md:px-16 py-10 md:py-16 h-full min-h-[240px] md:min-h-[360px]">
-            <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-9 mb-4 md:mb-5" />
-            <span className="text-white/50 text-[9px] md:text-[11px] font-medium tracking-[0.35em] uppercase mb-2 md:mb-3">
-              A rede social do futebol
-            </span>
-            <h1 className="text-2xl md:text-4xl font-black italic leading-[0.95] tracking-tight text-white">
-              Onde talentos
+          {/* Mobile background */}
+          <div className="absolute inset-0 md:hidden">
+            <img src={heroPlayer} alt="" className="w-full h-full object-cover object-top opacity-30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0,0%,12%)] via-[hsl(0,0%,12%)]/80 to-[hsl(0,0%,12%)]/60" />
+          </div>
+
+          {/* Hero content - left side */}
+          <div className="relative z-20 flex flex-col justify-center px-8 md:px-16 py-10 md:py-16 max-w-[550px] min-h-[280px] md:min-h-[420px]">
+            <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
+            
+            <h1 className="text-3xl md:text-5xl font-black italic leading-[0.9] tracking-tight text-white uppercase mb-3">
+              Soccer
               <br />
-              encontram oportunidades
+              <span className="text-white/70 text-xl md:text-3xl font-bold tracking-[0.15em] not-italic">
+                Vitae
+              </span>
             </h1>
-            <div className="w-[60px] h-[3px] bg-primary rounded-full mt-5 md:mt-6 mb-6 md:mb-8" />
+
+            <p className="text-white/80 text-xs md:text-sm leading-relaxed max-w-[400px] mt-2 mb-6 md:mb-8">
+              Desenvolva seu potencial, conecte-se e alcance seus sonhos no futebol. Treinamento de elite e oportunidades de scout ao seu alcance.
+            </p>
+
             <div className="flex gap-3">
               {isMobile ? (
                 <Button
@@ -148,8 +172,8 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Bottom gradient border */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          {/* Bottom green accent bar */}
+          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary/80 to-transparent" />
         </section>
 
         {/* Account Types Section */}
