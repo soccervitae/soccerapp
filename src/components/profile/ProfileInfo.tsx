@@ -243,7 +243,7 @@ export const ProfileInfo = ({
                   <span className="material-symbols-outlined text-[14px] font-bold">star</span>
                 </div>
               ) : profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) ? (
-                <div className="bg-blue-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
                   <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
                 </div>
               ) : profile.conta_verificada && (
