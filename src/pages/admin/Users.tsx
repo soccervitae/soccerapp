@@ -666,12 +666,12 @@ export default function AdminUsers() {
                         <Badge variant="destructive">
                           Banido
                         </Badge>
-                      ) : user.conta_verificada ? (
-                        <Badge variant="outline" className="border-green-500 text-green-500">
-                          Verificado
+                      ) : user.is_verified_premium && (!user.verified_premium_expires_at || new Date(user.verified_premium_expires_at) > new Date()) ? (
+                        <Badge variant="outline" className="border-primary text-primary">
+                          Premium
                         </Badge>
                       ) : (
-                        <Badge variant="outline">Não verificado</Badge>
+                        <Badge variant="outline">Não premium</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
