@@ -27,6 +27,12 @@ const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const isPWA = useIsPWA();
+
+  useEffect(() => {
+    if (isMobile && !isPWA) {
+      navigate('/saiba-mais', { replace: true });
+    }
+  }, [isMobile, isPWA, navigate]);
   const heroRef = useRef<HTMLElement>(null);
   const loginCardRef = useRef<DesktopLoginCardRef>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
