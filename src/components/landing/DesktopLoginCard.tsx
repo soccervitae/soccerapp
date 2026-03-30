@@ -84,7 +84,7 @@ const DesktopLoginCard = () => {
 
   return (
     <div className="hidden md:flex flex-col w-[380px] shrink-0 bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8 self-center">
-      <img src={logoGreen} alt="SOCCER VITAE" className="h-6 w-fit mx-auto mb-6" />
+      
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div className="space-y-2">
