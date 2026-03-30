@@ -101,13 +101,6 @@ const Landing = () => {
 
         {/* Hero Section - Dark with split layout */}
         <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[320px]">
-          {/* Decorative circles */}
-          <div className="absolute top-[15%] left-[-40px] w-24 h-24 md:w-36 md:h-36 rounded-full border border-white/10 z-10" />
-          <div className="absolute top-[40%] left-[20%] w-16 h-16 md:w-24 md:h-24 rounded-full border border-white/10 z-10" />
-          <div className="absolute bottom-[10%] right-[5%] w-20 h-20 md:w-32 md:h-32 rounded-full border border-white/10 z-10" />
-          <div className="absolute top-[20%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full bg-white z-10" />
-          <div className="absolute top-[35%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full border border-white z-10" />
-          <div className="absolute top-[50%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full border border-white z-10" />
 
           {/* Background image - right side */}
           <div className="absolute inset-0 md:left-[40%]">
