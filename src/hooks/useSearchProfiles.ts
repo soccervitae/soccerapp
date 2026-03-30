@@ -21,6 +21,8 @@ export interface SearchProfile {
   position_name?: string | null;
   team: string | null;
   conta_verificada: boolean;
+  is_verified_premium?: boolean | null;
+  verified_premium_expires_at?: string | null;
   followers_count?: number;
   role?: string | null;
   gender?: string | null;
