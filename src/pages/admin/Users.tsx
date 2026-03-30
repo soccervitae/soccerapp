@@ -211,7 +211,7 @@ export default function AdminUsers() {
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "homem"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("gender", "mulher"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).not("banned_at", "is", null),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("conta_verificada", true),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_verified_premium", true),
       ]);
 
       return {
