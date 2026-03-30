@@ -84,8 +84,31 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Conta */}
+        {/* Conteúdo */}
         <div className="p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conteúdo</p>
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <SettingsItem 
+              icon="mail"
+              label="Mensagens de visitantes"
+              onClick={() => navigate("/settings/guest-messages")}
+            />
+            <SettingsItem 
+              icon="bookmark"
+              label="Salvos"
+              onClick={() => navigate("/settings/saved")}
+            />
+            <SettingsItem 
+              icon="pending_actions"
+              label="Meus posts e moderação"
+              onClick={() => navigate("/settings/my-posts")}
+              isLast
+            />
+          </div>
+        </div>
+
+        {/* Conta */}
+        <div className="p-4 pt-0">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conta</p>
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <SettingsItem 
@@ -112,29 +135,6 @@ export default function Settings() {
               icon="notifications"
               label="Notificações"
               onClick={() => navigate("/settings/notifications")}
-              isLast
-            />
-          </div>
-        </div>
-
-        {/* Conteúdo */}
-        <div className="p-4 pt-0">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conteúdo</p>
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <SettingsItem 
-              icon="mail"
-              label="Mensagens de visitantes"
-              onClick={() => navigate("/settings/guest-messages")}
-            />
-            <SettingsItem 
-              icon="bookmark"
-              label="Salvos"
-              onClick={() => navigate("/settings/saved")}
-            />
-            <SettingsItem 
-              icon="pending_actions"
-              label="Meus posts e moderação"
-              onClick={() => navigate("/settings/my-posts")}
               isLast
             />
           </div>
