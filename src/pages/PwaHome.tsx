@@ -43,14 +43,6 @@ const PwaHome = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen px-6 py-10">
-        {/* Logo */}
-        <div className="flex flex-col items-center pt-4">
-          <img
-            src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png"
-            alt="Soccer Vitae"
-            className="h-12 object-contain"
-          />
-        </div>
 
         {/* Hero text */}
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
