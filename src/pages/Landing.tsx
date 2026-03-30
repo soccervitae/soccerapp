@@ -100,32 +100,19 @@ const Landing = () => {
       
       <div className="min-h-screen bg-background text-foreground font-sans">
 
-        {/* Hero Section - Split layout like reference */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[420px]">
+        {/* Hero Section - Split layout */}
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[280px] md:min-h-[420px]">
 
-          {/* Dark textured background */}
-          <div className="absolute inset-0 bg-[hsl(0,0%,12%)]" />
-          
-          {/* Decorative circles */}
-          <div className="absolute top-12 left-8 w-24 h-24 rounded-full border border-white/10 hidden md:block" />
-          <div className="absolute bottom-16 left-20 w-16 h-16 rounded-full border border-white/8 hidden md:block" />
-          <div className="absolute top-24 left-[35%] w-12 h-12 rounded-full border border-white/5 hidden md:block" />
-
-          {/* Player image - right side */}
-          <div className="absolute right-0 top-0 bottom-0 w-[55%] hidden md:block">
-            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[hsl(0,0%,12%)] to-transparent z-10" />
+          {/* Background image - full width */}
+          <div className="absolute inset-0">
             <img 
-              src={heroPlayer} 
-              alt="Jogador" 
-              className="w-full h-full object-cover object-top"
+              src={heroPlayersNight} 
+              alt="Jogadores disputando bola" 
+              className="w-full h-full object-cover object-center"
+              width={1920}
+              height={1024}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0,0%,12%)]/60 to-transparent" />
-          </div>
-
-          {/* Mobile background */}
-          <div className="absolute inset-0 md:hidden">
-            <img src={heroPlayer} alt="" className="w-full h-full object-cover object-top opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0,0%,12%)] via-[hsl(0,0%,12%)]/80 to-[hsl(0,0%,12%)]/60" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,0%)]/85 via-[hsl(0,0%,0%)]/50 to-[hsl(0,0%,0%)]/30" />
           </div>
 
           {/* Hero content - left side */}
