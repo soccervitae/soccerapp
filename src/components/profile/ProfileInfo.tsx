@@ -513,7 +513,7 @@ export const ProfileInfo = ({
             "{profile.nickname}"
           </p>
         )}
-        {profile.nickname && profile.position_name && profile.account_type !== 'time' && (
+        {profile.position_name && profile.account_type !== 'time' && (
           <p className="text-muted-foreground/70 text-xs">
             {profile.position_name}
           </p>
