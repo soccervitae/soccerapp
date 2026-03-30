@@ -1,8 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useIsPWA } from "@/hooks/useIsPWA";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import InstallInstructionsSheet from "@/components/common/InstallInstructionsSheet";
 
 interface PwaOnlyGateProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface PwaOnlyGateProps {
 
 const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
   const isPWA = useIsPWA();
-  const navigate = useNavigate();
+  const [showInstall, setShowInstall] = useState(false);
 
   if (!isPWA) {
     return (
@@ -25,7 +25,7 @@ const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
             Para fazer login ou criar sua conta, baixe o app Soccer Vitae.
           </p>
           <Button
-            onClick={() => navigate("/install")}
+            onClick={() => setShowInstall(true)}
             className="w-full gap-2"
             size="lg"
           >
@@ -33,6 +33,11 @@ const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
             Baixar App
           </Button>
         </div>
+
+        <InstallInstructionsSheet
+          open={showInstall}
+          onOpenChange={setShowInstall}
+        />
       </div>
     );
   }
