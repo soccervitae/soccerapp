@@ -110,14 +110,20 @@ const SaibaMais = () => {
 
         {/* Account Types Section */}
         <section className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center text-center gap-4 mb-10"
+          >
             <h1 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
             </h1>
             <p className="text-muted-foreground text-base max-w-[720px]">
               A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
             </p>
-          </div>
+          </motion.div>
 
           <div className="flex flex-wrap justify-center gap-5 lg:flex-nowrap">
             {featuresByAccount.map((type, index) => (
