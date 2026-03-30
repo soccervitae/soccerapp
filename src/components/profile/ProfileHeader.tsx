@@ -164,6 +164,9 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVer
     }
   };
 
+  // Hide header for guests (not logged in)
+  if (!user) return null;
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border px-4 h-[50px] flex items-center justify-between">

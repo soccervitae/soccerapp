@@ -533,7 +533,7 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={changeTabPreservingScroll} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-[50px] z-[30] bg-background rounded-none' : 'justify-center bg-transparent'}`}>
+      <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? `justify-center sticky ${isGuest ? 'top-0' : 'top-[50px]'} z-[30] bg-background rounded-none` : 'justify-center bg-transparent'}`}>
         {!isGuest && (
           <TabsTrigger 
             value="profile" 
@@ -707,7 +707,7 @@ const Profile = () => {
   const MainContent = () => (
     <>
       <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
-      <div className="pt-[50px] flex flex-col gap-4">
+      <div className={`${isGuest ? '' : 'pt-[50px]'} flex flex-col gap-4`}>
         <ProfileContent />
       </div>
     </>
