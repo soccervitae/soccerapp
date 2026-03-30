@@ -24,6 +24,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const heroRef = useRef<HTMLElement>(null);
+  const loginCardRef = useRef<DesktopLoginCardRef>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
   const deviceType = useDeviceType();
   const { isInstallable, promptInstall } = usePwaInstall();
