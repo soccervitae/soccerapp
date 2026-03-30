@@ -593,15 +593,6 @@ const Profile = () => {
             {!isMobile && 'Conquistas'}
           </TabsTrigger>
         )}
-        {isTeamOrSchool && (
-          <TabsTrigger 
-            value="squad" 
-            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
-          >
-            <span className="material-symbols-outlined text-[26px]">groups</span>
-            {!isMobile && 'Elenco'}
-          </TabsTrigger>
-        )}
       </TabsList>
 
       <motion.div
