@@ -1,21 +1,30 @@
 
 
-## Redesign do Banner — Layout Moderno e Profissional
+## Problem
 
-### Visão Geral
-Redesenhar o banner hero da Landing page com um visual mais sofisticado e profissional, mantendo o SoccerShowcase como background.
+In PWA mode, headers are hidden behind the device status bar (signal, wifi, battery icons) because:
+1. `apple-mobile-web-app-status-bar-style` is set to `black-translucent` — this makes the app render **behind** the status bar
+2. `viewport-fit=cover` extends the viewport into the safe area
+3. The `padding-top: 50px` CSS hack is a fixed value that doesn't match all devices and doesn't properly solve the overlay issue
 
-### Mudanças no Banner (Landing.tsx, linhas 102-130)
+In the browser, the browser chrome naturally pushes content below the status bar — that's why it works there.
 
-1. **Layout centralizado** — Trocar o alinhamento à esquerda por conteúdo centralizado, dando mais presença e equilíbrio visual
-2. **Overlay com gradiente mais sofisticado** — Usar um gradiente radial escuro (do centro para as bordas) em vez do gradiente linear simples, criando profundidade
-3. **Tipografia refinada** — Subtítulo menor em uppercase com tracking largo acima do título principal ("A REDE SOCIAL DO FUTEBOL"), título grande e impactante centralizado
-4. **Logo centralizada** acima do subtítulo
-5. **Linha decorativa verde** (accent bar) abaixo do título — uma linha fina de 60px na cor primary para dar acabamento
-6. **Botões lado a lado** — "Baixar App" (mobile) ou "Começar Agora" + "Saiba Mais" (desktop, outline) centralizados abaixo da linha
-7. **Borda inferior com gradiente** — Uma borda sutil na parte inferior do banner usando a cor primary com fade para transparência, separando elegantemente do conteúdo abaixo
-8. **Altura ajustada** — `min-h-[240px] md:min-h-[360px]` para dar mais respiro no desktop
+## Solution
 
-### Resultado Esperado
-Banner escuro com imagem de fundo, conteúdo centralizado, tipografia hierárquica clara, accent line verde e visual limpo e corporativo.
+Change the PWA to behave like the browser: content always starts **below** the status bar.
+
+### Changes
+
+1. **`index.html`** — Change status bar style from `black-translucent` to `default`
+   - This tells iOS to render a solid status bar above the app content instead of overlaying it
+   - The status bar will use the `theme-color` (#426F42) as background
+
+2. **`src/index.css`** — Remove the `@media (display-mode: standalone)` padding hack entirely since it's no longer needed
+
+This is a 2-file change. No component files need editing — the headers already have proper `bg-background/95` and `backdrop-blur` styling that will work correctly once the status bar stops overlapping.
+
+### Technical detail
+
+- `black-translucent`: status bar is transparent, content renders behind it → requires manual safe-area padding
+- `default`: status bar is opaque, content starts below it → just like the browser, no padding needed
 
