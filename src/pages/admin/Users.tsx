@@ -136,6 +136,11 @@ export default function AdminUsers() {
       query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
     }
 
+    // Always exclude admin users from the list
+    if (filters.status !== "admin" && adminUserIds && adminUserIds.length > 0) {
+      query = query.not("id", "in", `(${adminUserIds.join(",")})`);
+    }
+
     // Status filter
     if (filters.status === "banned") {
       query = query.not("banned_at", "is", null);
