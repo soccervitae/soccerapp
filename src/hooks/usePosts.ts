@@ -54,6 +54,9 @@ export interface Post {
     avatar_url: string | null;
     team: string | null;
     conta_verificada: boolean;
+    is_verified_premium: boolean | null;
+    verified_premium_expires_at: string | null;
+    is_official_account: boolean | null;
     gender: string | null;
     role: string | null;
     posicaomas: number | null;
@@ -87,6 +90,9 @@ export const usePostById = (postId: string | undefined) => {
             avatar_url,
             team,
             conta_verificada,
+            is_verified_premium,
+            verified_premium_expires_at,
+            is_official_account,
             gender,
             role,
             posicaomas,
@@ -216,6 +222,9 @@ export const usePosts = () => {
             avatar_url,
             team,
             conta_verificada,
+            is_verified_premium,
+            verified_premium_expires_at,
+            is_official_account,
             gender,
             role,
             posicaomas,

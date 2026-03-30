@@ -632,6 +632,13 @@ export const FeedPost = ({
               <span className="font-bold text-sm text-foreground hover:underline">
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
+              {post.profile.is_official_account ? (
+                <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              ) : post.profile.is_verified_premium && (!post.profile.verified_premium_expires_at || new Date(post.profile.verified_premium_expires_at) > new Date()) ? (
+                <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              ) : post.profile.conta_verificada ? (
+                <span className="material-symbols-outlined text-[16px] text-emerald-500" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              ) : null}
             </div>
             {/* Alternating position/account type/music info */}
             <div className="h-4 overflow-hidden relative">
