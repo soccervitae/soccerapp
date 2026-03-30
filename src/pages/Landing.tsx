@@ -1,21 +1,14 @@
 import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, Shirt, Icon } from "lucide-react";
-import { soccerBall } from "@lucide/lab";
+import { Share, MoreVertical, Plus, Download } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoWhite from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
-import stadiumHero from "@/assets/soccer-player-hero.jpg";
 import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
-import clappingLanding from "@/assets/clapping-landing.png";
-import playerKickingIcon from "@/assets/player-kicking-icon.png";
-import footballFieldIcon from "@/assets/football-field-icon.png";
-import SoccerShowcase from "@/components/common/SoccerShowcase";
 
 const useDeviceType = () => {
   return useMemo(() => {
