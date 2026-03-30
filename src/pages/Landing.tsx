@@ -211,6 +211,8 @@ const Landing = () => {
                 <div className="flex items-center gap-3 mb-6">
                   {account.customEmoji ? (
                     <img src={account.customEmoji} alt={account.accountType} className="w-8 h-8" loading="lazy" />
+                  ) : account.customIcon ? (
+                    <account.customIcon className="w-8 h-8 text-primary" />
                   ) : (
                     <span className="text-2xl">{account.emoji}</span>
                   )}
