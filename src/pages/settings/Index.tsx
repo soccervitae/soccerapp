@@ -209,7 +209,7 @@ export default function Settings() {
 
         {/* Version */}
         <div className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">Soccer Vitae v1.0.0</p>
+          <p className="text-xs text-muted-foreground">SOCCER VITAE v1.0.0</p>
         </div>
       </div>
 
