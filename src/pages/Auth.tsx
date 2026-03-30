@@ -742,7 +742,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     emailStatus === "valid" &&
     isPasswordValid &&
     password === confirmPassword &&
-    accountType.length > 0;
+    accountType.length > 0 &&
+    (accountType === "time" || gender.length > 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
