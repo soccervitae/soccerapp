@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import soccerVitaeLogo from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
+
+const LOGO_URL = "https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO.png";
 
 const SplashScreen = () => {
   return (
@@ -30,7 +31,7 @@ const SplashScreen = () => {
           />
           {/* Logo */}
           <img
-            src={soccerVitaeLogo}
+            src={LOGO_URL}
             alt="SOCCER VITAE"
             className="relative w-48 h-auto drop-shadow-2xl"
           />
