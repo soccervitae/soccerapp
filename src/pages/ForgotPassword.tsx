@@ -183,7 +183,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
       {/* Header com background */}
       <div className="relative h-48 bg-gradient-to-b from-primary/20 via-primary/10 to-background flex items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-transparent to-transparent" />
