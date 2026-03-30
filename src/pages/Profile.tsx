@@ -211,7 +211,9 @@ const Profile = () => {
 
   useLayoutEffect(() => {
     const savedY = tabScrollMemoryRef.current[activeTab];
-    const targetY = savedY !== undefined ? savedY : 0;
+    const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+    const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
+    const targetY = savedY !== undefined ? savedY : (wasStickyRef.current && tabsOffsetY > 0 ? tabsOffsetY : 0);
 
     let raf1 = 0;
     let raf2 = 0;
