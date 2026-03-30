@@ -18,7 +18,7 @@ const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcasePr
   useEffect(() => {
     const timer = setInterval(() => {
       setActive((prev) => (prev + 1) % slides.length);
-    }, 1000);
+    }, 3000);
     return () => clearInterval(timer);
   }, []);
 
