@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
 import DesktopLoginCard, { DesktopLoginCardRef } from "@/components/landing/DesktopLoginCard";
 
