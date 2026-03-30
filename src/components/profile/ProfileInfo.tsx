@@ -521,6 +521,22 @@ export const ProfileInfo = ({
           </div>
         </div>}
 
+      {/* Team Stats - Foundation Year, City, Category */}
+      {profile.account_type === 'time' && <div className="grid grid-cols-3 gap-2 bg-card p-3 w-full py-[4px] rounded-none">
+          <div className="flex flex-col gap-1 p-2 text-center">
+            <p className="text-foreground text-sm font-bold">{profile.foundation_year || "-"}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Fundação</p>
+          </div>
+          <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+            <p className="text-foreground text-sm font-bold">{profile.city || "-"}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Cidade</p>
+          </div>
+          <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+            <p className="text-foreground text-sm font-bold">{profile.team_category || "-"}</p>
+            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Categoria</p>
+          </div>
+        </div>}
+
       {/* Action Buttons */}
       <div className="flex w-full gap-2 mt-2 px-4 sm:max-w-xs">
         {isOwnProfile ? <>
