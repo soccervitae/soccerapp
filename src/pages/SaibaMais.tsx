@@ -245,8 +245,14 @@ const SaibaMais = () => {
           </motion.div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 px-4">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="py-16 px-4"
+        >
+          <div className="max-w-2xl mx-auto text-center">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-foreground text-2xl md:text-3xl font-black mb-4">
               Pronto para entrar em campo?
