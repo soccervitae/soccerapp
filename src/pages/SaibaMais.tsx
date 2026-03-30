@@ -1,21 +1,14 @@
-import { useRef, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, Shirt, Icon } from "lucide-react";
+import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, ArrowLeft, Icon } from "lucide-react";
 import { soccerBall } from "@lucide/lab";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoWhite from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
-import stadiumHero from "@/assets/soccer-player-hero.jpg";
-import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
-import playerKickingIcon from "@/assets/player-kicking-icon.png";
-import footballFieldIcon from "@/assets/football-field-icon.png";
-import SoccerShowcase from "@/components/common/SoccerShowcase";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -26,17 +19,13 @@ const useDeviceType = () => {
   }, []);
 };
 
-const Landing = () => {
+const SaibaMais = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const heroRef = useRef<HTMLElement>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
   const deviceType = useDeviceType();
   const { isInstallable, promptInstall } = usePwaInstall();
-  
-  const { scrollY } = useScroll();
-  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
+
   const featuresByAccount = [
     {
       emoji: "",
@@ -97,80 +86,33 @@ const Landing = () => {
     { icon: Search, title: "Explorar", description: "Descubra novos perfis por posição, região ou habilidades." },
   ];
 
-  return <>
+  return (
+    <>
       <Helmet>
-        <title>SOCCER VITAE - A Rede Social do Atleta Profissional</title>
-        <meta name="description" content="A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal." />
+        <title>Saiba Mais - SOCCER VITAE</title>
+        <meta name="description" content="Conheça todos os recursos da Soccer Vitae, a rede social do atleta profissional." />
       </Helmet>
-      
+
       <div className="min-h-screen bg-background text-foreground font-sans">
-
-        {/* Hero Section - Split layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[280px] md:min-h-[420px]">
-
-          {/* Background image - full width */}
-          <div className="absolute inset-0">
-            <img 
-              src={heroBannerProfessional} 
-              alt="Jogadores disputando bola" 
-              className="w-full h-full object-cover object-center"
-              width={1920}
-              height={1024}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,0%)]/85 via-[hsl(0,0%,0%)]/50 to-[hsl(0,0%,0%)]/30" />
+        {/* Fixed Header */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/30">
+          <div className="max-w-7xl mx-auto flex items-center gap-3 px-4 h-14">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="shrink-0">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <img src={logoGreen} alt="SOCCER VITAE" className="h-5" />
           </div>
+        </header>
 
-          {/* Hero content - left side */}
-          <div className="relative z-20 flex flex-col justify-center px-8 md:px-16 pt-14 pb-10 md:py-16 max-w-[550px] min-h-[280px] md:min-h-[420px]">
-            <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
-            
-            <h1 className="text-3xl md:text-5xl font-black italic leading-[0.9] tracking-tight text-white uppercase mb-3">
-              Soccer
-              <br />
-              <span className="text-white/70 text-xl md:text-3xl font-bold tracking-[0.15em] not-italic">
-                Vitae
-              </span>
-            </h1>
-
-
-            <div className="flex gap-3">
-              {isMobile ? (
-                <Button
-                  onClick={() => setShowInstallSheet(true)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                >
-                  Baixar App
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => navigate('/auth')}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                  >
-                    Começar Agora
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/saiba-mais')}
-                    className="border-white/30 text-white hover:bg-white/10 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                  >
-                    Saiba Mais
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom green accent bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-primary/80 to-transparent" />
-        </section>
+        {/* Spacer for fixed header */}
+        <div className="h-14" />
 
         {/* Account Types Section */}
-        <section id="account-types" className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
+        <section className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
-            <h2 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
+            <h1 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
-            </h2>
+            </h1>
             <p className="text-muted-foreground text-base max-w-[720px]">
               A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
             </p>
@@ -304,7 +246,6 @@ const Landing = () => {
               <SheetTitle className="text-lg font-bold">Como instalar o app</SheetTitle>
             </SheetHeader>
 
-            {/* Native install button for Android */}
             {isInstallable && deviceType !== "ios" && (
               <div className="mb-6">
                 <Button onClick={async () => { await promptInstall(); setShowInstallSheet(false); }} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-12 rounded-lg gap-2" size="lg">
@@ -315,7 +256,6 @@ const Landing = () => {
               </div>
             )}
 
-            {/* iOS Instructions */}
             {(deviceType === "ios" || deviceType === "unknown") && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -344,7 +284,6 @@ const Landing = () => {
               </div>
             )}
 
-            {/* Android Instructions */}
             {(deviceType === "android" || deviceType === "unknown") && (
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -397,6 +336,8 @@ const Landing = () => {
           </div>
         </footer>
       </div>
-    </>;
+    </>
+  );
 };
-export default Landing;
+
+export default SaibaMais;
