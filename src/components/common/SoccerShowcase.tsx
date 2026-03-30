@@ -44,7 +44,7 @@ const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcasePr
 
   if (banner) {
     return (
-      <div className="w-full relative overflow-hidden rounded-xl h-[280px]">
+      <div className="w-full h-full relative overflow-hidden">
         {slides.map((slide, i) => (
           <img
             key={i}
