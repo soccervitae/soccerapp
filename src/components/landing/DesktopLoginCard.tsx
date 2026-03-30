@@ -160,7 +160,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
           <button
             type="button"
             onClick={() => navigate("/forgot-password")}
-            className="text-xs text-primary hover:text-primary/80 transition-colors"
+            className="text-xs transition-colors text-emerald-500"
           >
             Esqueceu a senha?
           </button>
