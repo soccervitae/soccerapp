@@ -28,67 +28,7 @@ const Landing = () => {
   const { isInstallable, promptInstall } = usePwaInstall();
   
   const { scrollY } = useScroll();
-  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0.3]);
-  const featuresByAccount = [
-    {
-      emoji: "",
-      customIconNode: soccerBall,
-      accountType: "Atleta",
-      accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
-      features: [
-        { icon: User, title: "Perfil Completo", description: "Ano, posição, altura, peso, perna predominante e histórico de clubes." },
-        { icon: Newspaper, title: "Feed", description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas." },
-        { icon: Play, title: "Vídeos", description: "Publique vídeos de jogos, treinos e lances marcantes." },
-        { icon: Camera, title: "Replays", description: "Publique treinos e jogadas que ficam disponíveis por 24 horas." },
-        { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos e gols." },
-        { icon: Shield, title: "Times", description: "Adicione todos os clubes por onde passou." },
-        { icon: Trophy, title: "Campeonatos", description: "Registre campeonatos, gols marcados e colocação." },
-        { icon: Medal, title: "Conquistas", description: "Exiba medalhas, títulos e prêmios individuais." },
-        { icon: Users, title: "Torcedores", description: "Construa sua base de fãs e acompanhe quem torce por você." },
-      ],
-    },
-    {
-      emoji: "",
-      customIcon: ClipboardList,
-      accountType: "Comissão Técnica",
-      accountDescription: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional.",
-      features: [
-        { icon: User, title: "Perfil Profissional", description: "Crie seu perfil com função, histórico e experiência." },
-        { icon: Newspaper, title: "Feed", description: "Compartilhe conteúdo sobre treinos, táticas e bastidores." },
-        { icon: Play, title: "Vídeos", description: "Publique vídeos de treinos, táticas e bastidores." },
-        { icon: Camera, title: "Replays", description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas." },
-        { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos profissionais." },
-        { icon: MessageCircle, title: "Mensagens", description: "Converse com atletas e outros profissionais." },
-        { icon: Users, title: "Torcedores", description: "Acompanhe quem segue seu trabalho." },
-      ],
-    },
-    {
-      emoji: "",
-      customIcon: Shield,
-      accountType: "Time de Futebol",
-      accountDescription: "Clubes e equipes com presença na plataforma.",
-      features: [
-        { icon: User, title: "Perfil do Clube", description: "Página oficial com escudo, informações e história." },
-        { icon: Newspaper, title: "Feed", description: "Compartilhe novidades, resultados e bastidores do clube." },
-        { icon: Play, title: "Vídeos", description: "Publique vídeos de jogos, gols e momentos do clube." },
-        { icon: Camera, title: "Replays", description: "Publique momentos dos jogos e treinos por 24 horas." },
-        { icon: Film, title: "Destaques", description: "Álbuns permanentes com os melhores momentos do time." },
-        { icon: UserPlus, title: "Elenco", description: "Gerencie o elenco e receba solicitações de atletas." },
-        { icon: Search, title: "Buscar Talentos", description: "Encontre novos atletas por posição e região." },
-      ],
-    },
-  ];
 
-  const sharedFeatures = [
-    { icon: MessageCircle, title: "Mensagens Diretas", description: "Converse no chat com outros usuários da plataforma." },
-    { icon: Bell, title: "Notificações", description: "Alertas em tempo real sobre curtidas, comentários e mensagens." },
-    { icon: null as LucideIcon | null, customIcon: clappingLanding, title: "Aplausos", description: "Interaja com publicações através do sistema exclusivo de aplausos." },
-    { icon: Send, title: "Compartilhamento", description: "Envie posts, perfis e destaques diretamente para conversas." },
-    { icon: MapPin, title: "Localização", description: "Adicione localização às suas publicações." },
-    { icon: Lock, title: "Privacidade", description: "Controle quem pode ver seu perfil e configure segurança." },
-    { icon: Search, title: "Explorar", description: "Descubra novos perfis por posição, região ou habilidades." },
-  ];
 
   return <>
       <Helmet>
