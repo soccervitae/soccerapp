@@ -691,7 +691,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       body: {
         email: email,
         user_id: user.id,
-        first_name: isTeamOrSchool ? teamName.trim() : firstName.trim(),
+        first_name: firstName.trim(),
       },
     });
 
