@@ -551,7 +551,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   
   const { signUp } = useAuth();
   
-  const isTeamOrSchool = accountType === "time" || accountType === "escolinha";
+  const isTeamOrSchool = accountType === "time";
   
   // Validações individuais
   const isFirstNameValid = isTeamOrSchool ? teamName.trim().length >= 2 : firstName.trim().length >= 2;
