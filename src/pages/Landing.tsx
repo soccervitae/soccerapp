@@ -116,21 +116,6 @@ const Landing = () => {
           </div>
 
           {/* Header */}
-          <header className="relative z-30 flex items-center justify-between px-5 md:px-12 py-4 md:py-6">
-            <img src={logoWhite} alt="SOCCER VITAE" className="h-5 md:h-8" />
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="/sobre" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Sobre</a>
-              <a href="/terms" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Termos</a>
-              <a href="/privacy-policy" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Privacidade</a>
-              <Button
-                onClick={() => navigate("/auth")}
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-sm tracking-wider rounded px-5"
-              >
-                Entrar
-              </Button>
-            </nav>
-          </header>
 
           {/* Hero content */}
           <div className="relative z-20 flex flex-col justify-center px-5 md:px-12 pt-8 md:pt-16 pb-10 md:pb-20 max-w-[550px]">
