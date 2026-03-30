@@ -282,7 +282,7 @@ const Messages = () => {
       className="min-h-screen bg-background pb-20"
     >
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <AnimatePresence mode="wait">
           {showArchived ? (
             <motion.div
