@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Share, MoreVertical, Plus, Download, ClipboardList, Shield } from "lucide-react";
 import { Icon } from "lucide-react";
