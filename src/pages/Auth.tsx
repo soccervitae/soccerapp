@@ -657,14 +657,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
     setLoading(true);
 
-    const signUpFirstName = isTeamOrSchool ? teamName.trim() : firstName.trim();
-    const signUpLastName = isTeamOrSchool ? "" : lastName.trim();
-
     const { error } = await signUp({
       email,
       password,
-      firstName: signUpFirstName,
-      lastName: signUpLastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       accountType: accountType || undefined,
     });
 
