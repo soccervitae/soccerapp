@@ -210,7 +210,7 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         Não tem conta?{" "}
         <button
           onClick={onSwitchToSignup}
-          className="text-primary hover:text-primary/80 font-medium transition-colors"
+          className="font-medium transition-colors text-emerald-500"
         >
           Cadastre-se
         </button>
