@@ -1,57 +1,21 @@
 
 
-# Remover tipo de conta "Escolinha de Futebol"
+## Redesign do Banner — Layout Moderno e Profissional
 
-## Resumo
-Remover todas as referências ao tipo de conta "Escolinha de Futebol" em 12 arquivos do projeto. Onde houver condições `|| account_type === 'escolinha'`, serão simplificadas para apenas `account_type === 'time'`.
+### Visão Geral
+Redesenhar o banner hero da Landing page com um visual mais sofisticado e profissional, mantendo o SoccerShowcase como background.
 
-## Arquivos a editar
+### Mudanças no Banner (Landing.tsx, linhas 102-130)
 
-### 1. `src/pages/Landing.tsx`
-- Deletar o bloco inteiro do objeto "Escolinha de Futebol" no array `featuresByAccount` (o 4º item)
+1. **Layout centralizado** — Trocar o alinhamento à esquerda por conteúdo centralizado, dando mais presença e equilíbrio visual
+2. **Overlay com gradiente mais sofisticado** — Usar um gradiente radial escuro (do centro para as bordas) em vez do gradiente linear simples, criando profundidade
+3. **Tipografia refinada** — Subtítulo menor em uppercase com tracking largo acima do título principal ("A REDE SOCIAL DO FUTEBOL"), título grande e impactante centralizado
+4. **Logo centralizada** acima do subtítulo
+5. **Linha decorativa verde** (accent bar) abaixo do título — uma linha fina de 60px na cor primary para dar acabamento
+6. **Botões lado a lado** — "Baixar App" (mobile) ou "Começar Agora" + "Saiba Mais" (desktop, outline) centralizados abaixo da linha
+7. **Borda inferior com gradiente** — Uma borda sutil na parte inferior do banner usando a cor primary com fade para transparência, separando elegantemente do conteúdo abaixo
+8. **Altura ajustada** — `min-h-[240px] md:min-h-[360px]` para dar mais respiro no desktop
 
-### 2. `src/pages/Auth.tsx`
-- Remover `<SelectItem value="escolinha">` do seletor de tipo de conta
-- Simplificar `isTeamOrSchool` para `accountType === "time"`
-- Remover ternários que referenciam "escolinha" nos labels/placeholders
-
-### 3. `src/pages/CompleteProfile.tsx`
-- Simplificar todas as condições `|| account_type === 'escolinha'` para apenas `=== 'time'`
-- Remover placeholders e labels específicos de escolinha
-
-### 4. `src/pages/Profile.tsx`
-- Simplificar `isTeamOrSchool` para `account_type === 'time'`
-
-### 5. `src/pages/Explore.tsx`
-- Remover condição de escolinha no label de tipo de conta
-- Simplificar para mostrar apenas "Time de Futebol"
-
-### 6. `src/pages/settings/EditProfile.tsx`
-- Simplificar `isTeamOrSchool` e remover referências a escolinha nos placeholders/labels
-
-### 7. `src/pages/admin/Users.tsx`
-- Remover `<SelectItem value="escolinha">` do filtro
-- Remover badge de "Escolinha" na listagem
-
-### 8. `src/components/admin/ViewUserSheet.tsx`
-- Remover referências a escolinha nos badges e condições
-
-### 9. `src/components/feed/FeedPost.tsx`
-- Simplificar condição para mostrar label apenas para `'time'`
-
-### 10. `src/components/feed/CreateMenuSheet.tsx`
-- Simplificar `isTeamOrSchool` para apenas `'time'`
-
-### 11. `src/components/profile/ProfileInfo.tsx`
-- Remover todas as referências a escolinha nas condições e labels
-
-### 12. `src/components/profile/AboutTab.tsx`
-- Simplificar label de tipo de conta para apenas "Time de Futebol"
-
-## Padrão de mudança
-Em todos os arquivos, o padrão é:
-- `account_type === 'time' || account_type === 'escolinha'` → `account_type === 'time'`
-- `isTeamOrSchool` → `isTeamAccount` (ou manter o nome mas remover a parte escolinha)
-- Ternários `=== 'time' ? 'X' : 'Y'` onde Y era escolinha → valor direto para time
-- Remover opções de seleção e badges de escolinha
+### Resultado Esperado
+Banner escuro com imagem de fundo, conteúdo centralizado, tipografia hierárquica clara, accent line verde e visual limpo e corporativo.
 
