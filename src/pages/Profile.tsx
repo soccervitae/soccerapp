@@ -504,7 +504,7 @@ const Profile = () => {
 
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
-    ? (isGuest ? ["videos", "photos", "championships", "achievements", "squad"] : ["profile", "videos", "photos", "championships", "achievements", "squad"])
+    ? (isGuest ? ["videos", "photos", "championships", "achievements"] : ["profile", "videos", "photos", "championships", "achievements"])
     : isOfficialAccount 
       ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
       : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
