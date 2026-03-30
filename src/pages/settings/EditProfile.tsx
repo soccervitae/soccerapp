@@ -156,7 +156,7 @@ const EditProfile = () => {
   };
 
   // Validation errors
-  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+  const isTeamOrSchool = profile?.account_type === 'time';
 
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
