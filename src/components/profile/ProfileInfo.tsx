@@ -584,5 +584,36 @@ export const ProfileInfo = ({
           originRect={fullscreenClickOrigin}
         />
       )}
+
+      {/* Cheering Options Sheet */}
+      <Drawer open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
+        <DrawerContent>
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-center">@{profile.username}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-2 py-4 px-4">
+            <button
+              onClick={() => {
+                toast.success("Perfil favoritado!");
+                setCheeringSheetOpen(false);
+              }}
+              className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              <span className="material-symbols-outlined text-[22px]">star</span>
+              <span className="font-medium">Favoritar</span>
+            </button>
+            <button
+              onClick={() => {
+                handleFollowClick();
+                setCheeringSheetOpen(false);
+              }}
+              className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left text-destructive"
+            >
+              <span className="material-symbols-outlined text-[22px]">person_remove</span>
+              <span className="font-medium">Deixar de torcer</span>
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </section>;
 };
