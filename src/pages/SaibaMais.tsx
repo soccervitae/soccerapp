@@ -135,7 +135,6 @@ const SaibaMais = () => {
                 transition={{ duration: 0.4, delay: index * 0.15 }}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-              >
                 {type.customIconNode ? (
                   <Icon iconNode={type.customIconNode} className="w-10 h-10 text-primary" />
                 ) : type.customIcon ? (
