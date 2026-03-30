@@ -406,7 +406,7 @@ const Profile = () => {
       return (
         <div className="grid grid-cols-3 gap-[1px]">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-square bg-muted animate-pulse" />
+            <div key={i} className="aspect-[3/4] bg-muted animate-pulse" />
           ))}
         </div>
       );
@@ -463,7 +463,7 @@ const Profile = () => {
               <div 
                 key={post.id} 
                 ref={(el) => mediaGridItemRefs.current.set(post.id, el)}
-                className="aspect-square relative overflow-hidden bg-muted cursor-pointer"
+                className="aspect-[3/4] relative overflow-hidden bg-muted cursor-pointer"
                 onClick={() => handleMediaClick(post, mediaGridItemRefs.current.get(post.id) || null, index)}
               >
               {isVideo ? (
