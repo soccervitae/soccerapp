@@ -46,6 +46,7 @@ const Profile = () => {
   const [fromOnboarding, setFromOnboarding] = useState(false);
   const isGuest = !user;
   const [activeTab, setActiveTab] = useState(isGuest ? "profile" : "profile");
+  const wasStickyRef = useRef(false);
   // Grid refs removed - using FeedPost directly
   
   // Media viewer states
