@@ -59,7 +59,7 @@ const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }
       <div className="mt-6">
         <Button 
           variant="outline" 
-          className="h-12 w-full" 
+          className="h-12 w-full hover:bg-transparent" 
           onClick={handleGoogleLogin}
           disabled={loading}
         >
