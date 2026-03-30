@@ -1,10 +1,31 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import soccerPlayerHero from "@/assets/soccer-player-hero.jpg";
 
 const PwaHome = () => {
   const navigate = useNavigate();
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+
+  const handleSocialLogin = async (provider: "google" | "apple") => {
+    setSocialLoading(provider);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      console.error(`Erro no login com ${provider}:`, error);
+      toast.error(`Não foi possível fazer login com ${provider === "google" ? "Google" : "Apple"}`);
+      setSocialLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
