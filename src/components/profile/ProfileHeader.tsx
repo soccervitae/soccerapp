@@ -34,6 +34,10 @@ interface ProfileHeaderProps {
   username: string;
   isOwnProfile?: boolean;
   profileId?: string;
+  isVerifiedPremium?: boolean;
+  premiumExpiresAt?: string | null;
+  contaVerificada?: boolean;
+  isOfficialAccount?: boolean;
 }
 
 const REPORT_REASONS = [
