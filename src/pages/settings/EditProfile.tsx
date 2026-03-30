@@ -698,10 +698,7 @@ const EditProfile = () => {
         <div className="px-4 mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="full_name" className="flex items-center gap-1">
-              {isTeamOrSchool 
-                ? (profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha')
-                : 'Nome Completo'
-              } <span className="text-destructive">*</span>
+              {isTeamOrSchool ? 'Nome do Time' : 'Nome Completo'} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="full_name"
