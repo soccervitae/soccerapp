@@ -171,7 +171,13 @@ const SaibaMais = () => {
 
           <div className="flex flex-col gap-12">
             {featuresByAccount.map((account, idx) => (
-              <div key={idx}>
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
                 <div className="flex items-center gap-3 mb-6">
                   {account.customIconNode ? (
                     <Icon iconNode={account.customIconNode} className="w-8 h-8 text-primary" />
