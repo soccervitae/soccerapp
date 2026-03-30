@@ -28,6 +28,7 @@ import Notifications from "./pages/settings/Notifications";
 import Settings from "./pages/settings/Index";
 import Saved from "./pages/settings/Saved";
 import MyPosts from "./pages/settings/MyPosts";
+import Verification from "./pages/settings/Verification";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 
