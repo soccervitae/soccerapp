@@ -63,9 +63,9 @@ const Landing = () => {
       features: [
         { icon: User, title: "Perfil Profissional", description: "Crie seu perfil com função, histórico e experiência." },
         { icon: Newspaper, title: "Feed", description: "Compartilhe conteúdo sobre treinos, táticas e bastidores." },
+        { icon: Play, title: "Vídeos", description: "Publique vídeos de treinos, táticas e bastidores." },
         { icon: Camera, title: "Replays", description: "Publique momentos do dia a dia que ficam disponíveis por 24 horas." },
         { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos profissionais." },
-        { icon: Play, title: "Vídeos", description: "Publique vídeos de treinos, táticas e bastidores." },
         { icon: MessageCircle, title: "Mensagens", description: "Converse com atletas e outros profissionais." },
         { icon: Users, title: "Torcedores", description: "Acompanhe quem segue seu trabalho." },
       ],
