@@ -111,32 +111,22 @@ const Landing = () => {
       
       <div className="min-h-screen bg-white text-foreground font-sans">
 
-        {/* Hero Section with Parallax */}
-        <section ref={heroRef} className="w-full relative overflow-hidden min-h-[320px] md:min-h-[400px]">
-          {/* Parallax Background */}
-          <div className="absolute inset-0">
-            <SoccerShowcase fullscreen />
-          </div>
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-white/20" />
-          
-          {/* Content */}
-          <motion.div 
-            className="relative min-h-[320px] md:min-h-[400px] flex-col gap-6 md:gap-8 p-4 flex items-center justify-end"
-            style={{ opacity }}
-          >
-            <div className="flex flex-col gap-4 text-center z-10 max-w-[600px] items-center">
-              <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14" />
-              <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 py-[16px] text-primary">
-                Onde talentos encontram oportunidades
-              </h1>
-            </div>
-          </motion.div>
+        {/* Banner Slide */}
+        <section className="w-full relative overflow-hidden h-[280px] md:h-[360px]">
+          <SoccerShowcase banner />
         </section>
 
-        {/* Soccer Showcase Banner */}
-        <section className="py-10 px-4 max-w-7xl mx-auto">
-          <SoccerShowcase banner />
+        {/* Hero Content */}
+        <section className="py-10 px-4">
+          <motion.div 
+            className="flex flex-col gap-4 text-center items-center max-w-[600px] mx-auto"
+            style={{ opacity }}
+          >
+            <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14" />
+            <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 py-[16px] text-primary">
+              Onde talentos encontram oportunidades
+            </h1>
+          </motion.div>
         </section>
 
         {/* Account Types Section */}
