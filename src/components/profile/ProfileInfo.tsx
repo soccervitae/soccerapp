@@ -645,7 +645,7 @@ export const ProfileInfo = ({
                 </DropdownMenuContent>
               </DropdownMenu>}
           </> : !user ? <>
-            <button onClick={() => setShareSheetOpen(true)} className="flex-1 bg-primary text-primary-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-primary/90 flex items-center justify-center gap-1.5 shadow-sm">
+            <button onClick={() => setShareSheetOpen(true)} className="flex-1 bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-muted/80 border border-border flex items-center justify-center gap-1.5 shadow-sm">
               <span className="material-symbols-outlined text-[16px]">share</span>
               Compartilhar
             </button>
