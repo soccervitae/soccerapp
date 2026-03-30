@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import clappingLanding from "@/assets/clapping-landing.png";
@@ -109,19 +110,29 @@ const SaibaMais = () => {
 
         {/* Account Types Section */}
         <section className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center text-center gap-4 mb-10"
+          >
             <h1 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
             </h1>
             <p className="text-muted-foreground text-base max-w-[720px]">
               A SOCCER VITAE é para todos que vivem o futebol. Escolha o perfil que mais combina com você.
             </p>
-          </div>
+          </motion.div>
 
           <div className="flex flex-wrap justify-center gap-5 lg:flex-nowrap">
             {featuresByAccount.map((type, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.4, delay: index * 0.15 }}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
                 {type.customIconNode ? (
@@ -133,14 +144,20 @@ const SaibaMais = () => {
                 )}
                 <h3 className="text-foreground text-lg font-bold">{type.accountType}</h3>
                 <p className="text-muted-foreground text-sm">{type.accountDescription}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
         {/* Features by Account Type */}
         <section className="py-8 px-8 md:px-16 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center text-center gap-4 mb-12"
+          >
             <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
@@ -150,11 +167,17 @@ const SaibaMais = () => {
             <p className="text-muted-foreground text-base max-w-[720px]">
               Ferramentas profissionais desenhadas para cada tipo de perfil no ecossistema do futebol.
             </p>
-          </div>
+          </motion.div>
 
           <div className="flex flex-col gap-12">
             {featuresByAccount.map((account, idx) => (
-              <div key={idx}>
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
                 <div className="flex items-center gap-3 mb-6">
                   {account.customIconNode ? (
                     <Icon iconNode={account.customIconNode} className="w-8 h-8 text-primary" />
@@ -181,12 +204,18 @@ const SaibaMais = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Shared Features */}
-          <div className="mt-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-30px" }}
+            transition={{ duration: 0.4 }}
+            className="mt-12"
+          >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
                 ✨
@@ -213,11 +242,16 @@ const SaibaMais = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 px-4">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="py-16 px-4"
+        >
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-foreground text-2xl md:text-3xl font-black mb-4">
               Pronto para entrar em campo?
@@ -237,7 +271,7 @@ const SaibaMais = () => {
               </Button>
             )}
           </div>
-        </section>
+        </motion.section>
 
         {/* Install PWA Sheet */}
         <Sheet open={showInstallSheet} onOpenChange={setShowInstallSheet}>
