@@ -99,38 +99,61 @@ const Landing = () => {
       
       <div className="min-h-screen bg-background text-foreground font-sans">
 
-        {/* Hero Section - Dark with split layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[320px]">
+        {/* Hero Section - Modern centered layout */}
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[240px] md:min-h-[360px]">
 
-          {/* Background image - right side */}
-          <div className="absolute inset-0 md:left-[40%]">
+          {/* Background image - full width */}
+          <div className="absolute inset-0">
             <SoccerShowcase banner />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,12%)] via-[hsl(0,0%,12%)]/80 to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(0,0%,0%)_0%,_hsl(0,0%,0%)/70_50%,_hsl(0,0%,0%)/90_100%)]" />
           </div>
 
-          {/* Header */}
-
-          {/* Hero content */}
-          <div className="relative z-20 flex flex-col justify-center px-5 md:px-12 pt-8 md:pt-16 pb-10 md:pb-20 max-w-[550px]">
-            <img src={logoGreen} alt="SOCCER VITAE" className="h-5 md:h-8 w-fit mb-3 md:mb-4" />
-            <h1 className="text-3xl md:text-4xl font-black italic leading-[0.95] tracking-tight text-white">
+          {/* Hero content - centered */}
+          <div className="relative z-20 flex flex-col items-center justify-center text-center px-8 md:px-16 py-10 md:py-16 h-full min-h-[240px] md:min-h-[360px]">
+            <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-9 mb-4 md:mb-5" />
+            <span className="text-white/50 text-[9px] md:text-[11px] font-medium tracking-[0.35em] uppercase mb-2 md:mb-3">
+              A rede social do futebol
+            </span>
+            <h1 className="text-2xl md:text-4xl font-black italic leading-[0.95] tracking-tight text-white">
               Onde talentos
               <br />
               encontram oportunidades
             </h1>
-            {isMobile ? (
-              <Button
-                onClick={() => setShowInstallSheet(true)}
-                className="mt-5 w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 h-10 rounded text-sm tracking-wider uppercase"
-              >
-                Baixar App
-              </Button>
-            ) : null}
+            <div className="w-[60px] h-[3px] bg-primary rounded-full mt-5 md:mt-6 mb-6 md:mb-8" />
+            <div className="flex gap-3">
+              {isMobile ? (
+                <Button
+                  onClick={() => setShowInstallSheet(true)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                >
+                  Baixar App
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                  >
+                    Começar Agora
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById('account-types')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="border-white/30 text-white hover:bg-white/10 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                  >
+                    Saiba Mais
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
+
+          {/* Bottom gradient border */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
         </section>
 
         {/* Account Types Section */}
-        <section className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
+        <section id="account-types" className="py-12 px-8 md:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
             <h2 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
