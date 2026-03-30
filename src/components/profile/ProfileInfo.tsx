@@ -526,7 +526,7 @@ export const ProfileInfo = ({
           {profile.nickname || profile.full_name || profile.username}
         </h2>
         {profile.position_name && profile.account_type !== 'time' && (
-          <p className="text-muted-foreground/70 text-sm">
+          <p className="text-muted-foreground/70 text-base font-semibold">
             {profile.position_name}
           </p>
         )}
