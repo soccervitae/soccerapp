@@ -625,7 +625,7 @@ const Profile = () => {
           {activeTab === "profile" && renderProfileFeed()}
         </TabsContent>
 
-        <TabsContent value="videos" className="mt-4 px-1" forceMount={activeTab === "videos" ? true : undefined}>
+        <TabsContent value="videos" className="mt-4" forceMount={activeTab === "videos" ? true : undefined}>
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
         </TabsContent>
 
