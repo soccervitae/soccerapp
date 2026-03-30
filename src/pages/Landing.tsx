@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Share, MoreVertical, Plus, Download, ClipboardList, Shield } from "lucide-react";
 import { Icon } from "lucide-react";
@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
+import { useIsPWA } from "@/hooks/useIsPWA";
 import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
 import DesktopLoginCard, { DesktopLoginCardRef } from "@/components/landing/DesktopLoginCard";
 
@@ -25,6 +26,13 @@ const useDeviceType = () => {
 const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
+
+  useEffect(() => {
+    if (isMobile && !isPWA) {
+      navigate('/saiba-mais', { replace: true });
+    }
+  }, [isMobile, isPWA, navigate]);
   const heroRef = useRef<HTMLElement>(null);
   const loginCardRef = useRef<DesktopLoginCardRef>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
