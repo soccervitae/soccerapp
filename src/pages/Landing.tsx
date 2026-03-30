@@ -111,7 +111,7 @@ const Landing = () => {
           {/* Background image - full width */}
           <div className="absolute inset-0">
             <img 
-              src={heroPlayersNight} 
+              src={heroBannerProfessional} 
               alt="Jogadores disputando bola" 
               className="w-full h-full object-cover object-center"
               width={1920}
