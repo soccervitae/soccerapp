@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet-async";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoText from "@/assets/soccervitae-logo-text.png";
+import stadiumHero from "@/assets/soccer-player-hero.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
 import footballFieldIcon from "@/assets/football-field-icon.png";
@@ -115,7 +116,7 @@ const Landing = () => {
           <motion.div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuDT2pTn64tn7UxRaCLdSIqqE1y1Z0AYtCLNTzIggqae4i-MIj4O3l7tX9caZtZ7ZqPJ9QY47044d0PP8IK4sV2NLRz7RxAWknfxoUNw7M8eVGGAGOW7fPI0iPg6KxJ71fbDC5TH4Qt0Q4T-BEbTrHCkhmwDXJi05EtfmMPuOaMIHy7Z09KCn6Z5BtGiShd8QAjXzkpNoVOx_AWfXpZ-5gYFtHpXhhNDtbJ1MBjtiTDfcGIth28u2rz08qXv_bZgIe8pxPwJnzQvf4E")`,
+              backgroundImage: `url(${stadiumHero})`,
               y: backgroundY,
               scale: 1.1,
             }}
