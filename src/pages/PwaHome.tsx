@@ -52,7 +52,7 @@ const PwaHome = () => {
         {/* Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pb-4">
           <Button
-            className="w-full h-14 text-lg font-bold tracking-wide rounded-lg flex items-center justify-center gap-2"
+            className="w-full h-11 text-base font-bold tracking-wide rounded-lg flex items-center justify-center gap-2"
             onClick={() => navigate("/auth", { state: { tab: "signup" } })}
           >
             Criar Conta
@@ -60,7 +60,7 @@ const PwaHome = () => {
           </Button>
           <Button
             variant="outline"
-            className="w-full h-14 text-lg font-bold tracking-wide rounded-lg border-white/20 text-white hover:bg-white/10 bg-white/5"
+            className="w-full h-11 text-base font-bold tracking-wide rounded-lg border-white/20 text-white hover:bg-white/10 bg-white/5"
             onClick={() => navigate("/auth", { state: { tab: "login" } })}
           >
             Entrar
