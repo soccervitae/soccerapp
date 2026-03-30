@@ -100,11 +100,11 @@ const Landing = () => {
       <div className="min-h-screen bg-white text-foreground font-sans">
 
         {/* Banner Slide with overlaid logo and title */}
-        <section className="w-full relative overflow-hidden h-[380px] md:h-[460px]">
+        <section className="w-full relative overflow-hidden h-[260px] md:h-[460px]">
           <SoccerShowcase banner />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center px-4 z-10">
-            <img src={logoWhite} alt="SOCCER VITAE" className="h-10 md:h-14" />
-            <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight mt-4 text-white text-center max-w-[600px]">
+            <img src={logoWhite} alt="SOCCER VITAE" className="h-7 md:h-14" />
+            <h1 className="text-xl md:text-5xl font-black leading-tight tracking-tight mt-3 text-white text-center max-w-[600px]">
               Onde talentos encontram oportunidades
             </h1>
           </div>
