@@ -109,7 +109,7 @@ const Index = () => {
         className="min-h-screen bg-background pb-24 overflow-x-hidden"
       >
         <FeedHeader />
-        <main className="pt-16">
+        <main className="pt-[50px]">
           <AnimatePresence>
             {isFromCache && <OfflineCacheIndicator lastUpdated={cacheTimestamp} />}
           </AnimatePresence>

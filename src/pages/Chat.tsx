@@ -389,13 +389,13 @@ const Chat = () => {
 
       {/* Offline indicator */}
       {isOffline && (
-        <div className="fixed top-14 left-0 right-0 z-40 px-4 py-2">
+        <div className="fixed top-[50px] left-0 right-0 z-40 px-4 py-2">
           <OfflineIndicator />
         </div>
       )}
 
       {/* Messages area */}
-      <div className={`flex-1 overflow-y-auto pb-24 px-2 ${isOffline ? 'pt-28' : 'pt-16'}`}>
+      <div className={`flex-1 overflow-y-auto pb-24 px-2 ${isOffline ? 'pt-[74px]' : 'pt-[50px]'}`}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <span className="material-symbols-outlined text-5xl text-muted-foreground mb-3">

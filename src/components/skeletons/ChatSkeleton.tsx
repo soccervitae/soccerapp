@@ -70,7 +70,7 @@ export const ChatSkeleton = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <ChatHeaderSkeleton />
-      <div className="flex-1 overflow-hidden pt-16 pb-24">
+      <div className="flex-1 overflow-hidden pt-[50px] pb-24">
         <ChatMessagesSkeleton />
       </div>
       <ChatInputSkeleton />

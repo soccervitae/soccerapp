@@ -253,7 +253,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <main className="bg-background min-h-screen relative pb-24">
-        <div className="pt-16">
+        <div className="pt-[50px]">
           <ProfileSkeleton />
         </div>
         <BottomNavigation activeTab="profile" />

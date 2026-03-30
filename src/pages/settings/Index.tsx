@@ -55,7 +55,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-16 flex items-center">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
         <button 
           onClick={() => navigate('/profile')}
           className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
@@ -65,7 +65,7 @@ export default function Settings() {
         <h1 className="text-base font-bold text-foreground ml-2">Configurações</h1>
       </header>
 
-      <div className="pt-14 pb-20">
+      <div className="pt-[50px] pb-20">
         {/* Profile Card */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-4 w-full p-3 rounded-xl">
