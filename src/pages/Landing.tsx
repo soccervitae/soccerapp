@@ -46,12 +46,12 @@ const Landing = () => {
       features: [
         { icon: User, title: "Perfil Completo", description: "Ano, posição, altura, peso, perna predominante e histórico de clubes." },
         { icon: Newspaper, title: "Feed", description: "Compartilhe fotos e vídeos da sua carreira, treinos e conquistas." },
+        { icon: Play, title: "Vídeos", description: "Publique vídeos de jogos, treinos e lances marcantes." },
         { icon: Camera, title: "Replays", description: "Publique treinos e jogadas que ficam disponíveis por 24 horas." },
         { icon: Film, title: "Destaques", description: "Álbuns permanentes com seus melhores momentos e gols." },
         { icon: Shield, title: "Times", description: "Adicione todos os clubes por onde passou." },
         { icon: Trophy, title: "Campeonatos", description: "Registre campeonatos, gols marcados e colocação." },
         { icon: Medal, title: "Conquistas", description: "Exiba medalhas, títulos e prêmios individuais." },
-        { icon: Play, title: "Vídeos", description: "Publique vídeos de jogos, treinos e lances marcantes." },
         { icon: Users, title: "Torcedores", description: "Construa sua base de fãs e acompanhe quem torce por você." },
       ],
     },
