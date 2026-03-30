@@ -98,7 +98,7 @@ const Landing = () => {
                 ) : (
                   <>
                     <Button
-                      onClick={() => navigate('/auth')}
+                      onClick={() => loginCardRef.current?.switchToSignup()}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
                     >
                       Começar Agora
