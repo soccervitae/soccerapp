@@ -52,7 +52,7 @@ export const ProfileInfo = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Squad request hooks (for team/school profiles)
-  const isTeamOrSchool = profile.account_type === 'time' || profile.account_type === 'escolinha';
+  const isTeamOrSchool = profile.account_type === 'time';
   const { data: mySquadRequest } = useMySquadRequest(isTeamOrSchool && !isOwnProfile ? profile.id : undefined);
   const requestJoin = useRequestJoinSquad();
   const cancelRequest = useCancelSquadRequest();
