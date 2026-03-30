@@ -191,7 +191,7 @@ const ForgotPassword = () => {
           <img 
             src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
             alt="Soccer Vitae" 
-            className="h-20 w-20 mx-auto mb-4 object-contain"
+            className="h-10 w-auto mx-auto mb-4 object-contain"
           />
           <h1 className="text-2xl font-bold text-foreground">
             {stage === "success" ? "Senha Redefinida!" : "Recuperar Senha"}
