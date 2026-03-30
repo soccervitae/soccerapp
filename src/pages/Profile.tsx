@@ -46,6 +46,7 @@ const Profile = () => {
   const [fromOnboarding, setFromOnboarding] = useState(false);
   const isGuest = !user;
   const [activeTab, setActiveTab] = useState(isGuest ? "profile" : "profile");
+  const wasStickyRef = useRef(false);
   // Grid refs removed - using FeedPost directly
   
   // Media viewer states
@@ -210,7 +211,9 @@ const Profile = () => {
 
   useLayoutEffect(() => {
     const savedY = tabScrollMemoryRef.current[activeTab];
-    const targetY = savedY !== undefined ? savedY : 0;
+    const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+    const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
+    const targetY = savedY !== undefined ? savedY : (wasStickyRef.current && tabsOffsetY > 0 ? tabsOffsetY : 0);
 
     let raf1 = 0;
     let raf2 = 0;
@@ -513,6 +516,9 @@ const Profile = () => {
   const changeTabPreservingScroll = (nextTab: string) => {
     if (nextTab === activeTab) return;
     saveCurrentTabScroll();
+    const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+    const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
+    wasStickyRef.current = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
     pendingScrollRestoreRef.current = collectScrollTargets();
     setActiveTab(nextTab);
   };
