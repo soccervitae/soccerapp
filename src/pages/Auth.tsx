@@ -615,24 +615,24 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     return errorMessage;
   };
 
+  // Validações individuais
+  const isFirstNameValid = firstName.trim().length >= 2;
+  const isLastNameValid = lastName.trim().length >= 2;
+  const isEmailValid = emailStatus === "valid";
+  const doPasswordsMatch = password === confirmPassword;
+  const isAccountTypeValid = accountType.length > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (isTeamOrSchool) {
-      if (teamName.trim().length < 2) {
-        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
-        return;
-      }
-    } else {
-      if (firstName.trim().length < 2) {
-        setErrorMessage("O nome deve ter pelo menos 2 caracteres");
-        return;
-      }
-      if (lastName.trim().length < 2) {
-        setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
-        return;
-      }
+    if (firstName.trim().length < 2) {
+      setErrorMessage("O nome deve ter pelo menos 2 caracteres");
+      return;
+    }
+    if (lastName.trim().length < 2) {
+      setErrorMessage("O sobrenome deve ter pelo menos 2 caracteres");
+      return;
     }
 
     if (!validateEmail(email)) {
