@@ -183,9 +183,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header com background */}
-      <div className="flex items-center justify-center">
+      <div className="relative h-48 flex items-center justify-center">
         <div className="absolute inset-0" />
         <div className="relative z-10 text-center">
           <img 
