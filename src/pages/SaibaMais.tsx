@@ -101,7 +101,7 @@ const SaibaMais = () => {
             <img 
               src={logoGreen} 
               alt="SOCCER VITAE" 
-              className="h-5 cursor-pointer" 
+              className="h-4 cursor-pointer" 
               onClick={() => navigate('/')} 
             />
             <div className="flex items-center gap-2">
