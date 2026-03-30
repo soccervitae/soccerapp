@@ -704,10 +704,7 @@ const EditProfile = () => {
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder={isTeamOrSchool 
-                ? (profile?.account_type === 'time' ? 'Nome do time' : 'Nome da escolinha')
-                : 'Seu nome completo'
-              }
+              placeholder={isTeamOrSchool ? 'Nome do time' : 'Seu nome completo'}
               className={showValidationErrors && validationErrors.full_name ? "border-destructive" : ""}
             />
             {showValidationErrors && validationErrors.full_name && (
