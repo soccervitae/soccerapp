@@ -448,7 +448,7 @@ export const ProfileInfo = ({
           </button>
         </div>}
 
-      {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
+      {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && <div className="grid grid-cols-4 gap-2 bg-card p-3 w-full py-[4px] rounded-none">
           <div className="flex flex-col gap-1 p-2 text-center">
             <p className="text-foreground text-sm font-bold">{age || "-"}</p>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
