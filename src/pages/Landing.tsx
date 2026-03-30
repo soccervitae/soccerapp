@@ -220,11 +220,11 @@ const Landing = () => {
                   )}
                   <h3 className="text-foreground text-xl font-bold">{account.accountType}</h3>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="flex flex-col sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {account.features.map((feature, fIdx) => (
                     <div
                       key={fIdx}
-                      className="flex flex-col gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
+                      className="flex flex-row sm:flex-col items-center sm:items-start gap-3 sm:gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
                     >
                       <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                         <feature.icon className="w-4 h-4 text-primary" />
