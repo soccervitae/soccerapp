@@ -45,9 +45,7 @@ export default function ContactProfile() {
       let positionName: string | null = null;
 
       if (data.account_type === "comissao_tecnica" && data.funcao) {
-        const gender = data.gender;
-        const table = gender === "feminino" ? "funcaofem" : "funcaomas";
-        const { data: funcData } = await supabase.from(table).select("name").eq("id", data.funcao).single();
+        const { data: funcData } = await supabase.from("funcaoperfil").select("name").eq("id", data.funcao).single();
         positionName = funcData?.name || null;
       } else if (data.account_type === "atleta") {
         const gender = data.gender;
