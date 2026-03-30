@@ -125,9 +125,6 @@ const Landing = () => {
               <br />
               <span className="text-white">Vitae</span>
             </h1>
-            <p className="text-white/60 text-xs md:text-base tracking-[0.2em] uppercase mt-2 md:mt-3 font-medium">
-              A rede social do futebol
-            </p>
             {isMobile ? (
               <Button
                 onClick={() => setShowInstallSheet(true)}
