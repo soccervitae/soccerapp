@@ -534,7 +534,7 @@ const Profile = () => {
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={changeTabPreservingScroll} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
       <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? `justify-center sticky ${isGuest ? 'top-0' : 'top-[50px]'} z-[30] bg-background rounded-none` : 'justify-center bg-transparent'}`}>
-        {!isGuest && (
+        {(!isGuest || isTeamOrSchool) && (
           <TabsTrigger 
             value="profile" 
             className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}

@@ -659,5 +659,27 @@ export const ProfileInfo = ({
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Auth Prompt Modal */}
+      <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
+        <ResponsiveModalContent className="sm:max-w-sm">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="text-center">Entre na Soccer Vitae</ResponsiveModalTitle>
+          </ResponsiveModalHeader>
+          <div className="flex flex-col items-center gap-4 py-4 px-2">
+            <p className="text-sm text-muted-foreground text-center">
+              Você precisa estar logado ou criar sua conta para usar esta funcionalidade.
+            </p>
+            <div className="flex gap-2 w-full">
+              <Button variant="outline" className="flex-1" onClick={() => { setAuthPromptOpen(false); navigate("/login"); }}>
+                Entrar
+              </Button>
+              <Button className="flex-1" onClick={() => { setAuthPromptOpen(false); navigate("/auth"); }}>
+                Criar conta
+              </Button>
+            </div>
+          </div>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
     </section>;
 };
