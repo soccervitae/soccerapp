@@ -528,9 +528,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accountType, setAccountType] = useState("");
-  const [teamName, setTeamName] = useState("");
-  const [emblemFile, setEmblemFile] = useState<File | null>(null);
-  const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -540,29 +537,9 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     password: false,
     confirmPassword: false,
     accountType: false,
-    teamName: false,
   });
   
   const { signUp } = useAuth();
-  
-  const isTeamOrSchool = accountType === "time";
-  
-  // Validações individuais
-  const isFirstNameValid = isTeamOrSchool ? teamName.trim().length >= 2 : firstName.trim().length >= 2;
-  const isLastNameValid = isTeamOrSchool ? true : lastName.trim().length >= 2;
-  const isEmailValid = emailStatus === "valid";
-  const doPasswordsMatch = password === confirmPassword;
-  const isAccountTypeValid = accountType.length > 0;
-
-  const handleEmblemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setEmblemFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setEmblemPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
