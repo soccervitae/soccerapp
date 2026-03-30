@@ -43,17 +43,12 @@ const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcasePr
   if (banner) {
     return (
       <div className="w-full h-full relative overflow-hidden">
-        {slides.map((slide, i) => (
-          <img
-            key={i}
-            src={slide.src}
-            alt={slide.label}
-            loading="lazy"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-              i === active ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
+        <img
+          src={stadiumImg}
+          alt="Stadium"
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
       </div>
     );
