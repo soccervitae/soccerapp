@@ -254,8 +254,8 @@ export const ProfileInfo = ({
             </div>
             <p className="text-muted-foreground font-medium text-sm mt-0.5">
               {(() => {
-                if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
-                  return profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol';
+                if (profile.account_type === 'time') {
+                  return 'Time de Futebol';
                 }
                 const displayRole = profile.position_name;
                 if (displayRole && profile.team) return `${displayRole} · ${profile.team}`;
