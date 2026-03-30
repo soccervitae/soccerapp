@@ -20,6 +20,8 @@ const PwaHome = () => {
           Onde talentos<br />encontram<br />oportunidades
         </p>
       </div>
+
+      <SoccerAnimation />
       
       <div className="flex flex-col gap-3 w-full max-w-sm">
         <Button
