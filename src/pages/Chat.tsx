@@ -330,6 +330,7 @@ const Chat = () => {
         isPinned={isPinned}
         onTogglePin={handleTogglePin}
         isArchived={isArchived}
+        isDeletedUser={isDeletedUser}
       />
 
       {/* Delete confirmation dialog */}
