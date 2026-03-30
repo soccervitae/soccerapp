@@ -130,7 +130,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-5">
+          <div className="flex flex-wrap justify-center gap-5 lg:flex-nowrap">
             {featuresByAccount.map((type, index) => (
               <div
                 key={index}
