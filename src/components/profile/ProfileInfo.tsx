@@ -306,11 +306,6 @@ export const ProfileInfo = ({
                 </div>
               )}
             </div>
-            {profile.nickname && profile.full_name && (
-              <p className="text-muted-foreground font-medium text-sm mt-0.5">
-                {profile.full_name}
-              </p>
-            )}
             {profile.position_name && profile.account_type !== 'time' && (
               <p className="text-muted-foreground/70 text-xs mt-0.5">
                 {profile.position_name}
@@ -480,6 +475,10 @@ export const ProfileInfo = ({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <button onClick={handleMessageClick} className="bg-muted hover:bg-muted/80 text-foreground h-10 px-6 rounded-full font-semibold text-sm transition-colors border border-border flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+                  Mensagem
+                </button>
               </>
             ) : (
               <>
@@ -534,11 +533,6 @@ export const ProfileInfo = ({
         <h2 className="font-bold text-foreground leading-tight text-lg">
           {profile.nickname || profile.full_name || profile.username}
         </h2>
-        {profile.nickname && profile.full_name && (
-          <p className="text-muted-foreground font-medium text-sm">
-            {profile.full_name}
-          </p>
-        )}
         {profile.position_name && profile.account_type !== 'time' && (
           <p className="text-muted-foreground/70 text-xs">
             {profile.position_name}
@@ -669,6 +663,10 @@ export const ProfileInfo = ({
             <button onClick={() => setShareSheetOpen(true)} className="flex-1 bg-primary text-primary-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-primary/90 flex items-center justify-center gap-1.5 shadow-sm">
               <span className="material-symbols-outlined text-[16px]">share</span>
               Compartilhar
+            </button>
+            <button onClick={handleMessageClick} className="flex-1 bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-muted/80 border border-border flex items-center justify-center gap-1.5 shadow-sm">
+              <span className="material-symbols-outlined text-[16px]">chat_bubble_outline</span>
+              Mensagem
             </button>
             <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
               <DrawerContent>
