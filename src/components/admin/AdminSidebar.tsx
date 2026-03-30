@@ -16,6 +16,7 @@ import {
   Eye,
   Menu,
   X,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Sparkles, label: "Conteúdo", path: "/admin/content" },
   { icon: Users, label: "Usuários", path: "/admin/users" },
+  { icon: BadgeCheck, label: "Premium", path: "/admin/premium" },
   { icon: FileText, label: "Posts", path: "/admin/posts" },
   { icon: Eye, label: "Moderação", path: "/admin/moderation" },
   { icon: Flag, label: "Denúncias", path: "/admin/reports" },
