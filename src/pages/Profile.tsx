@@ -115,6 +115,24 @@ const Profile = () => {
     }
   }, [targetUserId, user?.id]);
 
+  const isTeamOrSchool = profile?.account_type === 'time';
+  const isOfficialAccount = (profile as any)?.is_official_account === true;
+
+  // Set correct default tab for guests once profile loads
+  const hasSetGuestTabRef = useRef(false);
+  useEffect(() => {
+    if (isGuest && profile && !hasSetGuestTabRef.current) {
+      hasSetGuestTabRef.current = true;
+      if (isTeamOrSchool) {
+        setActiveTab("profile");
+      } else if (isOfficialAccount) {
+        setActiveTab("videos");
+      } else {
+        setActiveTab("teams");
+      }
+    }
+  }, [isGuest, profile, isTeamOrSchool, isOfficialAccount]);
+
   const isLoading = profileLoading || statsLoading;
   
   // Refetching state for overlay
