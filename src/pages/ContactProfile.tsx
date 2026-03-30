@@ -173,7 +173,7 @@ export default function ContactProfile() {
             {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
             <p className="text-xs text-muted-foreground mt-1 text-right">{form.message.length}/1000</p>
           </div>
-          <Button onClick={handleSubmit} disabled={sending} className="w-full h-11 rounded-full font-semibold">
+          <Button onClick={handleSubmit} disabled={sending} className="w-full h-11 font-semibold rounded">
             {sending ? "Enviando..." : "Enviar mensagem"}
           </Button>
         </div>
