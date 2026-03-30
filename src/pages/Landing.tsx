@@ -50,7 +50,7 @@ const Landing = () => {
             <img 
               src={heroBannerProfessional} 
               alt="Jogadores disputando bola" 
-              className="w-full h-full object-cover object-center md:object-center object-[50%_30%]"
+              className="w-full h-full object-cover object-[center_30%] md:object-center"
               width={1920}
               height={1024}
             />
