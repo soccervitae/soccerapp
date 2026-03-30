@@ -328,7 +328,7 @@ export default function Saved() {
         <h1 className="text-base font-bold text-foreground ml-2">Salvos</h1>
       </header>
 
-      <div className="pt-14 pb-20">
+      <div className="pt-[50px] pb-20">
         <Tabs defaultValue="posts" className="w-full">
           <TabsList className="w-full grid grid-cols-2 bg-transparent border-b border-border rounded-none h-12">
             <TabsTrigger 

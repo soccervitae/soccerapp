@@ -120,7 +120,7 @@ export default function MyPosts() {
         <h1 className="text-base font-bold text-foreground ml-2">Meus Posts</h1>
       </header>
 
-      <div className="pt-14 pb-20">
+      <div className="pt-[50px] pb-20">
         {/* Info Card */}
         <div className="p-4">
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">

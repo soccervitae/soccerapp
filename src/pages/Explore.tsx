@@ -79,7 +79,7 @@ const Explore = () => {
       </div>
 
       {/* Content */}
-      <div className="pt-14">
+      <div className="pt-[50px]">
         {/* Search Bar */}
         <div className="px-4 py-3">
           <div className="relative">

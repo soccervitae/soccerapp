@@ -31,7 +31,7 @@ export default function Verification() {
         <h1 className="text-base font-bold text-foreground ml-2">Verificação Premium</h1>
       </header>
 
-      <div className="pt-14 pb-20 px-4">
+      <div className="pt-[50px] pb-20 px-4">
         {/* Hero */}
         <div className="flex flex-col items-center text-center py-8">
           <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-4">

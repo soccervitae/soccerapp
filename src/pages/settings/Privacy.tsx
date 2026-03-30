@@ -101,7 +101,7 @@ const Privacy = () => {
         <div className="w-10 h-10" />
       </header>
 
-      <div className="pt-16 px-4 pb-8">
+      <div className="pt-[50px] px-4 pb-8">
         {loading ? (
           <div className="space-y-6">
             <Skeleton className="h-20 w-full rounded-xl" />

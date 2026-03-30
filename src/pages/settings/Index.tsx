@@ -65,7 +65,7 @@ export default function Settings() {
         <h1 className="text-base font-bold text-foreground ml-2">Configurações</h1>
       </header>
 
-      <div className="pt-14 pb-20">
+      <div className="pt-[50px] pb-20">
         {/* Profile Card */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-4 w-full p-3 rounded-xl">

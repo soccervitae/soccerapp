@@ -326,7 +326,7 @@ const Messages = () => {
       </div>
 
       {/* Content */}
-      <div className="pt-14">
+      <div className="pt-[50px]">
         {/* Offline indicator */}
         <div className="px-3 py-2">
           <OfflineIndicator />
