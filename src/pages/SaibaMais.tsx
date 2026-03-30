@@ -272,7 +272,7 @@ const SaibaMais = () => {
               </Button>
             )}
           </div>
-        </section>
+        </motion.section>
 
         {/* Install PWA Sheet */}
         <Sheet open={showInstallSheet} onOpenChange={setShowInstallSheet}>
