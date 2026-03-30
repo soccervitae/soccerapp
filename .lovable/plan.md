@@ -1,28 +1,28 @@
 
 
-## Plan: Create "Saiba Mais" page
+## Plan: Add semi-transparent login card on desktop Landing page
 
 ### What will be built
-A new `/saiba-mais` page containing all the content currently below the hero banner on the Landing page (Account Types, Features by Account Type, Shared Features, and CTA sections). The page will have a fixed header with the Soccer Vitae logo.
+A login card with semi-transparent background (`bg-white/10 backdrop-blur`) positioned on the right side of the hero section, vertically centered. Only visible on desktop (hidden on mobile). The card will contain email/password fields, login button, Google login, and a link to signup.
 
 ### Changes
 
-**1. Create `src/pages/SaibaMais.tsx`**
-- Fixed header with white background, Soccer Vitae green logo (`logoGreen`), and a back arrow linking to `/`
-- Copy all content sections from Landing.tsx (lines 168-298): Account Types, Features by Account Type with all 3 account cards, Shared Features, and CTA section
-- Same data arrays (`featuresByAccount`, `sharedFeatures`) and same styling/layout
-- Same install sheet logic for mobile CTA buttons
+**1. `src/pages/Landing.tsx`**
+- Restructure the hero section to use a flex layout with the existing left content and a new right-side login card
+- The login card will include:
+  - Small logo at top
+  - Email input with icon
+  - Password input with show/hide toggle
+  - "Lembrar dispositivo" checkbox
+  - "Esqueceu a senha?" link
+  - Login button (primary)
+  - Google login button
+  - "Não tem conta? Cadastre-se" link (navigates to `/auth` with signup tab)
+- Card styling: `bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8`, max-width ~380px
+- Hidden on mobile (`hidden md:flex`)
+- Login logic will use `useAuth().signIn` and handle redirect, 2FA, etc. (reusing the same flow from Auth.tsx)
+- Import necessary components: `Input`, `Label`, `Checkbox`, icons
 
-**2. Update `src/App.tsx`**
-- Add route `/saiba-mais` as a public route (no auth required), rendering the new page
-
-**3. Update `src/pages/Landing.tsx`**
-- Change the "Saiba Mais" button's `onClick` to navigate to `/saiba-mais` instead of scrolling to `#account-types`
-- Remove all sections below the hero (Account Types, Features by Account, Shared Features, CTA) since they move to the new page
-- Keep only the hero banner and install sheet
-
-### Files
-- `src/pages/SaibaMais.tsx` (new)
-- `src/App.tsx` (add route)
-- `src/pages/Landing.tsx` (simplify, update button)
+**2. Files**
+- `src/pages/Landing.tsx` (modify — add login card component inline or as a local component)
 
