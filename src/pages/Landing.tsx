@@ -1,6 +1,8 @@
 import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Share, MoreVertical, Plus, Download, Trophy, Users, Shield } from "lucide-react";
+import { Share, MoreVertical, Plus, Download, ClipboardList, Shield } from "lucide-react";
+import { Icon } from "lucide-react";
+import { soccerBall } from "@lucide/lab";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
