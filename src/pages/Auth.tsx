@@ -528,6 +528,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accountType, setAccountType] = useState("");
+  const [gender, setGender] = useState("");
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -537,6 +538,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     password: false,
     confirmPassword: false,
     accountType: false,
+    gender: false,
   });
   
   const { signUp } = useAuth();
@@ -680,10 +682,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    // Save account type to profile
+    // Save account type and gender to profile
     await supabase
       .from("profiles")
-      .update({ account_type: accountType } as any)
+      .update({ account_type: accountType, gender: gender || null } as any)
       .eq("id", user.id);
 
     // Send verification code
@@ -740,7 +742,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     emailStatus === "valid" &&
     isPasswordValid &&
     password === confirmPassword &&
-    accountType.length > 0;
+    accountType.length > 0 &&
+    (accountType === "time" || gender.length > 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -869,6 +872,39 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       </div>
 
+      {/* Sexo */}
+      {accountType !== "time" && (
+        <div className="space-y-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">
+            Sexo <span className="text-destructive">*</span>
+          </Label>
+          <Select
+            value={gender}
+            onValueChange={(value) => {
+              setGender(value);
+              setTouched(prev => ({ ...prev, gender: true }));
+              setErrorMessage(null);
+            }}
+          >
+            <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+              touched.gender
+                ? gender
+                  ? "border-emerald-500 border"
+                  : "border-destructive border"
+                : "border-0"
+            }`}>
+              <SelectValue placeholder="Selecione o sexo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="homem">Masculino</SelectItem>
+              <SelectItem value="mulher">Feminino</SelectItem>
+            </SelectContent>
+          </Select>
+          {touched.gender && !gender && (
+            <p className="text-xs text-destructive">Selecione o sexo</p>
+          )}
+        </div>
+      )}
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
