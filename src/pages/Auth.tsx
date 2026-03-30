@@ -861,7 +861,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
               <Input
                 id="signup-teamname"
                 type="text"
-                placeholder={accountType === "time" ? "Ex: FC Barcelona" : "Ex: Escolinha Craque do Futuro"}
+                placeholder="Ex: FC Barcelona"
                 value={teamName}
                 onChange={(e) => {
                   setTeamName(e.target.value);
