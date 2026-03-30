@@ -48,6 +48,7 @@ export const ProfileInfo = ({
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [isStartingChat, setIsStartingChat] = useState(false);
+  const [cheeringSheetOpen, setCheeringSheetOpen] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
