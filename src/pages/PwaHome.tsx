@@ -6,13 +6,18 @@ const PwaHome = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-between py-12 px-6">
-      <div className="pt-8">
+      <div className="flex flex-col items-center">
         <img 
           src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png" 
           alt="Soccer Vitae"
           className="h-10 object-contain"
         />
-        <p className="text-muted-foreground text-sm mt-3 text-center">Onde talentos encontram oportunidades</p>
+      </div>
+      
+      <div className="flex flex-col items-center">
+        <p className="text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase my-0 py-[16px] text-primary text-center">
+          Onde talentos<br />encontram<br />oportunidades
+        </p>
       </div>
       
       <div className="flex flex-col gap-3 w-full max-w-sm">
