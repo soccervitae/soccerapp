@@ -54,10 +54,10 @@ const Landing = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,0%)]/85 via-[hsl(0,0%,0%)]/50 to-[hsl(0,0%,0%)]/30" />
           </div>
 
-          {/* Hero content wrapper - flex row on desktop */}
-          <div className="relative z-20 flex items-center justify-between min-h-screen w-full">
+          {/* Hero content wrapper - two column grid on desktop */}
+          <div className="relative z-20 grid md:grid-cols-2 items-center min-h-screen w-full">
             {/* Left content */}
-            <div className="flex flex-col justify-center pt-14 pb-10 md:py-16 max-w-[550px] md:max-w-[600px] md:px-[96px] px-[92px] md:shrink-0">
+            <div className="flex flex-col justify-center pt-14 pb-10 md:py-16 md:px-[96px] px-[92px]">
               <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
               
               <h1 className="font-bold tracking-[0.15em] text-white/70 mb-3 py-[22px] md:text-8xl text-4xl text-left">
@@ -115,8 +115,8 @@ const Landing = () => {
               </div>
             </div>
 
-            {/* Right side - Desktop login card */}
-            <div className="hidden md:flex pr-16 lg:pr-24">
+            {/* Right column - Desktop login card */}
+            <div className="hidden md:flex items-center justify-center">
               <DesktopLoginCard />
             </div>
           </div>
