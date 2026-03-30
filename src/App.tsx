@@ -29,6 +29,7 @@ import Settings from "./pages/settings/Index";
 import Saved from "./pages/settings/Saved";
 import MyPosts from "./pages/settings/MyPosts";
 import Verification from "./pages/settings/Verification";
+import Favorites from "./pages/settings/Favorites";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 
