@@ -592,16 +592,7 @@ export const ProfileInfo = ({
             <DrawerTitle className="text-center">@{profile.username}</DrawerTitle>
           </DrawerHeader>
           <div className="flex flex-col gap-2 py-4 px-4">
-            <button
-              onClick={() => {
-                toast.success("Perfil favoritado!");
-                setCheeringSheetOpen(false);
-              }}
-              className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
-            >
-              <span className="material-symbols-outlined text-[22px]">star</span>
-              <span className="font-medium">Favoritar</span>
-            </button>
+            <FavoriteButton profileId={profile.id} onDone={() => setCheeringSheetOpen(false)} />
             <button
               onClick={() => {
                 handleFollowClick();

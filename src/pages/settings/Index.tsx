@@ -88,7 +88,12 @@ export default function Settings() {
         <div className="p-4">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conta</p>
           <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <SettingsItem 
+            <SettingsItem 
+              icon="star"
+              label="Favoritos"
+              onClick={() => navigate("/settings/favorites")}
+            />
+            <SettingsItem 
               icon="verified"
               label="Verificação Premium"
               onClick={() => navigate("/settings/verification")}
