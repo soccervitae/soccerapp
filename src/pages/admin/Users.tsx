@@ -449,7 +449,7 @@ export default function AdminUsers() {
             <p className="text-2xl font-bold text-pink-500">{filterStats?.female || 0}</p>
           </div>
           <div className="bg-card rounded-lg border border-border p-4">
-            <div className="text-muted-foreground text-sm">Verificados</div>
+            <div className="text-muted-foreground text-sm">Premium</div>
             <p className="text-2xl font-bold text-green-500">{filterStats?.verified || 0}</p>
           </div>
           <div className="bg-card rounded-lg border border-border p-4">
