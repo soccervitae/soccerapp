@@ -404,7 +404,7 @@ const Profile = () => {
   const renderMediaGrid = (posts: typeof userPosts, emptyMessage: string, emptyIcon: string) => {
     if (postsLoading) {
       return (
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-3 gap-[1px]">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="aspect-square bg-muted animate-pulse" />
           ))}
@@ -452,7 +452,7 @@ const Profile = () => {
     };
 
       return (
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-3 gap-[1px]">
           {posts.map((post, index) => {
             const mediaUrls = post.media_url?.split(',') || [];
             const firstMedia = mediaUrls[0];
@@ -625,7 +625,7 @@ const Profile = () => {
           {activeTab === "profile" && renderProfileFeed()}
         </TabsContent>
 
-        <TabsContent value="videos" className="mt-4 px-1" forceMount={activeTab === "videos" ? true : undefined}>
+        <TabsContent value="videos" className="mt-4" forceMount={activeTab === "videos" ? true : undefined}>
           {activeTab === "videos" && renderMediaGrid(videoPosts, "Nenhum vídeo ainda", "play_circle")}
         </TabsContent>
 
@@ -663,7 +663,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
+        <TabsContent value="photos" className="mt-4" forceMount={activeTab === "photos" ? true : undefined}>
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
