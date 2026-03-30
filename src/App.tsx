@@ -58,6 +58,7 @@ import AdminAddTeams from "./pages/admin/AddTeams";
 import AdminChampionships from "./pages/admin/Championships";
 import AdminAchievements from "./pages/admin/Achievements";
 import AdminSettings from "./pages/admin/Settings";
+import AdminPremium from "./pages/admin/Premium";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 
 import NotFound from "./pages/NotFound";
