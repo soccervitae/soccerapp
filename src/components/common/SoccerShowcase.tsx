@@ -11,9 +11,10 @@ const slides = [
 
 interface SoccerShowcaseProps {
   fullscreen?: boolean;
+  banner?: boolean;
 }
 
-const SoccerShowcase = ({ fullscreen = false }: SoccerShowcaseProps) => {
+const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcaseProps) => {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -38,6 +39,25 @@ const SoccerShowcase = ({ fullscreen = false }: SoccerShowcaseProps) => {
         ))}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
       </>
+    );
+  }
+
+  if (banner) {
+    return (
+      <div className="w-full relative overflow-hidden rounded-xl h-[280px]">
+        {slides.map((slide, i) => (
+          <img
+            key={i}
+            src={slide.src}
+            alt={slide.label}
+            loading="lazy"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              i === active ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      </div>
     );
   }
 

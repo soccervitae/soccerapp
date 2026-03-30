@@ -134,9 +134,9 @@ const Landing = () => {
           </motion.div>
         </section>
 
-        {/* Soccer Showcase */}
-        <section className="py-10 px-4 max-w-7xl mx-auto flex flex-col items-center">
-          <SoccerShowcase />
+        {/* Soccer Showcase Banner */}
+        <section className="py-10 px-4 max-w-7xl mx-auto">
+          <SoccerShowcase banner />
         </section>
 
         {/* Account Types Section */}
