@@ -166,6 +166,9 @@ const AnimatedRoutes = () => {
           <PageTransition><FollowList /></PageTransition>
         </ProtectedRoute>
       } />
+      <Route path="/:username/contact" element={
+        <PageTransition><ContactProfile /></PageTransition>
+      } />
       <Route path="/:username" element={
         <PageTransition><Profile /></PageTransition>
       } />
