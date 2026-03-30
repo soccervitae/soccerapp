@@ -851,7 +851,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       {/* Campos condicionais baseados no tipo de conta */}
       {isTeamOrSchool ? (
         <>
-          {/* Nome do Time/Escolinha */}
+          {/* Nome do Time */}
           <div className="space-y-2">
             <Label htmlFor="signup-teamname" className="text-xs font-semibold uppercase text-muted-foreground">
               Nome do Time <span className="text-destructive">*</span>
