@@ -229,6 +229,11 @@ const AnimatedRoutes = () => {
           <PageTransition><MyPosts /></PageTransition>
         </ProtectedRoute>
       } />
+      <Route path="/settings/favorites" element={
+        <ProtectedRoute>
+          <PageTransition><Favorites /></PageTransition>
+        </ProtectedRoute>
+      } />
       <Route path="/settings/verification" element={
         <ProtectedRoute>
           <PageTransition><Verification /></PageTransition>
