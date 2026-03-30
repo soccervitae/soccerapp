@@ -34,12 +34,12 @@ export default function Verification() {
       <div className="pt-14 pb-20 px-4">
         {/* Hero */}
         <div className="flex flex-col items-center text-center py-8">
-          <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-white text-[40px]">verified</span>
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-4">
+            <span className="material-symbols-outlined text-primary-foreground text-[40px]">verified</span>
           </div>
           <h2 className="text-2xl font-bold text-foreground">Soccer Vitae Premium</h2>
           <p className="text-muted-foreground mt-2 max-w-xs">
-            Destaque-se com o selo de verificação azul e tenha benefícios exclusivos.
+            Destaque-se com o selo de verificação e tenha benefícios exclusivos.
           </p>
         </div>
 
