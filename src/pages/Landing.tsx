@@ -138,6 +138,11 @@ const Landing = () => {
           </motion.div>
         </section>
 
+        {/* Soccer Showcase */}
+        <section className="py-10 px-4 max-w-7xl mx-auto flex flex-col items-center">
+          <SoccerShowcase />
+        </section>
+
         {/* Account Types Section */}
         <section className="py-12 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
