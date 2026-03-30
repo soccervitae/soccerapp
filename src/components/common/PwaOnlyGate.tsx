@@ -3,6 +3,7 @@ import { useIsPWA } from "@/hooks/useIsPWA";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import InstallInstructionsSheet from "@/components/common/InstallInstructionsSheet";
+import logoVerde from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 
 interface PwaOnlyGateProps {
   children: ReactNode;
@@ -17,7 +18,7 @@ const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm space-y-6">
           <img
-            src="/SOCCERVITAE_LOGO_NOVO_verde.png"
+            src={logoVerde}
             alt="Soccer Vitae"
             className="h-10 mx-auto"
           />
