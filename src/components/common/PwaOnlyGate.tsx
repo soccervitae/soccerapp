@@ -3,6 +3,7 @@ import { useIsPWA } from "@/hooks/useIsPWA";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import InstallInstructionsSheet from "@/components/common/InstallInstructionsSheet";
+import logoVerde from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 
 interface PwaOnlyGateProps {
   children: ReactNode;
