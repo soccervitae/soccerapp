@@ -664,6 +664,10 @@ export const ProfileInfo = ({
               <span className="material-symbols-outlined text-[16px]">share</span>
               Compartilhar
             </button>
+            <button onClick={handleMessageClick} className="flex-1 bg-muted text-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-muted/80 border border-border flex items-center justify-center gap-1.5 shadow-sm">
+              <span className="material-symbols-outlined text-[16px]">chat_bubble_outline</span>
+              Mensagem
+            </button>
             <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
               <DrawerContent>
                 <DrawerHeader className="pb-2">
