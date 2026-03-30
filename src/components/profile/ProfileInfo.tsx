@@ -506,7 +506,7 @@ export const ProfileInfo = ({
       {/* Name and Position */}
       <div className="text-center space-y-0.5">
         <h2 className="font-bold text-foreground leading-tight text-lg">
-          {profile.full_name || profile.username}
+          {profile.nickname || profile.full_name || profile.username}
         </h2>
         {profile.nickname && (
           <p className="text-muted-foreground font-semibold text-sm">
