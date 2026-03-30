@@ -127,9 +127,14 @@ const SaibaMais = () => {
 
           <div className="flex flex-wrap justify-center gap-5 lg:flex-nowrap">
             {featuresByAccount.map((type, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.4, delay: index * 0.15 }}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
+              >
               >
                 {type.customIconNode ? (
                   <Icon iconNode={type.customIconNode} className="w-10 h-10 text-primary" />
