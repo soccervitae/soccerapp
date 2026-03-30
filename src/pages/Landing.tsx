@@ -90,7 +90,7 @@ const Landing = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex justify-center md:justify-start gap-3">
                 {isMobile ? (
                   <Button
                     onClick={() => setShowInstallSheet(true)}
