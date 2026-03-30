@@ -173,7 +173,7 @@ const CompleteProfile = () => {
   }, [profile]);
 
   // Check if account type is time or escolinha (set during signup)
-  const isTeamOrSchoolAccount = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+  const isTeamOrSchoolAccount = profile?.account_type === 'time';
 
   // Map UI "Tipo de perfil" labels to canonical values stored in profiles.role
   const mapProfileTypeValue = (typeName: string) => {
