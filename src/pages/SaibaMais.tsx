@@ -151,7 +151,13 @@ const SaibaMais = () => {
 
         {/* Features by Account Type */}
         <section className="py-8 px-8 md:px-16 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center text-center gap-4 mb-12"
+          >
             <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
             </p>
@@ -161,7 +167,7 @@ const SaibaMais = () => {
             <p className="text-muted-foreground text-base max-w-[720px]">
               Ferramentas profissionais desenhadas para cada tipo de perfil no ecossistema do futebol.
             </p>
-          </div>
+          </motion.div>
 
           <div className="flex flex-col gap-12">
             {featuresByAccount.map((account, idx) => (
