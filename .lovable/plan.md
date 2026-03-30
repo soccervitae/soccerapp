@@ -1,27 +1,23 @@
 
 
-## Plan: Handle deleted user in chat
+## Plan: Block auth pages in browser, allow only profile for guests
 
-### Problem
-When a user's account is deleted, the conversation still shows but displays "Usuário" with no name, and allows sending messages and calling.
-
-### Detection
-When the profile query returns `null` for the other participant, that means the account was deleted. We'll pass a new `isDeletedUser` flag based on whether the participant profile exists but the user_id was found in conversation_participants.
+### What changes
+The `/auth`, `/login`, `/signup`, `/forgot-password`, and `/two-factor-verify` routes will be restricted to PWA only. When accessed from a browser (non-PWA), they will show a message telling the user to download the app.
 
 ### Changes
 
-**1. `src/pages/Chat.tsx`**
-- Track `isDeletedUser` state: set to `true` when `otherParticipant` user_id exists but profile query returns `null`
-- Pass `isDeletedUser` to `ChatHeader`
-- When `isDeletedUser`: replace `ChatInput` with a blocked area showing "Este usuário não está mais disponível na Soccer Vitae" + a "Excluir conversa" button
-- The delete button opens a `ResponsiveModal` for confirmation (sheet on mobile, dialog on desktop), reusing `handleDeleteConversation`
+**1. Create `src/components/common/PwaOnlyGate.tsx`**
+- A wrapper component that checks `useIsPWA()`
+- If not PWA: renders a full-screen page with Soccer Vitae branding, message "Para fazer login ou criar sua conta, baixe o app Soccer Vitae", and a button linking to `/install`
+- If PWA: renders `children`
 
-**2. `src/components/messages/ChatHeader.tsx`**
-- Accept new prop `isDeletedUser?: boolean`
-- When `isDeletedUser` is true: hide the Phone, Video, and MoreVertical (3 dots) buttons entirely
-- Only show the back arrow and the user name ("Usuário")
+**2. `src/App.tsx`** — Wrap auth routes with PwaOnlyGate
+- Wrap `/auth`, `/forgot-password`, `/two-factor-verify` routes with `<PwaOnlyGate>`
+- `/login` and `/signup` already redirect to `/auth`, so they're covered
+- Profile route (`/:username`) remains public as-is
 
 ### Files
-- `src/pages/Chat.tsx`
-- `src/components/messages/ChatHeader.tsx`
+- `src/components/common/PwaOnlyGate.tsx` (new)
+- `src/App.tsx` (modify 3 routes)
 
