@@ -209,7 +209,13 @@ const SaibaMais = () => {
           </div>
 
           {/* Shared Features */}
-          <div className="mt-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-30px" }}
+            transition={{ duration: 0.4 }}
+            className="mt-12"
+          >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
                 ✨
