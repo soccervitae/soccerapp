@@ -531,7 +531,6 @@ export default function AdminUsers() {
                 <SelectItem value="atleta">Atleta</SelectItem>
                 <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
                 <SelectItem value="time">Time</SelectItem>
-                <SelectItem value="escolinha">Escolinha</SelectItem>
               </SelectContent>
             </Select>
 
