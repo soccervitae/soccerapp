@@ -39,7 +39,7 @@ const Landing = () => {
   const featuresByAccount = [
     {
       emoji: "",
-      customEmoji: playerKickingIcon,
+      customIcon: Shirt,
       accountType: "Atleta",
       accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
       features: [
