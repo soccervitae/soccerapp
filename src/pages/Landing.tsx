@@ -114,14 +114,9 @@ const Landing = () => {
         {/* Hero Section with Parallax */}
         <section ref={heroRef} className="w-full relative overflow-hidden min-h-[320px] md:min-h-[400px]">
           {/* Parallax Background */}
-          <motion.div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url(${stadiumHero})`,
-              y: backgroundY,
-              scale: 1.1,
-            }}
-          />
+          <div className="absolute inset-0">
+            <SoccerShowcase fullscreen />
+          </div>
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-white/20" />
           
