@@ -236,7 +236,7 @@ const ForgotPassword = () => {
 
             <Button
               type="submit"
-className="w-full h-12 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+className="w-full h-12 rounded bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
               disabled={loading}
             >
               {loading ? "Enviando..." : "Enviar código"}
