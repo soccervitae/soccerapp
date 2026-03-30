@@ -505,6 +505,20 @@ const Profile = () => {
   const isOfficialAccount = (profile as any)?.is_official_account === true;
   const isTeamOrSchool = profile?.account_type === 'time';
 
+  // Set correct default tab for guests once profile loads
+  const hasSetGuestTabRef = useRef(false);
+  useEffect(() => {
+    if (isGuest && profile && !hasSetGuestTabRef.current) {
+      hasSetGuestTabRef.current = true;
+      if (isTeamOrSchool) {
+        setActiveTab("profile");
+      } else if (isOfficialAccount) {
+        setActiveTab("videos");
+      } else {
+        setActiveTab("teams");
+      }
+    }
+  }, [isGuest, profile, isTeamOrSchool, isOfficialAccount]);
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
     ? (isGuest ? ["profile", "videos", "photos", "championships", "achievements"] : ["profile", "videos", "photos", "championships", "achievements"])
