@@ -116,7 +116,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center pt-14 pb-8">
+      <div className="flex items-center justify-center pt-20 pb-8">
         {/* Logo */}
         <img 
           src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
