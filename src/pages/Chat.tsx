@@ -109,6 +109,7 @@ const Chat = () => {
           .eq("id", otherParticipant.user_id)
           .single();
         setParticipant(profile);
+        setIsDeletedUser(!profile);
       }
     };
 
