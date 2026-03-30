@@ -54,7 +54,7 @@ const Landing = () => {
               width={1920}
               height={1024}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,0%)]/85 via-[hsl(0,0%,0%)]/50 to-[hsl(0,0%,0%)]/30" />
+            <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[hsl(0,0%,0%)]/85 via-[hsl(0,0%,0%)]/50 to-[hsl(0,0%,0%)]/30" />
           </div>
 
           {/* Hero content wrapper - two column grid on desktop */}
