@@ -680,36 +680,10 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    // Upload emblem if provided
-    let emblemUrl: string | null = null;
-    if (isTeamOrSchool && emblemFile) {
-      const fileExt = emblemFile.name.split(".").pop();
-      const filePath = `${user.id}/emblem.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, emblemFile, { upsert: true });
-      
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(filePath);
-        emblemUrl = urlData.publicUrl;
-      }
-    }
-
-    // Save account type and team info to profile
-    const profileUpdate: Record<string, any> = { account_type: accountType };
-    if (isTeamOrSchool) {
-      profileUpdate.nickname = teamName.trim();
-      profileUpdate.full_name = teamName.trim();
-      if (emblemUrl) {
-        profileUpdate.avatar_url = emblemUrl;
-      }
-    }
-
+    // Save account type to profile
     await supabase
       .from("profiles")
-      .update(profileUpdate as any)
+      .update({ account_type: accountType } as any)
       .eq("id", user.id);
 
     // Send verification code
