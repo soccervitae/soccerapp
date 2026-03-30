@@ -166,7 +166,7 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVer
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-16 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center justify-between">
         {isOwnProfile ? (
           <div className="w-10 h-10" />
         ) : (
