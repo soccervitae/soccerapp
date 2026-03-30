@@ -179,6 +179,8 @@ const Landing = () => {
               >
                 {type.customEmoji ? (
                   <img src={type.customEmoji} alt={type.accountType} className="w-16 h-16" loading="lazy" />
+                ) : type.customIcon ? (
+                  <type.customIcon className="w-16 h-16 text-primary" />
                 ) : (
                   <span className="text-5xl">{type.emoji}</span>
                 )}
