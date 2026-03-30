@@ -306,10 +306,24 @@ export const ProfileInfo = ({
                 </div>
               )}
             </div>
+            {profile.nickname && (
+              <p className="text-muted-foreground font-semibold text-sm mt-0.5">
+                "{profile.nickname}"
+              </p>
+            )}
+            {profile.nickname && profile.position_name && profile.account_type !== 'time' && (
+              <p className="text-muted-foreground/70 text-xs mt-0.5">
+                {profile.position_name}
+              </p>
+            )}
             <p className="text-muted-foreground font-medium text-sm mt-0.5">
               {(() => {
                 if (profile.account_type === 'time') {
                   return 'Time de Futebol';
+                }
+                if (profile.nickname) {
+                  // If nickname is shown, only show team here
+                  return profile.team || `@${profile.username}`;
                 }
                 const displayRole = profile.position_name;
                 if (displayRole && profile.team) return `${displayRole} · ${profile.team}`;
