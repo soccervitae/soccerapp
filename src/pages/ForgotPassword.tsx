@@ -185,13 +185,12 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header com background */}
-      <div className="relative h-48 flex items-center justify-center">
-        <div className="absolute inset-0" />
-        <div className="relative z-10 text-center">
+      <div className="flex items-center justify-center pt-20 pb-8">
+        <div className="text-center">
           <img 
             src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png" 
             alt="Soccer Vitae" 
-            className="h-10 w-auto mx-auto mb-4 object-contain"
+            className="h-7 w-auto mx-auto mb-4 object-contain"
           />
           <h1 className="text-2xl font-bold text-foreground">
             {stage === "success" ? "Senha Redefinida!" : "Recuperar Senha"}
