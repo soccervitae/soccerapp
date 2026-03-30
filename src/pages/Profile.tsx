@@ -707,7 +707,7 @@ const Profile = () => {
   const MainContent = () => (
     <>
       <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
-      <div className="pt-[50px] flex flex-col gap-4">
+      <div className={`${isGuest ? '' : 'pt-[50px]'} flex flex-col gap-4`}>
         <ProfileContent />
       </div>
     </>
