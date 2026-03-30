@@ -841,7 +841,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <SelectItem value="atleta">Atleta</SelectItem>
             <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
             <SelectItem value="time">Time</SelectItem>
-            <SelectItem value="escolinha">Escolinha de Futebol</SelectItem>
           </SelectContent>
         </Select>
         {touched.accountType && !isAccountTypeValid && (
