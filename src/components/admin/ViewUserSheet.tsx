@@ -273,12 +273,10 @@ export function ViewUserSheet({
                   {user.account_type && (
                     <Badge variant="outline" className={
                       user.account_type === 'time' ? 'border-blue-500 text-blue-500 mt-1' :
-                      user.account_type === 'escolinha' ? 'border-orange-500 text-orange-500 mt-1' :
                       user.account_type === 'comissao_tecnica' ? 'border-purple-500 text-purple-500 mt-1' :
                       'border-emerald-500 text-emerald-500 mt-1'
                     }>
                       {user.account_type === 'time' ? 'Time' :
-                       user.account_type === 'escolinha' ? 'Escolinha' :
                        user.account_type === 'comissao_tecnica' ? 'Comissão Técnica' : 'Atleta'}
                     </Badge>
                   )}
