@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import logoWhite from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import stadiumHero from "@/assets/soccer-player-hero.jpg";
-import heroPlayersNight from "@/assets/hero-players-night.jpg";
+import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
 import footballFieldIcon from "@/assets/football-field-icon.png";
@@ -111,7 +111,7 @@ const Landing = () => {
           {/* Background image - full width */}
           <div className="absolute inset-0">
             <img 
-              src={heroPlayersNight} 
+              src={heroBannerProfessional} 
               alt="Jogadores disputando bola" 
               className="w-full h-full object-cover object-center"
               width={1920}
