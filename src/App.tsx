@@ -15,6 +15,7 @@ import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import { GlobalOfflineBanner } from "@/components/common/GlobalOfflineBanner";
+import PwaOnlyGate from "@/components/common/PwaOnlyGate";
 
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
