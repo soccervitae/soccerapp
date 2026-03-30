@@ -125,14 +125,7 @@ const Landing = () => {
               >
                 Baixar App
               </Button>
-            ) : (
-              <Button
-                onClick={() => navigate("/auth")}
-                className="mt-8 w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-12 rounded text-sm tracking-wider uppercase"
-              >
-                Saiba Mais
-              </Button>
-            )}
+            ) : null}
           </div>
         </section>
 
