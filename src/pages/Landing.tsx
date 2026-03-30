@@ -68,7 +68,8 @@ const Landing = () => {
       ],
     },
     {
-      emoji: "🛡️",
+      emoji: "",
+      customIcon: Shield,
       accountType: "Time de Futebol",
       accountDescription: "Clubes e equipes com presença na plataforma.",
       features: [
