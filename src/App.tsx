@@ -29,6 +29,7 @@ import Settings from "./pages/settings/Index";
 import Saved from "./pages/settings/Saved";
 import MyPosts from "./pages/settings/MyPosts";
 import Verification from "./pages/settings/Verification";
+import Favorites from "./pages/settings/Favorites";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
 
@@ -226,6 +227,11 @@ const AnimatedRoutes = () => {
       <Route path="/settings/my-posts" element={
         <ProtectedRoute>
           <PageTransition><MyPosts /></PageTransition>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/favorites" element={
+        <ProtectedRoute>
+          <PageTransition><Favorites /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/settings/verification" element={
