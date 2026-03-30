@@ -183,11 +183,3 @@ div[style*="Edit with Lovable"],
   z-index: -9999 !important;
 }
 
-/* PWA safe-area: push fixed top headers below the status bar */
-@supports (padding-top: env(safe-area-inset-top)) {
-  @media (display-mode: standalone) {
-    .fixed.top-0 {
-      padding-top: max(1rem, env(safe-area-inset-top)) !important;
-    }
-  }
-}
