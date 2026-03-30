@@ -140,9 +140,9 @@ export default function AdminUsers() {
     if (filters.status === "banned") {
       query = query.not("banned_at", "is", null);
     } else if (filters.status === "verified") {
-      query = query.eq("conta_verificada", true).is("banned_at", null);
+      query = query.eq("is_verified_premium", true).is("banned_at", null);
     } else if (filters.status === "unverified") {
-      query = query.eq("conta_verificada", false).is("banned_at", null);
+      query = query.eq("is_verified_premium", false).is("banned_at", null);
     } else if (filters.status === "admin" && adminUserIds && adminUserIds.length > 0) {
       query = query.in("id", adminUserIds);
     }
