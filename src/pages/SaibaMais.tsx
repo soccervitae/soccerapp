@@ -145,7 +145,7 @@ const SaibaMais = () => {
                 )}
                 <h3 className="text-foreground text-lg font-bold">{type.accountType}</h3>
                 <p className="text-muted-foreground text-sm">{type.accountDescription}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
