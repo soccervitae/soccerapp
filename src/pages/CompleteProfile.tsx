@@ -160,11 +160,11 @@ const CompleteProfile = () => {
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
       if (profile.nickname) {
         setNickname(profile.nickname);
-        if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
+        if (profile.account_type === 'time') {
           setTeamName(profile.nickname);
         }
       }
-      if (profile.avatar_url && (profile.account_type === 'time' || profile.account_type === 'escolinha')) {
+      if (profile.avatar_url && profile.account_type === 'time') {
         setEmblemPreview(profile.avatar_url);
       }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
