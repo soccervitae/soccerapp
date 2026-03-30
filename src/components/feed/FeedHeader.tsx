@@ -6,7 +6,7 @@ export const FeedHeader = () => {
       <img 
         src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png" 
         alt="SOCCER VITAE"
-        className="h-6 object-contain"
+        className="h-4 object-contain"
       />
       <div className="flex items-center gap-2">
         <NotificationBell />
