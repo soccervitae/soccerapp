@@ -618,7 +618,7 @@ export const FeedPost = ({
                 <span className="material-symbols-outlined text-[12px] font-bold">star</span>
               </div>
             ) : (post.profile as any).is_verified_premium && (!(post.profile as any).verified_premium_expires_at || new Date((post.profile as any).verified_premium_expires_at) > new Date()) ? (
-              <div className="absolute -bottom-0.5 -right-0.5 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
+              <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center border-2 border-background">
                 <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
               </div>
             ) : post.profile.conta_verificada && (

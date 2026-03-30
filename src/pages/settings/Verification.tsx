@@ -34,12 +34,12 @@ export default function Verification() {
       <div className="pt-14 pb-20 px-4">
         {/* Hero */}
         <div className="flex flex-col items-center text-center py-8">
-          <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-white text-[40px]">verified</span>
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-4">
+            <span className="material-symbols-outlined text-primary-foreground text-[40px]">verified</span>
           </div>
           <h2 className="text-2xl font-bold text-foreground">Soccer Vitae Premium</h2>
           <p className="text-muted-foreground mt-2 max-w-xs">
-            Destaque-se com o selo de verificação azul e tenha benefícios exclusivos.
+            Destaque-se com o selo de verificação e tenha benefícios exclusivos.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export default function Verification() {
         <div className="bg-card rounded-xl border border-border p-4 mb-6">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Benefícios inclusos</p>
           <div className="space-y-3">
-            <BenefitItem icon="verified" text="Selo de verificação azul no perfil" />
+            <BenefitItem icon="verified" text="Selo de verificação no perfil" />
             <BenefitItem icon="edit" text="Alterar nome de usuário quando quiser" />
             <BenefitItem icon="star" text="Destaque no feed e nas buscas" />
             <BenefitItem icon="support_agent" text="Suporte prioritário" />
@@ -63,10 +63,10 @@ export default function Verification() {
 
         {/* Status or CTA */}
         {isActive ? (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center">
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-blue-500 text-[20px]">verified</span>
-              <span className="font-bold text-blue-500">Conta Verificada</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
+              <span className="font-bold text-primary">Conta Verificada</span>
             </div>
             {expiresAt && (
               <p className="text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ export default function Verification() {
         ) : (
           <button
             onClick={handleGetVerification}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors text-base"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 rounded-xl transition-colors text-base"
           >
             {isPremium && isExpired ? "Renovar Verificação" : "Obter Verificação Premium"}
           </button>
@@ -85,7 +85,7 @@ export default function Verification() {
 
         {isPremium && isExpired && (
           <p className="text-center text-sm text-destructive mt-3">
-            Sua verificação expirou. Renove para manter o selo azul.
+            Sua verificação expirou. Renove para manter o selo.
           </p>
         )}
       </div>
@@ -96,8 +96,8 @@ export default function Verification() {
 function BenefitItem({ icon, text }: { icon: string; text: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-        <span className="material-symbols-outlined text-blue-500 text-[18px]">{icon}</span>
+      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <span className="material-symbols-outlined text-primary text-[18px]">{icon}</span>
       </div>
       <span className="text-sm text-foreground">{text}</span>
     </div>
