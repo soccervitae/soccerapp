@@ -14,7 +14,7 @@ interface SoccerShowcaseProps {
   banner?: boolean;
 }
 
-const SoccerShowcase = ({ fullscreen = false }: SoccerShowcaseProps) => {
+const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcaseProps) => {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
