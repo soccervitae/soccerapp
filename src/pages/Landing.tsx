@@ -79,6 +79,7 @@ const Landing = () => {
         { icon: User, title: "Perfil do Clube", description: "Página oficial com escudo, informações e história." },
         { icon: Newspaper, title: "Feed", description: "Compartilhe novidades, resultados e bastidores do clube." },
         { icon: Camera, title: "Replays", description: "Publique momentos dos jogos e treinos por 24 horas." },
+        { icon: Play, title: "Vídeos", description: "Publique vídeos de jogos, gols e momentos do clube." },
         { icon: Film, title: "Destaques", description: "Álbuns permanentes com os melhores momentos do time." },
         { icon: UserPlus, title: "Elenco", description: "Gerencie o elenco e receba solicitações de atletas." },
         { icon: Search, title: "Buscar Talentos", description: "Encontre novos atletas por posição e região." },
