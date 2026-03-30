@@ -97,11 +97,42 @@ const SaibaMais = () => {
       <div className="min-h-screen bg-background text-foreground font-sans">
         {/* Fixed Header */}
         <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/30">
-          <div className="max-w-7xl mx-auto flex items-center gap-3 px-4 h-14">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="shrink-0">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <img src={logoGreen} alt="SOCCER VITAE" className="h-5" />
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-14">
+            <img 
+              src={logoGreen} 
+              alt="SOCCER VITAE" 
+              className="h-5 cursor-pointer" 
+              onClick={() => navigate('/')} 
+            />
+            <div className="flex items-center gap-2">
+              {isMobile ? (
+                <Button
+                  size="sm"
+                  onClick={() => setShowInstallSheet(true)}
+                  className="gap-1.5"
+                >
+                  <Download className="w-4 h-4" />
+                  Baixar App
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/auth', { state: { tab: 'login' } })}
+                    className="text-foreground"
+                  >
+                    Entrar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/auth', { state: { tab: 'signup' } })}
+                  >
+                    Criar Conta
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
