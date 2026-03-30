@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SoccerAnimation from "@/components/pwa/SoccerAnimation";
 
 const PwaHome = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const PwaHome = () => {
           Onde talentos<br />encontram<br />oportunidades
         </p>
       </div>
+
+      <SoccerAnimation />
       
       <div className="flex flex-col gap-3 w-full max-w-sm">
         <Button
