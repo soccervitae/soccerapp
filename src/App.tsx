@@ -267,6 +267,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/championships" element={<AdminRoute><AdminChampionships /></AdminRoute>} />
       <Route path="/admin/achievements" element={<AdminRoute><AdminAchievements /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+      <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
       
       {/* Error pages */}
       <Route path="/403" element={<PageTransition><Forbidden /></PageTransition>} />
