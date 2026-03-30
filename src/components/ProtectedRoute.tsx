@@ -16,7 +16,7 @@ export const ProtectedRoute = ({
   children, 
   requireCompleteProfile = true,
   requireOnboarding = true,
-  requirePwa = true,
+  requirePwa = false,
 }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
