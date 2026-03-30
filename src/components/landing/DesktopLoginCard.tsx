@@ -6,12 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Eye, EyeOff, Mail, Lock, Loader2, User, Check, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
-import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
+import SignupVerification from "@/components/auth/SignupVerification";
 
 const DesktopLoginCard = () => {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+
+  return (
+    <div className="hidden md:flex flex-col w-[380px] shrink-0 bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8 self-center max-h-[90vh] overflow-y-auto">
+      {mode === "login" ? (
+        <LoginForm onSwitchToSignup={() => setMode("signup")} />
+      ) : (
+        <SignupForm onSwitchToLogin={() => setMode("login")} />
+      )}
+    </div>
+  );
+};
+
+// ── Login Form ──────────────────────────────────────────
+interface LoginFormProps {
+  onSwitchToSignup: () => void;
+}
+
+const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
@@ -37,7 +63,6 @@ const DesktopLoginCard = () => {
         return;
       }
 
-      // Check 2FA
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -83,9 +108,7 @@ const DesktopLoginCard = () => {
   };
 
   return (
-    <div className="hidden md:flex flex-col w-[380px] shrink-0 bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8 self-center">
-      
-
+    <>
       <form onSubmit={handleLogin} className="space-y-4">
         <div className="space-y-2">
           <Label className="text-white/70 text-xs">E-mail</Label>
@@ -186,13 +209,290 @@ const DesktopLoginCard = () => {
       <p className="text-center text-xs text-white/40 mt-5">
         Não tem conta?{" "}
         <button
-          onClick={() => navigate("/auth?tab=signup")}
+          onClick={onSwitchToSignup}
           className="text-primary hover:text-primary/80 font-medium transition-colors"
         >
           Cadastre-se
         </button>
       </p>
-    </div>
+    </>
+  );
+};
+
+// ── Signup Form ─────────────────────────────────────────
+interface SignupFormProps {
+  onSwitchToLogin: () => void;
+}
+
+const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
+  const { signUp } = useAuth();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [accountType, setAccountType] = useState("");
+  const [gender, setGender] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showVerification, setShowVerification] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const validateEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+  const isPasswordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^a-zA-Z0-9]/.test(password);
+
+  const isFormValid =
+    firstName.trim().length >= 2 &&
+    lastName.trim().length >= 2 &&
+    validateEmail(email) &&
+    isPasswordValid &&
+    password === confirmPassword &&
+    accountType.length > 0 &&
+    (accountType === "time" || gender.length > 0);
+
+  const translateError = (msg: string): string => {
+    if (msg.includes("User already registered")) return "Este email já está cadastrado. Tente fazer login.";
+    if (msg.includes("Password should be at least")) return "A senha deve ter pelo menos 6 caracteres.";
+    return msg;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (!isFormValid) {
+      setErrorMessage("Preencha todos os campos corretamente");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await signUp({
+      email,
+      password,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      accountType: accountType || undefined,
+    });
+
+    if (error) {
+      setErrorMessage(translateError(error.message));
+      setLoading(false);
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setErrorMessage("Erro ao criar conta. Tente novamente.");
+      setLoading(false);
+      return;
+    }
+
+    await supabase
+      .from("profiles")
+      .update({ account_type: accountType, gender: gender || null } as any)
+      .eq("id", user.id);
+
+    const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
+      body: { email, user_id: user.id, first_name: firstName.trim() },
+    });
+
+    if (sendError) {
+      toast.error("Erro ao enviar código de verificação");
+      setLoading(false);
+      return;
+    }
+
+    setUserId(user.id);
+    setShowVerification(true);
+    setLoading(false);
+  };
+
+  const handleVerificationComplete = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/install?from=signup";
+  };
+
+  if (showVerification && userId) {
+    return (
+      <SignupVerification
+        email={email}
+        userId={userId}
+        firstName={firstName}
+        onVerified={handleVerificationComplete}
+        onBack={() => { setShowVerification(false); setUserId(null); }}
+      />
+    );
+  }
+
+  const inputClass = "bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-primary h-10";
+  const labelClass = "text-white/70 text-xs";
+
+  return (
+    <>
+      {/* Back to login */}
+      <button
+        onClick={onSwitchToLogin}
+        className="flex items-center gap-1 text-xs text-white/50 hover:text-white/70 mb-4 transition-colors"
+      >
+        <ArrowLeft className="w-3 h-3" />
+        Voltar ao login
+      </button>
+
+      <h3 className="text-white font-semibold text-lg mb-4">Criar conta</h3>
+
+      {errorMessage && (
+        <div className="flex items-center gap-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg mb-3">
+          <X className="h-4 w-4 text-red-400 flex-shrink-0" />
+          <p className="text-xs text-red-300">{errorMessage}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Account Type */}
+        <div className="space-y-1">
+          <Label className={labelClass}>Tipo de Conta *</Label>
+          <Select value={accountType} onValueChange={setAccountType}>
+            <SelectTrigger className={`${inputClass} w-full`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="atleta">Atleta</SelectItem>
+              <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
+              <SelectItem value="time">Time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Name row */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Label className={labelClass}>Nome *</Label>
+            <Input
+              placeholder="João"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className={inputClass}
+              maxLength={30}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className={labelClass}>Sobrenome *</Label>
+            <Input
+              placeholder="Silva"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className={inputClass}
+              maxLength={50}
+            />
+          </div>
+        </div>
+
+        {/* Gender (hidden for teams) */}
+        {accountType !== "time" && (
+          <div className="space-y-1">
+            <Label className={labelClass}>Sexo *</Label>
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger className={`${inputClass} w-full`}>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="homem">Masculino</SelectItem>
+                <SelectItem value="mulher">Feminino</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Email */}
+        <div className="space-y-1">
+          <Label className={labelClass}>E-mail *</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Input
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`pl-10 ${inputClass}`}
+            />
+          </div>
+        </div>
+
+        {/* Password */}
+        <div className="space-y-1">
+          <Label className={labelClass}>Senha *</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`pl-10 pr-10 ${inputClass}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {password.length > 0 && !isPasswordValid && (
+            <p className="text-[10px] text-white/40">Mín. 8 caracteres, maiúscula, número e especial</p>
+          )}
+        </div>
+
+        {/* Confirm Password */}
+        <div className="space-y-1">
+          <Label className={labelClass}>Confirmar Senha *</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={`pl-10 ${inputClass}`}
+            />
+            {confirmPassword.length > 0 && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {password === confirmPassword ? (
+                  <Check className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <X className="w-4 h-4 text-red-400" />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          disabled={loading || !isFormValid}
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11 rounded-lg"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Cadastrar"}
+        </Button>
+      </form>
+
+      <p className="text-center text-xs text-white/40 mt-4">
+        Já tem conta?{" "}
+        <button
+          onClick={onSwitchToLogin}
+          className="text-primary hover:text-primary/80 font-medium transition-colors"
+        >
+          Entrar
+        </button>
+      </p>
+    </>
   );
 };
 
