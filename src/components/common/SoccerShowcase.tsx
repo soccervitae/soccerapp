@@ -42,6 +42,25 @@ const SoccerShowcase = ({ fullscreen = false, banner = false }: SoccerShowcasePr
     );
   }
 
+  if (banner) {
+    return (
+      <div className="w-full relative overflow-hidden rounded-xl h-[280px]">
+        {slides.map((slide, i) => (
+          <img
+            key={i}
+            src={slide.src}
+            alt={slide.label}
+            loading="lazy"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              i === active ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-sm mx-auto">
       <div className="relative w-full aspect-video rounded-lg overflow-hidden">
