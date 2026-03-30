@@ -45,9 +45,11 @@ const Chat = () => {
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeletedUserDeleteDialog, setShowDeletedUserDeleteDialog] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
+  const [isDeletedUser, setIsDeletedUser] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
