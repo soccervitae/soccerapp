@@ -15,6 +15,7 @@ import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import { GlobalOfflineBanner } from "@/components/common/GlobalOfflineBanner";
+import PwaOnlyGate from "@/components/common/PwaOnlyGate";
 
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -119,11 +120,11 @@ const AnimatedRoutes = () => {
       <Route path="/" element={<LandingOrIndex />} />
       
       {/* Public auth routes */}
-      <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-      <Route path="/login" element={<Navigate to="/auth" replace />} />
-      <Route path="/signup" element={<Navigate to="/auth" replace />} />
-      <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-      <Route path="/two-factor-verify" element={<PageTransition><TwoFactorVerify /></PageTransition>} />
+      <Route path="/auth" element={<PwaOnlyGate><PageTransition><Auth /></PageTransition></PwaOnlyGate>} />
+      <Route path="/login" element={<PwaOnlyGate><Navigate to="/auth" replace /></PwaOnlyGate>} />
+      <Route path="/signup" element={<PwaOnlyGate><Navigate to="/auth" replace /></PwaOnlyGate>} />
+      <Route path="/forgot-password" element={<PwaOnlyGate><PageTransition><ForgotPassword /></PageTransition></PwaOnlyGate>} />
+      <Route path="/two-factor-verify" element={<PwaOnlyGate><PageTransition><TwoFactorVerify /></PageTransition></PwaOnlyGate>} />
       
       {/* Install page - public, no login required */}
       <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
