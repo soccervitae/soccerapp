@@ -504,7 +504,7 @@ const Profile = () => {
 
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
-    ? (isGuest ? ["videos", "photos", "championships", "achievements", "squad"] : ["profile", "videos", "photos", "championships", "achievements", "squad"])
+    ? (isGuest ? ["videos", "photos", "championships", "achievements"] : ["profile", "videos", "photos", "championships", "achievements"])
     : isOfficialAccount 
       ? (isGuest ? ["videos", "photos"] : ["profile", "videos", "photos"])
       : (isGuest ? ["teams", "videos", "championships", "achievements", "photos"] : ["profile", "teams", "videos", "championships", "achievements", "photos"]);
@@ -593,15 +593,6 @@ const Profile = () => {
             {!isMobile && 'Conquistas'}
           </TabsTrigger>
         )}
-        {isTeamOrSchool && (
-          <TabsTrigger 
-            value="squad" 
-            className={`${isMobile ? 'flex-1 px-1' : 'flex-1 px-2'} flex-col gap-1 text-xs py-3.5 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-muted-foreground`}
-          >
-            <span className="material-symbols-outlined text-[26px]">groups</span>
-            {!isMobile && 'Elenco'}
-          </TabsTrigger>
-        )}
       </TabsList>
 
       <motion.div
@@ -667,13 +658,6 @@ const Profile = () => {
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
-        {isTeamOrSchool && (
-          <TabsContent value="squad" className="mt-4" forceMount={activeTab === "squad" ? true : undefined}>
-            {activeTab === "squad" && (
-              <SquadTab userId={targetUserId} isOwnProfile={isOwnProfile} />
-            )}
-          </TabsContent>
-        )}
 
         {isTeamOrSchool && (
           <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
