@@ -533,7 +533,7 @@ const Profile = () => {
   // Profile tabs component
   const ProfileTabs = () => (
     <Tabs value={activeTab} onValueChange={changeTabPreservingScroll} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
-      <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-[50px] z-30 bg-background rounded' : 'justify-center bg-transparent'}`}>
+      <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? 'justify-center sticky top-[50px] z-30 bg-background rounded-none' : 'justify-center bg-transparent'}`}>
         {!isGuest && (
           <TabsTrigger 
             value="profile" 
