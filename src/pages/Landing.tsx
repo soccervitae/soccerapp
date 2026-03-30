@@ -60,10 +60,10 @@ const Landing = () => {
           {/* Hero content wrapper - two column grid on desktop */}
           <div className="relative z-20 grid md:grid-cols-2 items-center min-h-screen w-full">
             {/* Left content */}
-            <div className="flex flex-col justify-center pt-14 pb-10 md:py-16 md:px-[96px] px-[92px]">
-              <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
+            <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left pt-14 pb-10 md:py-16 md:px-[96px] px-6">
+              <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6 mx-auto md:mx-0" />
               
-              <h1 className="font-bold tracking-[0.15em] text-white/70 mb-3 py-[22px] text-left text-3xl md:text-3xl">
+              <h1 className="font-bold tracking-[0.15em] text-white/70 mb-3 py-[22px] text-center md:text-left text-3xl md:text-3xl">
                 Onde talentos
                 <br />
                 encontram oportunidades
@@ -74,7 +74,7 @@ const Landing = () => {
                 <p className="text-sm md:text-base text-white/50 mb-3 tracking-wide">
                   Escolha o perfil que mais combina com você.
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap justify-center md:justify-start gap-3">
                   <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                     <Icon iconNode={soccerBall} className="w-4 h-4 text-primary" />
                     <span className="text-xs md:text-sm text-white/80 font-medium">Atleta</span>
@@ -90,7 +90,7 @@ const Landing = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex justify-center md:justify-start gap-3">
                 {isMobile ? (
                   <Button
                     onClick={() => setShowInstallSheet(true)}
