@@ -843,9 +843,7 @@ const Profile = () => {
         <AdminMobileHeader />
       ) : user ? (
         <BottomNavigation activeTab="profile" />
-      ) : (
-        <GuestBanner />
-      )}
+      ) : null}
 
       <MediaViewers />
     </ContentWrapper>
