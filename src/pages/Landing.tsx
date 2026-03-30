@@ -224,12 +224,14 @@ const Landing = () => {
                   {account.features.map((feature, fIdx) => (
                     <div
                       key={fIdx}
-                      className="flex flex-row sm:flex-col items-center sm:items-start gap-3 sm:gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
+                      className="flex flex-col sm:flex-col gap-2 rounded-lg border border-border/30 bg-card p-4 hover:border-primary/20 transition-all"
                     >
-                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                        <feature.icon className="w-4 h-4 text-primary" />
+                      <div className="flex flex-row items-center gap-3">
+                        <div className="w-9 h-9 shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
+                          <feature.icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <h4 className="text-foreground text-sm font-semibold">{feature.title}</h4>
                       </div>
-                      <h4 className="text-foreground text-sm font-semibold">{feature.title}</h4>
                       <p className="text-muted-foreground text-xs leading-relaxed">{feature.description}</p>
                     </div>
                   ))}
