@@ -49,7 +49,7 @@ const REPORT_REASONS = [
   { value: "other", label: "Outro" },
 ];
 
-export const ProfileHeader = ({ username, isOwnProfile = false, profileId }: ProfileHeaderProps) => {
+export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVerifiedPremium, premiumExpiresAt, contaVerificada, isOfficialAccount }: ProfileHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [visitorsSheetOpen, setVisitorsSheetOpen] = useState(false);
