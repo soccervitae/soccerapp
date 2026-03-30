@@ -54,6 +54,9 @@ export interface Post {
     avatar_url: string | null;
     team: string | null;
     conta_verificada: boolean;
+    is_verified_premium: boolean | null;
+    verified_premium_expires_at: string | null;
+    is_official_account: boolean | null;
     gender: string | null;
     role: string | null;
     posicaomas: number | null;
