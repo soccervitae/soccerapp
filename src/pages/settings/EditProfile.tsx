@@ -156,7 +156,7 @@ const EditProfile = () => {
   };
 
   // Validation errors
-  const isTeamOrSchool = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+  const isTeamOrSchool = profile?.account_type === 'time';
 
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -252,7 +252,7 @@ const EditProfile = () => {
   // Initialize form when profile loads AND positions/functions are available
   useEffect(() => {
     // Wait for profile and the relevant options to be loaded
-    const isTeamOrSchoolAccount = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+    const isTeamOrSchoolAccount = profile?.account_type === 'time';
     const hasPositionOptions = positions.length > 0 || functions.length > 0;
     
     if (profile && !formInitialized && (isTeamOrSchoolAccount || hasPositionOptions)) {
@@ -698,19 +698,13 @@ const EditProfile = () => {
         <div className="px-4 mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="full_name" className="flex items-center gap-1">
-              {isTeamOrSchool 
-                ? (profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha')
-                : 'Nome Completo'
-              } <span className="text-destructive">*</span>
+              {isTeamOrSchool ? 'Nome do Time' : 'Nome Completo'} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder={isTeamOrSchool 
-                ? (profile?.account_type === 'time' ? 'Nome do time' : 'Nome da escolinha')
-                : 'Seu nome completo'
-              }
+              placeholder={isTeamOrSchool ? 'Nome do time' : 'Seu nome completo'}
               className={showValidationErrors && validationErrors.full_name ? "border-destructive" : ""}
             />
             {showValidationErrors && validationErrors.full_name && (
@@ -854,7 +848,7 @@ const EditProfile = () => {
                       setFormData({ ...formData, city: e.target.value });
                     }
                   }}
-                  placeholder="Cidade do time/escolinha"
+                  placeholder="Cidade do time"
                   maxLength={100}
                 />
               </div>

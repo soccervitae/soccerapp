@@ -52,7 +52,7 @@ export const ProfileInfo = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Squad request hooks (for team/school profiles)
-  const isTeamOrSchool = profile.account_type === 'time' || profile.account_type === 'escolinha';
+  const isTeamOrSchool = profile.account_type === 'time';
   const { data: mySquadRequest } = useMySquadRequest(isTeamOrSchool && !isOwnProfile ? profile.id : undefined);
   const requestJoin = useRequestJoinSquad();
   const cancelRequest = useCancelSquadRequest();
@@ -254,8 +254,8 @@ export const ProfileInfo = ({
             </div>
             <p className="text-muted-foreground font-medium text-sm mt-0.5">
               {(() => {
-                if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
-                  return profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol';
+                if (profile.account_type === 'time') {
+                  return 'Time de Futebol';
                 }
                 const displayRole = profile.position_name;
                 if (displayRole && profile.team) return `${displayRole} · ${profile.team}`;
@@ -287,7 +287,7 @@ export const ProfileInfo = ({
           </div>
 
           {/* Physical stats chips */}
-          {profile.account_type !== 'time' && profile.account_type !== 'escolinha' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
+          {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
             <div className="flex items-center gap-2 mt-4">
               <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
                 <span className="material-symbols-outlined text-[14px] text-muted-foreground">cake</span>
@@ -461,8 +461,8 @@ export const ProfileInfo = ({
         </h2>
         <p className="text-muted-foreground font-bold text-base">
           {(() => {
-          if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
-            return profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol';
+          if (profile.account_type === 'time') {
+            return 'Time de Futebol';
           }
           const displayRole = profile.position_name;
           if (displayRole && profile.team) return `${displayRole} | ${profile.team}`;
@@ -485,7 +485,7 @@ export const ProfileInfo = ({
           </button>
         </div>}
 
-      {profile.account_type !== 'time' && profile.account_type !== 'escolinha' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
+      {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && <div className="grid grid-cols-4 gap-2 bg-card rounded-2xl p-3 w-full py-[4px]">
           <div className="flex flex-col gap-1 p-2 text-center">
             <p className="text-foreground text-sm font-bold">{age || "-"}</p>
             <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>

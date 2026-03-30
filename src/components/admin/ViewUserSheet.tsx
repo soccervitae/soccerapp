@@ -273,16 +273,14 @@ export function ViewUserSheet({
                   {user.account_type && (
                     <Badge variant="outline" className={
                       user.account_type === 'time' ? 'border-blue-500 text-blue-500 mt-1' :
-                      user.account_type === 'escolinha' ? 'border-orange-500 text-orange-500 mt-1' :
                       user.account_type === 'comissao_tecnica' ? 'border-purple-500 text-purple-500 mt-1' :
                       'border-emerald-500 text-emerald-500 mt-1'
                     }>
                       {user.account_type === 'time' ? 'Time' :
-                       user.account_type === 'escolinha' ? 'Escolinha' :
                        user.account_type === 'comissao_tecnica' ? 'Comissão Técnica' : 'Atleta'}
                     </Badge>
                   )}
-                  {user.nickname && !['time', 'escolinha'].includes(user.account_type || '') && (
+                  {user.nickname && user.account_type !== 'time' && (
                     <p className="text-sm text-muted-foreground/70">Apelido: {user.nickname}</p>
                   )}
                   {user.bio && (
@@ -342,7 +340,7 @@ export function ViewUserSheet({
 
                 <TabsContent value="info" className="space-y-4 mt-4">
                   {/* Team/School specific info */}
-                  {(user.account_type === 'time' || user.account_type === 'escolinha') ? (
+                  {user.account_type === 'time' ? (
                     <div className="space-y-3">
                       {userEmail && (
                         <div className="flex items-center gap-2 text-sm">

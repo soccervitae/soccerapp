@@ -52,16 +52,12 @@ export const AboutTab = ({ profile }: AboutTabProps) => {
           </div>
         )}
 
-        {profile.account_type && (
+        {profile.account_type === 'time' && (
           <div className="bg-card rounded-xl p-4 border border-border/50 flex items-center gap-3">
-            <span className="material-symbols-outlined text-[22px] text-primary">
-              {profile.account_type === 'time' ? 'shield' : 'school'}
-            </span>
+            <span className="material-symbols-outlined text-[22px] text-primary">shield</span>
             <div>
               <p className="text-xs text-muted-foreground">Tipo de conta</p>
-              <p className="text-sm font-semibold text-foreground capitalize">
-                {profile.account_type === 'time' ? 'Time de Futebol' : 'Escolinha de Futebol'}
-              </p>
+              <p className="text-sm font-semibold text-foreground">Time de Futebol</p>
             </div>
           </div>
         )}

@@ -531,7 +531,6 @@ export default function AdminUsers() {
                 <SelectItem value="atleta">Atleta</SelectItem>
                 <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
                 <SelectItem value="time">Time</SelectItem>
-                <SelectItem value="escolinha">Escolinha</SelectItem>
               </SelectContent>
             </Select>
 
@@ -649,8 +648,6 @@ export default function AdminUsers() {
                     <TableCell>
                       {user.account_type === 'time' ? (
                         <Badge variant="outline" className="border-blue-500 text-blue-500">Time</Badge>
-                      ) : user.account_type === 'escolinha' ? (
-                        <Badge variant="outline" className="border-orange-500 text-orange-500">Escolinha</Badge>
                       ) : user.account_type === 'comissao_tecnica' ? (
                         <Badge variant="outline" className="border-purple-500 text-purple-500">Comissão</Badge>
                       ) : (

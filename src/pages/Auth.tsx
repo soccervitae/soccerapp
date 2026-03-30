@@ -551,7 +551,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   
   const { signUp } = useAuth();
   
-  const isTeamOrSchool = accountType === "time" || accountType === "escolinha";
+  const isTeamOrSchool = accountType === "time";
   
   // Validações individuais
   const isFirstNameValid = isTeamOrSchool ? teamName.trim().length >= 2 : firstName.trim().length >= 2;
@@ -841,7 +841,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
             <SelectItem value="atleta">Atleta</SelectItem>
             <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
             <SelectItem value="time">Time</SelectItem>
-            <SelectItem value="escolinha">Escolinha de Futebol</SelectItem>
           </SelectContent>
         </Select>
         {touched.accountType && !isAccountTypeValid && (
@@ -852,17 +851,17 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       {/* Campos condicionais baseados no tipo de conta */}
       {isTeamOrSchool ? (
         <>
-          {/* Nome do Time/Escolinha */}
+          {/* Nome do Time */}
           <div className="space-y-2">
             <Label htmlFor="signup-teamname" className="text-xs font-semibold uppercase text-muted-foreground">
-              {accountType === "time" ? "Nome do Time" : "Nome da Escolinha"} <span className="text-destructive">*</span>
+              Nome do Time <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="signup-teamname"
                 type="text"
-                placeholder={accountType === "time" ? "Ex: FC Barcelona" : "Ex: Escolinha Craque do Futuro"}
+                placeholder="Ex: FC Barcelona"
                 value={teamName}
                 onChange={(e) => {
                   setTeamName(e.target.value);
@@ -923,7 +922,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
                 </label>
               )}
               <p className="text-xs text-muted-foreground flex-1">
-                Envie o escudo do seu {accountType === "time" ? "time" : "escolinha"}. Formato: JPG, PNG.
+                Envie o escudo do seu time. Formato: JPG, PNG.
               </p>
             </div>
           </div>

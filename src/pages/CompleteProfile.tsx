@@ -160,11 +160,11 @@ const CompleteProfile = () => {
       if (profile.preferred_foot) setPreferredFoot(profile.preferred_foot);
       if (profile.nickname) {
         setNickname(profile.nickname);
-        if (profile.account_type === 'time' || profile.account_type === 'escolinha') {
+        if (profile.account_type === 'time') {
           setTeamName(profile.nickname);
         }
       }
-      if (profile.avatar_url && (profile.account_type === 'time' || profile.account_type === 'escolinha')) {
+      if (profile.avatar_url && profile.account_type === 'time') {
         setEmblemPreview(profile.avatar_url);
       }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
@@ -172,8 +172,8 @@ const CompleteProfile = () => {
     }
   }, [profile]);
 
-  // Check if account type is time or escolinha (set during signup)
-  const isTeamOrSchoolAccount = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+  // Check if account type is time (set during signup)
+  const isTeamOrSchoolAccount = profile?.account_type === 'time';
 
   // Map UI "Tipo de perfil" labels to canonical values stored in profiles.role
   const mapProfileTypeValue = (typeName: string) => {
@@ -378,7 +378,7 @@ const CompleteProfile = () => {
           <>
             <div className="space-y-2">
               <Label htmlFor="teamName">
-                {profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha'} <span className="text-destructive">*</span>
+                Nome do Time <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="teamName"
@@ -386,7 +386,7 @@ const CompleteProfile = () => {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 onBlur={() => handleBlur("nickname")}
-                placeholder={profile?.account_type === 'time' ? 'Ex: FC Barcelona' : 'Ex: Escolinha do Neymar'}
+                placeholder="Ex: FC Barcelona"
                 maxLength={50}
                 className={getInputClass(getFieldStatus(isTeamNameValid, touched.nickname))}
               />
