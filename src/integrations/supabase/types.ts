@@ -1085,6 +1085,7 @@ export type Database = {
           id: string
           is_official_account: boolean | null
           is_private: boolean | null
+          is_verified_premium: boolean | null
           last_seen_at: string | null
           nationality: number | null
           nickname: string | null
@@ -1114,6 +1115,8 @@ export type Database = {
           username: string
           verification_attempts: number | null
           verification_locked_until: string | null
+          verified_premium_at: string | null
+          verified_premium_expires_at: string | null
           visitors_seen_at: string | null
           weight: number | null
         }
@@ -1140,6 +1143,7 @@ export type Database = {
           id: string
           is_official_account?: boolean | null
           is_private?: boolean | null
+          is_verified_premium?: boolean | null
           last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
@@ -1169,6 +1173,8 @@ export type Database = {
           username: string
           verification_attempts?: number | null
           verification_locked_until?: string | null
+          verified_premium_at?: string | null
+          verified_premium_expires_at?: string | null
           visitors_seen_at?: string | null
           weight?: number | null
         }
@@ -1195,6 +1201,7 @@ export type Database = {
           id?: string
           is_official_account?: boolean | null
           is_private?: boolean | null
+          is_verified_premium?: boolean | null
           last_seen_at?: string | null
           nationality?: number | null
           nickname?: string | null
@@ -1224,6 +1231,8 @@ export type Database = {
           username?: string
           verification_attempts?: number | null
           verification_locked_until?: string | null
+          verified_premium_at?: string | null
+          verified_premium_expires_at?: string | null
           visitors_seen_at?: string | null
           weight?: number | null
         }
