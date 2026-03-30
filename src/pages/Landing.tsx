@@ -127,9 +127,6 @@ const Landing = () => {
               </span>
             </h1>
 
-            <p className="text-white/80 text-xs md:text-sm leading-relaxed max-w-[400px] mt-2 mb-6 md:mb-8">
-              Desenvolva seu potencial, conecte-se e alcance seus sonhos no futebol. Treinamento de elite e oportunidades de scout ao seu alcance.
-            </p>
 
             <div className="flex gap-3">
               {isMobile ? (
