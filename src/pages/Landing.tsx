@@ -207,13 +207,11 @@ const Landing = () => {
             {featuresByAccount.map((account, idx) => (
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                    {account.customEmoji ? (
-                      <img src={account.customEmoji} alt={account.accountType} className="w-6 h-6" loading="lazy" />
-                    ) : (
-                      account.emoji
-                    )}
-                  </div>
+                  {account.customEmoji ? (
+                    <img src={account.customEmoji} alt={account.accountType} className="w-8 h-8" loading="lazy" />
+                  ) : (
+                    <span className="text-2xl">{account.emoji}</span>
+                  )}
                   <h3 className="text-foreground text-xl font-bold">{account.accountType}</h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
