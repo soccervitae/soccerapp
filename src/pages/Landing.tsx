@@ -55,7 +55,7 @@ const Landing = () => {
     },
     {
       emoji: "",
-      customEmoji: footballFieldIcon,
+      customIcon: ClipboardList,
       accountType: "Comissão Técnica",
       accountDescription: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional.",
       features: [
