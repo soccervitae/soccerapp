@@ -516,6 +516,9 @@ const Profile = () => {
   const changeTabPreservingScroll = (nextTab: string) => {
     if (nextTab === activeTab) return;
     saveCurrentTabScroll();
+    const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
+    const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
+    wasStickyRef.current = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
     pendingScrollRestoreRef.current = collectScrollTargets();
     setActiveTab(nextTab);
   };
