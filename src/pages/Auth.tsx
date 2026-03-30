@@ -1176,7 +1176,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
       <Button
         type="submit"
-        className="w-full h-12 text-base font-semibold"
+        className="w-full h-12 text-base font-semibold rounded"
         disabled={loading || !isFormValid}
       >
         {loading ? (
