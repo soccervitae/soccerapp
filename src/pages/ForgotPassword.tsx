@@ -188,9 +188,11 @@ const ForgotPassword = () => {
       <div className="relative h-48 bg-gradient-to-b from-primary/20 via-primary/10 to-background flex items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-transparent to-transparent" />
         <div className="relative z-10 text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-            <Lock className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <img 
+            src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/soccervitaeoff.png" 
+            alt="Soccer Vitae" 
+            className="h-16 w-16 rounded-full mx-auto mb-4 shadow-lg shadow-primary/30 object-cover"
+          />
           <h1 className="text-2xl font-bold text-foreground">
             {stage === "success" ? "Senha Redefinida!" : "Recuperar Senha"}
           </h1>
