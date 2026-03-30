@@ -161,7 +161,7 @@ const Landing = () => {
         </section>
 
         {/* Features by Account Type */}
-        <section className="py-8 px-4 max-w-7xl mx-auto">
+        <section className="py-8 px-8 md:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-12">
             <p className="text-primary text-sm font-medium uppercase tracking-wider">
               Recursos Principais
