@@ -378,7 +378,7 @@ const CompleteProfile = () => {
           <>
             <div className="space-y-2">
               <Label htmlFor="teamName">
-                {profile?.account_type === 'time' ? 'Nome do Time' : 'Nome da Escolinha'} <span className="text-destructive">*</span>
+                Nome do Time <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="teamName"
