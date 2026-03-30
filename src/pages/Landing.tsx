@@ -139,9 +139,6 @@ const Landing = () => {
         {/* Account Types Section */}
         <section className="py-12 px-4 max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center gap-4 mb-10">
-            <p className="text-primary text-sm font-medium uppercase tracking-wider">
-              Para Todos do Futebol
-            </p>
             <h2 className="text-3xl md:text-4xl font-black max-w-[720px] text-primary">
               Crie sua conta e faça parte
             </h2>
