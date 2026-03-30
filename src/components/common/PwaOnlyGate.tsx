@@ -16,7 +16,11 @@ const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm space-y-6">
-          <h1 className="text-2xl font-bold text-foreground">Soccer Vitae</h1>
+          <img
+            src="/SOCCERVITAE_LOGO_NOVO_verde.png"
+            alt="Soccer Vitae"
+            className="h-10 mx-auto"
+          />
           <p className="text-muted-foreground text-base">
             Para fazer login ou criar sua conta, baixe o app Soccer Vitae.
           </p>
