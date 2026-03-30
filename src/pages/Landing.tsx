@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, Shirt } from "lucide-react";
+import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, Shirt, Icon } from "lucide-react";
+import { soccerBall } from "@lucide/lab";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +40,7 @@ const Landing = () => {
   const featuresByAccount = [
     {
       emoji: "",
-      customIcon: Shirt,
+      customIconNode: soccerBall,
       accountType: "Atleta",
       accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
       features: [
@@ -178,7 +179,9 @@ const Landing = () => {
                 key={index}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                {type.customIcon ? (
+                {type.customIconNode ? (
+                  <Icon iconNode={type.customIconNode} className="w-10 h-10 text-primary" />
+                ) : type.customIcon ? (
                   <type.customIcon className="w-10 h-10 text-primary" />
                 ) : (
                   <span className="text-5xl">{type.emoji}</span>
@@ -208,7 +211,9 @@ const Landing = () => {
             {featuresByAccount.map((account, idx) => (
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
-                  {account.customIcon ? (
+                  {account.customIconNode ? (
+                    <Icon iconNode={account.customIconNode} className="w-8 h-8 text-primary" />
+                  ) : account.customIcon ? (
                     <account.customIcon className="w-8 h-8 text-primary" />
                   ) : (
                     <span className="text-2xl">{account.emoji}</span>
