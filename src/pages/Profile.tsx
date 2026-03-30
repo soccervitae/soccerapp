@@ -663,7 +663,7 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        <TabsContent value="photos" className="mt-4 px-1" forceMount={activeTab === "photos" ? true : undefined}>
+        <TabsContent value="photos" className="mt-4" forceMount={activeTab === "photos" ? true : undefined}>
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
