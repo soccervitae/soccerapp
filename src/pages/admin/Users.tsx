@@ -413,8 +413,8 @@ export default function AdminUsers() {
   const statusOptions: { value: UserFilter; label: string }[] = [
     { value: "all", label: "Todos os status" },
     { value: "admin", label: `Administradores (${filterStats?.admins || 0})` },
-    { value: "verified", label: `Verificados (${filterStats?.verified || 0})` },
-    { value: "unverified", label: "Não verificados" },
+    { value: "verified", label: `Premium (${filterStats?.verified || 0})` },
+    { value: "unverified", label: "Não premium" },
     { value: "banned", label: `Banidos (${filterStats?.banned || 0})` },
   ];
 
