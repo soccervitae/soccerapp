@@ -1,30 +1,68 @@
 
+Objetivo: corrigir de forma definitiva o header no PWA para que ele fique abaixo da barra de notificação do celular, visível e clicável em iPhone/Android.
 
-## Problem
+1. Confirmar a causa real
+- O problema persiste mesmo com `apple-mobile-web-app-status-bar-style="default"` porque o app ainda usa `viewport-fit=cover` em `index.html`.
+- Com `cover`, o viewport invade a safe area do topo no modo standalone, então os headers `fixed top-0` continuam começando “por trás” da barra do sistema.
 
-In PWA mode, headers are hidden behind the device status bar (signal, wifi, battery icons) because:
-1. `apple-mobile-web-app-status-bar-style` is set to `black-translucent` — this makes the app render **behind** the status bar
-2. `viewport-fit=cover` extends the viewport into the safe area
-3. The `padding-top: 50px` CSS hack is a fixed value that doesn't match all devices and doesn't properly solve the overlay issue
+2. Aplicar a correção global correta
+- Em `index.html`, ajustar a meta viewport removendo `viewport-fit=cover`.
+- Manter `apple-mobile-web-app-status-bar-style="default"`.
+- Isso faz o app se comportar como no navegador: o conteúdo começa abaixo da barra do sistema, sem hack manual por pixel.
 
-In the browser, the browser chrome naturally pushes content below the status bar — that's why it works there.
+3. Preservar consistência dos headers
+- Não mexer header por header agora, porque os componentes já seguem um padrão consistente (`fixed top-0 ... h-16`).
+- Manter a altura atual dos headers.
+- Evitar voltar com `padding-top` fixo, pois isso varia por aparelho e cria desalinhamentos.
 
-## Solution
+4. Revisar espaçamentos de conteúdo abaixo dos headers
+- Verificar as páginas principais que usam header fixo e offset manual (`pt-14`, `pt-16`, `pt-12`) para garantir que continuem alinhadas após a correção global.
+- Prioridade de revisão:
+  - `src/components/feed/FeedHeader.tsx` + `src/pages/Index.tsx`
+  - `src/components/profile/ProfileHeader.tsx` + `src/pages/Profile.tsx`
+  - `src/pages/Explore.tsx`
+  - `src/pages/Messages.tsx`
+  - páginas de `src/pages/settings/*`
 
-Change the PWA to behave like the browser: content always starts **below** the status bar.
+5. Ajustes finos onde necessário
+- Se algum conteúdo ficar muito próximo do header após remover `viewport-fit=cover`, ajustar apenas o offset da página correspondente.
+- Exemplo: páginas com header `h-16` devem usar offset coerente com essa altura; hoje há casos com `pt-12` e `pt-14` que merecem padronização.
 
-### Changes
+Resultado esperado
+- No PWA, o header deixa de ficar sob a barra de sinal/Wi‑Fi/bateria.
+- O header volta a ficar totalmente visível e clicável.
+- O comportamento fica igual ao navegador, sem depender de padding artificial.
 
-1. **`index.html`** — Change status bar style from `black-translucent` to `default`
-   - This tells iOS to render a solid status bar above the app content instead of overlaying it
-   - The status bar will use the `theme-color` (#426F42) as background
+Detalhes técnicos
+```text
+Hoje:
+meta viewport = ... viewport-fit=cover
++
+header fixed top-0
+=
+viewport invade a safe area
+=
+header começa atrás da barra do sistema
 
-2. **`src/index.css`** — Remove the `@media (display-mode: standalone)` padding hack entirely since it's no longer needed
+Correção:
+meta viewport sem viewport-fit=cover
++
+status-bar-style = default
+=
+viewport começa abaixo da barra do sistema
+=
+header visível e clicável
+```
 
-This is a 2-file change. No component files need editing — the headers already have proper `bg-background/95` and `backdrop-blur` styling that will work correctly once the status bar stops overlapping.
-
-### Technical detail
-
-- `black-translucent`: status bar is transparent, content renders behind it → requires manual safe-area padding
-- `default`: status bar is opaque, content starts below it → just like the browser, no padding needed
-
+Arquivos que devem ser alterados
+- `index.html`
+- Possivelmente ajustes pontuais de espaçamento em:
+  - `src/pages/Index.tsx`
+  - `src/pages/Profile.tsx`
+  - `src/pages/Explore.tsx`
+  - `src/pages/Messages.tsx`
+  - `src/pages/settings/Index.tsx`
+  - `src/pages/settings/MyPosts.tsx`
+  - `src/pages/settings/Privacy.tsx`
+  - `src/pages/settings/Saved.tsx`
+  - `src/pages/settings/Verification.tsx`
