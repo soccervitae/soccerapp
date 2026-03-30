@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SoccerAnimation from "@/components/pwa/SoccerAnimation";
 
 const PwaHome = () => {
   const navigate = useNavigate();
