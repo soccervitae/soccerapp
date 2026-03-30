@@ -46,7 +46,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-2 h-14 flex items-center gap-2" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-2 h-14 flex items-center gap-2" style={{ paddingTop: 'max(22px, env(safe-area-inset-top))' }}>
       <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="hover:bg-transparent">
         <ArrowLeft className="h-5 w-5" />
       </Button>
