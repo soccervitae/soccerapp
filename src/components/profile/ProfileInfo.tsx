@@ -290,7 +290,7 @@ export const ProfileInfo = ({
           <div className="mt-3 text-center">
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-2xl font-bold text-foreground">
-                {profile.full_name || profile.username}
+                {profile.nickname || profile.full_name || profile.username}
               </h2>
               {(profile as any).is_official_account ? (
                 <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
@@ -306,9 +306,9 @@ export const ProfileInfo = ({
                 </div>
               )}
             </div>
-            {profile.nickname && (
-              <p className="text-muted-foreground font-semibold text-sm mt-0.5">
-                "{profile.nickname}"
+            {profile.nickname && profile.full_name && (
+              <p className="text-muted-foreground font-medium text-sm mt-0.5">
+                {profile.full_name}
               </p>
             )}
             {profile.position_name && profile.account_type !== 'time' && (
@@ -506,11 +506,11 @@ export const ProfileInfo = ({
       {/* Name and Position */}
       <div className="text-center space-y-0.5">
         <h2 className="font-bold text-foreground leading-tight text-lg">
-          {profile.full_name || profile.username}
+          {profile.nickname || profile.full_name || profile.username}
         </h2>
-        {profile.nickname && (
-          <p className="text-muted-foreground font-semibold text-sm">
-            "{profile.nickname}"
+        {profile.nickname && profile.full_name && (
+          <p className="text-muted-foreground font-medium text-sm">
+            {profile.full_name}
           </p>
         )}
         {profile.position_name && profile.account_type !== 'time' && (
