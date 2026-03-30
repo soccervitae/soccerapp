@@ -11,6 +11,7 @@ const slides = [
 
 interface SoccerShowcaseProps {
   fullscreen?: boolean;
+  banner?: boolean;
 }
 
 const SoccerShowcase = ({ fullscreen = false }: SoccerShowcaseProps) => {
