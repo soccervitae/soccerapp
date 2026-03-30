@@ -103,7 +103,7 @@ const Landing = () => {
         <section className="w-full relative overflow-hidden h-[380px] md:h-[460px]">
           <SoccerShowcase banner />
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center px-4 z-10">
-            <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14 brightness-0 invert" />
+            <img src={logoWhite} alt="SOCCER VITAE" className="h-10 md:h-14" />
             <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight mt-4 text-white text-center max-w-[600px]">
               Onde talentos encontram oportunidades
             </h1>
