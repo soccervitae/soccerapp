@@ -658,12 +658,6 @@ const Profile = () => {
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
-        {isTeamOrSchool && (
-          <TabsContent value="squad" className="mt-4" forceMount={activeTab === "squad" ? true : undefined}>
-            {activeTab === "squad" && (
-              <SquadTab userId={targetUserId} isOwnProfile={isOwnProfile} />
-            )}
-          </TabsContent>
         )}
 
         {isTeamOrSchool && (
