@@ -130,7 +130,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="flex flex-wrap justify-center gap-5">
             {featuresByAccount.map((type, index) => (
               <div
                 key={index}
