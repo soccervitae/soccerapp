@@ -603,7 +603,7 @@ const EditProfile = () => {
 
       <main className="bg-background min-h-screen">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border" style={{ paddingTop: 'max(22px, env(safe-area-inset-top))' }}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
           <button
             onClick={handleBackClick}
