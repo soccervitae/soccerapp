@@ -63,10 +63,10 @@ export default function Verification() {
 
         {/* Status or CTA */}
         {isActive ? (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center">
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-blue-500 text-[20px]">verified</span>
-              <span className="font-bold text-blue-500">Conta Verificada</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
+              <span className="font-bold text-primary">Conta Verificada</span>
             </div>
             {expiresAt && (
               <p className="text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ export default function Verification() {
         ) : (
           <button
             onClick={handleGetVerification}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors text-base"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 rounded-xl transition-colors text-base"
           >
             {isPremium && isExpired ? "Renovar Verificação" : "Obter Verificação Premium"}
           </button>
