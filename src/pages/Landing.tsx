@@ -211,7 +211,9 @@ const Landing = () => {
             {featuresByAccount.map((account, idx) => (
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
-                  {account.customIcon ? (
+                  {account.customIconNode ? (
+                    <Icon iconNode={account.customIconNode} className="w-8 h-8 text-primary" />
+                  ) : account.customIcon ? (
                     <account.customIcon className="w-8 h-8 text-primary" />
                   ) : (
                     <span className="text-2xl">{account.emoji}</span>
