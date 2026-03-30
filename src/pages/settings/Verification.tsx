@@ -54,7 +54,7 @@ export default function Verification() {
         <div className="bg-card rounded-xl border border-border p-4 mb-6">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Benefícios inclusos</p>
           <div className="space-y-3">
-            <BenefitItem icon="verified" text="Selo de verificação azul no perfil" />
+            <BenefitItem icon="verified" text="Selo de verificação no perfil" />
             <BenefitItem icon="edit" text="Alterar nome de usuário quando quiser" />
             <BenefitItem icon="star" text="Destaque no feed e nas buscas" />
             <BenefitItem icon="support_agent" text="Suporte prioritário" />
