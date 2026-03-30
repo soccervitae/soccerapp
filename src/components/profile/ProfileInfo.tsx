@@ -665,6 +665,32 @@ export const ProfileInfo = ({
                     </DropdownMenuItem>}
                 </DropdownMenuContent>
               </DropdownMenu>}
+          </> : !user ? <>
+            <button onClick={() => setShareSheetOpen(true)} className="flex-1 bg-primary text-primary-foreground h-9 rounded font-semibold text-xs tracking-wide transition-colors hover:bg-primary/90 flex items-center justify-center gap-1.5 shadow-sm">
+              <span className="material-symbols-outlined text-[16px]">share</span>
+              Compartilhar
+            </button>
+            <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+              <DrawerContent>
+                <DrawerHeader className="pb-2">
+                  <DrawerTitle className="text-center">Compartilhar Perfil</DrawerTitle>
+                </DrawerHeader>
+                <div className="flex flex-col gap-2 py-4 px-4">
+                  <button onClick={() => { handleShareProfile(); setShareSheetOpen(false); }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
+                    <span className="material-symbols-outlined text-[22px]">link</span>
+                    <span className="font-medium">Copiar link</span>
+                  </button>
+                  <button onClick={() => { setShareSheetOpen(false); setQrDialogOpen(true); }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
+                    <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
+                    <span className="font-medium">QR Code</span>
+                  </button>
+                  {typeof navigator.share === "function" && <button onClick={() => { handleNativeShare(); setShareSheetOpen(false); }} className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left">
+                    <span className="material-symbols-outlined text-[22px]">ios_share</span>
+                    <span className="font-medium">Compartilhar</span>
+                  </button>}
+                </div>
+              </DrawerContent>
+            </Drawer>
           </> : <>
             <div className="relative flex-1">
               <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
