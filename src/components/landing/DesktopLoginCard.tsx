@@ -18,8 +18,16 @@ import { toast } from "sonner";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
 import SignupVerification from "@/components/auth/SignupVerification";
 
-const DesktopLoginCard = () => {
+export interface DesktopLoginCardRef {
+  switchToSignup: () => void;
+}
+
+const DesktopLoginCard = forwardRef<DesktopLoginCardRef>((_, ref) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
+
+  useImperativeHandle(ref, () => ({
+    switchToSignup: () => setMode("signup"),
+  }));
 
   return (
     <div className="hidden md:flex flex-col w-[380px] shrink-0 bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8 self-center max-h-[90vh] overflow-y-auto">
@@ -30,7 +38,7 @@ const DesktopLoginCard = () => {
       )}
     </div>
   );
-};
+});
 
 // ── Login Form ──────────────────────────────────────────
 interface LoginFormProps {
