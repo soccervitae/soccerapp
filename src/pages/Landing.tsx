@@ -9,7 +9,7 @@ import { useScroll, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoGreen from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 import heroBannerProfessional from "@/assets/hero-banner-professional.jpg";
-import DesktopLoginCard from "@/components/landing/DesktopLoginCard";
+import DesktopLoginCard, { DesktopLoginCardRef } from "@/components/landing/DesktopLoginCard";
 
 const useDeviceType = () => {
   return useMemo(() => {
