@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "placeholder.svg"],
+      includeAssets: ["favicon.png", "placeholder.svg", "iconpwasoccervitae.png"],
       manifest: {
         name: "SOCCER VITAE - Onde talentos encontram oportunidades.",
         short_name: "SOCCER VITAE",
