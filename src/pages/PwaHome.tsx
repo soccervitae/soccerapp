@@ -15,7 +15,7 @@ const PwaHome = () => {
       </div>
       
       <div className="flex flex-col items-center">
-        <p className="text-4xl md:text-6xl font-black leading-tight tracking-tight uppercase my-0 py-[16px] text-primary text-center">
+        <p className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 py-[16px] text-primary text-center">
           Onde talentos<br />encontram<br />oportunidades
         </p>
       </div>
