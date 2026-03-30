@@ -98,22 +98,15 @@ const Landing = () => {
       
       <div className="min-h-screen bg-white text-foreground font-sans">
 
-        {/* Banner Slide */}
-        <section className="w-full relative overflow-hidden h-[280px] md:h-[360px]">
+        {/* Banner Slide with overlaid logo and title */}
+        <section className="w-full relative overflow-hidden h-[380px] md:h-[460px]">
           <SoccerShowcase banner />
-        </section>
-
-        {/* Hero Content */}
-        <section className="py-10 px-4">
-          <motion.div 
-            className="flex flex-col gap-4 text-center items-center max-w-[600px] mx-auto"
-            style={{ opacity }}
-          >
-            <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14" />
-            <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 py-[16px] text-primary">
+          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center px-4 z-10">
+            <img src={logoText} alt="SOCCER VITAE" className="h-10 md:h-14 brightness-0 invert" />
+            <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight mt-4 text-white text-center max-w-[600px]">
               Onde talentos encontram oportunidades
             </h1>
-          </motion.div>
+          </div>
         </section>
 
         {/* Account Types Section */}
