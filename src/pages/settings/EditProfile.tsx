@@ -252,7 +252,7 @@ const EditProfile = () => {
   // Initialize form when profile loads AND positions/functions are available
   useEffect(() => {
     // Wait for profile and the relevant options to be loaded
-    const isTeamOrSchoolAccount = profile?.account_type === 'time' || profile?.account_type === 'escolinha';
+    const isTeamOrSchoolAccount = profile?.account_type === 'time';
     const hasPositionOptions = positions.length > 0 || functions.length > 0;
     
     if (profile && !formInitialized && (isTeamOrSchoolAccount || hasPositionOptions)) {
