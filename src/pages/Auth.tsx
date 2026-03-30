@@ -854,7 +854,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
           {/* Nome do Time/Escolinha */}
           <div className="space-y-2">
             <Label htmlFor="signup-teamname" className="text-xs font-semibold uppercase text-muted-foreground">
-              {accountType === "time" ? "Nome do Time" : "Nome da Escolinha"} <span className="text-destructive">*</span>
+              Nome do Time <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
