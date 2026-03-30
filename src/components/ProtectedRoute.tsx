@@ -18,13 +18,12 @@ export const ProtectedRoute = ({
   requireOnboarding = true,
   requirePwa = false,
 }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
-  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { user, loading: authLoading } = useAuth();
   const { shouldBlockAccess, isLoading: pwaLoading } = useRequirePwa();
-  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const location = useLocation();
 
-  if (loading || profileLoading || pwaLoading || adminLoading) {
+  // Wait for auth to resolve first before running any queries
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -34,6 +33,52 @@ export const ProtectedRoute = ({
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Only render inner component (which runs profile/admin queries) after auth is confirmed
+  return (
+    <ProtectedRouteInner
+      requireCompleteProfile={requireCompleteProfile}
+      requireOnboarding={requireOnboarding}
+      requirePwa={requirePwa}
+      shouldBlockAccess={shouldBlockAccess}
+      pwaLoading={pwaLoading}
+      location={location}
+    >
+      {children}
+    </ProtectedRouteInner>
+  );
+};
+
+// Inner component that only mounts when user is confirmed authenticated.
+// This ensures useProfile and useIsAdmin queries run with a valid auth session,
+// preventing the race condition where auth.uid() is null in RLS policies.
+const ProtectedRouteInner = ({ 
+  children, 
+  requireCompleteProfile,
+  requireOnboarding,
+  requirePwa,
+  shouldBlockAccess,
+  pwaLoading,
+  location,
+}: {
+  children: React.ReactNode;
+  requireCompleteProfile: boolean;
+  requireOnboarding: boolean;
+  requirePwa: boolean;
+  shouldBlockAccess: boolean;
+  pwaLoading: boolean;
+  location: ReturnType<typeof useLocation>;
+}) => {
+  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+
+  if (profileLoading || pwaLoading || adminLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const profileData = profile as any;
