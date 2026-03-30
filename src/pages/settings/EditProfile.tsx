@@ -718,26 +718,54 @@ const EditProfile = () => {
             )}
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Label>Nome de Usuário</Label>
-              {!isTeamOrSchool && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="material-symbols-outlined text-muted-foreground text-[16px] cursor-help">info</span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>O nome de usuário não pode ser alterado</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-            <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
-              @{formData.username}
-            </div>
-          </div>
+          {(() => {
+            const isPremiumActive = profile?.is_verified_premium === true && 
+              (!profile?.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date());
+            
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <Label>Nome de Usuário</Label>
+                  {!isPremiumActive && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="material-symbols-outlined text-muted-foreground text-[16px] cursor-help">info</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Assine o Premium para alterar seu nome de usuário</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                {isPremiumActive ? (
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                    <Input
+                      value={formData.username}
+                      onChange={(e) => handleUsernameChange(e.target.value)}
+                      className="pl-7"
+                      maxLength={20}
+                    />
+                    {usernameStatus === "checking" && (
+                      <span className="text-xs text-muted-foreground mt-1 block">Verificando...</span>
+                    )}
+                    {usernameStatus === "taken" && (
+                      <span className="text-xs text-destructive mt-1 block">Nome de usuário já em uso</span>
+                    )}
+                    {usernameStatus === "available" && formData.username !== profile?.username && (
+                      <span className="text-xs text-emerald-500 mt-1 block">Disponível!</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
+                    @{formData.username}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {!isTeamOrSchool && (
             <div className="space-y-2">

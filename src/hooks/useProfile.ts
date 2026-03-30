@@ -41,6 +41,9 @@ export interface Profile {
   foundation_year?: number | null;
   city?: string | null;
   team_category?: string | null;
+  is_verified_premium?: boolean;
+  verified_premium_at?: string | null;
+  verified_premium_expires_at?: string | null;
 }
 
 export const useProfile = (userId?: string) => {
