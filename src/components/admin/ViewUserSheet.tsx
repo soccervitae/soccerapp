@@ -280,7 +280,7 @@ export function ViewUserSheet({
                        user.account_type === 'comissao_tecnica' ? 'Comissão Técnica' : 'Atleta'}
                     </Badge>
                   )}
-                  {user.nickname && !['time', 'escolinha'].includes(user.account_type || '') && (
+                  {user.nickname && user.account_type !== 'time' && (
                     <p className="text-sm text-muted-foreground/70">Apelido: {user.nickname}</p>
                   )}
                   {user.bio && (
