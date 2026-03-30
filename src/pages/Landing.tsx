@@ -85,7 +85,7 @@ const Landing = () => {
                   <Button
                     variant="outline"
                     onClick={() => navigate('/saiba-mais')}
-                    className="border-transparent text-white/60 hover:bg-white/10 hover:text-white font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                    className="border-transparent bg-white/15 text-white hover:bg-white/25 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
                   >
                     Saiba Mais
                   </Button>
