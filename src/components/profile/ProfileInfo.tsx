@@ -290,7 +290,7 @@ export const ProfileInfo = ({
           <div className="mt-3 text-center">
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-2xl font-bold text-foreground">
-                {profile.full_name || profile.username}
+                {profile.nickname || profile.full_name || profile.username}
               </h2>
               {(profile as any).is_official_account ? (
                 <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
