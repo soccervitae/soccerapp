@@ -25,6 +25,7 @@ const useDeviceType = () => {
 const Landing = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const isPWA = useIsPWA();
   const heroRef = useRef<HTMLElement>(null);
   const loginCardRef = useRef<DesktopLoginCardRef>(null);
   const [showInstallSheet, setShowInstallSheet] = useState(false);
