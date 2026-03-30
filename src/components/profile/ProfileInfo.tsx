@@ -306,11 +306,6 @@ export const ProfileInfo = ({
                 </div>
               )}
             </div>
-            {profile.nickname && profile.full_name && (
-              <p className="text-muted-foreground font-medium text-sm mt-0.5">
-                {profile.full_name}
-              </p>
-            )}
             {profile.position_name && profile.account_type !== 'time' && (
               <p className="text-muted-foreground/70 text-xs mt-0.5">
                 {profile.position_name}
