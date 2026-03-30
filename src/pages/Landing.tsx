@@ -74,7 +74,7 @@ const Landing = () => {
                 <p className="text-sm md:text-base text-white/50 mb-3 tracking-wide">
                   Escolha o perfil que mais combina com você.
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap justify-center md:justify-start gap-3">
                   <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                     <Icon iconNode={soccerBall} className="w-4 h-4 text-primary" />
                     <span className="text-xs md:text-sm text-white/80 font-medium">Atleta</span>
