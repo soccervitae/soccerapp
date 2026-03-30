@@ -658,7 +658,6 @@ const Profile = () => {
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
-        )}
 
         {isTeamOrSchool && (
           <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
