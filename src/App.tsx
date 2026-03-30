@@ -47,6 +47,7 @@ import Guidelines from "./pages/Guidelines";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/Privacy";
 import About from "./pages/About";
+import SaibaMais from "./pages/SaibaMais";
 
 import AdminDashboard from "./pages/admin/Index";
 import AdminContent from "./pages/admin/Content";
