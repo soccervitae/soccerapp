@@ -54,7 +54,7 @@ const Landing = () => {
           </div>
 
           {/* Hero content - left side */}
-          <div className="relative z-20 flex flex-col justify-center px-8 md:px-16 pt-14 pb-10 md:py-16 max-w-[550px] min-h-screen">
+          <div className="relative z-20 flex flex-col justify-center pt-14 pb-10 md:py-16 max-w-[550px] min-h-screen md:px-[96px] px-[92px]">
             <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
             
             <h1 className="text-xl md:text-3xl font-bold tracking-[0.15em] text-white/70 uppercase mb-3">
