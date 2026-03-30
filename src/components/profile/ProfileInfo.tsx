@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsPWA } from "@/hooks/useIsPWA";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { ResponsiveModal, ResponsiveModalContent, ResponsiveModalHeader, ResponsiveModalTitle } from "@/components/ui/responsive-modal";
@@ -17,6 +19,56 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+
+function FavoriteButton({ profileId, onDone }: { profileId: string; onDone: () => void }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const { data: isFavorited } = useQuery({
+    queryKey: ["is_favorited", user?.id, profileId],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from("favorite_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("favorite_id", profileId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleToggle = async () => {
+    if (!user?.id) return;
+    if (isFavorited) {
+      await supabase
+        .from("favorite_profiles")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("favorite_id", profileId);
+      toast.success("Removido dos favoritos");
+    } else {
+      await supabase
+        .from("favorite_profiles")
+        .insert({ user_id: user.id, favorite_id: profileId });
+      toast.success("Perfil favoritado!");
+    }
+    queryClient.invalidateQueries({ queryKey: ["is_favorited", user.id, profileId] });
+    queryClient.invalidateQueries({ queryKey: ["favorite_profiles"] });
+    onDone();
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left"
+    >
+      <span className="material-symbols-outlined text-[22px]">{isFavorited ? "star" : "star"}</span>
+      <span className="font-medium">{isFavorited ? "Remover dos favoritos" : "Favoritar"}</span>
+    </button>
+  );
+}
 
 interface ProfileInfoProps {
   profile: Profile;
