@@ -12,6 +12,7 @@ import stadiumHero from "@/assets/soccer-player-hero.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
 import footballFieldIcon from "@/assets/football-field-icon.png";
+import SoccerShowcase from "@/components/common/SoccerShowcase";
 
 const useDeviceType = () => {
   return useMemo(() => {
