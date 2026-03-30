@@ -188,7 +188,7 @@ export const ProfileInfo = ({
   };
   const handleFollowClick = () => {
     if (!user) {
-      navigate("/login");
+      setAuthPromptOpen(true);
       return;
     }
     followUser.mutate({
