@@ -734,18 +734,13 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   }
 
 
-  const isFormValid = isTeamOrSchool
-    ? teamName.trim().length >= 2 &&
-      emailStatus === "valid" &&
-      isPasswordValid &&
-      password === confirmPassword &&
-      accountType.length > 0
-    : firstName.trim().length >= 2 && 
-      lastName.trim().length >= 2 &&
-      emailStatus === "valid" &&
-      isPasswordValid &&
-      password === confirmPassword &&
-      accountType.length > 0;
+  const isFormValid = 
+    firstName.trim().length >= 2 && 
+    lastName.trim().length >= 2 &&
+    emailStatus === "valid" &&
+    isPasswordValid &&
+    password === confirmPassword &&
+    accountType.length > 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
