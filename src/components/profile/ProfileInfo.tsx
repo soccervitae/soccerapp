@@ -527,10 +527,10 @@ export const ProfileInfo = ({
               </DropdownMenu>}
           </> : <>
             <div className="relative flex-1">
-              <button ref={buttonRef} onClick={handleFollowClick} disabled={followUser.isPending} className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
+              <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`w-full h-9 rounded font-semibold text-xs tracking-wide transition-all duration-200 ease-out flex items-center justify-center disabled:opacity-50 ${isCheering ? "bg-background text-primary border border-border hover:bg-muted/50 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]"}`}>
                 <AnimatePresence mode="wait" initial={false}>
-                  <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}>
-                    {isCheering ? "Torcendo" : "Torcer"}
+                  <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
+                    {isCheering ? <>Torcendo <span className="material-symbols-outlined text-[14px]">keyboard_arrow_down</span></> : "Torcer"}
                   </motion.span>
                 </AnimatePresence>
               </button>
