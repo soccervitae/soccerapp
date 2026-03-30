@@ -178,7 +178,16 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVer
             <span className="material-symbols-outlined text-[24px]">arrow_back</span>
           </button>
         )}
-        <h1 className="text-base font-bold text-foreground tracking-wide">{username}</h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-base font-bold text-foreground tracking-wide">{username}</h1>
+          {isOfficialAccount ? (
+            <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+          ) : isVerifiedPremium && (!premiumExpiresAt || new Date(premiumExpiresAt) > new Date()) ? (
+            <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+          ) : contaVerificada ? (
+            <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+          ) : null}
+        </div>
         <div className="flex items-center gap-1">
           {isOwnProfile ? (
             <>
