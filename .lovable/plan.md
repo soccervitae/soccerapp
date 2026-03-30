@@ -1,23 +1,21 @@
 
 
-## Plan: Block auth pages in browser, allow only profile for guests
+## Plan: Generate professional hero banner image for Landing Page
 
-### What changes
-The `/auth`, `/login`, `/signup`, `/forgot-password`, and `/two-factor-verify` routes will be restricted to PWA only. When accessed from a browser (non-PWA), they will show a message telling the user to download the app.
+### What will be done
+Use the AI image generation API to create a professional soccer hero banner image inspired by the reference image (player doing a bicycle kick with dark cinematic tones), then replace the current `hero-players-night.jpg` used in the Landing page hero section.
 
-### Changes
+### Steps
 
-**1. Create `src/components/common/PwaOnlyGate.tsx`**
-- A wrapper component that checks `useIsPWA()`
-- If not PWA: renders a full-screen page with Soccer Vitae branding, message "Para fazer login ou criar sua conta, baixe o app Soccer Vitae", and a button linking to `/install`
-- If PWA: renders `children`
+**1. Generate the image** using Nano banana 2 (google/gemini-3.1-flash-image-preview)
+- Prompt: A cinematic, professional soccer/football hero banner. A player in white kit performing a spectacular bicycle kick against a dark moody background with dramatic lighting. Dark gray/charcoal tones with subtle green accents. Wide aspect ratio (16:9), high contrast, editorial sports photography style. No text overlay.
+- Save the generated image to `src/assets/hero-banner-professional.jpg`
 
-**2. `src/App.tsx`** — Wrap auth routes with PwaOnlyGate
-- Wrap `/auth`, `/forgot-password`, `/two-factor-verify` routes with `<PwaOnlyGate>`
-- `/login` and `/signup` already redirect to `/auth`, so they're covered
-- Profile route (`/:username`) remains public as-is
+**2. Update `src/pages/Landing.tsx`**
+- Replace the `heroPlayersNight` import with the new image
+- Update the `<img>` tag in the hero section to use the new asset
 
 ### Files
-- `src/components/common/PwaOnlyGate.tsx` (new)
-- `src/App.tsx` (modify 3 routes)
+- `src/assets/hero-banner-professional.jpg` (new, generated)
+- `src/pages/Landing.tsx` (update import)
 
