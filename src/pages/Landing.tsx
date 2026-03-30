@@ -182,23 +182,6 @@ const Landing = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Footer */}
-        <footer className="border-t border-border/30 py-8 px-4">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logoGreen} alt="SOCCER VITAE" className="h-4" />
-            </div>
-            <div className="flex gap-6 text-muted-foreground text-sm">
-              <a href="/sobre" className="hover:text-foreground transition-colors">Sobre</a>
-              <a href="/terms" className="hover:text-foreground transition-colors">Termos</a>
-              <a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-foreground transition-colors">Suporte</a>
-            </div>
-            <p className="text-muted-foreground/60 text-xs">
-              © {new Date().getFullYear()} SOCCER VITAE. Todos os direitos reservados.
-            </p>
-          </div>
-        </footer>
       </div>
     </>;
 };
