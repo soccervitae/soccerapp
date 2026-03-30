@@ -97,37 +97,67 @@ const Landing = () => {
         <meta name="description" content="A plataforma definitiva para atletas mostrarem seu talento e encontrarem o time ideal." />
       </Helmet>
       
-      <div className="min-h-screen bg-white text-foreground font-sans">
+      <div className="min-h-screen bg-background text-foreground font-sans">
 
-        {/* Hero Banner */}
-        <section className="w-full relative overflow-hidden h-[280px] md:h-[520px]">
-          <SoccerShowcase banner />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/60 to-transparent z-10" />
-          <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 max-w-7xl mx-auto">
-            <img src={logoWhite} alt="SOCCER VITAE" className="h-5 md:h-10 w-fit mb-3 md:mb-6" />
-            <h1 className="text-2xl md:text-6xl font-black leading-tight tracking-tight text-white max-w-[500px] md:max-w-[700px]">
-              MOSTRE SEU{" "}
-              <span className="text-amber-400">TALENTO</span>
+        {/* Hero Section - Dark with split layout */}
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[320px] md:min-h-[600px]">
+          {/* Decorative circles */}
+          <div className="absolute top-[15%] left-[-40px] w-24 h-24 md:w-36 md:h-36 rounded-full border border-white/10 z-10" />
+          <div className="absolute top-[40%] left-[20%] w-16 h-16 md:w-24 md:h-24 rounded-full border border-white/10 z-10" />
+          <div className="absolute bottom-[10%] right-[5%] w-20 h-20 md:w-32 md:h-32 rounded-full border border-white/10 z-10" />
+          <div className="absolute top-[20%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full bg-white z-10" />
+          <div className="absolute top-[35%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full border border-white z-10" />
+          <div className="absolute top-[50%] right-[8%] w-3 h-3 md:w-4 md:h-4 rounded-full border border-white z-10" />
+
+          {/* Background image - right side */}
+          <div className="absolute inset-0 md:left-[40%]">
+            <SoccerShowcase banner />
+            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,12%)] via-[hsl(0,0%,12%)]/80 to-transparent" />
+          </div>
+
+          {/* Header */}
+          <header className="relative z-30 flex items-center justify-between px-5 md:px-12 py-4 md:py-6">
+            <img src={logoWhite} alt="SOCCER VITAE" className="h-5 md:h-8" />
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="/sobre" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Sobre</a>
+              <a href="/terms" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Termos</a>
+              <a href="/privacy-policy" className="text-white/80 text-sm tracking-widest uppercase hover:text-white transition-colors">Privacidade</a>
+              <Button
+                onClick={() => navigate("/auth")}
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-sm tracking-wider rounded px-5"
+              >
+                Entrar
+              </Button>
+            </nav>
+          </header>
+
+          {/* Hero content */}
+          <div className="relative z-20 flex flex-col justify-center px-5 md:px-12 pt-8 md:pt-16 pb-10 md:pb-20 max-w-[550px]">
+            <h1 className="text-3xl md:text-7xl font-black italic leading-[0.95] tracking-tight text-primary uppercase">
+              Soccer
+              <br />
+              <span className="text-white">Vitae</span>
             </h1>
-            <div className="w-12 md:w-20 h-1 bg-amber-400 mt-2 md:mt-4 mb-3 md:mb-5" />
-            <p className="text-white/80 text-xs md:text-lg max-w-[320px] md:max-w-[500px] leading-relaxed">
-              A plataforma onde atletas, clubes e comissões técnicas se conectam e encontram oportunidades no futebol.
+            <p className="text-white/60 text-xs md:text-base tracking-[0.2em] uppercase mt-2 md:mt-3 font-medium">
+              A rede social do futebol
+            </p>
+            <p className="text-white/70 text-xs md:text-base max-w-[360px] leading-relaxed mt-4 md:mt-6">
+              A plataforma onde atletas, clubes e comissões técnicas se conectam e encontram oportunidades.
             </p>
             {isMobile ? (
               <Button
                 onClick={() => setShowInstallSheet(true)}
-                className="mt-4 w-fit bg-amber-400 hover:bg-amber-500 text-black font-bold px-6 h-10 rounded text-sm"
+                className="mt-5 w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 h-10 rounded text-sm tracking-wider uppercase"
               >
                 Baixar App
-                <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
               <Button
                 onClick={() => navigate("/auth")}
-                className="mt-6 w-fit bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 h-12 rounded text-base"
+                className="mt-8 w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-12 rounded text-sm tracking-wider uppercase"
               >
-                Cadastrar Agora
-                <ChevronRight className="w-5 h-5 ml-2" />
+                Saiba Mais
               </Button>
             )}
           </div>
