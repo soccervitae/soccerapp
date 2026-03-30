@@ -100,7 +100,7 @@ const Landing = () => {
       <div className="min-h-screen bg-background text-foreground font-sans">
 
         {/* Hero Section - Dark with split layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[460px]">
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,12%)] min-h-[280px] md:min-h-[320px]">
           {/* Decorative circles */}
           <div className="absolute top-[15%] left-[-40px] w-24 h-24 md:w-36 md:h-36 rounded-full border border-white/10 z-10" />
           <div className="absolute top-[40%] left-[20%] w-16 h-16 md:w-24 md:h-24 rounded-full border border-white/10 z-10" />
