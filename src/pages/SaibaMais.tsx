@@ -253,7 +253,6 @@ const SaibaMais = () => {
           className="py-16 px-4"
         >
           <div className="max-w-2xl mx-auto text-center">
-          <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-foreground text-2xl md:text-3xl font-black mb-4">
               Pronto para entrar em campo?
             </h2>
