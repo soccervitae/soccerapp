@@ -362,6 +362,24 @@ export const ProfileInfo = ({
             </div>
           )}
 
+          {/* Team Stats - Desktop */}
+          {profile.account_type === 'time' && (
+            <div className="flex items-center gap-2 mt-4">
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">calendar_month</span>
+                <span className="font-semibold text-foreground">{profile.foundation_year || "-"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">location_on</span>
+                <span className="font-semibold text-foreground">{profile.city || "-"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
+                <span className="material-symbols-outlined text-[14px] text-muted-foreground">category</span>
+                <span className="font-semibold text-foreground">{profile.team_category || "-"}</span>
+              </div>
+            </div>
+          )}
+
           {/* Action buttons - centered */}
           <div className="flex gap-3 mt-5">
             {isOwnProfile ? (
