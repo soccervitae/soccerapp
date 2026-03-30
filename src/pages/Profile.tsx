@@ -463,7 +463,7 @@ const Profile = () => {
               <div 
                 key={post.id} 
                 ref={(el) => mediaGridItemRefs.current.set(post.id, el)}
-                className="aspect-square relative overflow-hidden bg-muted cursor-pointer"
+                className="aspect-[3/4] relative overflow-hidden bg-muted cursor-pointer"
                 onClick={() => handleMediaClick(post, mediaGridItemRefs.current.get(post.id) || null, index)}
               >
               {isVideo ? (
