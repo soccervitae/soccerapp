@@ -53,7 +53,7 @@ export const DesktopHeader = () => {
           {/* Logo */}
           <button onClick={() => navigate("/")} className="flex-shrink-0">
             <img
-              src="https://gkkuttabavwxjuibmrnr.supabase.co/storage/v1/object/public/escudotime/LOGOSITE/soccervitaeoff.png"
+              src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png"
               alt="SOCCER VITAE"
               className="h-7 object-contain"
             />

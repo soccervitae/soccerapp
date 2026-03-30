@@ -1,7 +1,7 @@
 import { ArrowLeft, Trophy, Target, Users, Shield, Rocket, Heart, MapPin, MessageCircle, Star, Award, Search, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import soccerVitaeLogo from "@/assets/soccer-vitae-logo.png";
+import soccerVitaeLogo from "@/assets/SOCCERVITAE_LOGO_NOVO_verde.png";
 
 const values = [
   {

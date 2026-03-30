@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useRequirePwa } from "@/hooks/useRequirePwa";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoText from "@/assets/soccervitae-logo-text.png";
+import logoText from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 type DeviceType = "ios" | "android" | "unknown";
 const useDeviceType = (): DeviceType => {
   return useMemo(() => {

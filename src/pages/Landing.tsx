@@ -327,7 +327,7 @@ const Landing = () => {
         <footer className="border-t border-border/30 py-8 px-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src={logoText} alt="SOCCER VITAE" className="h-6" />
+              <img src={logoGreen} alt="SOCCER VITAE" className="h-6" />
             </div>
             <div className="flex gap-6 text-muted-foreground text-sm">
               <a href="/sobre" className="hover:text-foreground transition-colors">Sobre</a>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import soccerVitaeLogo from "@/assets/soccer-vitae-logo.png";
+import soccerVitaeLogo from "@/assets/SOCCERVITAE_LOGO_NOVO.png";
 
 const SplashScreen = () => {
   return (
