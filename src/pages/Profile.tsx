@@ -45,7 +45,7 @@ const Profile = () => {
   // Check if coming from onboarding
   const [fromOnboarding, setFromOnboarding] = useState(false);
   const isGuest = !user;
-  const [activeTab, setActiveTab] = useState(isGuest ? "profile" : "profile");
+  const [activeTab, setActiveTab] = useState(isGuest ? "teams" : "profile");
   const wasStickyRef = useRef(false);
   // Grid refs removed - using FeedPost directly
   
@@ -114,6 +114,24 @@ const Profile = () => {
       profileView.mutate(targetUserId);
     }
   }, [targetUserId, user?.id]);
+
+  const isTeamOrSchool = profile?.account_type === 'time';
+  const isOfficialAccount = (profile as any)?.is_official_account === true;
+
+  // Set correct default tab for guests once profile loads
+  const hasSetGuestTabRef = useRef(false);
+  useEffect(() => {
+    if (isGuest && profile && !hasSetGuestTabRef.current) {
+      hasSetGuestTabRef.current = true;
+      if (isTeamOrSchool) {
+        setActiveTab("profile");
+      } else if (isOfficialAccount) {
+        setActiveTab("videos");
+      } else {
+        setActiveTab("teams");
+      }
+    }
+  }, [isGuest, profile, isTeamOrSchool, isOfficialAccount]);
 
   const isLoading = profileLoading || statsLoading;
   
@@ -501,9 +519,6 @@ const Profile = () => {
     );
   };
 
-  // Check if official account (simplified layout without championships/achievements)
-  const isOfficialAccount = (profile as any)?.is_official_account === true;
-  const isTeamOrSchool = profile?.account_type === 'time';
 
   // Tab order for swipe navigation
   const tabOrder = isTeamOrSchool
