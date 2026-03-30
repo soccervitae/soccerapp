@@ -66,7 +66,7 @@ const Explore = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between" style={{ paddingTop: 'max(22px, env(safe-area-inset-top))' }}>
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-16 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-foreground">Explorar</h1>
         <div className="flex items-center gap-2">
           <ExploreFiltersSheet
