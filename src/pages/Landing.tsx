@@ -63,6 +63,26 @@ const Landing = () => {
               encontram oportunidades
             </h1>
 
+            {/* Account types */}
+            <div className="mb-6">
+              <p className="text-sm md:text-base text-white/50 mb-3 tracking-wide">
+                Escolha o perfil que mais combina com você.
+              </p>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                  <Trophy className="w-4 h-4 text-primary" />
+                  <span className="text-xs md:text-sm text-white/80 font-medium">Atleta</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span className="text-xs md:text-sm text-white/80 font-medium">Comissão Técnica</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span className="text-xs md:text-sm text-white/80 font-medium">Time de Futebol</span>
+                </div>
+              </div>
+            </div>
 
             <div className="flex gap-3">
               {isMobile ? (
