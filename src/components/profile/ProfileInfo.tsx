@@ -381,31 +381,7 @@ export const ProfileInfo = ({
                   <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                   Mensagem
                 </button>
-                {isTeamOrSchool && user && (
-                  mySquadRequest?.status === 'pending' ? (
-                    <button
-                      onClick={() => cancelRequest.mutate({ requestId: mySquadRequest.id, teamProfileId: profile.id })}
-                      disabled={cancelRequest.isPending}
-                      className="bg-muted text-muted-foreground h-10 w-10 rounded-full font-semibold text-sm transition-all border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80"
-                      title="Solicitado"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">hourglass_top</span>
-                    </button>
-                  ) : mySquadRequest?.status === 'approved' ? (
-                    <div className="bg-primary/10 text-primary h-10 w-10 rounded-full font-semibold text-sm flex items-center justify-center" title="No elenco">
-                      <span className="material-symbols-outlined text-[20px]">check</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => requestJoin.mutate(profile.id)}
-                      disabled={requestJoin.isPending}
-                      className="bg-primary text-primary-foreground h-10 w-10 rounded-full font-semibold text-sm transition-all flex items-center justify-center disabled:opacity-50 hover:bg-primary/90"
-                      title="Fazer parte do elenco"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">group_add</span>
-                    </button>
-                  )
-                )}
+              
               </>
             )}
           </div>
