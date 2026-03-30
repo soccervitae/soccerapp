@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import stadiumImg from "@/assets/soccer-player-hero.jpg";
 import varzeaImg from "@/assets/varzea-match.jpg";
-import kidsImg from "@/assets/kids-training.jpg";
 
 const slides = [
   { src: stadiumImg, label: "Estádio" },
   { src: varzeaImg, label: "Várzea" },
-  { src: kidsImg, label: "Base" },
 ];
 
 interface SoccerShowcaseProps {
