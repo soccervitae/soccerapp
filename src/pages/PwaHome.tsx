@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import SoccerAnimation from "@/components/pwa/SoccerAnimation";
+import soccerHero from "@/assets/soccer-hero.png";
 
 const PwaHome = () => {
   const navigate = useNavigate();
@@ -15,13 +15,18 @@ const PwaHome = () => {
         />
       </div>
       
-      <div className="flex flex-col items-center">
-        <p className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 py-[16px] text-primary text-center">
+      <div className="flex flex-col items-center gap-6">
+        <p className="text-4xl md:text-6xl font-black leading-tight tracking-tight my-0 text-primary text-center">
           Onde talentos<br />encontram<br />oportunidades
         </p>
+        <img 
+          src={soccerHero}
+          alt="Soccer"
+          className="w-32 h-32 object-contain"
+          width={512}
+          height={512}
+        />
       </div>
-
-      <SoccerAnimation />
       
       <div className="flex flex-col gap-3 w-full max-w-sm">
         <Button
