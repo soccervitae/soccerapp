@@ -192,7 +192,7 @@ const ForgotPassword = () => {
             alt="Soccer Vitae" 
             className="h-7 w-auto mx-auto mb-4 object-contain"
           />
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-xl font-bold text-foreground">
             {stage === "success" ? "Senha Redefinida!" : "Recuperar Senha"}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
