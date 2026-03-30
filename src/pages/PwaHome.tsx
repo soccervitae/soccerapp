@@ -55,6 +55,11 @@ const PwaHome = () => {
           </h1>
         </div>
 
+        {/* Soccer Showcase */}
+        <div className="px-2 mb-4">
+          <SoccerShowcase />
+        </div>
+
         {/* Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto pb-4">
           <Button
