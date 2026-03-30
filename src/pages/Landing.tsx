@@ -12,6 +12,7 @@ import stadiumHero from "@/assets/soccer-player-hero.jpg";
 import clappingLanding from "@/assets/clapping-landing.png";
 import playerKickingIcon from "@/assets/player-kicking-icon.png";
 import footballFieldIcon from "@/assets/football-field-icon.png";
+import SoccerShowcase from "@/components/common/SoccerShowcase";
 
 const useDeviceType = () => {
   return useMemo(() => {
@@ -136,6 +137,11 @@ const Landing = () => {
               </h1>
             </div>
           </motion.div>
+        </section>
+
+        {/* Soccer Showcase */}
+        <section className="py-10 px-4 max-w-7xl mx-auto flex flex-col items-center">
+          <SoccerShowcase />
         </section>
 
         {/* Account Types Section */}
