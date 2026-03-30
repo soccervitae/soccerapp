@@ -46,7 +46,7 @@ const PwaHome = () => {
 
         {/* Hero text */}
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-          <h1 className="text-5xl md:text-6xl font-black leading-tight tracking-tight uppercase">
+          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight uppercase">
             <span className="text-white">Jogue.</span>
             <br />
             <span className="text-primary">Brilhe.</span>
