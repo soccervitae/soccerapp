@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download } from "lucide-react";
+import { Search, Play, Eye, ChevronRight, User, MessageCircle, Film, Shield, Users, Trophy, Medal, Newspaper, Bell, Lock, Camera, Send, MapPin, type LucideIcon, ClipboardList, UserPlus, Share, MoreVertical, Plus, Download, Shirt } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +39,7 @@ const Landing = () => {
   const featuresByAccount = [
     {
       emoji: "",
-      customEmoji: playerKickingIcon,
+      customIcon: Shirt,
       accountType: "Atleta",
       accountDescription: "Crie seu currículo esportivo e mostre seu talento para o mundo.",
       features: [
@@ -178,9 +178,7 @@ const Landing = () => {
                 key={index}
                 className="flex flex-col items-center text-center gap-4 rounded-xl border border-border/40 bg-card shadow-sm p-6 hover:border-primary/30 transition-all"
               >
-                {type.customEmoji ? (
-                  <img src={type.customEmoji} alt={type.accountType} className="w-16 h-16" loading="lazy" />
-                ) : type.customIcon ? (
+                {type.customIcon ? (
                   <type.customIcon className="w-16 h-16 text-primary" />
                 ) : (
                   <span className="text-5xl">{type.emoji}</span>
@@ -210,9 +208,7 @@ const Landing = () => {
             {featuresByAccount.map((account, idx) => (
               <div key={idx}>
                 <div className="flex items-center gap-3 mb-6">
-                  {account.customEmoji ? (
-                    <img src={account.customEmoji} alt={account.accountType} className="w-8 h-8" loading="lazy" />
-                  ) : account.customIcon ? (
+                  {account.customIcon ? (
                     <account.customIcon className="w-8 h-8 text-primary" />
                   ) : (
                     <span className="text-2xl">{account.emoji}</span>
