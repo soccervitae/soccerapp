@@ -55,7 +55,7 @@ const Landing = () => {
     },
     {
       emoji: "",
-      customEmoji: footballFieldIcon,
+      customIcon: ClipboardList,
       accountType: "Comissão Técnica",
       accountDescription: "Treinadores, preparadores físicos e auxiliares podem criar seu perfil profissional.",
       features: [
@@ -179,6 +179,8 @@ const Landing = () => {
               >
                 {type.customEmoji ? (
                   <img src={type.customEmoji} alt={type.accountType} className="w-16 h-16" loading="lazy" />
+                ) : type.customIcon ? (
+                  <type.customIcon className="w-16 h-16 text-primary" />
                 ) : (
                   <span className="text-5xl">{type.emoji}</span>
                 )}
@@ -209,6 +211,8 @@ const Landing = () => {
                 <div className="flex items-center gap-3 mb-6">
                   {account.customEmoji ? (
                     <img src={account.customEmoji} alt={account.accountType} className="w-8 h-8" loading="lazy" />
+                  ) : account.customIcon ? (
+                    <account.customIcon className="w-8 h-8 text-primary" />
                   ) : (
                     <span className="text-2xl">{account.emoji}</span>
                   )}
