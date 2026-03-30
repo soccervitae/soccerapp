@@ -39,7 +39,7 @@ const Landing = () => {
       <div className="min-h-screen bg-background text-foreground font-sans">
 
         {/* Hero Section - Split layout */}
-        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-[280px] md:min-h-[420px]">
+        <section className="w-full relative overflow-hidden bg-[hsl(0,0%,8%)] min-h-screen">
 
           {/* Background image - full width */}
           <div className="absolute inset-0">
@@ -54,7 +54,7 @@ const Landing = () => {
           </div>
 
           {/* Hero content - left side */}
-          <div className="relative z-20 flex flex-col justify-center px-8 md:px-16 pt-14 pb-10 md:py-16 max-w-[550px] min-h-[280px] md:min-h-[420px]">
+          <div className="relative z-20 flex flex-col justify-center px-8 md:px-16 pt-14 pb-10 md:py-16 max-w-[550px] min-h-screen">
             <img src={logoGreen} alt="SOCCER VITAE" className="h-6 md:h-10 w-fit mb-5 md:mb-6" />
             
             <h1 className="text-3xl md:text-5xl font-black italic leading-[0.9] tracking-tight text-white uppercase mb-3">
@@ -182,23 +182,6 @@ const Landing = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Footer */}
-        <footer className="border-t border-border/30 py-8 px-4">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logoGreen} alt="SOCCER VITAE" className="h-4" />
-            </div>
-            <div className="flex gap-6 text-muted-foreground text-sm">
-              <a href="/sobre" className="hover:text-foreground transition-colors">Sobre</a>
-              <a href="/terms" className="hover:text-foreground transition-colors">Termos</a>
-              <a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-foreground transition-colors">Suporte</a>
-            </div>
-            <p className="text-muted-foreground/60 text-xs">
-              © {new Date().getFullYear()} SOCCER VITAE. Todos os direitos reservados.
-            </p>
-          </div>
-        </footer>
       </div>
     </>;
 };
