@@ -285,7 +285,29 @@ const Messages = () => {
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center justify-between">
         <AnimatePresence mode="wait">
-          {showArchived ? (
+          {showSearch ? (
+            <motion.div
+              key="search-header"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex items-center gap-2 w-full"
+            >
+              <button
+                onClick={() => { setShowSearch(false); setSearchQuery(""); }}
+                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <Input
+                autoFocus
+                placeholder="Buscar entre quem você segue..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="h-8 text-sm"
+              />
+            </motion.div>
+          ) : showArchived ? (
             <motion.div
               key="archived-header"
               initial={{ opacity: 0, x: -20 }}
@@ -310,17 +332,25 @@ const Messages = () => {
               className="flex items-center justify-between w-full"
             >
               <h1 className="text-lg font-semibold">Mensagens</h1>
-              <button
-                onClick={() => setShowArchived(true)}
-                className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
-              >
-                <Archive className="w-5 h-5" />
-                {archivedConversations.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
-                    {archivedConversations.length}
-                  </span>
-                )}
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="p-1.5 hover:bg-muted rounded-full transition-colors"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowArchived(true)}
+                  className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
+                >
+                  <Archive className="w-5 h-5" />
+                  {archivedConversations.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
+                      {archivedConversations.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
