@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
     const userName = profile?.full_name || profile?.username || "Atleta";
 
     const emailResponse = await resend.emails.send({
-      from: "SOCCER VITAE <noreply@soccervitae.com>",
+      from: "SOCCER VITAE <naoresponda@soccervitae.com>",
       to: [email],
       subject: "Código de Recuperação de Senha - SOCCER VITAE",
       html: `
