@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -46,7 +46,7 @@ export const useConversations = () => {
     };
   }, []);
 
-  const fetchConversations = async (isRefetch = false) => {
+  const fetchConversations = useCallback(async (isRefetch = false) => {
     if (!user) return;
     
     if (isRefetch) {
@@ -205,7 +205,7 @@ export const useConversations = () => {
       setIsLoading(false);
       setIsFetching(false);
     }
-  };
+  }, [user, showNotification, isGranted]);
 
   const handleNewMessage = useCallback(
     async (payload: { new: Message }) => {
@@ -265,7 +265,7 @@ export const useConversations = () => {
       // Refresh conversations
       fetchConversations();
     },
-    [user, isGranted, showNotification]
+    [user, isGranted, showNotification, fetchConversations]
   );
 
   useEffect(() => {
@@ -318,12 +318,14 @@ export const useConversations = () => {
     };
   }, [user, handleNewMessage]);
 
-  return {
+  const refetch = useCallback(() => fetchConversations(true), [fetchConversations]);
+
+  return useMemo(() => ({
     conversations,
     isLoading,
     isFetching,
     isOffline,
     totalUnread,
-    refetch: () => fetchConversations(true),
-  };
+    refetch,
+  }), [conversations, isLoading, isFetching, isOffline, totalUnread, refetch]);
 };

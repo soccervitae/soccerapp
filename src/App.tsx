@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
+import { ConversationsProvider } from "@/contexts/ConversationsContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -338,12 +339,14 @@ const App = () => {
               {/* PWA auto-update hook */}
               <PwaAutoUpdate />
               <BrowserRouter>
-                <MessageNotificationProvider>
-                  <CallNotificationHandler />
-                  <ScrollToTop />
-                  <GlobalOfflineBanner />
-                  <AnimatedRoutes />
-                </MessageNotificationProvider>
+                <ConversationsProvider>
+                  <MessageNotificationProvider>
+                    <CallNotificationHandler />
+                    <ScrollToTop />
+                    <GlobalOfflineBanner />
+                    <AnimatedRoutes />
+                  </MessageNotificationProvider>
+                </ConversationsProvider>
               </BrowserRouter>
             </PresenceProvider>
           </AuthProvider>

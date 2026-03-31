@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useFollowUser } from "@/hooks/useProfile";
 import { usePresenceContext } from "@/contexts/PresenceContext";
-import { useConversations } from "@/hooks/useConversations";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const trendingTopics = [
@@ -23,7 +23,7 @@ export const RightSidebar = () => {
   const navigate = useNavigate();
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
-  const { totalUnread } = useConversations();
+  const { totalUnread } = useConversationsContext();
 
   // Fetch following users for online section
   const { data: followingUsers } = useQuery({
