@@ -113,6 +113,14 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
                 <span className="flex items-center gap-1">
                   🎤 Mensagem de voz
                 </span>
+              ) : lastMessage.media_type === "voice_call" ? (
+                <span className="flex items-center gap-1">
+                  📞 Chamada de voz
+                </span>
+              ) : lastMessage.media_type === "video_call" ? (
+                <span className="flex items-center gap-1">
+                  📹 Chamada de vídeo
+                </span>
               ) : lastMessage.media_url ? (
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px]">
