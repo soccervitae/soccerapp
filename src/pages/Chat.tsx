@@ -42,6 +42,7 @@ const Chat = () => {
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
+  const [participantLoaded, setParticipantLoaded] = useState(false);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
