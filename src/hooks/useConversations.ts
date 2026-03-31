@@ -137,17 +137,14 @@ export const useConversations = () => {
             .limit(1)
             .single();
 
-          // Count unread messages: messages not sent by me, where read_by does not contain my id
-          const { count: countNotInArray } = await supabase
+          // Count unread messages: not sent by me, where I'm not in read_by (or read_by is null)
+          const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
             .eq("conversation_id", conv.id)
             .neq("sender_id", user.id)
             .is("deleted_at", null)
-            .not("read_by", "cs", `{${user.id}}`);
-
-          // This .not('read_by', 'cs', ...) also covers NULL read_by arrays in PostgREST
-          const count = countNotInArray;
+            .or(`read_by.is.null,read_by.not.cs.{"${user.id}"}`);
 
           return {
             ...conv,
