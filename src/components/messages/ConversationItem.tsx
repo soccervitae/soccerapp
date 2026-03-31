@@ -25,7 +25,8 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
   };
 
   const formatTime = (date: string) => {
-    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR })
+      .replace("há menos de um minuto", "há um minuto");
   };
 
   const truncateMessage = (text: string, maxLength: number = 40) => {
