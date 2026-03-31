@@ -89,10 +89,17 @@ const Messages = () => {
     return new Set(conversations.filter(c => c.participant).map(c => c.participant!.id));
   }, [conversations]);
 
-  // Filter conversations
+  // Filter conversations based on search
   const allConversations = useMemo(() => {
-    return conversations.filter(c => !c.isArchived);
-  }, [conversations]);
+    const nonArchived = conversations.filter(c => !c.isArchived);
+    if (searchQuery.length < 2) return nonArchived;
+    const query = searchQuery.toLowerCase();
+    return nonArchived.filter(c => {
+      const name = c.participant?.full_name?.toLowerCase() || "";
+      const username = c.participant?.username?.toLowerCase() || "";
+      return name.includes(query) || username.includes(query);
+    });
+  }, [conversations, searchQuery]);
 
   const archivedConversations = useMemo(() => {
     return conversations.filter(c => c.isArchived);
