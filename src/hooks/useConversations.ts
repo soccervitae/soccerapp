@@ -46,7 +46,7 @@ export const useConversations = () => {
     };
   }, []);
 
-  const fetchConversations = async (isRefetch = false) => {
+  const fetchConversations = useCallback(async (isRefetch = false) => {
     if (!user) return;
     
     if (isRefetch) {
