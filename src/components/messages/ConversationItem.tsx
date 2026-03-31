@@ -79,7 +79,7 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`text-foreground ${hasUnread ? "font-bold" : "font-medium"}`}>
+            <span className={`text-foreground ${hasUnread ? "font-extrabold" : "font-medium"}`}>
               {participant?.full_name || participant?.username || "Usuário"}
             </span>
             {isMuted && (
