@@ -220,7 +220,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         }));
       });
 
-      callObject.on("participant-updated", (event?: DailyEventObjectParticipant) => {
+      callObject.on("participant-updated", (event) => {
         if (!event || event.participant.local) return;
         
         const tracks = event.participant.tracks;
