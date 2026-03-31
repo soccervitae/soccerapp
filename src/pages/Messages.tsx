@@ -80,6 +80,7 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [creatingUserId, setCreatingUserId] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
