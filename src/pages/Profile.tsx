@@ -508,8 +508,8 @@ const Profile = () => {
     if (nextTab === activeTab) return;
     saveCurrentTabScroll();
     const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
-    const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
-    const isSticky = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
+    // Detect sticky: if the tabs' top is at or near the sticky position (50px for header), they're stuck
+    const isSticky = tabsEl ? tabsEl.getBoundingClientRect().top <= (isGuest ? 1 : 51) : false;
     wasStickyRef.current = isSticky;
     if (!isSticky) {
       pendingScrollRestoreRef.current = collectScrollTargets();
