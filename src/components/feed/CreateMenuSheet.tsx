@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/responsive-modal";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useProfile } from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 type CreateOption = "post" | "replay" | "highlight" | "times" | "championship" | "achievement";
 
@@ -23,6 +24,7 @@ const allMenuOptions = [
     icon: "add_photo_alternate",
     colorClass: "bg-blue-500/20 text-blue-500",
     adminOnly: false,
+    proOnly: false,
   },
   {
     id: "replay" as CreateOption,
@@ -31,6 +33,7 @@ const allMenuOptions = [
     icon: "slow_motion_video",
     colorClass: "bg-purple-500/20 text-purple-500",
     adminOnly: false,
+    proOnly: true,
   },
   {
     id: "highlight" as CreateOption,
@@ -39,6 +42,7 @@ const allMenuOptions = [
     icon: "auto_awesome",
     colorClass: "bg-amber-500/20 text-amber-500",
     adminOnly: false,
+    proOnly: true,
   },
   {
     id: "times" as CreateOption,
@@ -47,6 +51,7 @@ const allMenuOptions = [
     icon: "shield",
     colorClass: "bg-red-500/20 text-red-500",
     adminOnly: false,
+    proOnly: false,
   },
   {
     id: "championship" as CreateOption,
@@ -55,6 +60,7 @@ const allMenuOptions = [
     icon: "emoji_events",
     colorClass: "bg-yellow-500/20 text-yellow-500",
     adminOnly: false,
+    proOnly: false,
   },
   {
     id: "achievement" as CreateOption,
@@ -63,6 +69,7 @@ const allMenuOptions = [
     icon: "military_tech",
     colorClass: "bg-emerald-500/20 text-emerald-500",
     adminOnly: false,
+    proOnly: false,
   },
 ];
 
@@ -79,6 +86,7 @@ export const CreateMenuSheet = ({
   
   // Check if user is official account (can create content anywhere)
   const isOfficialAccount = profile?.is_official_account === true;
+  const isPro = profile?.is_verified_premium === true;
   
   // Admin users (except official account) can't create posts/replays/highlights from public app
   const isTeamOrSchool = profile?.account_type === 'time';
@@ -94,6 +102,15 @@ export const CreateMenuSheet = ({
   });
 
   const handleSelect = (option: CreateOption) => {
+    // Check if option requires Pro and user is not Pro/official
+    const menuOption = allMenuOptions.find(o => o.id === option);
+    if (menuOption?.proOnly && !isPro && !isOfficialAccount) {
+      toast.error("Recurso exclusivo do Plano Pro", {
+        description: "Assine o Plano Pro para desbloquear Replays e Destaques.",
+      });
+      return;
+    }
+    
     onOpenChange(false);
     // Small delay to allow sheet close animation
     setTimeout(() => {
