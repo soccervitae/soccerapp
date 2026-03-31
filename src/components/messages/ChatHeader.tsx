@@ -36,6 +36,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
+  const isUnknownUser = !participant?.full_name && !participant?.username;
 
   const getInitials = (name: string) => {
     return name
@@ -91,7 +92,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
       </div>
 
       {/* Call buttons and menu - hidden for deleted users */}
-      {!isDeletedUser && (
+      {!isDeletedUser && !isUnknownUser && (
         <div className="flex items-center gap-1">
           {/* Voice call button */}
           <Button
