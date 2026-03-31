@@ -144,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SportConnect <onboarding@resend.dev>",
+        from: "SOCCER VITAE <noreply@soccervitae.com>",
         to: [email],
         subject: "⚠️ Novo dispositivo detectado na sua conta",
         html: emailHtml,
