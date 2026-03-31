@@ -236,7 +236,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         setCallState(prev => ({ ...prev, remoteStream: mediaStream }));
       });
 
-      callObject.on("participant-left", (event?: DailyEventObjectParticipant) => {
+      callObject.on("participant-left", (event) => {
         if (!event || event.participant.local) return;
         console.log("[Daily] Remote participant left");
         cleanupCall(callConnectedRef.current ? 'completed' : undefined);
