@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SOCCER VITAE <noreply@soccervitae.com>",
+        from: "SOCCER VITAE <naoresponda@soccervitae.com>",
         to: [email],
         subject: "⚠️ Confirme a Exclusão da sua Conta - SOCCER VITAE",
         html: emailHtml,

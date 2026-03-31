@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SOCCER VITAE <noreply@soccervitae.com>",
+        from: "SOCCER VITAE <naoresponda@soccervitae.com>",
         to: [userEmail],
         subject: `Resposta ao seu ticket: ${ticket.subject} - SOCCER VITAE`,
         html: emailHtml,
