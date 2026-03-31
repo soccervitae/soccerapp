@@ -398,13 +398,8 @@ const Messages = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Campo de busca */}
-              <div className="px-3 pb-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Buscar entre quem você segue..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
-                </div>
-              </div>
+
+
 
               {/* Loading state */}
               {isLoadingFollowing && (
