@@ -19,8 +19,8 @@ const CreateReplay = () => {
 
   useEffect(() => {
     if (replayProfile && !replayProfile.is_verified_premium && !replayProfile.is_official_account) {
-      toast.error("Recurso exclusivo do Plano Pro", {
-        description: "Assine o Plano Pro para criar Replays.",
+      toast("SEJA PRO e tenha mais recursos! 🌟", {
+        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
       });
       navigate("/", { replace: true });
     }
