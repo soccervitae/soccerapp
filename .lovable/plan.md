@@ -1,39 +1,26 @@
 
 
-## Plano: Sistema de Notificação PWA para Mensagens no Chat
+## Plano: Melhorar Estilo de Mensagens Não Lidas (Estilo Instagram)
 
 ### Situação Atual
-O projeto **já possui** a infraestrutura de notificações:
-- Badge no ícone de mensagens no menu inferior (via `totalUnread`)
-- Service Worker com suporte a push notifications
-- Realtime subscription para novas mensagens
-- `MessageNotificationProvider` montado globalmente
-
-### O que falta
-1. **App Badge API** — mostrar badge no ícone do PWA instalado (na home screen)
-2. **Garantir que o badge atualiza em tempo real** quando o app está em background
-3. **Solicitar permissão de notificação** automaticamente ao entrar no app
+O sistema **já possui** negrito e badge, mas pode ser melhorado para ficar mais parecido com o Instagram.
 
 ### Alterações
 
-**1. Adicionar App Badge API ao `useConversations.ts`**
-- Quando `totalUnread` mudar, chamar `navigator.setAppBadge(count)` para atualizar o badge no ícone do PWA na home screen
-- Chamar `navigator.clearAppBadge()` quando count for 0
+**1. `src/components/messages/ConversationItem.tsx`**
+- Tornar o nome do remetente mais destacado com `font-extrabold` (ao invés de `font-bold`)
+- Tornar o preview da mensagem em `font-semibold text-foreground` (mais forte que o atual `font-medium`)
+- Tornar o horário também em negrito quando não lido
+- Manter o badge de contagem com estilo mais proeminente (cor primary sólida)
 
-**2. Atualizar `usePushNotifications.ts`**
-- Adicionar auto-request de permissão quando o app roda como PWA
-- Melhorar o `showNotification` para incluir o badge count no payload
+**2. `src/components/profile/BottomNavigation.tsx`**
+- O badge no ícone de chat já funciona via `totalUnread` -- sem alterações necessárias aqui, já está correto
 
-**3. Atualizar `public/sw.js`**
-- Adicionar lógica para atualizar o app badge quando receber notificação push
-- Manter badge sincronizado mesmo com app em background
+### Resumo das Mudanças Visuais
+- Nome: `font-bold` → `font-extrabold` quando não lido
+- Preview da mensagem: `font-medium` → `font-semibold` quando não lido  
+- Horário: adicionar `font-semibold text-foreground` quando não lido
+- Badge: manter como está (já funcional)
 
-**4. Adicionar prompt de permissão no `Index.tsx` (feed)**
-- Mostrar botão/banner pedindo permissão de notificação na primeira vez que o usuário abre o app como PWA
-
-### Detalhes Técnicos
-- `navigator.setAppBadge()` é suportado em Chrome/Edge PWA (Android e Desktop)
-- O service worker já está configurado e funcional
-- O realtime do Supabase já escuta novas mensagens globalmente
-- O badge no bottom navigation já funciona — este plano adiciona o badge no ícone do PWA na home screen e garante notificações push funcionais
+Apenas 1 arquivo editado: `ConversationItem.tsx`
 
