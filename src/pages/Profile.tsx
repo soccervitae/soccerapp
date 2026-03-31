@@ -848,7 +848,6 @@ const Profile = () => {
           </div>
         </>
       )}
-      )}
       
       {isAdminViewingProfile ? (
         <AdminMobileHeader />
