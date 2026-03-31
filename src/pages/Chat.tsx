@@ -56,6 +56,14 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Refetch conversations when messages load to update unread badges
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      const timer = setTimeout(() => refetchConversations(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, messages.length, refetchConversations]);
+
   // Video call hook
   const {
     isCallActive,
