@@ -126,9 +126,9 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SOCCER VITAE <onboarding@resend.dev>",
-        to: ["soccervitae@gmail.com"],
-        subject: `Confirme seu cadastro - SOCCER VITAE ⚽ (para: ${email})`,
+        from: "SOCCER VITAE <noreply@soccervitae.com>",
+        to: [email],
+        subject: `Confirme seu cadastro - SOCCER VITAE ⚽`,
         html: emailHtml,
       }),
     });

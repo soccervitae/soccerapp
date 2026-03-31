@@ -82,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">⚽ SportConnect</h1>
+            <h1 style="color: white; margin: 0; font-size: 24px;">⚽ SOCCER VITAE</h1>
           </div>
           
           <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none;">
@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
             
             <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-              Você está recebendo este email porque um novo dispositivo acessou sua conta no SportConnect.
+              Você está recebendo este email porque um novo dispositivo acessou sua conta no SOCCER VITAE.
               <br>
               Para desativar estes alertas, acesse Configurações > Segurança > Alertas de Segurança.
             </p>
@@ -144,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SportConnect <onboarding@resend.dev>",
+        from: "SOCCER VITAE <noreply@soccervitae.com>",
         to: [email],
         subject: "⚠️ Novo dispositivo detectado na sua conta",
         html: emailHtml,

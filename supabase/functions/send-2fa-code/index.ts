@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "SOCCER VITAE <onboarding@resend.dev>",
+        from: "SOCCER VITAE <noreply@soccervitae.com>",
         to: [email],
         subject: "Código de Verificação - SOCCER VITAE",
         html: emailHtml,
