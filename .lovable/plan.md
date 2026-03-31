@@ -1,36 +1,23 @@
 
 
-## Plano: Corrigir Negrito em Mensagens Não Lidas e Contador no Badge
+## Plano: Corrigir troca de abas no perfil quando sticky (sem recarregar)
 
-### Diagnóstico
+### Problema
+`ProfileTabs`, `ProfileContent` e `MainContent` são definidos como **funções-componente dentro do render** do `Profile`. Isso faz com que o React os trate como componentes **novos** a cada render — ao trocar de aba, o React desmonta e remonta toda a árvore, causando o efeito de "recarregar a página".
 
-A infraestrutura já existe (ConversationsProvider, ConversationItem com estilos bold, badge no BottomNavigation). O problema provável é a **query de contagem de não lidas** na linha 147 do `useConversations.ts`:
+### Solução
+Converter `ProfileTabs`, `ProfileContent` e `MainContent` de componentes inline para **JSX direto** (inline rendering), eliminando a recriação de componentes a cada render.
 
-```
-.or(`read_by.is.null,not.read_by.cs.{${user.id}}`)
-```
+### Alterações — `src/pages/Profile.tsx`
 
-O operador `not.read_by.cs.{...}` dentro de `.or()` pode não funcionar corretamente com o PostgREST — a sintaxe para negar dentro de `or` é diferente. Isso faz com que `unreadCount` retorne sempre 0, quebrando tanto o negrito quanto o badge.
+1. **Remover as declarações de função** `ProfileTabs`, `ProfileContent` e `MainContent` (linhas ~555, ~699, ~728)
+2. **Substituir `<ProfileTabs />`** por o JSX da `Tabs` diretamente inline em todos os lugares onde é usado (linhas 724, 789, 849)
+3. **Substituir `<ProfileContent />`** pelo JSX inline (linha 732)
+4. **Substituir `<MainContent />`** pelo JSX inline (linha 854)
+5. Manter `<MediaViewers />` como está (não causa problema pois não depende de `activeTab`)
 
-Além disso, quando o usuário abre o chat e lê as mensagens, o `read_by` pode não estar sendo atualizado corretamente, fazendo com que a contagem nunca mude.
-
-### Alterações
-
-**1. `src/hooks/useConversations.ts`** — Corrigir query de contagem de não lidas
-- Trocar a query `.or(...)` por uma abordagem mais confiável usando `not` filter separado
-- Usar `.not('read_by', 'cs', `{"${user.id}"}`)` como filtro direto ao invés de dentro do `.or()`
-- Manter o filtro `read_by.is.null` tratado separadamente ou via RPC
-
-**2. `src/hooks/useMessages.ts`** — Garantir que `read_by` é atualizado ao abrir chat
-- Verificar se ao entrar no chat as mensagens recebidas são marcadas como lidas (adicionando o `user.id` ao array `read_by`)
-- Após marcar como lidas, disparar `refetch` do ConversationsContext para atualizar badge
-
-**3. `src/components/messages/ConversationItem.tsx`** — Sem alterações (estilos bold já estão corretos)
-
-**4. `src/components/profile/BottomNavigation.tsx`** — Sem alterações (badge já usa `totalUnread` do contexto)
-
-### Resumo
-- Fix na query PostgREST para contar não lidas corretamente
-- Garantir marcação de leitura ao abrir conversa
-- Badge e negrito já funcionam — só dependem de `unreadCount > 0` retornar o valor correto
+### Resultado
+- Clicar nas abas quando sticky apenas troca o conteúdo sem desmontar/remontar
+- Scroll preservation continua funcionando normalmente
+- Nenhuma mudança visual ou funcional
 
