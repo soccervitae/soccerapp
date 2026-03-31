@@ -228,47 +228,23 @@ const Profile = () => {
   };
 
   useLayoutEffect(() => {
+    // If tabs are sticky, don't touch scroll at all (Instagram behavior)
+    if (wasStickyRef.current) {
+      pendingScrollRestoreRef.current = null;
+      return;
+    }
+
     const savedY = tabScrollMemoryRef.current[activeTab];
     const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
     const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
-    const targetY = savedY !== undefined ? savedY : (wasStickyRef.current && tabsOffsetY > 0 ? tabsOffsetY : 0);
+    const targetY = savedY !== undefined ? savedY : (tabsOffsetY > 0 ? tabsOffsetY : 0);
 
-    let raf1 = 0;
-    let raf2 = 0;
-    let raf3 = 0;
-
-    const restoreAll = () => {
-      const targets = pendingScrollRestoreRef.current;
-      if (targets && targets.length > 0) {
-        restoreScrollTargets(targets);
-      }
-      window.scrollTo({ top: targetY, behavior: "auto" });
-    };
-
-    const timeout1 = window.setTimeout(restoreAll, 80);
-    const timeout2 = window.setTimeout(() => {
-      restoreAll();
-      pendingScrollRestoreRef.current = null;
-    }, 180);
-
-    restoreAll();
-    raf1 = requestAnimationFrame(() => {
-      restoreAll();
-      raf2 = requestAnimationFrame(() => {
-        restoreAll();
-        raf3 = requestAnimationFrame(() => {
-          restoreAll();
-        });
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      cancelAnimationFrame(raf3);
-      window.clearTimeout(timeout1);
-      window.clearTimeout(timeout2);
-    };
+    const targets = pendingScrollRestoreRef.current;
+    if (targets && targets.length > 0) {
+      restoreScrollTargets(targets);
+    }
+    window.scrollTo({ top: targetY, behavior: "auto" });
+    pendingScrollRestoreRef.current = null;
   }, [activeTab]);
 
   if (isLoading) {
@@ -533,8 +509,11 @@ const Profile = () => {
     saveCurrentTabScroll();
     const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
     const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
-    wasStickyRef.current = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
-    pendingScrollRestoreRef.current = collectScrollTargets();
+    const isSticky = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
+    wasStickyRef.current = isSticky;
+    if (!isSticky) {
+      pendingScrollRestoreRef.current = collectScrollTargets();
+    }
     setActiveTab(nextTab);
   };
 
@@ -616,21 +595,8 @@ const Profile = () => {
         )}
       </TabsList>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.15 }}
+      <div
         style={{ overflow: 'visible' }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={(_, info) => {
-          if (info.offset.x < -50) {
-            handleSwipe("left");
-          } else if (info.offset.x > 50) {
-            handleSwipe("right");
-          }
-        }}
       >
         <TabsContent value="profile" className="mt-4" forceMount={activeTab === "profile" ? true : undefined}>
           {activeTab === "profile" && renderProfileFeed()}
@@ -690,7 +656,7 @@ const Profile = () => {
             )}
           </TabsContent>
         )}
-      </motion.div>
+      </div>
     </Tabs>
   );
 
