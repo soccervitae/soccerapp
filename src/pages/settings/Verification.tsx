@@ -37,7 +37,7 @@ export default function Verification() {
           <span className="material-symbols-outlined text-primary text-[64px] font-bold mb-4">verified</span>
           <h2 className="text-2xl font-bold text-foreground">Soccer Vitae Pro</h2>
           <p className="text-muted-foreground mt-2 max-w-xs">
-            Destaque-se com o selo de verificação e tenha benefícios exclusivos.
+            Destaque-se com o selo de verificação e tenha benefícios exclusivos com o Plano Pro.
           </p>
         </div>
 
