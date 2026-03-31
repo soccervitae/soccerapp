@@ -83,6 +83,8 @@ const Chat = () => {
     const fetchParticipantAndStatus = async () => {
       if (!conversationId || !user) return;
 
+      setParticipantLoaded(false);
+
       // Fetch mute, pin and archive status for current user
       const { data: currentParticipation } = await supabase
         .from("conversation_participants")
@@ -112,6 +114,7 @@ const Chat = () => {
         setParticipant(profile);
         setIsDeletedUser(!profile);
       }
+      setParticipantLoaded(true);
     };
 
     fetchParticipantAndStatus();
