@@ -1,60 +1,39 @@
 
 
-## Plan: Guest Contact Form & Inbox for Profile Owners
+## Plano: Sistema de Notificação PWA para Mensagens no Chat
 
-### Overview
-When an unauthenticated visitor clicks "Mensagem" on a profile, instead of prompting login, navigate to a contact form page. The form shows the profile owner's photo, nickname, and position/function, plus fields for: nome, email, whatsapp, facebook, instagram, and mensagem. Profile owners can view received messages from a new "Mensagens de visitantes" section in Settings.
+### Situação Atual
+O projeto **já possui** a infraestrutura de notificações:
+- Badge no ícone de mensagens no menu inferior (via `totalUnread`)
+- Service Worker com suporte a push notifications
+- Realtime subscription para novas mensagens
+- `MessageNotificationProvider` montado globalmente
 
-### Database Changes
+### O que falta
+1. **App Badge API** — mostrar badge no ícone do PWA instalado (na home screen)
+2. **Garantir que o badge atualiza em tempo real** quando o app está em background
+3. **Solicitar permissão de notificação** automaticamente ao entrar no app
 
-**New table: `guest_messages`**
-- `id` (uuid, PK)
-- `profile_id` (uuid, FK to profiles, not null) — who the message is for
-- `sender_name` (text, not null)
-- `sender_email` (text, not null)
-- `sender_whatsapp` (text, nullable)
-- `sender_facebook` (text, nullable)
-- `sender_instagram` (text, nullable)
-- `message` (text, not null)
-- `is_read` (boolean, default false)
-- `created_at` (timestamptz, default now())
+### Alterações
 
-**RLS policies:**
-- `anon` can INSERT (so guests can send messages)
-- `authenticated` can SELECT where `profile_id = auth.uid()` (owners read their messages)
-- `authenticated` can UPDATE `is_read` where `profile_id = auth.uid()`
+**1. Adicionar App Badge API ao `useConversations.ts`**
+- Quando `totalUnread` mudar, chamar `navigator.setAppBadge(count)` para atualizar o badge no ícone do PWA na home screen
+- Chamar `navigator.clearAppBadge()` quando count for 0
 
-### Frontend Changes
+**2. Atualizar `usePushNotifications.ts`**
+- Adicionar auto-request de permissão quando o app roda como PWA
+- Melhorar o `showNotification` para incluir o badge count no payload
 
-**1. New page: `src/pages/ContactProfile.tsx`**
-- Route: `/:username/contact` (public, no auth required)
-- Fetches profile by username (avatar, nickname, position_name)
-- Displays profile photo, nickname, and position/function at top
-- Form fields: Nome, Email, WhatsApp, Facebook, Instagram, Mensagem
-- On submit: inserts into `guest_messages` table
-- Success toast and redirect back to profile
+**3. Atualizar `public/sw.js`**
+- Adicionar lógica para atualizar o app badge quando receber notificação push
+- Manter badge sincronizado mesmo com app em background
 
-**2. New page: `src/pages/settings/GuestMessages.tsx`**
-- Route: `/settings/guest-messages` (protected)
-- Lists all guest messages sent to the logged-in user
-- Shows sender name, email, social links, message content, and timestamp
-- Mark as read functionality
-- Unread badge count
+**4. Adicionar prompt de permissão no `Index.tsx` (feed)**
+- Mostrar botão/banner pedindo permissão de notificação na primeira vez que o usuário abre o app como PWA
 
-**3. Update `ProfileInfo.tsx`**
-- In `handleMessageClick`, when `!user`: navigate to `/:username/contact` instead of opening auth prompt
-
-**4. Update `src/pages/settings/Index.tsx`**
-- Add "Mensagens de visitantes" item in the "Conta" or "Conteúdo" section with icon `mail` linking to `/settings/guest-messages`
-
-**5. Update `src/App.tsx`**
-- Add public route `/:username/contact` → `ContactProfile`
-- Add protected route `/settings/guest-messages` → `GuestMessages`
-
-### Technical Details
-- Contact form uses client-side validation (zod) for required fields (name, email, message)
-- Email validation with proper format check
-- The form inserts using `supabase` client with anon key (RLS allows anon INSERT)
-- Guest messages page uses `useQuery` to fetch from `guest_messages` where `profile_id = user.id`
-- Unread count can be shown as a badge on the settings item
+### Detalhes Técnicos
+- `navigator.setAppBadge()` é suportado em Chrome/Edge PWA (Android e Desktop)
+- O service worker já está configurado e funcional
+- O realtime do Supabase já escuta novas mensagens globalmente
+- O badge no bottom navigation já funciona — este plano adiciona o badge no ícone do PWA na home screen e garante notificações push funcionais
 
