@@ -65,7 +65,7 @@ export default function Verification() {
           <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
-              <span className="font-bold text-primary">Conta Verificada</span>
+              <span className="font-bold text-primary">Plano Pro Ativo</span>
             </div>
             {expiresAt && (
               <p className="text-sm text-muted-foreground">
