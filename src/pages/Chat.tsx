@@ -42,6 +42,7 @@ const Chat = () => {
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
   const [participant, setParticipant] = useState<Profile | null>(null);
+  const [participantLoaded, setParticipantLoaded] = useState(false);
   const [replyTo, setReplyTo] = useState<MessageWithSender | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -82,6 +83,8 @@ const Chat = () => {
     const fetchParticipantAndStatus = async () => {
       if (!conversationId || !user) return;
 
+      setParticipantLoaded(false);
+
       // Fetch mute, pin and archive status for current user
       const { data: currentParticipation } = await supabase
         .from("conversation_participants")
@@ -111,6 +114,7 @@ const Chat = () => {
         setParticipant(profile);
         setIsDeletedUser(!profile);
       }
+      setParticipantLoaded(true);
     };
 
     fetchParticipantAndStatus();
@@ -442,7 +446,8 @@ const Chat = () => {
 
       {/* Fixed input at bottom - hidden for unknown users */}
       {(() => {
-        const isUnknownUser = !participant?.full_name && !participant?.username;
+        const isUnknownUser = participantLoaded && !participant?.full_name && !participant?.username;
+        if (!participantLoaded) return null;
         if (isUnknownUser) {
           return (
             <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 text-center space-y-3">
