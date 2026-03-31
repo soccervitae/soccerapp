@@ -127,6 +127,21 @@ self.addEventListener('message', (event) => {
       tag: `message-${conversationId}`,
       renotify: true,
     });
+
+    // Update PWA app badge
+    if (navigator.setAppBadge) {
+      navigator.setAppBadge().catch(() => {});
+    }
+  }
+
+  // Update app badge count
+  if (event.data?.type === 'UPDATE_APP_BADGE') {
+    const { count } = event.data;
+    if (navigator.setAppBadge && count > 0) {
+      navigator.setAppBadge(count).catch(() => {});
+    } else if (navigator.clearAppBadge) {
+      navigator.clearAppBadge().catch(() => {});
+    }
   }
 
   // Handle call notifications

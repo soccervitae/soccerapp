@@ -58,7 +58,18 @@ export const useConversations = () => {
       try {
         const cached = await getCachedConversations() as ConversationWithDetails[];
         setConversations(cached);
-        setTotalUnread(cached.reduce((acc: number, c: ConversationWithDetails) => acc + (c.unreadCount || 0), 0));
+        const cachedTotal = cached.reduce((acc: number, c: ConversationWithDetails) => acc + (c.unreadCount || 0), 0);
+        setTotalUnread(cachedTotal);
+        // Update PWA app badge from cache
+        try {
+          if ('setAppBadge' in navigator) {
+            if (cachedTotal > 0) {
+              (navigator as any).setAppBadge(cachedTotal);
+            } else {
+              (navigator as any).clearAppBadge();
+            }
+          }
+        } catch (e) {}
       } catch (error) {
         console.error("Error loading cached conversations:", error);
       }
@@ -157,7 +168,21 @@ export const useConversations = () => {
       });
 
       setConversations(conversationsWithDetails);
-      setTotalUnread(conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0));
+      const newTotal = conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0);
+      setTotalUnread(newTotal);
+
+      // Update PWA app badge
+      try {
+        if ('setAppBadge' in navigator) {
+          if (newTotal > 0) {
+            (navigator as any).setAppBadge(newTotal);
+          } else {
+            (navigator as any).clearAppBadge();
+          }
+        }
+      } catch (e) {
+        // Badge API not supported or permission denied
+      }
 
       // Cache conversations for offline use
       try {
