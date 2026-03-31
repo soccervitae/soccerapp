@@ -776,7 +776,7 @@ const Profile = () => {
                     profileAvatarUrl={profile.avatar_url}
                   />
                 )}
-                <ProfileTabs />
+                {profileTabsJsx}
               </div>
             </div>
           </main>
