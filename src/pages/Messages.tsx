@@ -514,12 +514,22 @@ const Messages = () => {
                     </div>
                   )}
 
-                  {/* Empty conversations state */}
-                  {allConversations.length === 0 && !isLoading && (
+                  {/* Empty state */}
+                  {allConversations.length === 0 && !isLoading && searchQuery.length < 2 && (
                     <div className="py-8 text-center">
                       <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground">
                         Nenhuma conversa ainda. Clique em alguém online para iniciar!
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Search empty state */}
+                  {searchQuery.length >= 2 && allConversations.length === 0 && filteredUsers.filter(u => !existingConversationUserIds.has(u.id)).length === 0 && (
+                    <div className="py-8 text-center">
+                      <Search className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        Nenhum resultado para "{searchQuery}"
                       </p>
                     </div>
                   )}
