@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useConversations } from "@/hooks/useConversations";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
 import { usePresenceContext } from "@/contexts/PresenceContext";
