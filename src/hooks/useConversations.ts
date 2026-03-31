@@ -144,7 +144,7 @@ export const useConversations = () => {
             .eq("conversation_id", conv.id)
             .neq("sender_id", user.id)
             .is("deleted_at", null)
-            .or(`read_by.is.null,read_by.not.cs.{"${user.id}"}`);
+            .or(`read_by.is.null,not.read_by.cs.{"${user.id}"}`);
 
           return {
             ...conv,
