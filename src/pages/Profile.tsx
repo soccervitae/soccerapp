@@ -836,7 +836,7 @@ const Profile = () => {
               </div>
             )}
             <motion.div variants={itemVariants}>
-              <ProfileTabs />
+              {profileTabsJsx}
             </motion.div>
           </div>
         </motion.div>
