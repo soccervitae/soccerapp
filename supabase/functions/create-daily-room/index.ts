@@ -25,10 +25,8 @@ serve(async (req) => {
       );
     }
 
-    // Create a unique room name based on conversation
-    const roomName = `call-${conversationId}-${Date.now()}`;
+    const roomName = `call-${conversationId.slice(0, 8)}-${Date.now()}`;
 
-    // Create Daily.co room via REST API
     const response = await fetch("https://api.daily.co/v1/rooms", {
       method: "POST",
       headers: {
@@ -37,7 +35,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         name: roomName,
-        privacy: "private",
+        privacy: "public",
         properties: {
           max_participants: 2,
           enable_chat: false,
@@ -45,7 +43,7 @@ serve(async (req) => {
           enable_screenshare: false,
           start_video_off: callType === "voice",
           start_audio_off: false,
-          exp: Math.floor(Date.now() / 1000) + 3600, // expires in 1 hour
+          exp: Math.floor(Date.now() / 1000) + 3600,
           eject_at_room_exp: true,
         },
       }),
@@ -58,37 +56,6 @@ serve(async (req) => {
 
     const room = await response.json();
 
-    // Create meeting tokens for both participants
-    const createToken = async (participantId: string) => {
-      const tokenRes = await fetch("https://api.daily.co/v1/meeting-tokens", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${DAILY_API_KEY}`,
-        },
-        body: JSON.stringify({
-          properties: {
-            room_name: roomName,
-            user_id: participantId,
-            exp: Math.floor(Date.now() / 1000) + 3600,
-            enable_screenshare: false,
-            start_video_off: callType === "voice",
-          },
-        }),
-      });
-
-      if (!tokenRes.ok) {
-        const errorData = await tokenRes.text();
-        throw new Error(`Daily.co token error [${tokenRes.status}]: ${errorData}`);
-      }
-
-      return tokenRes.json();
-    };
-
-    // We'll create a single token for now, each participant calls separately
-    const { caller_id, callee_id } = await req.json().catch(() => ({}));
-    
-    // Just return the room URL - tokens will be created per-participant
     return new Response(
       JSON.stringify({
         roomUrl: room.url,
