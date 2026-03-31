@@ -265,7 +265,7 @@ export const useConversations = () => {
       // Refresh conversations
       fetchConversations();
     },
-    [user, isGranted, showNotification]
+    [user, isGranted, showNotification, fetchConversations]
   );
 
   useEffect(() => {
