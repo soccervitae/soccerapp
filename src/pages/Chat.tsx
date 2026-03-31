@@ -28,6 +28,7 @@ import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { ChatSkeleton } from "@/components/skeletons/ChatSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { MessageWithSender } from "@/hooks/useMessages";
