@@ -551,8 +551,8 @@ const Profile = () => {
   // Check if has highlights
   const hasHighlights = highlights && highlights.length > 0;
 
-  // Profile tabs component
-  const ProfileTabs = () => (
+  // Profile tabs JSX (inline to prevent remounting on tab change)
+  const profileTabsJsx = (
     <Tabs value={activeTab} onValueChange={changeTabPreservingScroll} className={`w-full ${hasHighlights ? 'mt-2' : 'mt-0'}`}>
       <TabsList data-profile-tabs-list="true" className={`w-full h-auto p-0 border-b border-border flex ${isMobile ? `justify-center sticky ${isGuest ? 'top-0' : 'top-[50px]'} z-[30] bg-background rounded-none` : 'justify-center bg-transparent'}`}>
         {(!isGuest || isTeamOrSchool) && (
@@ -617,7 +617,6 @@ const Profile = () => {
       </TabsList>
 
       <motion.div
-        
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.15 }}
@@ -679,7 +678,6 @@ const Profile = () => {
           {activeTab === "photos" && renderMediaGrid(photoPosts, "Nenhuma foto ainda", "photo_library")}
         </TabsContent>
 
-
         {isTeamOrSchool && (
           <TabsContent value="achievements" className="mt-4" forceMount={activeTab === "achievements" ? true : undefined}>
             {activeTab === "achievements" && (
@@ -696,7 +694,8 @@ const Profile = () => {
     </Tabs>
   );
 
-  const ProfileContent = () => (
+  // Inline profile content JSX
+  const profileContentJsx = (
     <>
       <ProfileInfo 
         profile={profile} 
@@ -721,16 +720,7 @@ const Profile = () => {
           />
         </div>
       )}
-      <ProfileTabs />
-    </>
-  );
-
-  const MainContent = () => (
-    <>
-      <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
-      <div className={`${isGuest ? '' : 'pt-[50px]'} flex flex-col gap-4`}>
-        <ProfileContent />
-      </div>
+      {profileTabsJsx}
     </>
   );
 
@@ -786,7 +776,7 @@ const Profile = () => {
                     profileAvatarUrl={profile.avatar_url}
                   />
                 )}
-                <ProfileTabs />
+                {profileTabsJsx}
               </div>
             </div>
           </main>
@@ -846,12 +836,17 @@ const Profile = () => {
               </div>
             )}
             <motion.div variants={itemVariants}>
-              <ProfileTabs />
+              {profileTabsJsx}
             </motion.div>
           </div>
         </motion.div>
       ) : (
-        <MainContent />
+        <>
+          <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
+          <div className={`${isGuest ? '' : 'pt-[50px]'} flex flex-col gap-4`}>
+            {profileContentJsx}
+          </div>
+        </>
       )}
       
       {isAdminViewingProfile ? (
