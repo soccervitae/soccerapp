@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
             
             <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-              Você está recebendo este email porque um novo dispositivo acessou sua conta no SportConnect.
+              Você está recebendo este email porque um novo dispositivo acessou sua conta no SOCCER VITAE.
               <br>
               Para desativar estes alertas, acesse Configurações > Segurança > Alertas de Segurança.
             </p>
