@@ -533,8 +533,11 @@ const Profile = () => {
     saveCurrentTabScroll();
     const tabsEl = document.querySelector('[data-profile-tabs-list="true"]') as HTMLElement | null;
     const tabsOffsetY = tabsEl ? tabsEl.offsetTop - 50 : 0;
-    wasStickyRef.current = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
-    pendingScrollRestoreRef.current = collectScrollTargets();
+    const isSticky = (window.scrollY || 0) >= tabsOffsetY && tabsOffsetY > 0;
+    wasStickyRef.current = isSticky;
+    if (!isSticky) {
+      pendingScrollRestoreRef.current = collectScrollTargets();
+    }
     setActiveTab(nextTab);
   };
 
