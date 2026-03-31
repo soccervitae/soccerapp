@@ -442,10 +442,9 @@ const Messages = () => {
               {/* Main content */}
               {!isLoadingFollowing && filteredUsers.length > 0 && (
                 <ScrollArea className="h-[calc(100vh-200px)] px-3">
-                  {/* Seção Online - Horizontal scroll */}
-                  {onlineUsers.length > 0 && (
+                  {/* Seção Online - Horizontal scroll (hide during search) */}
+                  {onlineUsers.length > 0 && searchQuery.length < 2 && (
                     <div className="mb-4">
-
                       <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
                         {onlineUsers.map(userProfile => (
                           <OnlineUserAvatar 
@@ -460,12 +459,47 @@ const Messages = () => {
                     </div>
                   )}
 
+                  {/* Search results - users you follow (only during search) */}
+                  {searchQuery.length >= 2 && filteredUsers.filter(u => !existingConversationUserIds.has(u.id)).length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Pessoas que você segue
+                        </h3>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
+                        {filteredUsers.filter(u => !existingConversationUserIds.has(u.id)).map(userProfile => (
+                          <div
+                            key={userProfile.id}
+                            className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => handleStartConversation(userProfile.id)}
+                          >
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={userProfile.avatar_url || undefined} />
+                              <AvatarFallback className="bg-muted text-muted-foreground">
+                                {getInitials(userProfile.full_name || userProfile.username || "U")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground truncate">
+                                {userProfile.full_name || userProfile.username}
+                              </p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                @{userProfile.username}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Seção de conversas recentes */}
                   {allConversations.length > 0 && (
                     <div className="mb-4">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="text-sm font-medium text-muted-foreground">
-                          Conversas recentes ({allConversations.length})
+                          {searchQuery.length >= 2 ? `Conversas encontradas (${allConversations.length})` : `Conversas recentes (${allConversations.length})`}
                         </h3>
                       </div>
                       <div className="bg-muted/30 rounded-lg overflow-hidden divide-y divide-border">
