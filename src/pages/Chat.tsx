@@ -397,7 +397,7 @@ const Chat = () => {
       {/* Voice call modal */}
       {callType === 'voice' && (
         <VoiceCallModal
-          isOpen={isCallActive}
+          isOpen={isCallActive || isCalling}
           participant={participant}
           remoteStream={remoteStream}
           isCalling={isCalling}
