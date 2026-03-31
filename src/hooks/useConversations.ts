@@ -205,7 +205,7 @@ export const useConversations = () => {
       setIsLoading(false);
       setIsFetching(false);
     }
-  };
+  }, [user, showNotification, isGranted]);
 
   const handleNewMessage = useCallback(
     async (payload: { new: Message }) => {
