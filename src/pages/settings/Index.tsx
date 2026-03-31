@@ -118,7 +118,7 @@ export default function Settings() {
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <SettingsItem
               icon="verified"
-              label="Verificação Premium"
+              label="SEJA PRO"
               onClick={() => navigate("/settings/verification")}
             />
             <SettingsItem 
