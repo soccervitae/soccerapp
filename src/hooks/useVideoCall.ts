@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import DailyIframe, { DailyCall, DailyEventObjectParticipant } from "@daily-co/daily-js";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -13,11 +14,11 @@ export type CallType = 'video' | 'voice';
 
 export interface VideoCallMetadata {
   status: VideoCallStatus;
-  duration?: number; // in seconds
+  duration?: number;
   startedAt?: string;
   endedAt?: string;
-  initiator?: string; // user id who started the call
-  callType?: CallType; // type of call
+  initiator?: string;
+  callType?: CallType;
 }
 
 interface CallState {
@@ -34,41 +35,15 @@ interface CallState {
 }
 
 interface SignalingMessage {
-  type: "call_request" | "call_accepted" | "call_rejected" | "offer" | "answer" | "ice_candidate" | "call_ended";
+  type: "call_request" | "call_accepted" | "call_rejected" | "call_ended" | "daily_room_ready";
   from: string;
   to: string;
-  payload?: RTCSessionDescriptionInit | RTCIceCandidateInit | null;
   callerInfo?: Profile;
   callType?: CallType;
+  roomUrl?: string;
 }
 
-// ICE servers with TURN for NAT traversal
-const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    { urls: "stun:stun2.l.google.com:19302" },
-    // TURN servers for NAT traversal when STUN fails
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443?transport=tcp",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
-
-const CALL_TIMEOUT_MS = 30000; // 30 seconds timeout
+const CALL_TIMEOUT_MS = 30000;
 
 export const useVideoCall = (conversationId: string | null, participant: Profile | null) => {
   const { user } = useAuth();
@@ -86,16 +61,14 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     callType: null,
   });
 
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
+  const dailyCallRef = useRef<DailyCall | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
   const callTimeoutRef = useRef<number | null>(null);
   const callStartTimeRef = useRef<Date | null>(null);
   const isInitiatorRef = useRef<boolean>(false);
   const callConnectedRef = useRef<boolean>(false);
+  const roomUrlRef = useRef<string | null>(null);
 
-  // Save call to message history
   const saveCallToHistory = useCallback(async (status: VideoCallStatus, currentCallType?: CallType) => {
     if (!conversationId || !user) return;
 
@@ -114,8 +87,6 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       callType: callTypeToSave,
     };
 
-    console.log("[WebRTC] Saving call to history:", metadata);
-
     try {
       await supabase.from("messages").insert({
         conversation_id: conversationId,
@@ -124,46 +95,36 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         media_type: callTypeToSave === 'voice' ? "voice_call" : "video_call",
       });
     } catch (error) {
-      console.error("[WebRTC] Error saving call to history:", error);
+      console.error("[Daily] Error saving call to history:", error);
     }
   }, [conversationId, user, callState.callType]);
 
-  // Define cleanupCall first since it's used by other functions
   const cleanupCall = useCallback((saveStatus?: VideoCallStatus) => {
-    console.log("[WebRTC] Cleaning up call...", saveStatus);
-    
-    // Save to history if status provided
+    console.log("[Daily] Cleaning up call...", saveStatus);
+
     if (saveStatus) {
       saveCallToHistory(saveStatus);
     }
-    
-    // Clear timeout
+
     if (callTimeoutRef.current) {
       clearTimeout(callTimeoutRef.current);
       callTimeoutRef.current = null;
     }
 
-    // Stop all tracks
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        console.log("[WebRTC] Stopping track:", track.kind);
-        track.stop();
-      });
-      localStreamRef.current = null;
+    // Destroy Daily call object
+    if (dailyCallRef.current) {
+      try {
+        dailyCallRef.current.destroy();
+      } catch (e) {
+        console.warn("[Daily] Error destroying call object:", e);
+      }
+      dailyCallRef.current = null;
     }
 
-    // Close peer connection
-    if (peerConnectionRef.current) {
-      console.log("[WebRTC] Closing peer connection");
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-
-    // Clear pending candidates and refs
-    pendingCandidatesRef.current = [];
     callStartTimeRef.current = null;
     isInitiatorRef.current = false;
     callConnectedRef.current = false;
+    roomUrlRef.current = null;
 
     setCallState({
       isCallActive: false,
@@ -199,185 +160,156 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     [user]
   );
 
-  const createPeerConnection = useCallback(() => {
-    console.log("[WebRTC] Creating peer connection with ICE servers:", ICE_SERVERS);
-    const pc = new RTCPeerConnection(ICE_SERVERS);
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate && participant) {
-        console.log("[WebRTC] Sending ICE candidate:", event.candidate.type);
-        sendSignalingMessage({
-          type: "ice_candidate",
-          to: participant.id,
-          payload: event.candidate.toJSON(),
-        });
-      }
-    };
-
-    pc.onicegatheringstatechange = () => {
-      console.log("[WebRTC] ICE gathering state:", pc.iceGatheringState);
-    };
-
-    pc.ontrack = (event) => {
-      console.log("[WebRTC] Remote track received:", event.track.kind);
-      clearCallTimeout();
-      setCallState((prev) => ({
-        ...prev,
-        remoteStream: event.streams[0],
-      }));
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      console.log("[WebRTC] ICE connection state:", pc.iceConnectionState);
-      console.log("[WebRTC] Connection state:", pc.connectionState);
-      console.log("[WebRTC] Signaling state:", pc.signalingState);
-      
-      // Map ICE connection state to our connection status
-      let connectionStatus: ConnectionStatus = 'idle';
-      const iceState = pc.iceConnectionState;
-      
-      if (iceState === 'new' || iceState === 'checking') {
-        connectionStatus = 'connecting';
-      } else if (iceState === 'connected' || iceState === 'completed') {
-        connectionStatus = 'connected';
-      } else if (iceState === 'disconnected') {
-        connectionStatus = 'reconnecting';
-      } else if (iceState === 'failed') {
-        connectionStatus = 'failed';
-      }
-      
-      if (pc.iceConnectionState === "connected") {
-        clearCallTimeout();
-        // Mark call as connected and record start time
-        if (!callConnectedRef.current) {
-          callConnectedRef.current = true;
-          callStartTimeRef.current = new Date();
-        }
-        setCallState((prev) => ({ ...prev, isCalling: false, isCallActive: true, connectionStatus }));
-      } else if (pc.iceConnectionState === "disconnected") {
-        console.log("[WebRTC] Connection disconnected, attempting to recover...");
-        toast.error("Conexão perdida. Tentando reconectar...");
-        setCallState((prev) => ({ ...prev, connectionStatus }));
-      } else if (pc.iceConnectionState === "failed") {
-        console.log("[WebRTC] Connection failed");
-        toast.error("Falha na conexão. Tente novamente.");
-        cleanupCall(callConnectedRef.current ? 'completed' : undefined);
-      } else {
-        setCallState((prev) => ({ ...prev, connectionStatus }));
-      }
-    };
-
-    pc.onconnectionstatechange = () => {
-      console.log("[WebRTC] Connection state changed:", pc.connectionState);
-      if (pc.connectionState === "failed") {
-        toast.error("Conexão falhou");
-        cleanupCall();
-      }
-    };
-
-    peerConnectionRef.current = pc;
-    return pc;
-  }, [participant, sendSignalingMessage, clearCallTimeout, cleanupCall]);
-
-  const getLocalStream = useCallback(async (type: CallType = 'video') => {
+  // Join a Daily.co room
+  const joinDailyRoom = useCallback(async (roomUrl: string, callType: CallType) => {
+    console.log("[Daily] Joining room:", roomUrl);
+    
     try {
-      console.log("[WebRTC] Requesting media permissions for", type, "call...");
-      const constraints = type === 'video' 
-        ? { video: true, audio: true }
-        : { video: false, audio: true };
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("[WebRTC] Got local stream with tracks:", stream.getTracks().map(t => t.kind));
-      localStreamRef.current = stream;
-      setCallState((prev) => ({ ...prev, localStream: stream }));
-      return stream;
+      const callObject = DailyIframe.createCallObject({
+        audioSource: true,
+        videoSource: callType === 'video',
+      });
+
+      dailyCallRef.current = callObject;
+
+      // Set up event listeners
+      callObject.on("joined-meeting", () => {
+        console.log("[Daily] Joined meeting");
+        setCallState(prev => ({ ...prev, connectionStatus: 'connecting' }));
+        
+        // Get local tracks
+        const localParticipant = callObject.participants().local;
+        if (localParticipant) {
+          const tracks = localParticipant.tracks;
+          const mediaStream = new MediaStream();
+          
+          if (tracks.audio?.persistentTrack) {
+            mediaStream.addTrack(tracks.audio.persistentTrack);
+          }
+          if (tracks.video?.persistentTrack) {
+            mediaStream.addTrack(tracks.video.persistentTrack);
+          }
+          
+          setCallState(prev => ({ ...prev, localStream: mediaStream }));
+        }
+      });
+
+      callObject.on("participant-joined", (event?: DailyEventObjectParticipant) => {
+        if (!event || event.participant.local) return;
+        console.log("[Daily] Remote participant joined");
+        clearCallTimeout();
+        callConnectedRef.current = true;
+        callStartTimeRef.current = new Date();
+
+        const tracks = event.participant.tracks;
+        const mediaStream = new MediaStream();
+        
+        if (tracks.audio?.persistentTrack) {
+          mediaStream.addTrack(tracks.audio.persistentTrack);
+        }
+        if (tracks.video?.persistentTrack) {
+          mediaStream.addTrack(tracks.video.persistentTrack);
+        }
+
+        setCallState(prev => ({
+          ...prev,
+          remoteStream: mediaStream,
+          isCalling: false,
+          isCallActive: true,
+          connectionStatus: 'connected',
+        }));
+      });
+
+      callObject.on("participant-updated", (event?: DailyEventObjectParticipant) => {
+        if (!event || event.participant.local) return;
+        
+        const tracks = event.participant.tracks;
+        const mediaStream = new MediaStream();
+        
+        if (tracks.audio?.persistentTrack) {
+          mediaStream.addTrack(tracks.audio.persistentTrack);
+        }
+        if (tracks.video?.persistentTrack) {
+          mediaStream.addTrack(tracks.video.persistentTrack);
+        }
+
+        setCallState(prev => ({ ...prev, remoteStream: mediaStream }));
+      });
+
+      callObject.on("participant-left", (event?: DailyEventObjectParticipant) => {
+        if (!event || event.participant.local) return;
+        console.log("[Daily] Remote participant left");
+        cleanupCall(callConnectedRef.current ? 'completed' : undefined);
+      });
+
+      callObject.on("error", (event) => {
+        console.error("[Daily] Error:", event);
+        toast.error("Erro na chamada. Tente novamente.");
+        cleanupCall(callConnectedRef.current ? 'completed' : undefined);
+      });
+
+      callObject.on("left-meeting", () => {
+        console.log("[Daily] Left meeting");
+      });
+
+      // Join the room
+      await callObject.join({ url: roomUrl });
+
+      setCallState(prev => ({
+        ...prev,
+        isCallActive: true,
+        connectionStatus: 'connecting',
+      }));
+
     } catch (error: any) {
-      console.error("[WebRTC] Error getting local stream:", error);
+      console.error("[Daily] Error joining room:", error);
       
-      if (error.name === "NotAllowedError") {
-        toast.error("Permissão de câmera/microfone negada. Por favor, permita o acesso nas configurações do navegador.");
-      } else if (error.name === "NotFoundError") {
-        toast.error("Câmera ou microfone não encontrado no dispositivo.");
-      } else if (error.name === "NotReadableError") {
-        toast.error("Câmera ou microfone já está em uso por outro aplicativo.");
+      if (error.message?.includes("permission") || error.message?.includes("NotAllowed")) {
+        toast.error("Permissão de câmera/microfone negada.");
       } else {
-        toast.error("Erro ao acessar câmera/microfone.");
+        toast.error("Erro ao conectar na chamada.");
       }
       
       cleanupCall();
-      throw error;
     }
-  }, [cleanupCall]);
+  }, [clearCallTimeout, cleanupCall]);
 
-  const createOffer = useCallback(async () => {
-    const pc = createPeerConnection();
-    const stream = await getLocalStream(callState.callType || 'video');
-
-    stream.getTracks().forEach((track) => {
-      pc.addTrack(track, stream);
-    });
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-
-    if (participant) {
-      sendSignalingMessage({
-        type: "offer",
-        to: participant.id,
-        payload: offer,
+  // Create Daily room via edge function
+  const createDailyRoom = useCallback(async (callType: CallType): Promise<string | null> => {
+    try {
+      console.log("[Daily] Creating room...");
+      const { data, error } = await supabase.functions.invoke("create-daily-room", {
+        body: { conversationId, callType },
       });
+
+      if (error) throw error;
+      if (!data?.roomUrl) throw new Error("No room URL returned");
+
+      console.log("[Daily] Room created:", data.roomUrl);
+      return data.roomUrl;
+    } catch (error) {
+      console.error("[Daily] Error creating room:", error);
+      toast.error("Erro ao criar sala de chamada.");
+      return null;
     }
-
-    setCallState((prev) => ({ ...prev, isCalling: true, isCallActive: true, connectionStatus: 'connecting' }));
-  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage, callState.callType]);
-
-  const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
-    const pc = createPeerConnection();
-    const stream = await getLocalStream(callState.callType || 'video');
-
-    stream.getTracks().forEach((track) => {
-      pc.addTrack(track, stream);
-    });
-
-    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-    
-    // Add any pending ICE candidates
-    for (const candidate of pendingCandidatesRef.current) {
-      await pc.addIceCandidate(new RTCIceCandidate(candidate));
-    }
-    pendingCandidatesRef.current = [];
-
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    if (participant) {
-      sendSignalingMessage({
-        type: "answer",
-        to: participant.id,
-        payload: answer,
-      });
-    }
-
-    setCallState((prev) => ({ ...prev, isCallActive: true, isIncomingCall: false }));
-  }, [createPeerConnection, getLocalStream, participant, sendSignalingMessage, callState.callType]);
+  }, [conversationId]);
 
   const handleSignalingMessage = useCallback(async (message: SignalingMessage) => {
-    console.log("Handling signaling:", message.type);
+    console.log("[Daily] Signaling:", message.type);
 
     switch (message.type) {
       case "call_request":
-        setCallState((prev) => ({
+        setCallState(prev => ({
           ...prev,
           isIncomingCall: true,
           callerInfo: message.callerInfo || null,
           callType: message.callType || 'video',
         }));
-        
-        // Show push notification if app is in background
+
         if (document.visibilityState === 'hidden' && conversationId) {
-          const callerName = message.callerInfo?.full_name || 
-                            message.callerInfo?.username || 
-                            'Alguém';
+          const callerName = message.callerInfo?.full_name ||
+            message.callerInfo?.username ||
+            'Alguém';
           showCallNotification(
             callerName,
             message.callType || 'video',
@@ -388,7 +320,34 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         break;
 
       case "call_accepted":
-        await createOffer();
+        // Other party accepted - create room and share URL
+        const callType = callState.callType || 'video';
+        const roomUrl = await createDailyRoom(callType);
+        if (roomUrl) {
+          roomUrlRef.current = roomUrl;
+          // Send room URL to the other participant
+          if (participant) {
+            sendSignalingMessage({
+              type: "daily_room_ready",
+              to: participant.id,
+              roomUrl,
+              callType,
+            });
+          }
+          // Join the room ourselves
+          await joinDailyRoom(roomUrl, callType);
+        } else {
+          cleanupCall();
+        }
+        break;
+
+      case "daily_room_ready":
+        // Room is ready, join it
+        if (message.roomUrl) {
+          const type = message.callType || callState.callType || 'video';
+          roomUrlRef.current = message.roomUrl;
+          await joinDailyRoom(message.roomUrl, type);
+        }
         break;
 
       case "call_rejected":
@@ -396,44 +355,11 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         cleanupCall('rejected');
         break;
 
-      case "offer":
-        if (message.payload) {
-          await handleOffer(message.payload as RTCSessionDescriptionInit);
-        }
-        break;
-
-      case "answer":
-        if (message.payload && peerConnectionRef.current) {
-          await peerConnectionRef.current.setRemoteDescription(
-            new RTCSessionDescription(message.payload as RTCSessionDescriptionInit)
-          );
-          // Add any pending ICE candidates
-          for (const candidate of pendingCandidatesRef.current) {
-            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-          }
-          pendingCandidatesRef.current = [];
-        }
-        break;
-
-      case "ice_candidate":
-        if (message.payload) {
-          if (peerConnectionRef.current?.remoteDescription) {
-            await peerConnectionRef.current.addIceCandidate(
-              new RTCIceCandidate(message.payload as RTCIceCandidateInit)
-            );
-          } else {
-            // Queue the candidate for later
-            pendingCandidatesRef.current.push(message.payload as RTCIceCandidateInit);
-          }
-        }
-        break;
-
       case "call_ended":
-        // Other party ended the call - they will save to history
         cleanupCall();
         break;
     }
-  }, [createOffer, handleOffer, cleanupCall, conversationId, showCallNotification]);
+  }, [callState.callType, participant, sendSignalingMessage, createDailyRoom, joinDailyRoom, cleanupCall, conversationId, showCallNotification]);
 
   // Initialize signaling channel
   useEffect(() => {
@@ -444,14 +370,9 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
     channel
       .on("broadcast", { event: "signaling" }, ({ payload }) => {
         const message = payload as SignalingMessage;
-        
-        // Ignore messages from ourselves
         if (message.from === user.id) return;
-        
-        // Only process messages meant for us
         if (message.to !== user.id) return;
 
-        console.log("Received signaling message:", message.type);
         handleSignalingMessage(message);
       })
       .subscribe();
@@ -466,13 +387,11 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
   const startCall = useCallback(async (type: CallType = 'video') => {
     if (!participant || !user) return;
 
-    console.log("[WebRTC] Starting", type, "call to:", participant.username);
+    console.log("[Daily] Starting", type, "call to:", participant.username);
     isInitiatorRef.current = true;
 
-    // Set call type before starting
-    setCallState((prev) => ({ ...prev, callType: type, isCalling: true }));
+    setCallState(prev => ({ ...prev, callType: type, isCalling: true }));
 
-    // Fetch current user's profile for caller info
     const { data: profile } = await supabase
       .from("profiles")
       .select("*")
@@ -486,10 +405,9 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       callType: type,
     });
 
-    // Set timeout for unanswered call
     clearCallTimeout();
     callTimeoutRef.current = window.setTimeout(() => {
-      console.log("[WebRTC] Call timeout - no answer");
+      console.log("[Daily] Call timeout - no answer");
       toast.error("Chamada não atendida");
       cleanupCall('no_answer');
     }, CALL_TIMEOUT_MS);
@@ -503,7 +421,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       to: callState.callerInfo.id,
     });
 
-    setCallState((prev) => ({ ...prev, isIncomingCall: false }));
+    setCallState(prev => ({ ...prev, isIncomingCall: false }));
   }, [callState.callerInfo, sendSignalingMessage]);
 
   const rejectCall = useCallback(() => {
@@ -514,7 +432,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
       to: callState.callerInfo.id,
     });
 
-    setCallState((prev) => ({
+    setCallState(prev => ({
       ...prev,
       isIncomingCall: false,
       callerInfo: null,
@@ -528,36 +446,37 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         to: participant.id,
       });
     }
-    // Save to history - if call was connected, save as completed
     cleanupCall(callConnectedRef.current ? 'completed' : undefined);
   }, [participant, sendSignalingMessage, cleanupCall]);
 
   const toggleVideo = useCallback(() => {
-    if (localStreamRef.current) {
-      const videoTrack = localStreamRef.current.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        setCallState((prev) => ({ ...prev, isVideoEnabled: videoTrack.enabled }));
-      }
+    if (dailyCallRef.current) {
+      const isEnabled = callState.isVideoEnabled;
+      dailyCallRef.current.setLocalVideo(!isEnabled);
+      setCallState(prev => ({ ...prev, isVideoEnabled: !isEnabled }));
     }
-  }, []);
+  }, [callState.isVideoEnabled]);
 
   const toggleAudio = useCallback(() => {
-    if (localStreamRef.current) {
-      const audioTrack = localStreamRef.current.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setCallState((prev) => ({ ...prev, isAudioEnabled: audioTrack.enabled }));
-      }
+    if (dailyCallRef.current) {
+      const isEnabled = callState.isAudioEnabled;
+      dailyCallRef.current.setLocalAudio(!isEnabled);
+      setCallState(prev => ({ ...prev, isAudioEnabled: !isEnabled }));
     }
-  }, []);
+  }, [callState.isAudioEnabled]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      cleanupCall();
+      if (dailyCallRef.current) {
+        try {
+          dailyCallRef.current.destroy();
+        } catch (e) {
+          // ignore
+        }
+      }
     };
-  }, [cleanupCall]);
+  }, []);
 
   return {
     ...callState,
