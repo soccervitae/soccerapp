@@ -84,6 +84,7 @@ export const CreateMenuSheet = ({
 }: CreateMenuSheetProps) => {
   const { isAdmin } = useIsAdmin();
   const { data: profile } = useProfile();
+  const navigate = useNavigate();
   
   // Check if user is official account (can create content anywhere)
   const isOfficialAccount = profile?.is_official_account === true;
