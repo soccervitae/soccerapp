@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   ResponsiveModal,
   ResponsiveModalContent,
@@ -83,6 +84,7 @@ export const CreateMenuSheet = ({
 }: CreateMenuSheetProps) => {
   const { isAdmin } = useIsAdmin();
   const { data: profile } = useProfile();
+  const navigate = useNavigate();
   
   // Check if user is official account (can create content anywhere)
   const isOfficialAccount = profile?.is_official_account === true;
@@ -105,8 +107,16 @@ export const CreateMenuSheet = ({
     // Check if option requires Pro and user is not Pro/official
     const menuOption = allMenuOptions.find(o => o.id === option);
     if (menuOption?.proOnly && !isPro && !isOfficialAccount) {
-      toast.error("Recurso exclusivo do Plano Pro", {
-        description: "Assine o Plano Pro para desbloquear Replays e Destaques.",
+      onOpenChange(false);
+      setTimeout(() => {
+        navigate("/settings/verification");
+      }, 200);
+      toast("SEJA PRO e tenha mais recursos! 🌟", {
+        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
+        action: {
+          label: "Ver planos",
+          onClick: () => navigate("/settings/verification"),
+        },
       });
       return;
     }

@@ -183,8 +183,8 @@ const CreateHighlight = () => {
 
   useEffect(() => {
     if (highlightProfile && !highlightProfile.is_verified_premium && !highlightProfile.is_official_account) {
-      toast.error("Recurso exclusivo do Plano Pro", {
-        description: "Assine o Plano Pro para criar Destaques.",
+      toast("SEJA PRO e tenha mais recursos! 🌟", {
+        description: "Desbloqueie Destaques, Replays e muito mais com o Plano Pro.",
       });
       navigate("/", { replace: true });
     }
