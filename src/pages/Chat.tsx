@@ -380,7 +380,7 @@ const Chat = () => {
       {/* Video call modal */}
       {callType === 'video' && (
         <VideoCallModal
-          isOpen={isCallActive}
+          isOpen={isCallActive || isCalling}
           participant={participant}
           localStream={localStream}
           remoteStream={remoteStream}
