@@ -180,6 +180,13 @@ const Login = () => {
               </div>
             </div>
 
+            {errorMessage && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{errorMessage}</p>
+              </div>
+            )}
+
             <div className="text-right">
               <Link
                 to="/forgot-password"
