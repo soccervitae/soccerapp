@@ -28,6 +28,7 @@ import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { ChatSkeleton } from "@/components/skeletons/ChatSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { MessageWithSender } from "@/hooks/useMessages";
@@ -38,6 +39,7 @@ const Chat = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refetch: refetchConversations } = useConversationsContext();
   const { messages, isLoading, isSending, isOffline, sendMessage, deleteMessage } = useMessages(conversationId || null);
   const { typingUsers, startTyping, stopTyping, isAnyoneTyping } = useTypingIndicator(conversationId || null);
   const { fetchReactionsForMessages, addReaction, removeReaction, getReactionsForMessage } = useMessageReactions(conversationId || null);
@@ -53,6 +55,14 @@ const Chat = () => {
   const [isDeletedUser, setIsDeletedUser] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Refetch conversations when messages load to update unread badges
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      const timer = setTimeout(() => refetchConversations(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, messages.length, refetchConversations]);
 
   // Video call hook
   const {
