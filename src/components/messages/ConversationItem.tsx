@@ -98,7 +98,7 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+          <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
             {lastMessage ? (
               // First check if content is shared content JSON
               getSharedContentLabel(lastMessage.content) ? (
