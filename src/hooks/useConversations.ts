@@ -157,7 +157,21 @@ export const useConversations = () => {
       });
 
       setConversations(conversationsWithDetails);
-      setTotalUnread(conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0));
+      const newTotal = conversationsWithDetails.reduce((acc, c) => acc + c.unreadCount, 0);
+      setTotalUnread(newTotal);
+
+      // Update PWA app badge
+      try {
+        if ('setAppBadge' in navigator) {
+          if (newTotal > 0) {
+            (navigator as any).setAppBadge(newTotal);
+          } else {
+            (navigator as any).clearAppBadge();
+          }
+        }
+      } catch (e) {
+        // Badge API not supported or permission denied
+      }
 
       // Cache conversations for offline use
       try {
