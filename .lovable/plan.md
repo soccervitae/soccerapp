@@ -1,49 +1,36 @@
 
 
-## Plano: Corrigir Realtime de Mensagens e Notificação de Não Lidas
+## Plano: Corrigir Negrito em Mensagens Não Lidas e Contador no Badge
 
 ### Diagnóstico
 
-A tabela `messages` **já está** na publicação `supabase_realtime` e as subscriptions existem nos hooks. O problema está em dois pontos:
+A infraestrutura já existe (ConversationsProvider, ConversationItem com estilos bold, badge no BottomNavigation). O problema provável é a **query de contagem de não lidas** na linha 147 do `useConversations.ts`:
 
-1. **`useConversations` é instanciado separadamente** em `BottomNavigation` e em `Messages.tsx` — cada instância cria seu próprio estado e subscription. O `BottomNavigation` tem sua própria instância que faz fetch completo (N+1 queries por conversa), o que pode ser lento e não refletir mudanças imediatamente.
+```
+.or(`read_by.is.null,not.read_by.cs.{${user.id}}`)
+```
 
-2. **`handleNewMessage` captura `fetchConversations` stale** — `fetchConversations` não é memoizada com `useCallback`, mas `handleNewMessage` é um `useCallback` que não a inclui nas deps. Isso pode causar problemas onde o realtime callback não atualiza o estado corretamente.
+O operador `not.read_by.cs.{...}` dentro de `.or()` pode não funcionar corretamente com o PostgREST — a sintaxe para negar dentro de `or` é diferente. Isso faz com que `unreadCount` retorne sempre 0, quebrando tanto o negrito quanto o badge.
 
-3. **Sem contexto compartilhado** — cada componente que chama `useConversations()` cria uma instância independente com subscriptions duplicadas e estados separados, então o badge no `BottomNavigation` pode não atualizar quando a lista em `Messages.tsx` atualiza.
+Além disso, quando o usuário abre o chat e lê as mensagens, o `read_by` pode não estar sendo atualizado corretamente, fazendo com que a contagem nunca mude.
 
 ### Alterações
 
-**1. Criar `ConversationsContext`** (novo arquivo `src/contexts/ConversationsContext.tsx`)
-- Mover a lógica do `useConversations` para um Context Provider
-- Instanciar UMA VEZ no nível do app (em `App.tsx` dentro de routes autenticadas)
-- Todas as chamadas a `useConversations()` retornam o MESMO estado compartilhado
-- Isso garante que quando uma mensagem nova chega via realtime, TODOS os componentes veem a atualização (badge + lista)
+**1. `src/hooks/useConversations.ts`** — Corrigir query de contagem de não lidas
+- Trocar a query `.or(...)` por uma abordagem mais confiável usando `not` filter separado
+- Usar `.not('read_by', 'cs', `{"${user.id}"}`)` como filtro direto ao invés de dentro do `.or()`
+- Manter o filtro `read_by.is.null` tratado separadamente ou via RPC
 
-**2. Corrigir memoização em `useConversations`**
-- Envolver `fetchConversations` em `useCallback` com deps `[user]`
-- Incluir `fetchConversations` nas deps de `handleNewMessage`
-- Garantir que o channel subscription se recrie corretamente quando as callbacks mudam
+**2. `src/hooks/useMessages.ts`** — Garantir que `read_by` é atualizado ao abrir chat
+- Verificar se ao entrar no chat as mensagens recebidas são marcadas como lidas (adicionando o `user.id` ao array `read_by`)
+- Após marcar como lidas, disparar `refetch` do ConversationsContext para atualizar badge
 
-**3. Atualizar `BottomNavigation.tsx`**
-- Usar o novo `useConversationsContext()` ao invés de `useConversations()`
+**3. `src/components/messages/ConversationItem.tsx`** — Sem alterações (estilos bold já estão corretos)
 
-**4. Atualizar `Messages.tsx`**
-- Usar o novo `useConversationsContext()` ao invés de `useConversations()`
+**4. `src/components/profile/BottomNavigation.tsx`** — Sem alterações (badge já usa `totalUnread` do contexto)
 
-**5. Atualizar `App.tsx`**
-- Envolver routes autenticadas com `<ConversationsProvider>`
-
-### Resultado
-- Mensagens aparecem em tempo real no chat (já funciona via `useMessages`)
-- Badge no ícone de mensagens atualiza instantaneamente quando chega mensagem nova
-- Notificação de não lidas funciona corretamente porque o estado é compartilhado
-- Menos subscriptions duplicadas = melhor performance
-
-### Arquivos Modificados
-- `src/contexts/ConversationsContext.tsx` (novo)
-- `src/hooks/useConversations.ts` (memoização)
-- `src/components/profile/BottomNavigation.tsx` (usar contexto)
-- `src/pages/Messages.tsx` (usar contexto)
-- `src/App.tsx` (adicionar provider)
+### Resumo
+- Fix na query PostgREST para contar não lidas corretamente
+- Garantir marcação de leitura ao abrir conversa
+- Badge e negrito já funcionam — só dependem de `unreadCount > 0` retornar o valor correto
 
