@@ -82,9 +82,6 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
             <span className={`text-foreground ${hasUnread ? "font-bold" : "font-medium"}`}>
               {participant?.full_name || participant?.username || "Usuário"}
             </span>
-            {isOnline && (
-              <span className="text-xs text-green-500 font-medium">online</span>
-            )}
             {isMuted && (
               <BellOff className="h-3.5 w-3.5 text-muted-foreground" />
             )}
