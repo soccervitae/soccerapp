@@ -84,7 +84,7 @@ export default function Verification() {
 
         {isPremium && isExpired && (
           <p className="text-center text-sm text-destructive mt-3">
-            Sua verificação expirou. Renove para manter o selo.
+            Seu Plano Pro expirou. Renove para manter o selo.
           </p>
         )}
       </div>
