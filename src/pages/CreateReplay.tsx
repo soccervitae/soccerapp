@@ -259,11 +259,11 @@ const CreateReplay = () => {
         <Button 
           onClick={handleAdvance} 
           size="sm" 
-          className={`rounded-full px-5 font-semibold text-sm transition-all duration-200 ${
+          className={`px-5 font-semibold text-sm transition-all duration-200 ${
             hasSelection && !isLoading
               ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25' 
               : 'bg-white/10 text-white/40 hover:bg-white/10'
-          }`}
+          } rounded`}
           disabled={!hasSelection || isLoading}
         >
           Avançar
