@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "SOCCER VITAE <noreply@soccervitae.com>",
         to: [email],
-        subject: `Confirme seu cadastro - SOCCER VITAE ⚽ (para: ${email})`,
+        subject: `Confirme seu cadastro - SOCCER VITAE ⚽`,
         html: emailHtml,
       }),
     });
