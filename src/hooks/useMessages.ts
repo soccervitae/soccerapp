@@ -107,14 +107,15 @@ export const useMessages = (conversationId: string | null) => {
       );
 
       if (unreadMessages && unreadMessages.length > 0) {
-        for (const msg of unreadMessages) {
-          await supabase
+        const markPromises = unreadMessages.map((msg) =>
+          supabase
             .from("messages")
             .update({
               read_by: [...(msg.read_by || []), user.id],
             })
-            .eq("id", msg.id);
-        }
+            .eq("id", msg.id)
+        );
+        await Promise.all(markPromises);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
