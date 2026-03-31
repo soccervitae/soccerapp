@@ -615,7 +615,7 @@ export const FeedPost = ({
           </div>
           <div className="cursor-pointer" onClick={handleProfileClick}>
             <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-foreground hover:underline">
+              <span className="font-bold text-foreground hover:underline text-base">
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
               {post.profile.is_verified_premium && (!post.profile.verified_premium_expires_at || new Date(post.profile.verified_premium_expires_at) > new Date()) && (
