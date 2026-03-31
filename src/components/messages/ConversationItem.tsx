@@ -79,7 +79,7 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`text-foreground ${hasUnread ? "font-bold" : "font-medium"}`}>
+            <span className={`text-foreground ${hasUnread ? "font-extrabold" : "font-medium"}`}>
               {participant?.full_name || participant?.username || "Usuário"}
             </span>
             {isMuted && (
@@ -91,14 +91,14 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
           </div>
           <div className="flex items-center gap-2">
             {lastMessage && (
-              <span className="text-xs text-muted-foreground">
+              <span className={`text-xs ${hasUnread ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                 {formatTime(lastMessage.created_at)}
               </span>
             )}
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+          <p className={`text-sm truncate flex-1 ${hasUnread ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
             {lastMessage ? (
               // First check if content is shared content JSON
               getSharedContentLabel(lastMessage.content) ? (
