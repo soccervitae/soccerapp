@@ -78,7 +78,7 @@ export default function Verification() {
             onClick={handleGetVerification}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 transition-colors text-base rounded"
           >
-            {isPremium && isExpired ? "Renovar Verificação" : "Obter Verificação Premium"}
+            {isPremium && isExpired ? "Renovar Plano Pro" : "Obter Plano Pro"}
           </button>
         )}
 
