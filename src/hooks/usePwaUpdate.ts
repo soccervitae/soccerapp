@@ -2,17 +2,27 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 
 export const usePwaUpdate = () => {
   const { updateServiceWorker } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
-      // Verificar atualizações periodicamente (a cada 1 hora)
-      if (registration) {
-        setInterval(() => {
-          registration.update();
-        }, 60 * 60 * 1000);
-      }
+    onRegisteredSW(_swUrl, registration) {
+      if (!registration) return;
+
+      registration.update();
+      window.setInterval(() => {
+        registration.update();
+      }, 5 * 60 * 1000);
     },
-    onNeedRefresh() {
-      // Atualiza o service worker silenciosamente sem reload
-      updateServiceWorker(true);
+    async onNeedRefresh() {
+      if (!("serviceWorker" in navigator)) {
+        window.location.reload();
+        return;
+      }
+
+      const handleControllerChange = () => {
+        navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+        window.location.reload();
+      };
+
+      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+      await updateServiceWorker(true);
     },
   });
 };

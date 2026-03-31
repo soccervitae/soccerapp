@@ -2,6 +2,23 @@ import { useState, useEffect, useCallback } from "react";
 
 type NotificationPermissionState = "default" | "granted" | "denied";
 
+let serviceWorkerRegistrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+
+const getServiceWorkerRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
+  if (!("serviceWorker" in navigator)) return null;
+
+  if (!serviceWorkerRegistrationPromise) {
+    serviceWorkerRegistrationPromise = navigator.serviceWorker
+      .getRegistration("/")
+      .then(async (existingRegistration) => {
+        if (existingRegistration) return existingRegistration;
+        return navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      });
+  }
+
+  return serviceWorkerRegistrationPromise;
+};
+
 export const usePushNotifications = () => {
   const [permission, setPermission] = useState<NotificationPermissionState>("default");
   const [isSupported, setIsSupported] = useState(false);
@@ -11,24 +28,32 @@ export const usePushNotifications = () => {
     const supported = "Notification" in window && "serviceWorker" in navigator;
     setIsSupported(supported);
 
-    if (supported) {
-      setPermission(Notification.permission);
+    if (!supported) return;
 
-      // Register service worker
-      navigator.serviceWorker.register("/sw.js").then((reg) => {
-        console.log("Service Worker registered:", reg);
-        setRegistration(reg);
-      }).catch((err) => {
+    setPermission(Notification.permission);
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "NOTIFICATION_CLICK") {
+        window.location.href = event.data.url;
+      }
+    };
+
+    getServiceWorkerRegistration()
+      .then((reg) => {
+        if (reg) {
+          console.log("Service Worker registered:", reg);
+          setRegistration(reg);
+        }
+      })
+      .catch((err) => {
         console.error("Service Worker registration failed:", err);
       });
 
-      // Listen for notification clicks
-      navigator.serviceWorker.addEventListener("message", (event) => {
-        if (event.data?.type === "NOTIFICATION_CLICK") {
-          window.location.href = event.data.url;
-        }
-      });
-    }
+    navigator.serviceWorker.addEventListener("message", handleMessage);
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", handleMessage);
+    };
   }, []);
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
@@ -48,15 +73,10 @@ export const usePushNotifications = () => {
     async (title: string, body: string, url?: string, conversationId?: string) => {
       if (!isSupported || permission !== "granted" || !registration) return;
 
-      // Check if app is in foreground
-      if (document.visibilityState === "visible") {
-        // Don't show notification if user is already viewing the chat
-        if (conversationId && window.location.pathname.includes(conversationId)) {
-          return;
-        }
+      if (document.visibilityState === "visible" && conversationId && window.location.pathname.includes(conversationId)) {
+        return;
       }
 
-      // Send message to service worker to show notification
       if (registration.active) {
         registration.active.postMessage({
           type: "SHOW_NOTIFICATION",
@@ -73,13 +93,12 @@ export const usePushNotifications = () => {
   const showCallNotification = useCallback(
     async (
       callerName: string,
-      callType: 'video' | 'voice',
+      callType: "video" | "voice",
       conversationId: string,
       callerId: string
     ) => {
       if (!isSupported || permission !== "granted" || !registration) return;
 
-      // Send message to service worker to show call notification
       if (registration.active) {
         registration.active.postMessage({
           type: "SHOW_CALL_NOTIFICATION",
