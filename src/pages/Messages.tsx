@@ -47,7 +47,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { conversations, isLoading, isFetching, refetch } = useConversations();
+  const { conversations, isLoading, isFetching, refetch } = useConversationsContext();
   const { createConversation } = useCreateConversation();
   const { data: followingUsers, isLoading: isLoadingFollowing, isFetching: isFetchingFollowing } = useFollowing(user?.id || "");
   

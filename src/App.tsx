@@ -339,12 +339,14 @@ const App = () => {
               {/* PWA auto-update hook */}
               <PwaAutoUpdate />
               <BrowserRouter>
-                <MessageNotificationProvider>
-                  <CallNotificationHandler />
-                  <ScrollToTop />
-                  <GlobalOfflineBanner />
-                  <AnimatedRoutes />
-                </MessageNotificationProvider>
+                <ConversationsProvider>
+                  <MessageNotificationProvider>
+                    <CallNotificationHandler />
+                    <ScrollToTop />
+                    <GlobalOfflineBanner />
+                    <AnimatedRoutes />
+                  </MessageNotificationProvider>
+                </ConversationsProvider>
               </BrowserRouter>
             </PresenceProvider>
           </AuthProvider>

@@ -53,7 +53,7 @@ interface BottomNavigationProps {
 export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>(({ activeTab }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { totalUnread } = useConversations();
+  const { totalUnread } = useConversationsContext();
   const { user } = useAuth();
   const { data: userTeams = [] } = useUserTeams(user?.id);
   

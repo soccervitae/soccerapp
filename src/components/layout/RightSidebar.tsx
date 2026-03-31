@@ -23,7 +23,7 @@ export const RightSidebar = () => {
   const navigate = useNavigate();
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
-  const { totalUnread } = useConversations();
+  const { totalUnread } = useConversationsContext();
 
   // Fetch following users for online section
   const { data: followingUsers } = useQuery({
