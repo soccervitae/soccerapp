@@ -28,7 +28,7 @@ export default function Verification() {
         >
           <span className="material-symbols-outlined text-[24px]">arrow_back</span>
         </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Verificação Premium</h1>
+        <h1 className="text-base font-bold text-foreground ml-2">Plano Pro</h1>
       </header>
 
       <div className="pt-[50px] pb-20 px-4">
