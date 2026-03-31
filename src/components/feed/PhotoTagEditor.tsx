@@ -192,7 +192,7 @@ export const PhotoTagEditor = ({
               </span>
               <Input
                 type="text"
-                placeholder="Buscar entre quem você segue..."
+                placeholder="Buscar entre quem você torce..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 border-0 bg-transparent p-0 h-auto text-sm focus-visible:ring-0"
