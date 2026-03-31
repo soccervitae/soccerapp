@@ -666,7 +666,7 @@ export const FeedPost = ({
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: -10, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="text-xs text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                     >
                       {post.profile.position_name}
                     </motion.p>
