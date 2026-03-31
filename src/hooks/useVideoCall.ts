@@ -194,7 +194,7 @@ export const useVideoCall = (conversationId: string | null, participant: Profile
         }
       });
 
-      callObject.on("participant-joined", (event?: DailyEventObjectParticipant) => {
+      callObject.on("participant-joined", (event) => {
         if (!event || event.participant.local) return;
         console.log("[Daily] Remote participant joined");
         clearCallTimeout();
