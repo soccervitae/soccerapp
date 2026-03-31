@@ -137,14 +137,16 @@ export const useConversations = () => {
             .limit(1)
             .single();
 
-          // Count unread messages: not sent by me, where I'm not in read_by (or read_by is null)
-          const { count } = await supabase
+          // Count unread messages: not sent by me, where I'm not in read_by (or read_by is null/empty)
+          const { count, error: unreadError } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
             .eq("conversation_id", conv.id)
             .neq("sender_id", user.id)
             .is("deleted_at", null)
-            .or(`read_by.is.null,not.read_by.cs.{"${user.id}"}`);
+            .or(`read_by.is.null,read_by.eq.{},not.read_by.cs.{"${user.id}"}`);
+          
+          console.log(`[Unread] Conv ${conv.id}: count=${count}, error=${JSON.stringify(unreadError)}`);
 
           return {
             ...conv,
