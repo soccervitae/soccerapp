@@ -179,6 +179,16 @@ const SortableExistingMedia = ({
 const CreateHighlight = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: highlightProfile } = useProfile();
+
+  useEffect(() => {
+    if (highlightProfile && !highlightProfile.is_verified_premium && !highlightProfile.is_official_account) {
+      toast.error("Recurso exclusivo do Plano Pro", {
+        description: "Assine o Plano Pro para criar Destaques.",
+      });
+      navigate("/", { replace: true });
+    }
+  }, [highlightProfile, navigate]);
   const { data: highlights = [] } = useUserHighlights(user?.id);
   const addHighlight = useAddHighlight();
   const addHighlightImage = useAddHighlightImage();
