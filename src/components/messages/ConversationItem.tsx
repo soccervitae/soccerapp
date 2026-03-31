@@ -91,7 +91,7 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
           </div>
           <div className="flex items-center gap-2">
             {lastMessage && (
-              <span className="text-xs text-muted-foreground">
+              <span className={`text-xs ${hasUnread ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                 {formatTime(lastMessage.created_at)}
               </span>
             )}
