@@ -30,6 +30,18 @@ export const FeedStories = () => {
       navigate("/login");
       return;
     }
+    const isPro = profile?.is_verified_premium === true;
+    const isOfficial = profile?.is_official_account === true;
+    if (!isPro && !isOfficial) {
+      toast("SEJA PRO e tenha mais recursos! 🌟", {
+        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
+        action: {
+          label: "Ver planos",
+          onClick: () => navigate("/settings/verification"),
+        },
+      });
+      return;
+    }
     navigate("/create-replay");
   };
 
