@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import DailyIframe, { DailyCall, DailyEventObjectParticipant } from "@daily-co/daily-js";
+import DailyIframe, { DailyCall } from "@daily-co/daily-js";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
