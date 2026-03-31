@@ -147,11 +147,13 @@ export const useConversations = () => {
         })
       );
 
-      // Sort: pinned first, then by updated_at
+      // Sort: pinned first, then by last message date (descending)
       conversationsWithDetails.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        const aTime = a.lastMessage ? new Date(a.lastMessage.created_at).getTime() : new Date(a.updated_at).getTime();
+        const bTime = b.lastMessage ? new Date(b.lastMessage.created_at).getTime() : new Date(b.updated_at).getTime();
+        return bTime - aTime;
       });
 
       setConversations(conversationsWithDetails);
