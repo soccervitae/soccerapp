@@ -36,6 +36,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
+  const isUnknownUser = !participant?.full_name && !participant?.username;
 
   const getInitials = (name: string) => {
     return name
