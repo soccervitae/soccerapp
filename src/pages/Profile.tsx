@@ -595,21 +595,8 @@ const Profile = () => {
         )}
       </TabsList>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.15 }}
+      <div
         style={{ overflow: 'visible' }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={(_, info) => {
-          if (info.offset.x < -50) {
-            handleSwipe("left");
-          } else if (info.offset.x > 50) {
-            handleSwipe("right");
-          }
-        }}
       >
         <TabsContent value="profile" className="mt-4" forceMount={activeTab === "profile" ? true : undefined}>
           {activeTab === "profile" && renderProfileFeed()}
