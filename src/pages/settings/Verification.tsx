@@ -45,7 +45,7 @@ export default function Verification() {
         <div className="bg-card rounded-xl border border-border p-6 mb-6 text-center">
           <p className="text-sm text-muted-foreground uppercase tracking-wide font-semibold mb-1">Assinatura anual</p>
           <p className="text-4xl font-black text-foreground">R$ 149,90</p>
-          <p className="text-sm text-muted-foreground mt-1">/ano</p>
+          
           <p className="text-sm text-primary font-semibold mt-2">ou 12x de R$ 14,90</p>
         </div>
 
