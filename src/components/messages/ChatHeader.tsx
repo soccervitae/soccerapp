@@ -92,7 +92,7 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
       </div>
 
       {/* Call buttons and menu - hidden for deleted users */}
-      {!isDeletedUser && (
+      {!isDeletedUser && !isUnknownUser && (
         <div className="flex items-center gap-1">
           {/* Voice call button */}
           <Button
