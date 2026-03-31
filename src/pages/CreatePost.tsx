@@ -820,7 +820,16 @@ const CreatePost = () => {
             <div className="relative">
               {selectedMediaType === "video" ? (
                 <>
-                  <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-xl" />
+                  {selectedMediaList[0]?.url.includes('youtube.com/embed') ? (
+                    <iframe 
+                      src={selectedMediaList[0]?.url} 
+                      className="w-full aspect-video rounded-xl" 
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  ) : (
+                    <video src={selectedMediaList[0]?.url} controls className="w-full aspect-square object-cover rounded-xl" />
+                  )}
                   <div className="absolute top-2 left-2 px-3 py-1.5 bg-red-500/90 backdrop-blur-sm rounded-full flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-white">videocam</span>
                     <span className="text-xs font-semibold text-white">VÍDEO</span>
