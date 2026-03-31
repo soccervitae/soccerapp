@@ -111,6 +111,7 @@ const Index = () => {
       >
         <FeedHeader />
         <main className="pt-[50px]">
+          <NotificationPermissionBanner />
           <AnimatePresence>
             {isFromCache && <OfflineCacheIndicator lastUpdated={cacheTimestamp} />}
           </AnimatePresence>
