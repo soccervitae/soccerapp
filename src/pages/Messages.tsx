@@ -438,12 +438,7 @@ const Messages = () => {
                   {/* Seção Online - Horizontal scroll */}
                   {onlineUsers.length > 0 && (
                     <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                        <h3 className="text-sm font-medium text-muted-foreground">
-                          Online agora ({onlineUsers.length})
-                        </h3>
-                      </div>
+
                       <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
                         {onlineUsers.map(userProfile => (
                           <OnlineUserAvatar 
