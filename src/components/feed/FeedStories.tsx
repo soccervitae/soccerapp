@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MediaPreview } from "@/components/common/MediaPreview";
+import { toast } from "sonner";
 
 export const FeedStories = () => {
   const navigate = useNavigate();
