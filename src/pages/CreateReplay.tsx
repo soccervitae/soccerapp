@@ -14,6 +14,16 @@ type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-ed
 
 const CreateReplay = () => {
   const navigate = useNavigate();
+  const { data: replayProfile } = useProfile();
+
+  useEffect(() => {
+    if (replayProfile && !replayProfile.is_verified_premium && !replayProfile.is_official_account) {
+      toast.error("Recurso exclusivo do Plano Pro", {
+        description: "Assine o Plano Pro para criar Replays.",
+      });
+      navigate("/", { replace: true });
+    }
+  }, [replayProfile, navigate]);
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);
