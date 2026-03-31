@@ -58,7 +58,18 @@ export const useConversations = () => {
       try {
         const cached = await getCachedConversations() as ConversationWithDetails[];
         setConversations(cached);
-        setTotalUnread(cached.reduce((acc: number, c: ConversationWithDetails) => acc + (c.unreadCount || 0), 0));
+        const cachedTotal = cached.reduce((acc: number, c: ConversationWithDetails) => acc + (c.unreadCount || 0), 0);
+        setTotalUnread(cachedTotal);
+        // Update PWA app badge from cache
+        try {
+          if ('setAppBadge' in navigator) {
+            if (cachedTotal > 0) {
+              (navigator as any).setAppBadge(cachedTotal);
+            } else {
+              (navigator as any).clearAppBadge();
+            }
+          }
+        } catch (e) {}
       } catch (error) {
         console.error("Error loading cached conversations:", error);
       }
