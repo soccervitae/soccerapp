@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { NotificationPermissionBanner } from "@/components/notifications/NotificationPermissionBanner";
 import { FeedHeader } from "@/components/feed/FeedHeader";
 import { FeedStories } from "@/components/feed/FeedStories";
 import { FeedPost } from "@/components/feed/FeedPost";
