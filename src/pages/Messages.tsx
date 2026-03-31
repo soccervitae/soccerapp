@@ -308,7 +308,7 @@ const Messages = () => {
               </button>
               <Input
                 autoFocus
-                placeholder="Buscar entre quem você segue..."
+                placeholder="Buscar entre quem você torce..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="h-8 text-sm"
