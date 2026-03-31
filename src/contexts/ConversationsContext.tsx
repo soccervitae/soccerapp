@@ -1,5 +1,6 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
 import { useConversations, ConversationWithDetails } from "@/hooks/useConversations";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ConversationsContextType {
   conversations: ConversationWithDetails[];
@@ -10,9 +11,18 @@ interface ConversationsContextType {
   refetch: () => Promise<void>;
 }
 
-const ConversationsContext = createContext<ConversationsContextType | null>(null);
+const defaultValue: ConversationsContextType = {
+  conversations: [],
+  isLoading: false,
+  isFetching: false,
+  isOffline: false,
+  totalUnread: 0,
+  refetch: async () => {},
+};
 
-export const ConversationsProvider = ({ children }: { children: ReactNode }) => {
+const ConversationsContext = createContext<ConversationsContextType>(defaultValue);
+
+const ConversationsProviderInner = ({ children }: { children: ReactNode }) => {
   const value = useConversations();
   return (
     <ConversationsContext.Provider value={value}>
@@ -21,10 +31,20 @@ export const ConversationsProvider = ({ children }: { children: ReactNode }) => 
   );
 };
 
-export const useConversationsContext = (): ConversationsContextType => {
-  const context = useContext(ConversationsContext);
-  if (!context) {
-    throw new Error("useConversationsContext must be used within a ConversationsProvider");
+export const ConversationsProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <ConversationsContext.Provider value={defaultValue}>
+        {children}
+      </ConversationsContext.Provider>
+    );
   }
-  return context;
+
+  return <ConversationsProviderInner>{children}</ConversationsProviderInner>;
+};
+
+export const useConversationsContext = (): ConversationsContextType => {
+  return useContext(ConversationsContext);
 };
