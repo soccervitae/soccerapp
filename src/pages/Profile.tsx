@@ -656,7 +656,7 @@ const Profile = () => {
             )}
           </TabsContent>
         )}
-      </motion.div>
+      </div>
     </Tabs>
   );
 
