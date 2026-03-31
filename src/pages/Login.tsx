@@ -13,21 +13,26 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
 
     const { error } = await signIn(email, password);
 
     if (error) {
       // Check if it's a ban error
       if (error.message.includes("banida") || error.message.includes("banned")) {
+        setErrorMessage(error.message);
         toast.error(error.message, { duration: 8000 });
+      } else if (error.message.includes("Invalid login credentials")) {
+        setErrorMessage("Email ou senha incorretos. Verifique seus dados ou crie uma conta.");
       } else {
-        toast.error("Email ou senha incorretos");
+        setErrorMessage("Email ou senha incorretos. Verifique seus dados ou crie uma conta.");
       }
       setLoading(false);
       return;
