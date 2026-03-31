@@ -130,17 +130,22 @@ export const CreateMenuSheet = ({
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              className="flex items-center gap-4 p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition-colors active:scale-[0.98]"
+              className={`flex items-center gap-4 p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition-colors active:scale-[0.98] ${
+                option.proOnly && !isPro && !isOfficialAccount ? 'opacity-60' : ''
+              }`}
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${option.colorClass}`}>
                 <span className="material-symbols-outlined text-[24px]">
                   {option.icon}
                 </span>
               </div>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <p className="font-medium text-white">{option.label}</p>
                 <p className="text-sm text-zinc-400">{option.description}</p>
               </div>
+              {option.proOnly && !isPro && !isOfficialAccount && (
+                <span className="material-symbols-outlined text-[20px] text-amber-400">lock</span>
+              )}
             </button>
           ))}
           

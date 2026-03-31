@@ -95,6 +95,30 @@ const CreatePost = () => {
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [showModerationSheet, setShowModerationSheet] = useState(false);
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+
+  const isPro = profile?.is_verified_premium === true;
+  const isOfficialAccount = profile?.is_official_account === true;
+
+  const getYoutubeEmbedUrl = (url: string): string | null => {
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}` : null;
+  };
+
+  const handleYoutubeLink = () => {
+    const embedUrl = getYoutubeEmbedUrl(youtubeUrl.trim());
+    if (!embedUrl) {
+      toast.error("Link do YouTube inválido");
+      return;
+    }
+    setSelectedMediaList([{ url: embedUrl, isLocal: false }]);
+    setSelectedMediaType("video");
+    setShowYoutubeInput(false);
+    setYoutubeUrl("");
+    toast.success("Vídeo do YouTube adicionado!");
+  };
 
   useEffect(() => {
     if (error) {

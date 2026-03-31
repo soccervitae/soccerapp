@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
+import { useProfile } from "@/hooks/useProfile";
 import { useDeviceGallery, GalleryMedia } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { MusicPicker } from "@/components/feed/MusicPicker";

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { useAddHighlight, useUserHighlights, UserHighlight, HighlightImage, useAddHighlightImage, useDeleteHighlightImage, useReorderHighlightImages, useUpdateHighlight } from "@/hooks/useProfile";
+import { useAddHighlight, useUserHighlights, UserHighlight, HighlightImage, useAddHighlightImage, useDeleteHighlightImage, useReorderHighlightImages, useUpdateHighlight, useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
