@@ -28,16 +28,16 @@ export default function Verification() {
         >
           <span className="material-symbols-outlined text-[24px]">arrow_back</span>
         </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Verificação Premium</h1>
+        <h1 className="text-base font-bold text-foreground ml-2">Plano Pro</h1>
       </header>
 
       <div className="pt-[50px] pb-20 px-4">
         {/* Hero */}
         <div className="flex flex-col items-center text-center py-8">
           <span className="material-symbols-outlined text-primary text-[64px] font-bold mb-4">verified</span>
-          <h2 className="text-2xl font-bold text-foreground">Soccer Vitae Premium</h2>
+          <h2 className="text-2xl font-bold text-foreground">Soccer Vitae Pro</h2>
           <p className="text-muted-foreground mt-2 max-w-xs">
-            Destaque-se com o selo de verificação e tenha benefícios exclusivos.
+            Destaque-se com o selo de verificação e tenha benefícios exclusivos com o Plano Pro.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default function Verification() {
           <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
-              <span className="font-bold text-primary">Conta Verificada</span>
+              <span className="font-bold text-primary">Plano Pro Ativo</span>
             </div>
             {expiresAt && (
               <p className="text-sm text-muted-foreground">
@@ -78,13 +78,13 @@ export default function Verification() {
             onClick={handleGetVerification}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 transition-colors text-base rounded"
           >
-            {isPremium && isExpired ? "Renovar Verificação" : "Obter Verificação Premium"}
+            {isPremium && isExpired ? "Renovar Plano Pro" : "Obter Plano Pro"}
           </button>
         )}
 
         {isPremium && isExpired && (
           <p className="text-center text-sm text-destructive mt-3">
-            Sua verificação expirou. Renove para manter o selo.
+            Seu Plano Pro expirou. Renove para manter o selo.
           </p>
         )}
       </div>
