@@ -318,12 +318,14 @@ export const useConversations = () => {
     };
   }, [user, handleNewMessage]);
 
-  return {
+  const refetch = useCallback(() => fetchConversations(true), [fetchConversations]);
+
+  return useMemo(() => ({
     conversations,
     isLoading,
     isFetching,
     isOffline,
     totalUnread,
-    refetch: () => fetchConversations(true),
-  };
+    refetch,
+  }), [conversations, isLoading, isFetching, isOffline, totalUnread, refetch]);
 };
