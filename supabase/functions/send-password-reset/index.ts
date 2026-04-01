@@ -122,47 +122,115 @@ const handler = async (req: Request): Promise<Response> => {
 
     const userName = profile?.full_name || profile?.username || "Atleta";
 
+    const logoUrl = "https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO.png";
+    const year = new Date().getFullYear();
+
+    const codeDigits = resetCode.split("").map((digit: string) => `
+      <td style="width:44px;height:52px;background-color:#426F42;border-radius:10px;text-align:center;vertical-align:middle;font-size:26px;font-weight:700;color:#ffffff;font-family:'Courier New',monospace;letter-spacing:0;">
+        ${digit}
+      </td>
+      <td style="width:6px;"></td>
+    `).join("");
+
+    const emailHtml = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperação de Senha - Soccer Vitae</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+          <!-- Header with Logo -->
+          <tr>
+            <td style="padding:32px 24px 24px;text-align:center;border-bottom:1px solid #e5e7eb;">
+              <img src="${logoUrl}" alt="Soccer Vitae" width="140" height="auto" style="display:inline-block;max-width:140px;height:auto;" />
+            </td>
+          </tr>
+
+          <!-- Title Section -->
+          <tr>
+            <td style="padding:28px 28px 0;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1a1a1a;text-align:center;">
+                Recuperação de Senha 🔑
+              </h1>
+              <p style="margin:0;font-size:15px;color:#6b7280;text-align:center;line-height:1.6;">
+                Olá, <strong style="color:#1a1a1a;">${userName}</strong>! Você solicitou a redefinição da sua senha. Use o código abaixo:
+              </p>
+            </td>
+          </tr>
+
+          <!-- Code Box -->
+          <tr>
+            <td style="padding:28px 28px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;">
+                <tr>
+                  <td style="padding:24px 16px;text-align:center;">
+                    <p style="margin:0 0 16px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:3px;font-weight:600;">
+                      Código de Recuperação
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                      <tr>
+                        ${codeDigits}
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Expiration Notice -->
+          <tr>
+            <td style="padding:16px 28px 0;text-align:center;">
+              <p style="margin:0;font-size:13px;color:#6b7280;">
+                ⏱️ Este código expira em <strong style="color:#f59e0b;">15 minutos</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Security Notice -->
+          <tr>
+            <td style="padding:24px 28px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 16px;text-align:center;">
+                    <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5;">
+                      🔒 Se você não solicitou a redefinição de senha, ignore este email. Por segurança, nunca compartilhe este código.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 28px 28px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
+                © ${year} Soccer Vitae — Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
     const emailResponse = await resend.emails.send({
       from: "SOCCER VITAE <naoresponda@soccervitae.com>",
       to: [email],
-      subject: "Código de Recuperação de Senha - SOCCER VITAE",
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; padding: 40px 20px;">
-            <tr><td align="center">
-              <table width="100%" style="max-width: 500px; background: linear-gradient(135deg, #1a1a1a 0%, #0d1f0d 100%); border-radius: 16px; overflow: hidden; border: 1px solid #22c55e20;">
-                <tr><td style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; text-align: center;">
-                  <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 30px;">⚽</span>
-                  </div>
-                  <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 600;">Recuperação de Senha</h1>
-                </td></tr>
-                <tr><td style="padding: 40px 30px; text-align: center;">
-                  <p style="color: #a1a1aa; font-size: 16px; margin: 0 0 25px;">Olá <span style="color: #22c55e; font-weight: 600;">${userName}</span>!</p>
-                  <p style="color: #d1d5db; font-size: 15px; margin: 0 0 30px; line-height: 1.6;">Você solicitou a recuperação de senha. Use o código abaixo:</p>
-                  <div style="background: linear-gradient(135deg, #22c55e20 0%, #16a34a10 100%); border: 2px solid #22c55e40; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
-                    <p style="color: #a1a1aa; font-size: 12px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 2px;">Seu código</p>
-                    <p style="color: #22c55e; font-size: 36px; font-weight: 700; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">${resetCode}</p>
-                  </div>
-                  <p style="color: #71717a; font-size: 13px; margin: 0;">⏱️ Expira em <strong style="color: #f59e0b;">15 minutos</strong></p>
-                </td></tr>
-                <tr><td style="padding: 0 30px 30px;">
-                  <div style="background: #27272a; border-radius: 8px; padding: 15px;">
-                    <p style="color: #71717a; font-size: 12px; margin: 0; text-align: center;">🔒 Se você não solicitou, ignore este email.</p>
-                  </div>
-                </td></tr>
-                <tr><td style="padding: 20px 30px; border-top: 1px solid #27272a; text-align: center;">
-                  <p style="color: #52525b; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} SOCCER VITAE</p>
-                </td></tr>
-              </table>
-            </td></tr>
-          </table>
-        </body>
-        </html>
-      `,
+      subject: "Recuperação de Senha - SOCCER VITAE",
+      html: emailHtml,
     });
 
     if (emailResponse.error) {
