@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { useIsPWA } from "@/hooks/useIsPWA";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import InstallInstructionsSheet from "@/components/common/InstallInstructionsSheet";
@@ -11,9 +12,10 @@ interface PwaOnlyGateProps {
 
 const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
   const isPWA = useIsPWA();
+  const isMobile = useIsMobile();
   const [showInstall, setShowInstall] = useState(false);
 
-  if (!isPWA) {
+  if (isMobile && !isPWA) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm space-y-6">
