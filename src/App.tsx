@@ -77,6 +77,15 @@ import VerifyAccount from "./pages/VerifyAccount";
 import ChooseAccountType from "./pages/ChooseAccountType";
 import AdminAccountTypes from "./pages/admin/AccountTypes";
 import AdminAccountTypeDetail from "./pages/admin/AccountTypeDetail";
+import ParaAtletas from "./pages/ParaAtletas";
+import ParaComissao from "./pages/ParaComissao";
+import ParaTimes from "./pages/ParaTimes";
+import ComoFunciona from "./pages/ComoFunciona";
+import Blog from "./pages/Blog";
+import Vagas from "./pages/Vagas";
+import Peneiras from "./pages/Peneiras";
+import Explorar from "./pages/Explorar";
+import PublicProfile from "./pages/PublicProfile";
 const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
@@ -144,6 +153,21 @@ const AnimatedRoutes = () => {
       <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
       <Route path="/sobre" element={<PageTransition><About /></PageTransition>} />
       <Route path="/saiba-mais" element={<PageTransition><SaibaMais /></PageTransition>} />
+      
+      {/* SEO Landing Pages */}
+      <Route path="/para-atletas" element={<PageTransition><ParaAtletas /></PageTransition>} />
+      <Route path="/para-comissao" element={<PageTransition><ParaComissao /></PageTransition>} />
+      <Route path="/para-times" element={<PageTransition><ParaTimes /></PageTransition>} />
+      <Route path="/como-funciona" element={<PageTransition><ComoFunciona /></PageTransition>} />
+      <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
+      <Route path="/vagas" element={<PageTransition><Vagas /></PageTransition>} />
+      <Route path="/peneiras" element={<PageTransition><Peneiras /></PageTransition>} />
+      <Route path="/explorar" element={<PageTransition><Explorar /></PageTransition>} />
+      
+      {/* SEO-friendly public profile routes */}
+      <Route path="/atleta/:slug" element={<PageTransition><PublicProfile profileType="atleta" /></PageTransition>} />
+      <Route path="/treinador/:slug" element={<PageTransition><PublicProfile profileType="treinador" /></PageTransition>} />
+      <Route path="/time/:slug" element={<PageTransition><PublicProfile profileType="time" /></PageTransition>} />
 
       {/* Verify account route - requires login but not verification or complete profile */}
       <Route path="/verify-account" element={
