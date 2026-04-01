@@ -76,6 +76,7 @@ import CreatePost from "./pages/CreatePost";
 import VerifyAccount from "./pages/VerifyAccount";
 import ChooseAccountType from "./pages/ChooseAccountType";
 import AdminAccountTypes from "./pages/admin/AccountTypes";
+import AdminAccountTypeDetail from "./pages/admin/AccountTypeDetail";
 const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
@@ -303,6 +304,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/championships" element={<AdminRoute><AdminChampionships /></AdminRoute>} />
       <Route path="/admin/achievements" element={<AdminRoute><AdminAchievements /></AdminRoute>} />
       <Route path="/admin/account-types" element={<AdminRoute><AdminAccountTypes /></AdminRoute>} />
+      <Route path="/admin/account-types/:slug" element={<AdminRoute><AdminAccountTypeDetail /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
       <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
       

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +20,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, MoreHorizontal, Trash2, Edit, Plus, Users, List, Loader2 } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Edit, Plus, Users, List, Loader2, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +37,7 @@ interface AccountType {
 }
 
 export default function AdminAccountTypes() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -256,6 +258,11 @@ export default function AdminAccountTypes() {
                           <DropdownMenuItem onClick={() => handleEdit(item)}>
                             <Edit className="h-4 w-4 mr-2" /> Editar
                           </DropdownMenuItem>
+                          {(item.slug === "atleta" || item.slug === "comissao_tecnica") && (
+                            <DropdownMenuItem onClick={() => navigate(`/admin/account-types/${item.slug}`)}>
+                              <Settings2 className="h-4 w-4 mr-2" /> Gerenciar Sexo/Posições
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setDeleteId(item.id)}
