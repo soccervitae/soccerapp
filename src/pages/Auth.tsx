@@ -8,6 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
 import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
@@ -517,6 +524,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
   const [showVerification, setShowVerification] = useState(false);
@@ -527,6 +535,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
+    gender: false,
     email: false,
     password: false,
     confirmPassword: false,
@@ -668,7 +677,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-
+    // Save gender to profile
+    await supabase
+      .from("profiles")
+      .update({ gender: gender || null } as any)
+      .eq("id", user.id);
 
     // Send verification code
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
@@ -715,9 +728,12 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   }
 
 
+  const isGenderValid = gender.length > 0;
+
   const isFormValid = 
     firstName.trim().length >= 2 && 
     lastName.trim().length >= 2 &&
+    isGenderValid &&
     emailStatus === "valid" &&
     isPasswordValid &&
     password === confirmPassword;
@@ -820,6 +836,31 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       </div>
 
 
+
+      {/* Sexo */}
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold uppercase text-muted-foreground">
+          Sexo <span className="text-destructive">*</span>
+        </Label>
+        <Select value={gender} onValueChange={(v) => { setGender(v); setTouched(prev => ({ ...prev, gender: true })); setErrorMessage(null); }}>
+          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+            touched.gender
+              ? isGenderValid
+                ? "border-emerald-500 border"
+                : "border-destructive border"
+              : "border-0"
+          }`}>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="homem">Masculino</SelectItem>
+            <SelectItem value="mulher">Feminino</SelectItem>
+          </SelectContent>
+        </Select>
+        {touched.gender && !isGenderValid && (
+          <p className="text-xs text-destructive">Selecione uma opção</p>
+        )}
+      </div>
 
       {/* Email */}
       <div className="space-y-2">

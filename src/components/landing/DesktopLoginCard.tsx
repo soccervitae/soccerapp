@@ -240,7 +240,6 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [accountType, setAccountType] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -261,8 +260,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
     validateEmail(email) &&
     isPasswordValid &&
     password === confirmPassword &&
-    accountType.length > 0 &&
-    (accountType === "time" || gender.length > 0);
+    gender.length > 0;
 
   const translateError = (msg: string): string => {
     if (msg.includes("User already registered")) return "Este email já está cadastrado. Tente fazer login.";
@@ -286,7 +284,6 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
       password,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      accountType: accountType || undefined,
     });
 
     if (error) {
@@ -304,7 +301,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
 
     await supabase
       .from("profiles")
-      .update({ account_type: accountType, gender: gender || null } as any)
+      .update({ gender: gender || null } as any)
       .eq("id", user.id);
 
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
@@ -324,7 +321,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
 
   const handleVerificationComplete = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/install?from=signup";
+    window.location.href = "/choose-account-type";
   };
 
   if (showVerification && userId) {
@@ -363,21 +360,6 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Account Type */}
-        <div className="space-y-1">
-          <Label className={labelClass}>Tipo de Conta *</Label>
-          <Select value={accountType} onValueChange={setAccountType}>
-            <SelectTrigger className={`${inputClass} w-full`}>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="atleta">Atleta</SelectItem>
-              <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
-              <SelectItem value="time">Time</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Name row */}
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
@@ -402,21 +384,19 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
           </div>
         </div>
 
-        {/* Gender (hidden for teams) */}
-        {accountType !== "time" && (
-          <div className="space-y-1">
-            <Label className={labelClass}>Sexo *</Label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger className={`${inputClass} w-full`}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="homem">Masculino</SelectItem>
-                <SelectItem value="mulher">Feminino</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        {/* Gender */}
+        <div className="space-y-1">
+          <Label className={labelClass}>Sexo *</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger className={`${inputClass} w-full`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="homem">Masculino</SelectItem>
+              <SelectItem value="mulher">Feminino</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Email */}
         <div className="space-y-1">
