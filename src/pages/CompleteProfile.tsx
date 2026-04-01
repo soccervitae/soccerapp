@@ -46,6 +46,7 @@ const CompleteProfile = () => {
   const [foundationYear, setFoundationYear] = useState("");
   const [teamCategory, setTeamCategory] = useState("");
   const [teamName, setTeamName] = useState("");
+  const [city, setCity] = useState("");
   const [emblemFile, setEmblemFile] = useState<File | null>(null);
   const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   const [uploadingEmblem, setUploadingEmblem] = useState(false);
