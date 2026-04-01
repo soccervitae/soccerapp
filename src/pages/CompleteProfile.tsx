@@ -306,6 +306,8 @@ const CompleteProfile = () => {
         updateData.funcao = Number(staffFunction); // Store function ID in funcao column
         updateData.posicaomas = null; // Clear athlete positions for staff
         updateData.posicaofem = null;
+        updateData.height = Number(height);
+        updateData.weight = Number(weight);
       }
 
       const { error } = await supabase
