@@ -258,6 +258,11 @@ export default function AdminAccountTypes() {
                           <DropdownMenuItem onClick={() => handleEdit(item)}>
                             <Edit className="h-4 w-4 mr-2" /> Editar
                           </DropdownMenuItem>
+                          {(item.slug === "atleta" || item.slug === "comissao_tecnica") && (
+                            <DropdownMenuItem onClick={() => navigate(`/admin/account-types/${item.slug}`)}>
+                              <Settings2 className="h-4 w-4 mr-2" /> Gerenciar Sexo/Posições
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setDeleteId(item.id)}
