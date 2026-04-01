@@ -642,8 +642,9 @@ const CompleteProfile = () => {
                   {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
                 </p>
               )}
-          </div>
-        )}
+            </div>
+          );
+        })()}
 
         {/* Nationality */}
         <div className="space-y-2">
