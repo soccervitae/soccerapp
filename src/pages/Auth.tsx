@@ -711,10 +711,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   };
 
   const handleVerificationComplete = async () => {
-    // Sign out user from browser - they need to login again in PWA
-    await supabase.auth.signOut();
-    // Redirect to install page with signup flag
-    window.location.href = "/install?from=signup";
+    // After verification, navigate to complete profile (user stays logged in)
+    window.location.href = "/complete-profile";
   };
 
   const handleBackToSignup = () => {
