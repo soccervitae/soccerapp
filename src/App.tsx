@@ -150,6 +150,13 @@ const AnimatedRoutes = () => {
         </ProtectedRoute>
       } />
 
+      {/* Choose account type route - requires login and verification but not account type or profile */}
+      <Route path="/choose-account-type" element={
+        <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
+          <PageTransition><ChooseAccountType /></PageTransition>
+        </ProtectedRoute>
+      } />
+
       {/* Complete profile route - requires login but not complete profile or onboarding */}
       <Route path="/complete-profile" element={
         <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
