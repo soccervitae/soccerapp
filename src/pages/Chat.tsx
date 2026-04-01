@@ -307,9 +307,6 @@ const Chat = () => {
       <ChatHeader 
         participant={participant} 
         isTyping={isAnyoneTyping}
-        onVideoCall={handleVideoCall}
-        onVoiceCall={handleVoiceCall}
-        isCallActive={isCallActive}
         onArchive={handleToggleArchiveConversation}
         onDelete={() => setShowDeleteDialog(true)}
         isMuted={isMuted}
