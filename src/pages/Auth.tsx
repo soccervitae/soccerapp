@@ -677,7 +677,11 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-
+    // Save gender to profile
+    await supabase
+      .from("profiles")
+      .update({ gender: gender || null } as any)
+      .eq("id", user.id);
 
     // Send verification code
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
