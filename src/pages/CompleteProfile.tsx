@@ -148,7 +148,15 @@ const CompleteProfile = () => {
       if (profile.username) setUsername(profile.username);
       if (profile.gender) setGender(profile.gender);
       if (profile.role) setProfileType(profile.role);
-      if (profile.birth_date) setBirthDate(profile.birth_date);
+      if (profile.birth_date) {
+        setBirthDate(profile.birth_date);
+        const parts = profile.birth_date.split("-");
+        if (parts.length === 3) {
+          setBirthYear(parts[0]);
+          setBirthMonth(parts[1]);
+          setBirthDay(parts[2]);
+        }
+      }
       // Load position based on gender/role
       if (profile.posicaomas) setPosition(profile.posicaomas.toString());
       else if (profile.posicaofem) setPosition(profile.posicaofem.toString());
