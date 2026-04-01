@@ -825,39 +825,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       </div>
 
-      {/* Sexo */}
-      {accountType !== "time" && (
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold uppercase text-muted-foreground">
-            Sexo <span className="text-destructive">*</span>
-          </Label>
-          <Select
-            value={gender}
-            onValueChange={(value) => {
-              setGender(value);
-              setTouched(prev => ({ ...prev, gender: true }));
-              setErrorMessage(null);
-            }}
-          >
-            <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
-              touched.gender
-                ? gender
-                  ? "border-emerald-500 border"
-                  : "border-destructive border"
-                : "border-0"
-            }`}>
-              <SelectValue placeholder="Selecione o sexo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="homem">Masculino</SelectItem>
-              <SelectItem value="mulher">Feminino</SelectItem>
-            </SelectContent>
-          </Select>
-          {touched.gender && !gender && (
-            <p className="text-xs text-destructive">Selecione o sexo</p>
-          )}
-        </div>
-      )}
+
+
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
