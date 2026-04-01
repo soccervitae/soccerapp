@@ -77,7 +77,7 @@ const VerifyAccount = () => {
       <div className="flex items-center justify-center pt-20 pb-8">
         <img 
           src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png" 
-          alt="Soccer Vitae"
+          alt="SOCCER VITAE"
           className="h-7 w-auto object-contain"
         />
       </div>

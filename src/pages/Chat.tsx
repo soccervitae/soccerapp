@@ -482,7 +482,7 @@ const Chat = () => {
             {isDeletedUser ? (
               <div className="bg-background border-t border-border p-4 text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Este usuário não está mais disponível na Soccer Vitae
+                  Este usuário não está mais disponível no SOCCER VITAE
                 </p>
                 <Button
                   variant="destructive"

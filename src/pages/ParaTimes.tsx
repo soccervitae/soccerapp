@@ -17,8 +17,8 @@ const ParaTimes = () => {
   return (
     <>
       <Helmet>
-        <title>Para Times | Cadastre Seu Clube | Soccer Vitae</title>
-        <meta name="description" content="Cadastre seu time de futebol na Soccer Vitae. Encontre jogadores, monte seu elenco e dê visibilidade ao seu clube. Amador ou profissional." />
+        <title>Para Times | Cadastre Seu Clube | SOCCER VITAE</title>
+        <meta name="description" content="Cadastre seu time de futebol no SOCCER VITAE. Encontre jogadores, monte seu elenco e dê visibilidade ao seu clube. Amador ou profissional." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://soccervitae.com/para-times" />
       </Helmet>
@@ -26,7 +26,7 @@ const ParaTimes = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>

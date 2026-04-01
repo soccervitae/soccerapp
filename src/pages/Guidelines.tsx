@@ -55,8 +55,8 @@ const Guidelines = () => {
   return (
     <>
       <Helmet>
-        <title>Diretrizes da Comunidade - Soccer Vitae</title>
-        <meta name="description" content="Conheça as diretrizes e regras de uso da comunidade Soccer Vitae. Saiba o que é permitido e proibido na plataforma." />
+        <title>Diretrizes da Comunidade - SOCCER VITAE</title>
+        <meta name="description" content="Conheça as diretrizes e regras de uso da comunidade SOCCER VITAE. Saiba o que é permitido e proibido na plataforma." />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -78,7 +78,7 @@ const Guidelines = () => {
             </div>
             <h2 className="text-3xl font-bold text-foreground">Jogue Limpo</h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              O Soccer Vitae é uma comunidade para celebrar o futebol. Para manter o campo em ordem, 
+              O SOCCER VITAE é uma comunidade para celebrar o futebol. Para manter o campo em ordem, 
               algumas regras são inegociáveis.
             </p>
           </section>
@@ -182,7 +182,7 @@ const Guidelines = () => {
               Última atualização: Janeiro 2026
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              Ao usar o Soccer Vitae, você concorda com estas diretrizes. 
+              Ao usar o SOCCER VITAE, você concorda com estas diretrizes. 
               Reservamo-nos o direito de atualizar estas regras quando necessário.
             </p>
           </section>

@@ -59,7 +59,7 @@ const Privacy = () => {
   const sections = [
     {
       title: "1. Quem Somos",
-      content: `O Soccer Vitae é uma plataforma social voltada para jogadores, profissionais e entusiastas do futebol. Esta política descreve como coletamos, usamos e protegemos suas informações pessoais.`
+      content: `O SOCCER VITAE é uma plataforma social voltada para jogadores, profissionais e entusiastas do futebol. Esta política descreve como coletamos, usamos e protegemos suas informações pessoais.`
     },
     {
       title: "2. Base Legal para Processamento",
@@ -83,7 +83,7 @@ const Privacy = () => {
     },
     {
       title: "7. Menores de Idade",
-      content: `O Soccer Vitae não é destinado a menores de 13 anos. Se soubermos que coletamos dados de uma criança menor de 13 anos sem consentimento parental, tomaremos medidas para excluir essas informações.`
+      content: `O SOCCER VITAE não é destinado a menores de 13 anos. Se soubermos que coletamos dados de uma criança menor de 13 anos sem consentimento parental, tomaremos medidas para excluir essas informações.`
     },
     {
       title: "8. Alterações nesta Política",
@@ -94,8 +94,8 @@ const Privacy = () => {
   return (
     <>
       <Helmet>
-        <title>Política de Privacidade - Soccer Vitae</title>
-        <meta name="description" content="Saiba como o Soccer Vitae coleta, usa e protege seus dados pessoais. Transparência e segurança são nossas prioridades." />
+        <title>Política de Privacidade - SOCCER VITAE</title>
+        <meta name="description" content="Saiba como o SOCCER VITAE coleta, usa e protege seus dados pessoais. Transparência e segurança são nossas prioridades." />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -117,7 +117,7 @@ const Privacy = () => {
             </div>
             <h2 className="text-3xl font-bold text-foreground">Sua Privacidade Importa</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              No Soccer Vitae, levamos a proteção dos seus dados a sério. 
+              No SOCCER VITAE, levamos a proteção dos seus dados a sério. 
               Esta política explica de forma clara como tratamos suas informações.
             </p>
             <p className="text-sm text-muted-foreground">

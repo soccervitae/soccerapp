@@ -11,8 +11,8 @@ const Explorar = () => {
   return (
     <>
       <Helmet>
-        <title>Explorar Perfis de Futebol | Soccer Vitae</title>
-        <meta name="description" content="Explore perfis de atletas, treinadores e times de futebol na Soccer Vitae. Busque por posicao, cidade e categoria." />
+        <title>Explorar Perfis de Futebol | SOCCER VITAE</title>
+        <meta name="description" content="Explore perfis de atletas, treinadores e times de futebol no SOCCER VITAE. Busque por posicao, cidade e categoria." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://soccervitae.com/explorar" />
       </Helmet>
@@ -20,7 +20,7 @@ const Explorar = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>

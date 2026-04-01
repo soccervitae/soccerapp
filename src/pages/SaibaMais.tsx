@@ -91,7 +91,7 @@ const SaibaMais = () => {
     <>
       <Helmet>
         <title>Saiba Mais - SOCCER VITAE</title>
-        <meta name="description" content="Conheça todos os recursos da Soccer Vitae, a rede social do atleta profissional." />
+        <meta name="description" content="Conheça todos os recursos do SOCCER VITAE, a rede social do atleta profissional." />
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground font-sans">

@@ -17,8 +17,8 @@ const ParaAtletas = () => {
   return (
     <>
       <Helmet>
-        <title>Para Atletas | Crie Seu Perfil de Jogador | Soccer Vitae</title>
-        <meta name="description" content="Crie seu perfil de jogador de futebol na Soccer Vitae. Seja descoberto por clubes e olheiros. Mostre seu talento, estatísticas e vídeos. Grátis para começar." />
+        <title>Para Atletas | Crie Seu Perfil de Jogador | SOCCER VITAE</title>
+        <meta name="description" content="Crie seu perfil de jogador de futebol no SOCCER VITAE. Seja descoberto por clubes e olheiros. Mostre seu talento, estatísticas e vídeos. Grátis para começar." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://soccervitae.com/para-atletas" />
       </Helmet>
@@ -27,7 +27,7 @@ const ParaAtletas = () => {
         {/* Header */}
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>
@@ -38,7 +38,7 @@ const ParaAtletas = () => {
             Crie Seu Perfil de Jogador e Apareça para Clubes e Olheiros
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            A Soccer Vitae é a rede social onde atletas de futebol criam perfis profissionais, compartilham vídeos e são descobertos pelo mercado.
+            A SOCCER VITAE é a rede social onde atletas de futebol criam perfis profissionais, compartilham vídeos e são descobertos pelo mercado.
           </p>
           <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-8 py-6">
             Criar Meu Perfil Grátis
@@ -49,7 +49,7 @@ const ParaAtletas = () => {
         <section className="px-6 py-16 bg-muted/30">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mb-12">
-              Por que usar a Soccer Vitae?
+              Por que usar o SOCCER VITAE?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {benefits.map((b, i) => (

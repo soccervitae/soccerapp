@@ -9,11 +9,11 @@ const Terms = () => {
   const sections = [
     {
       title: "1. Aceitação dos Termos",
-      content: `Ao criar uma conta ou usar o Soccer Vitae, você concorda com estes Termos de Uso. Se você não concordar, não utilize a plataforma. Reservamo-nos o direito de modificar estes termos a qualquer momento, e o uso continuado após alterações constitui aceitação das mudanças.`
+      content: `Ao criar uma conta ou usar o SOCCER VITAE, você concorda com estes Termos de Uso. Se você não concordar, não utilize a plataforma. Reservamo-nos o direito de modificar estes termos a qualquer momento, e o uso continuado após alterações constitui aceitação das mudanças.`
     },
     {
       title: "2. Elegibilidade",
-      content: `Para usar o Soccer Vitae, você deve ter pelo menos 13 anos de idade. Se você for menor de 18 anos, deve ter permissão de um responsável legal. Ao se cadastrar, você confirma que atende a estes requisitos.`
+      content: `Para usar o SOCCER VITAE, você deve ter pelo menos 13 anos de idade. Se você for menor de 18 anos, deve ter permissão de um responsável legal. Ao se cadastrar, você confirma que atende a estes requisitos.`
     },
     {
       title: "3. Sua Conta",
@@ -29,7 +29,7 @@ const Terms = () => {
     },
     {
       title: "6. Propriedade Intelectual",
-      content: `O Soccer Vitae, incluindo logo, design, código e funcionalidades, é propriedade exclusiva da plataforma e está protegido por leis de propriedade intelectual. É proibido copiar, modificar, distribuir ou criar obras derivadas sem autorização expressa.`
+      content: `O SOCCER VITAE, incluindo logo, design, código e funcionalidades, é propriedade exclusiva da plataforma e está protegido por leis de propriedade intelectual. É proibido copiar, modificar, distribuir ou criar obras derivadas sem autorização expressa.`
     },
     {
       title: "7. Suspensão e Encerramento",
@@ -37,7 +37,7 @@ const Terms = () => {
     },
     {
       title: "8. Isenção de Garantias",
-      content: `O Soccer Vitae é fornecido "como está" sem garantias de qualquer tipo. Não garantimos que a plataforma será ininterrupta, livre de erros ou segura. Você usa a plataforma por sua conta e risco.`
+      content: `O SOCCER VITAE é fornecido "como está" sem garantias de qualquer tipo. Não garantimos que a plataforma será ininterrupta, livre de erros ou segura. Você usa a plataforma por sua conta e risco.`
     },
     {
       title: "9. Limitação de Responsabilidade",
@@ -66,8 +66,8 @@ const Terms = () => {
   return (
     <>
       <Helmet>
-        <title>Termos de Uso - Soccer Vitae</title>
-        <meta name="description" content="Leia os Termos de Uso do Soccer Vitae. Entenda seus direitos e obrigações ao usar nossa plataforma." />
+        <title>Termos de Uso - SOCCER VITAE</title>
+        <meta name="description" content="Leia os Termos de Uso do SOCCER VITAE. Entenda seus direitos e obrigações ao usar nossa plataforma." />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -89,7 +89,7 @@ const Terms = () => {
             </div>
             <h2 className="text-3xl font-bold text-foreground">Termos de Uso</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Estes termos regem o uso do Soccer Vitae. Ao usar a plataforma, você concorda com as condições descritas abaixo.
+              Estes termos regem o uso do SOCCER VITAE. Ao usar a plataforma, você concorda com as condições descritas abaixo.
             </p>
             <p className="text-sm text-muted-foreground">
               Última atualização: Janeiro 2026
