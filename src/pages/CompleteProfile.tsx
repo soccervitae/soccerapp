@@ -210,8 +210,8 @@ const CompleteProfile = () => {
   const isPositionValid = isTeamOrSchoolAccount || (isAthlete ? !!position : true);
   const isStaffFunctionValid = isTeamOrSchoolAccount || (isStaff ? !!staffFunction : true);
   const isNationalityValid = !!nationality;
-  const isHeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
-  const isWeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
+  const isHeightValid = isTeamOrSchoolAccount || ((isAthlete || isStaff) ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
+  const isWeightValid = isTeamOrSchoolAccount || ((isAthlete || isStaff) ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
   const isPreferredFootValid = isTeamOrSchoolAccount || (isAthlete ? !!preferredFoot : true);
 
   const isFormValid =
