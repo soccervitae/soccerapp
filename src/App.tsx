@@ -73,7 +73,7 @@ import CreateReplay from "./pages/CreateReplay";
 import CreateHighlight from "./pages/CreateHighlight";
 import Post from "./pages/Post";
 import CreatePost from "./pages/CreatePost";
-
+import VerifyAccount from "./pages/VerifyAccount";
 const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
