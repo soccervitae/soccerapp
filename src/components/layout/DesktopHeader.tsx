@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import {
   DropdownMenu,
@@ -19,16 +18,8 @@ export const DesktopHeader = () => {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile();
   
-  const [searchQuery, setSearchQuery] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
