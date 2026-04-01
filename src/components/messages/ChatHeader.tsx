@@ -19,9 +19,6 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 interface ChatHeaderProps {
   participant: Profile | null;
   isTyping?: boolean;
-  onVideoCall?: () => void;
-  onVoiceCall?: () => void;
-  isCallActive?: boolean;
   onArchive?: () => void;
   onDelete?: () => void;
   isMuted?: boolean;
