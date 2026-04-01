@@ -20,7 +20,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, MoreHorizontal, Trash2, Edit, Plus, Users, List, Loader2 } from "lucide-react";
+import { Search, MoreHorizontal, Trash2, Edit, Plus, Users, List, Loader2, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
