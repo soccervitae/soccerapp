@@ -9,9 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Check, ChevronRight, Shield, Upload } from "lucide-react";
-import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
-import { StatePickerSheet } from "@/components/profile/StatePickerSheet";
+import { Loader2, Check, Shield, Upload } from "lucide-react";
 
 interface Country {
   id: number;
