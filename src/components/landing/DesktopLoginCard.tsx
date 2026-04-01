@@ -360,21 +360,6 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Account Type */}
-        <div className="space-y-1">
-          <Label className={labelClass}>Tipo de Conta *</Label>
-          <Select value={accountType} onValueChange={setAccountType}>
-            <SelectTrigger className={`${inputClass} w-full`}>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="atleta">Atleta</SelectItem>
-              <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
-              <SelectItem value="time">Time</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Name row */}
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
@@ -399,21 +384,19 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
           </div>
         </div>
 
-        {/* Gender (hidden for teams) */}
-        {accountType !== "time" && (
-          <div className="space-y-1">
-            <Label className={labelClass}>Sexo *</Label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger className={`${inputClass} w-full`}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="homem">Masculino</SelectItem>
-                <SelectItem value="mulher">Feminino</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        {/* Gender */}
+        <div className="space-y-1">
+          <Label className={labelClass}>Sexo *</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger className={`${inputClass} w-full`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="homem">Masculino</SelectItem>
+              <SelectItem value="mulher">Feminino</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Email */}
         <div className="space-y-1">
