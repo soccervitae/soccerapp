@@ -698,8 +698,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   };
 
   const handleVerificationComplete = async () => {
-    // After verification, navigate to complete profile (user stays logged in)
-    window.location.href = "/complete-profile";
+    window.location.href = "/choose-account-type";
   };
 
   const handleBackToSignup = () => {
