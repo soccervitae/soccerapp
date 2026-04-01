@@ -77,6 +77,15 @@ import VerifyAccount from "./pages/VerifyAccount";
 import ChooseAccountType from "./pages/ChooseAccountType";
 import AdminAccountTypes from "./pages/admin/AccountTypes";
 import AdminAccountTypeDetail from "./pages/admin/AccountTypeDetail";
+import ParaAtletas from "./pages/ParaAtletas";
+import ParaComissao from "./pages/ParaComissao";
+import ParaTimes from "./pages/ParaTimes";
+import ComoFunciona from "./pages/ComoFunciona";
+import Blog from "./pages/Blog";
+import Vagas from "./pages/Vagas";
+import Peneiras from "./pages/Peneiras";
+import Explorar from "./pages/Explorar";
+import PublicProfile from "./pages/PublicProfile";
 const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
