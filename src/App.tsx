@@ -142,6 +142,13 @@ const AnimatedRoutes = () => {
       <Route path="/sobre" element={<PageTransition><About /></PageTransition>} />
       <Route path="/saiba-mais" element={<PageTransition><SaibaMais /></PageTransition>} />
 
+      {/* Verify account route - requires login but not verification or complete profile */}
+      <Route path="/verify-account" element={
+        <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
+          <PageTransition><VerifyAccount /></PageTransition>
+        </ProtectedRoute>
+      } />
+
       {/* Complete profile route - requires login but not complete profile or onboarding */}
       <Route path="/complete-profile" element={
         <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
