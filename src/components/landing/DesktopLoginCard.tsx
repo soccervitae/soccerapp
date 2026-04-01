@@ -321,7 +321,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
 
   const handleVerificationComplete = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/install?from=signup";
+    window.location.href = "/choose-account-type";
   };
 
   if (showVerification && userId) {
