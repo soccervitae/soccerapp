@@ -341,7 +341,7 @@ const CompleteProfile = () => {
   // Calculate completed fields based on profile type
   const teamFields = [isNicknameValid, isNationalityValid];
   const athleteFields = [isNicknameValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isNicknameValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
+  const staffFields = [isNicknameValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid, isHeightValid, isWeightValid];
   
   const activeFields = isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields;
   const completedFields = activeFields.filter(Boolean).length;
