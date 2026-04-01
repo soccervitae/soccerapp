@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import {
@@ -19,16 +18,8 @@ export const DesktopHeader = () => {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile();
   
-  const [searchQuery, setSearchQuery] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -59,21 +50,6 @@ export const DesktopHeader = () => {
             />
           </button>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-xl">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[20px]">
-                search
-              </span>
-              <Input
-                type="text"
-                placeholder="Buscar atletas, clubes, treinadores..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-muted/50 border-transparent focus:border-primary focus:bg-background"
-              />
-            </div>
-          </form>
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
