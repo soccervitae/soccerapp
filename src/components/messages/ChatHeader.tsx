@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, ArchiveRestore, BellOff, BellRing, Pin, PinOff } from "lucide-react";
+import { ArrowLeft, MoreVertical, Trash2, Archive, ArchiveRestore, BellOff, BellRing, Pin, PinOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
