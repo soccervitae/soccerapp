@@ -46,6 +46,7 @@ const CompleteProfile = () => {
   const [foundationYear, setFoundationYear] = useState("");
   const [teamCategory, setTeamCategory] = useState("");
   const [teamName, setTeamName] = useState("");
+  const [city, setCity] = useState("");
   const [emblemFile, setEmblemFile] = useState<File | null>(null);
   const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   const [uploadingEmblem, setUploadingEmblem] = useState(false);
@@ -167,6 +168,7 @@ const CompleteProfile = () => {
       }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
       if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
+      if ((profile as any).city) setCity((profile as any).city);
     }
   }, [profile]);
 
@@ -208,8 +210,8 @@ const CompleteProfile = () => {
   const isPositionValid = isTeamOrSchoolAccount || (isAthlete ? !!position : true);
   const isStaffFunctionValid = isTeamOrSchoolAccount || (isStaff ? !!staffFunction : true);
   const isNationalityValid = !!nationality;
-  const isHeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
-  const isWeightValid = isTeamOrSchoolAccount || (isAthlete ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
+  const isHeightValid = isTeamOrSchoolAccount || ((isAthlete || isStaff) ? (!!height && Number(height) > 0 && Number(height) <= 250) : true);
+  const isWeightValid = isTeamOrSchoolAccount || ((isAthlete || isStaff) ? (!!weight && Number(weight) > 0 && Number(weight) <= 200) : true);
   const isPreferredFootValid = isTeamOrSchoolAccount || (isAthlete ? !!preferredFoot : true);
 
   const isFormValid =
@@ -273,6 +275,7 @@ const CompleteProfile = () => {
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
         foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
         team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
+        city: isTeamOrSchoolAccount ? city.trim() || null : null,
       };
 
       if (emblemUrl) {
@@ -303,6 +306,8 @@ const CompleteProfile = () => {
         updateData.funcao = Number(staffFunction); // Store function ID in funcao column
         updateData.posicaomas = null; // Clear athlete positions for staff
         updateData.posicaofem = null;
+        updateData.height = Number(height);
+        updateData.weight = Number(weight);
       }
 
       const { error } = await supabase
@@ -336,7 +341,7 @@ const CompleteProfile = () => {
   // Calculate completed fields based on profile type
   const teamFields = [isNicknameValid, isNationalityValid];
   const athleteFields = [isNicknameValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isNicknameValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
+  const staffFields = [isNicknameValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid, isHeightValid, isWeightValid];
   
   const activeFields = isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields;
   const completedFields = activeFields.filter(Boolean).length;
@@ -486,6 +491,18 @@ const CompleteProfile = () => {
                 </Select>
               </div>
             )}
+            {/* City */}
+            <div className="space-y-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Ex: São Paulo"
+                maxLength={100}
+              />
+            </div>
           </>
         )}
 
@@ -727,8 +744,8 @@ const CompleteProfile = () => {
           </>
         )}
 
-        {/* Height & Weight Row - Only for Athletes */}
-        {!isTeamOrSchoolAccount && isAthlete && (
+        {/* Height & Weight Row - For Athletes and Staff */}
+        {!isTeamOrSchoolAccount && (isAthlete || isStaff) && (
           <div className="grid grid-cols-2 gap-4">
             {/* Height */}
             <div className="space-y-2">
