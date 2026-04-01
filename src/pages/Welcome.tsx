@@ -179,18 +179,11 @@ export default function Welcome() {
             className="w-full space-y-3"
           >
             <Button 
-              onClick={handleStartTutorial} 
+              onClick={handleComplete}
               className="w-full h-12 text-base font-medium"
             >
-              Ver tutorial do app
-              <ChevronRight className="w-5 h-5 ml-1" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              onClick={handleComplete}
-              className="w-full text-muted-foreground"
-            >
               Ir para o Perfil
+              <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
           </motion.div>
         </motion.div>
