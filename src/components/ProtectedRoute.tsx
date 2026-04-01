@@ -102,6 +102,16 @@ const ProtectedRouteInner = ({
     return <Navigate to="/verify-account" replace />;
   }
 
+  // Redirect to choose account type if no account_type set
+  if (
+    profile &&
+    profileData.conta_verificada &&
+    !profileData.account_type &&
+    location.pathname !== "/choose-account-type"
+  ) {
+    return <Navigate to="/choose-account-type" replace />;
+  }
+
   // Redirect to complete profile if profile is not completed
   if (
     requireCompleteProfile &&
