@@ -275,6 +275,7 @@ const CompleteProfile = () => {
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
         foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
         team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
+        city: isTeamOrSchoolAccount ? city.trim() || null : null,
       };
 
       if (emblemUrl) {
