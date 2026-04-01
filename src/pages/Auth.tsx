@@ -13,13 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
 import { toast } from "sonner";
 import { useIsPWA } from "@/hooks/useIsPWA";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
 
 // Social Login Buttons Component
 const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }) => {
