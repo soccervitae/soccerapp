@@ -91,28 +91,6 @@ export const ChatHeader = ({ participant, isTyping, onArchive, onDelete, isMuted
       {/* Call buttons and menu - hidden for deleted users */}
       {!isDeletedUser && !isUnknownUser && (
         <div className="flex items-center gap-1">
-          {/* Voice call button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onVoiceCall}
-            disabled={!participant || isCallActive}
-            className="text-primary hover:text-primary/80"
-          >
-            <Phone className="h-5 w-5" />
-          </Button>
-
-          {/* Video call button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onVideoCall}
-            disabled={!participant || isCallActive}
-            className="text-primary hover:text-primary/80"
-          >
-            <Video className="h-5 w-5" />
-          </Button>
-
           {/* Options menu (3 dots) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

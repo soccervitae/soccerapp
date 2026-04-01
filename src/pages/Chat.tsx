@@ -338,45 +338,6 @@ const Chat = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Incoming call modal */}
-      <IncomingCallModal
-        isOpen={isIncomingCall}
-        caller={callerInfo}
-        callType={callType || 'video'}
-        onAccept={acceptCall}
-        onReject={rejectCall}
-      />
-
-      {/* Video call modal */}
-      {callType === 'video' && (
-        <VideoCallModal
-          isOpen={isCallActive || isCalling}
-          participant={participant}
-          localStream={localStream}
-          remoteStream={remoteStream}
-          isCalling={isCalling}
-          isVideoEnabled={isVideoEnabled}
-          isAudioEnabled={isAudioEnabled}
-          connectionStatus={connectionStatus}
-          onToggleVideo={toggleVideo}
-          onToggleAudio={toggleAudio}
-          onEndCall={endCall}
-        />
-      )}
-
-      {/* Voice call modal */}
-      {callType === 'voice' && (
-        <VoiceCallModal
-          isOpen={isCallActive || isCalling}
-          participant={participant}
-          remoteStream={remoteStream}
-          isCalling={isCalling}
-          isAudioEnabled={isAudioEnabled}
-          connectionStatus={connectionStatus}
-          onToggleAudio={toggleAudio}
-          onEndCall={endCall}
-        />
-      )}
 
       {/* Offline indicator */}
       {isOffline && (

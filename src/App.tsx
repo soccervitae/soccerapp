@@ -88,10 +88,6 @@ import Explorar from "./pages/Explorar";
 import PublicProfile from "./pages/PublicProfile";
 const queryClient = new QueryClient();
 
-const CallNotificationHandler = () => {
-  useCallNotificationActions();
-  return null;
-};
 
 // Check if running as PWA
 const isPWA = (): boolean => {
