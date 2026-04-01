@@ -802,6 +802,21 @@ const CompleteProfile = () => {
           </div>
         )}
 
+        {/* City - For Athletes and Staff */}
+        {!isTeamOrSchoolAccount && (isAthlete || isStaff) && (
+          <div className="space-y-2">
+            <Label htmlFor="city">Cidade</Label>
+            <Input
+              id="city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ex: São Paulo"
+              maxLength={100}
+            />
+          </div>
+        )}
+
         {/* Preferred Foot - Only for Athletes */}
         {!isTeamOrSchoolAccount && isAthlete && (
           <div className="space-y-2">
