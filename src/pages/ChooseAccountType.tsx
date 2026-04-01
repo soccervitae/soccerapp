@@ -397,10 +397,12 @@ const ChooseAccountType = () => {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label>Cidade</Label>
-                              <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ex: São Paulo" maxLength={100} />
-                            </div>
+                            {isBrazilSelected && (
+                              <div className="space-y-2">
+                                <Label>Cidade</Label>
+                                <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ex: São Paulo" maxLength={100} />
+                              </div>
+                            )}
                           </>
                         )}
 
@@ -601,8 +603,8 @@ const ChooseAccountType = () => {
                           </div>
                         )}
 
-                        {/* City (Athlete / Staff) */}
-                        {(isAthlete || isStaff) && (
+                        {/* City (Athlete / Staff) - only when Brazil */}
+                        {(isAthlete || isStaff) && isBrazilSelected && (
                           <div className="space-y-2">
                             <Label>Cidade</Label>
                             <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ex: São Paulo" maxLength={100} />
