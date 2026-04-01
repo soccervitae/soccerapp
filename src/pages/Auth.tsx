@@ -111,6 +111,10 @@ const Auth = () => {
   }, [user, navigate]);
 
   return (
+    <>
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-center pt-20 pb-8">
