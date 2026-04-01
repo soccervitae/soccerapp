@@ -36,6 +36,9 @@ const CompleteProfile = () => {
   const [gender, setGender] = useState("");
   const [profileType, setProfileType] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [position, setPosition] = useState("");
   const [nationality, setNationality] = useState<string>("");
   const [height, setHeight] = useState("");
