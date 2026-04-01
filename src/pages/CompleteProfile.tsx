@@ -62,8 +62,6 @@ const CompleteProfile = () => {
 
   const [touched, setTouched] = useState({
     nickname: false,
-    gender: false,
-    profileType: false,
     birthDate: false,
     position: false,
     staffFunction: false,
