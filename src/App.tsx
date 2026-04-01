@@ -37,7 +37,7 @@ import Chat from "./pages/Chat";
 
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
-import CompleteProfile from "./pages/CompleteProfile";
+
 import Welcome from "./pages/Welcome";
 import Teams from "./pages/Teams";
 import SelectTeams from "./pages/SelectTeams";
