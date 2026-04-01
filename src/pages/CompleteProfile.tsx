@@ -61,8 +61,6 @@ const CompleteProfile = () => {
   const [profileTypes, setProfileTypes] = useState<{ id: number; name: string }[]>([]);
   const [staffFunction, setStaffFunction] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
-  const [statePickerOpen, setStatePickerOpen] = useState(false);
 
   const [touched, setTouched] = useState({
     nickname: false,
