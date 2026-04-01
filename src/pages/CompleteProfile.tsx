@@ -559,153 +559,124 @@ const CompleteProfile = () => {
         )}
 
         {/* Birth Date (hidden for team/school) */}
-        {!isTeamOrSchoolAccount && (() => {
-          const birthDay = birthDate ? birthDate.split("-")[2] || "" : "";
-          const birthMonth = birthDate ? birthDate.split("-")[1] || "" : "";
-          const birthYear = birthDate ? birthDate.split("-")[0] || "" : "";
+        {!isTeamOrSchoolAccount && (
+          <div className="space-y-2">
+            <Label>
+              Data de nascimento <span className="text-destructive">*</span>
+            </Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Select
+                value={birthDay}
+                onValueChange={(val) => {
+                  setBirthDay(val);
+                  if (val && birthMonth && birthYear) setBirthDate(`${birthYear}-${birthMonth}-${val}`);
+                  else setBirthDate("");
+                  handleBlur("birthDate");
+                }}
+              >
+                <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
+                  <SelectValue placeholder="Dia" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: birthMonth && birthYear ? new Date(Number(birthYear), Number(birthMonth), 0).getDate() : 31 }, (_, i) => (i + 1).toString().padStart(2, "0")).map((d) => (
+                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          const currentYear = new Date().getFullYear();
-          const maxYear = currentYear - 16;
-          const minYear = 1940;
-          const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => (maxYear - i).toString());
+              <Select
+                value={birthMonth}
+                onValueChange={(val) => {
+                  setBirthMonth(val);
+                  if (birthDay && val && birthYear) setBirthDate(`${birthYear}-${val}-${birthDay}`);
+                  else setBirthDate("");
+                  handleBlur("birthDate");
+                }}
+              >
+                <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
+                  <SelectValue placeholder="Mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "01", label: "Janeiro" },
+                    { value: "02", label: "Fevereiro" },
+                    { value: "03", label: "Março" },
+                    { value: "04", label: "Abril" },
+                    { value: "05", label: "Maio" },
+                    { value: "06", label: "Junho" },
+                    { value: "07", label: "Julho" },
+                    { value: "08", label: "Agosto" },
+                    { value: "09", label: "Setembro" },
+                    { value: "10", label: "Outubro" },
+                    { value: "11", label: "Novembro" },
+                    { value: "12", label: "Dezembro" },
+                  ].map((m) => (
+                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          const months = [
-            { value: "01", label: "Janeiro" },
-            { value: "02", label: "Fevereiro" },
-            { value: "03", label: "Março" },
-            { value: "04", label: "Abril" },
-            { value: "05", label: "Maio" },
-            { value: "06", label: "Junho" },
-            { value: "07", label: "Julho" },
-            { value: "08", label: "Agosto" },
-            { value: "09", label: "Setembro" },
-            { value: "10", label: "Outubro" },
-            { value: "11", label: "Novembro" },
-            { value: "12", label: "Dezembro" },
-          ];
-
-          const daysInMonth = birthMonth && birthYear
-            ? new Date(Number(birthYear), Number(birthMonth), 0).getDate()
-            : 31;
-          const days = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString().padStart(2, "0"));
-
-          const updateBirthDate = (day: string, month: string, year: string) => {
-            if (day && month && year) {
-              setBirthDate(`${year}-${month}-${day}`);
-            } else {
-              setBirthDate("");
-            }
-          };
-
-          return (
-            <div className="space-y-2">
-              <Label>
-                Data de nascimento <span className="text-destructive">*</span>
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Select
-                  value={birthDay}
-                  onValueChange={(val) => {
-                    updateBirthDate(val, birthMonth, birthYear);
-                    handleBlur("birthDate");
-                  }}
-                >
-                  <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
-                    <SelectValue placeholder="Dia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {days.map((d) => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={birthMonth}
-                  onValueChange={(val) => {
-                    updateBirthDate(birthDay, val, birthYear);
-                    handleBlur("birthDate");
-                  }}
-                >
-                  <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
-                    <SelectValue placeholder="Mês" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={birthYear}
-                  onValueChange={(val) => {
-                    updateBirthDate(birthDay, birthMonth, val);
-                    handleBlur("birthDate");
-                  }}
-                >
-                  <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
-                    <SelectValue placeholder="Ano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((y) => (
-                      <SelectItem key={y} value={y}>{y}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Você deve ter no mínimo 16 anos.
-              </p>
-              {touched.birthDate && !isBirthDateValid && (
-                <p className="text-xs text-destructive">
-                  {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
-                </p>
-              )}
+              <Select
+                value={birthYear}
+                onValueChange={(val) => {
+                  setBirthYear(val);
+                  if (birthDay && birthMonth && val) setBirthDate(`${val}-${birthMonth}-${birthDay}`);
+                  else setBirthDate("");
+                  handleBlur("birthDate");
+                }}
+              >
+                <SelectTrigger className={getInputClass(getFieldStatus(isBirthDateValid, touched.birthDate))}>
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: (new Date().getFullYear() - 16) - 1940 + 1 }, (_, i) => ((new Date().getFullYear() - 16) - i).toString()).map((y) => (
+                    <SelectItem key={y} value={y}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          );
-        })()}
+            <p className="text-xs text-muted-foreground">
+              Você deve ter no mínimo 16 anos.
+            </p>
+            {touched.birthDate && !isBirthDateValid && (
+              <p className="text-xs text-destructive">
+                {!birthDate ? "Selecione sua data de nascimento." : "Você deve ter no mínimo 16 anos."}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Nationality */}
         <div className="space-y-2">
           <Label htmlFor="nationality">
             Nacionalidade <span className="text-destructive">*</span>
           </Label>
-          <button
-            type="button"
-            onClick={() => { setCountryPickerOpen(true); handleBlur("nationality"); }}
-            className={`w-full flex items-center justify-between px-3 py-2 border rounded-md bg-background text-left ${
-              getInputClass(getFieldStatus(isNationalityValid, touched.nationality))
-            }`}
+          <Select
+            value={nationality}
+            onValueChange={(val) => { setNationality(val); setEstado(""); handleBlur("nationality"); }}
           >
-            {nationality ? (
-              <span className="flex items-center gap-2">
-                {countries.find(c => c.id.toString() === nationality)?.bandeira_url && (
-                  <img 
-                    src={countries.find(c => c.id.toString() === nationality)?.bandeira_url || ""} 
-                    alt="" 
-                    className="w-5 h-3 object-cover rounded-sm" 
-                  />
-                )}
-                <span>{countries.find(c => c.id.toString() === nationality)?.nome}</span>
-              </span>
-            ) : (
-              <span className="text-muted-foreground">Selecione seu país</span>
-            )}
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+            <SelectTrigger className={getInputClass(getFieldStatus(isNationalityValid, touched.nationality))}>
+              <SelectValue placeholder="Selecione seu país" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries
+                .sort((a, b) => a.nome.toLowerCase() === "brasil" ? -1 : b.nome.toLowerCase() === "brasil" ? 1 : a.nome.localeCompare(b.nome))
+                .map((c) => (
+                  <SelectItem key={c.id} value={c.id.toString()}>
+                    <span className="flex items-center gap-2">
+                      {c.bandeira_url && (
+                        <img src={c.bandeira_url} alt="" className="w-5 h-3 object-cover rounded-sm inline-block" />
+                      )}
+                      {c.nome}
+                    </span>
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
           {touched.nationality && !isNationalityValid && (
             <p className="text-xs text-destructive">Selecione sua nacionalidade.</p>
           )}
         </div>
-
-        <CountryPickerSheet
-          open={countryPickerOpen}
-          onOpenChange={setCountryPickerOpen}
-          countries={countries}
-          selectedCountryId={nationality}
-          onSelectCountry={(value) => { setNationality(value); setEstado(""); handleBlur("nationality"); }}
-        />
 
         {/* State - Only for Brazil */}
         {isBrazilSelected && (
