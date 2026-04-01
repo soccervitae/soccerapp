@@ -62,8 +62,6 @@ const CompleteProfile = () => {
 
   const [touched, setTouched] = useState({
     nickname: false,
-    gender: false,
-    profileType: false,
     birthDate: false,
     position: false,
     staffFunction: false,
@@ -196,8 +194,8 @@ const CompleteProfile = () => {
   const isTeamNameValid = teamName.trim().length >= 2 && teamName.trim().length <= 50;
   const isNicknameValid = isTeamOrSchoolAccount ? isTeamNameValid : (nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim()));
   
-  const isGenderValid = isTeamOrSchoolAccount || !!gender;
-  const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
+  const isGenderValid = true;
+  const isProfileTypeValid = true;
   // Minimum age: 16 years
   const getMaxBirthDate = () => {
     const today = new Date();
@@ -337,8 +335,8 @@ const CompleteProfile = () => {
 
   // Calculate completed fields based on profile type
   const teamFields = [isNicknameValid, isNationalityValid];
-  const athleteFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
-  const staffFields = [isNicknameValid, isGenderValid, isProfileTypeValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
+  const athleteFields = [isNicknameValid, isBirthDateValid, isPositionValid, isNationalityValid, isHeightValid, isWeightValid, isPreferredFootValid];
+  const staffFields = [isNicknameValid, isBirthDateValid, isStaffFunctionValid, isNationalityValid];
   
   const activeFields = isTeamOrSchoolAccount ? teamFields : isAthlete ? athleteFields : staffFields;
   const completedFields = activeFields.filter(Boolean).length;
@@ -491,50 +489,6 @@ const CompleteProfile = () => {
           </>
         )}
 
-        {/* Gender - Sexo (hidden for team/school accounts) */}
-        {!isTeamOrSchoolAccount && (
-          <div className="space-y-2">
-            <Label htmlFor="gender">
-              Sexo <span className="text-destructive">*</span>
-            </Label>
-            <Select value={gender} onValueChange={(value) => { setGender(value); handleBlur("gender"); setPosition(""); setStaffFunction(""); }}>
-              <SelectTrigger className={getInputClass(getFieldStatus(isGenderValid, touched.gender))}>
-                <SelectValue placeholder="Selecione seu sexo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="homem">Homem</SelectItem>
-                <SelectItem value="mulher">Mulher</SelectItem>
-              </SelectContent>
-            </Select>
-            {touched.gender && !isGenderValid && (
-              <p className="text-xs text-destructive">Selecione seu sexo.</p>
-            )}
-          </div>
-        )}
-
-        {/* Profile Type - Atleta ou Comissão Técnica (hidden for team/school accounts) */}
-        {!isTeamOrSchoolAccount && (
-          <div className="space-y-2">
-            <Label htmlFor="profileType">
-              Tipo de perfil <span className="text-destructive">*</span>
-            </Label>
-            <Select value={profileType} onValueChange={(value) => { setProfileType(value); handleBlur("profileType"); setPosition(""); setStaffFunction(""); }}>
-              <SelectTrigger className={getInputClass(getFieldStatus(isProfileTypeValid, touched.profileType))}>
-                <SelectValue placeholder="Selecione o tipo de perfil" />
-              </SelectTrigger>
-              <SelectContent>
-                {profileTypes.map((type) => (
-                  <SelectItem key={type.id} value={mapProfileTypeValue(type.name)}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {touched.profileType && !isProfileTypeValid && (
-              <p className="text-xs text-destructive">Selecione o tipo de perfil.</p>
-            )}
-          </div>
-        )}
 
         {/* Position - Only for Athletes */}
         {!isTeamOrSchoolAccount && isAthlete && (
