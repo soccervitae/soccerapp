@@ -153,6 +153,21 @@ const AnimatedRoutes = () => {
       <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
       <Route path="/sobre" element={<PageTransition><About /></PageTransition>} />
       <Route path="/saiba-mais" element={<PageTransition><SaibaMais /></PageTransition>} />
+      
+      {/* SEO Landing Pages */}
+      <Route path="/para-atletas" element={<PageTransition><ParaAtletas /></PageTransition>} />
+      <Route path="/para-comissao" element={<PageTransition><ParaComissao /></PageTransition>} />
+      <Route path="/para-times" element={<PageTransition><ParaTimes /></PageTransition>} />
+      <Route path="/como-funciona" element={<PageTransition><ComoFunciona /></PageTransition>} />
+      <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
+      <Route path="/vagas" element={<PageTransition><Vagas /></PageTransition>} />
+      <Route path="/peneiras" element={<PageTransition><Peneiras /></PageTransition>} />
+      <Route path="/explorar" element={<PageTransition><Explorar /></PageTransition>} />
+      
+      {/* SEO-friendly public profile routes */}
+      <Route path="/atleta/:slug" element={<PageTransition><PublicProfile profileType="atleta" /></PageTransition>} />
+      <Route path="/treinador/:slug" element={<PageTransition><PublicProfile profileType="treinador" /></PageTransition>} />
+      <Route path="/time/:slug" element={<PageTransition><PublicProfile profileType="time" /></PageTransition>} />
 
       {/* Verify account route - requires login but not verification or complete profile */}
       <Route path="/verify-account" element={
