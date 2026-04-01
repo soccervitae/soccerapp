@@ -17,6 +17,7 @@ import ExploreFiltersSheet, { ExploreFilters } from "@/components/explore/Explor
 const Explore = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ExploreFilters>({
     profileType: null,
