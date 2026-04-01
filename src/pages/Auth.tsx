@@ -13,13 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
 import { toast } from "sonner";
 import { useIsPWA } from "@/hooks/useIsPWA";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
 
 // Social Login Buttons Component
 const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }) => {
@@ -527,8 +522,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [showVerification, setShowVerification] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [accountType, setAccountType] = useState("");
-  const [gender, setGender] = useState("");
   
   // Estados "touched" para feedback visual após interação
   const [touched, setTouched] = useState({
@@ -537,8 +530,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     email: false,
     password: false,
     confirmPassword: false,
-    accountType: false,
-    gender: false,
   });
   
   const { signUp } = useAuth();
@@ -622,7 +613,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const isLastNameValid = lastName.trim().length >= 2;
   const isEmailValid = emailStatus === "valid";
   const doPasswordsMatch = password === confirmPassword;
-  const isAccountTypeValid = accountType.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -652,10 +642,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    if (!accountType) {
-      setErrorMessage("Selecione o tipo de conta");
-      return;
-    }
+
 
     setLoading(true);
 
@@ -664,7 +651,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       password,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      accountType: accountType || undefined,
     });
 
     if (error) {
@@ -682,11 +668,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    // Save account type and gender to profile
-    await supabase
-      .from("profiles")
-      .update({ account_type: accountType, gender: gender || null } as any)
-      .eq("id", user.id);
+
 
     // Send verification code
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
@@ -711,8 +693,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   };
 
   const handleVerificationComplete = async () => {
-    // After verification, navigate to complete profile (user stays logged in)
-    window.location.href = "/complete-profile";
+    window.location.href = "/choose-account-type";
   };
 
   const handleBackToSignup = () => {
@@ -739,9 +720,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     lastName.trim().length >= 2 &&
     emailStatus === "valid" &&
     isPasswordValid &&
-    password === confirmPassword &&
-    accountType.length > 0 &&
-    (accountType === "time" || gender.length > 0);
+    password === confirmPassword;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -753,38 +732,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       )}
 
-      {/* Tipo de Conta */}
-      <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase text-muted-foreground">
-          Tipo de Conta <span className="text-destructive">*</span>
-        </Label>
-        <Select
-          value={accountType}
-          onValueChange={(value) => {
-            setAccountType(value);
-            setTouched(prev => ({ ...prev, accountType: true }));
-            setErrorMessage(null);
-          }}
-        >
-          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
-            touched.accountType
-              ? isAccountTypeValid
-                ? "border-emerald-500 border"
-                : "border-destructive border"
-              : "border-0"
-          }`}>
-            <SelectValue placeholder="Selecione o tipo de conta" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="atleta">Atleta</SelectItem>
-            <SelectItem value="comissao_tecnica">Comissão Técnica</SelectItem>
-            <SelectItem value="time">Time</SelectItem>
-          </SelectContent>
-        </Select>
-        {touched.accountType && !isAccountTypeValid && (
-          <p className="text-xs text-destructive">Selecione um tipo de conta</p>
-        )}
-      </div>
+
+
 
       {/* Nome e Sobrenome em linha */}
       <div className="grid grid-cols-2 gap-3">
@@ -870,39 +819,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
         </div>
       </div>
 
-      {/* Sexo */}
-      {accountType !== "time" && (
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold uppercase text-muted-foreground">
-            Sexo <span className="text-destructive">*</span>
-          </Label>
-          <Select
-            value={gender}
-            onValueChange={(value) => {
-              setGender(value);
-              setTouched(prev => ({ ...prev, gender: true }));
-              setErrorMessage(null);
-            }}
-          >
-            <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
-              touched.gender
-                ? gender
-                  ? "border-emerald-500 border"
-                  : "border-destructive border"
-                : "border-0"
-            }`}>
-              <SelectValue placeholder="Selecione o sexo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="homem">Masculino</SelectItem>
-              <SelectItem value="mulher">Feminino</SelectItem>
-            </SelectContent>
-          </Select>
-          {touched.gender && !gender && (
-            <p className="text-xs text-destructive">Selecione o sexo</p>
-          )}
-        </div>
-      )}
+
+
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">

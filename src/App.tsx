@@ -74,6 +74,8 @@ import CreateHighlight from "./pages/CreateHighlight";
 import Post from "./pages/Post";
 import CreatePost from "./pages/CreatePost";
 import VerifyAccount from "./pages/VerifyAccount";
+import ChooseAccountType from "./pages/ChooseAccountType";
+import AdminAccountTypes from "./pages/admin/AccountTypes";
 const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
@@ -146,6 +148,13 @@ const AnimatedRoutes = () => {
       <Route path="/verify-account" element={
         <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
           <PageTransition><VerifyAccount /></PageTransition>
+        </ProtectedRoute>
+      } />
+
+      {/* Choose account type route - requires login and verification but not account type or profile */}
+      <Route path="/choose-account-type" element={
+        <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
+          <PageTransition><ChooseAccountType /></PageTransition>
         </ProtectedRoute>
       } />
 
@@ -293,6 +302,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/teams/add" element={<AdminRoute><AdminAddTeams /></AdminRoute>} />
       <Route path="/admin/championships" element={<AdminRoute><AdminChampionships /></AdminRoute>} />
       <Route path="/admin/achievements" element={<AdminRoute><AdminAchievements /></AdminRoute>} />
+      <Route path="/admin/account-types" element={<AdminRoute><AdminAccountTypes /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
       <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
       

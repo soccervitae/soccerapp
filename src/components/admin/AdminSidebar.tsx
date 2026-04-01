@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   BadgeCheck,
+  UserCog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +38,7 @@ const menuItems = [
   { icon: Shield, label: "Times", path: "/admin/teams" },
   { icon: Trophy, label: "Campeonatos", path: "/admin/championships" },
   { icon: Medal, label: "Conquistas", path: "/admin/achievements" },
+  { icon: UserCog, label: "Tipos de Conta", path: "/admin/account-types" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
 ];
 

@@ -22,7 +22,7 @@ const VerifyAccount = () => {
   // If already verified, redirect
   useEffect(() => {
     if (profile && (profile as any).conta_verificada) {
-      navigate("/complete-profile", { replace: true });
+      navigate("/choose-account-type", { replace: true });
     }
   }, [profile, navigate]);
 
@@ -53,9 +53,8 @@ const VerifyAccount = () => {
   }, [user, userEmail, codeSent, sending, firstName]);
 
   const handleVerified = async () => {
-    // Invalidate profile cache to pick up conta_verificada = true
     await queryClient.invalidateQueries({ queryKey: ["profile"] });
-    navigate("/complete-profile", { replace: true });
+    navigate("/choose-account-type", { replace: true });
   };
 
   const handleBack = async () => {
