@@ -76,6 +76,7 @@ import CreatePost from "./pages/CreatePost";
 import VerifyAccount from "./pages/VerifyAccount";
 import ChooseAccountType from "./pages/ChooseAccountType";
 import AdminAccountTypes from "./pages/admin/AccountTypes";
+const queryClient = new QueryClient();
 
 const CallNotificationHandler = () => {
   useCallNotificationActions();
