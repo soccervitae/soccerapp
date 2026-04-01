@@ -833,6 +833,31 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
 
 
+      {/* Sexo */}
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold uppercase text-muted-foreground">
+          Sexo <span className="text-destructive">*</span>
+        </Label>
+        <Select value={gender} onValueChange={(v) => { setGender(v); setTouched(prev => ({ ...prev, gender: true })); setErrorMessage(null); }}>
+          <SelectTrigger className={`h-12 bg-muted/50 transition-colors ${
+            touched.gender
+              ? isGenderValid
+                ? "border-emerald-500 border"
+                : "border-destructive border"
+              : "border-0"
+          }`}>
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="homem">Masculino</SelectItem>
+            <SelectItem value="mulher">Feminino</SelectItem>
+          </SelectContent>
+        </Select>
+        {touched.gender && !isGenderValid && (
+          <p className="text-xs text-destructive">Selecione uma opção</p>
+        )}
+      </div>
+
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-xs font-semibold uppercase text-muted-foreground">
