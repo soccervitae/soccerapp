@@ -37,6 +37,7 @@ interface AccountType {
 }
 
 export default function AdminAccountTypes() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
