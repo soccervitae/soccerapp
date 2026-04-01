@@ -171,7 +171,7 @@ const SignupVerification = ({
             Conta verificada!
           </h3>
           <p className="text-muted-foreground text-sm">
-            Redirecionando para o login...
+            Redirecionando...
           </p>
         </div>
       </div>
