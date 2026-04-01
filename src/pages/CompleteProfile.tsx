@@ -680,42 +680,26 @@ const CompleteProfile = () => {
 
         {/* State - Only for Brazil */}
         {isBrazilSelected && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="estado">
-                Estado
-              </Label>
-              <button
-                type="button"
-                onClick={() => setStatePickerOpen(true)}
-                className="w-full flex items-center justify-between px-3 py-2 border rounded-md bg-background text-left"
-              >
-                {estado ? (
-                  <span className="flex items-center gap-2">
-                    {states.find(s => s.id.toString() === estado)?.bandeira_url && (
-                      <img 
-                        src={states.find(s => s.id.toString() === estado)?.bandeira_url || ""} 
-                        alt="" 
-                        className="w-5 h-3 object-cover rounded-sm" 
-                      />
-                    )}
-                    <span>{states.find(s => s.id.toString() === estado)?.nome}</span>
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Selecione seu estado</span>
-                )}
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-
-            <StatePickerSheet
-              open={statePickerOpen}
-              onOpenChange={setStatePickerOpen}
-              states={states}
-              selectedStateId={estado}
-              onSelectState={(value) => setEstado(value)}
-            />
-          </>
+          <div className="space-y-2">
+            <Label htmlFor="estado">Estado</Label>
+            <Select value={estado} onValueChange={(val) => setEstado(val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione seu estado" />
+              </SelectTrigger>
+              <SelectContent>
+                {states.map((s) => (
+                  <SelectItem key={s.id} value={s.id.toString()}>
+                    <span className="flex items-center gap-2">
+                      {s.bandeira_url && (
+                        <img src={s.bandeira_url} alt="" className="w-5 h-3 object-cover rounded-sm inline-block" />
+                      )}
+                      {s.nome}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
 
         {/* Height & Weight Row - For Athletes and Staff */}
