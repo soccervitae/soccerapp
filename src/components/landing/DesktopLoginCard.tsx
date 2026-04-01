@@ -260,8 +260,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
     validateEmail(email) &&
     isPasswordValid &&
     password === confirmPassword &&
-    accountType.length > 0 &&
-    (accountType === "time" || gender.length > 0);
+    gender.length > 0;
 
   const translateError = (msg: string): string => {
     if (msg.includes("User already registered")) return "Este email já está cadastrado. Tente fazer login.";
