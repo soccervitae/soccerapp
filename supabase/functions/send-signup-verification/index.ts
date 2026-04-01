@@ -97,28 +97,26 @@ const handler = async (req: Request): Promise<Response> => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verificação de Conta - Soccer Vitae</title>
 </head>
-<body style="margin:0;padding:0;background-color:#0f1612;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-  <!-- Wrapper -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f1612;padding:40px 16px;">
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:40px 16px;">
     <tr>
       <td align="center">
-        <!-- Main Card -->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#1a2420;border-radius:20px;overflow:hidden;border:1px solid rgba(66,111,66,0.2);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
 
           <!-- Header with Logo -->
           <tr>
-            <td style="background:linear-gradient(135deg,#2d4a2d 0%,#1a3a1a 100%);padding:32px 24px 28px;text-align:center;">
+            <td style="padding:32px 24px 24px;text-align:center;border-bottom:1px solid #e5e7eb;">
               <img src="${logoUrl}" alt="Soccer Vitae" width="140" height="auto" style="display:inline-block;max-width:140px;height:auto;" />
             </td>
           </tr>
 
           <!-- Welcome Section -->
           <tr>
-            <td style="padding:32px 28px 0;">
-              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#ffffff;text-align:center;">
+            <td style="padding:28px 28px 0;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1a1a1a;text-align:center;">
                 Bem-vindo(a), ${displayName}! ⚽
               </h1>
-              <p style="margin:0;font-size:15px;color:#9ca3af;text-align:center;line-height:1.6;">
+              <p style="margin:0;font-size:15px;color:#6b7280;text-align:center;line-height:1.6;">
                 Estamos felizes em ter você na nossa comunidade. Para ativar sua conta, use o código abaixo:
               </p>
             </td>
@@ -127,13 +125,12 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Code Box -->
           <tr>
             <td style="padding:28px 28px 0;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,rgba(66,111,66,0.15) 0%,rgba(66,111,66,0.05) 100%);border:1px solid rgba(66,111,66,0.3);border-radius:16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;">
                 <tr>
                   <td style="padding:24px 16px;text-align:center;">
-                    <p style="margin:0 0 16px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:3px;font-weight:600;">
+                    <p style="margin:0 0 16px;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:3px;font-weight:600;">
                       Código de Verificação
                     </p>
-                    <!-- Code Digits -->
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                       <tr>
                         ${codeDigits}
@@ -154,48 +151,10 @@ const handler = async (req: Request): Promise<Response> => {
             </td>
           </tr>
 
-          <!-- Divider -->
-          <tr>
-            <td style="padding:28px 28px 0;">
-              <div style="height:1px;background-color:rgba(255,255,255,0.08);"></div>
-            </td>
-          </tr>
-
-          <!-- Welcome Benefits -->
-          <tr>
-            <td style="padding:24px 28px 0;">
-              <p style="margin:0 0 16px;font-size:14px;font-weight:600;color:#d1d5db;text-align:center;">
-                O que te espera no Soccer Vitae:
-              </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#9ca3af;line-height:1.5;">
-                    ⚽ &nbsp;Crie seu perfil profissional de atleta
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#9ca3af;line-height:1.5;">
-                    📸 &nbsp;Compartilhe seus melhores momentos
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#9ca3af;line-height:1.5;">
-                    🏆 &nbsp;Registre suas conquistas e títulos
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:#9ca3af;line-height:1.5;">
-                    🤝 &nbsp;Conecte-se com outros atletas e equipes
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
           <!-- Security Notice -->
           <tr>
             <td style="padding:24px 28px 0;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:rgba(255,255,255,0.04);border-radius:10px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;border-radius:10px;">
                 <tr>
                   <td style="padding:14px 16px;text-align:center;">
                     <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5;">
@@ -210,21 +169,19 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Footer -->
           <tr>
             <td style="padding:24px 28px 28px;text-align:center;">
-              <p style="margin:0;font-size:11px;color:#4b5563;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
                 © ${year} Soccer Vitae — Todos os direitos reservados.
               </p>
             </td>
           </tr>
 
         </table>
-        <!-- End Main Card -->
       </td>
     </tr>
   </table>
 </body>
 </html>
     `;
-
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
