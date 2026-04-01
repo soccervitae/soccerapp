@@ -12,7 +12,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
-import { useCallNotificationActions } from "@/hooks/useCallNotificationActions";
+
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import { GlobalOfflineBanner } from "@/components/common/GlobalOfflineBanner";
