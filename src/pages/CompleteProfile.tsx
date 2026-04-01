@@ -275,7 +275,7 @@ const CompleteProfile = () => {
         estado_id: isBrazilSelected && estado ? Number(estado) : null,
         foundation_year: isTeamOrSchoolAccount && foundationYear ? Number(foundationYear) : null,
         team_category: isTeamOrSchoolAccount ? teamCategory || null : null,
-        city: isTeamOrSchoolAccount ? city.trim() || null : null,
+        city: city.trim() || null,
       };
 
       if (emblemUrl) {
@@ -799,6 +799,21 @@ const CompleteProfile = () => {
                 <p className="text-xs text-destructive">Peso inválido.</p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* City - For Athletes and Staff */}
+        {!isTeamOrSchoolAccount && (isAthlete || isStaff) && (
+          <div className="space-y-2">
+            <Label htmlFor="city">Cidade</Label>
+            <Input
+              id="city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ex: São Paulo"
+              maxLength={100}
+            />
           </div>
         )}
 
