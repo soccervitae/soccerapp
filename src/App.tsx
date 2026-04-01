@@ -374,7 +374,7 @@ const App = () => {
               <BrowserRouter>
                 <ConversationsProvider>
                   <MessageNotificationProvider>
-                    <CallNotificationHandler />
+                    
                     <ScrollToTop />
                     <GlobalOfflineBanner />
                     <AnimatedRoutes />
