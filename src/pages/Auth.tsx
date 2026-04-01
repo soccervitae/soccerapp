@@ -524,6 +524,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle" | "invalid" | "valid">("idle");
   const [showVerification, setShowVerification] = useState(false);
@@ -534,6 +535,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
+    gender: false,
     email: false,
     password: false,
     confirmPassword: false,
