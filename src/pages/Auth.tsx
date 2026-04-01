@@ -647,10 +647,7 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       return;
     }
 
-    if (!accountType) {
-      setErrorMessage("Selecione o tipo de conta");
-      return;
-    }
+
 
     setLoading(true);
 
