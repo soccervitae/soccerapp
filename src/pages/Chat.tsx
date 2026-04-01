@@ -60,29 +60,6 @@ const Chat = () => {
     }
   }, [isLoading, messages.length, refetchConversations]);
 
-  // Video call hook
-  const {
-    isCallActive,
-    isIncomingCall,
-    isCalling,
-    isVideoEnabled,
-    isAudioEnabled,
-    localStream,
-    remoteStream,
-    callerInfo,
-    connectionStatus,
-    callType,
-    startCall,
-    acceptCall,
-    rejectCall,
-    endCall,
-    toggleVideo,
-    toggleAudio,
-  } = useVideoCall(conversationId || null, participant);
-
-  // Call handlers
-  const handleVideoCall = useCallback(() => startCall('video'), [startCall]);
-  const handleVoiceCall = useCallback(() => startCall('voice'), [startCall]);
 
   // Fetch other participant, mute and pin status
   useEffect(() => {
