@@ -102,24 +102,14 @@ const ProtectedRouteInner = ({
     return <Navigate to="/verify-account" replace />;
   }
 
-  // Redirect to choose account type if no account_type set
+  // Redirect to choose account type if no account_type or profile not completed
   if (
     profile &&
     profileData.conta_verificada &&
-    !profileData.account_type &&
+    (!profileData.account_type || (requireCompleteProfile && !profileData.profile_completed)) &&
     location.pathname !== "/choose-account-type"
   ) {
     return <Navigate to="/choose-account-type" replace />;
-  }
-
-  // Redirect to complete profile if profile is not completed
-  if (
-    requireCompleteProfile &&
-    profile &&
-    !profileData.profile_completed &&
-    location.pathname !== "/complete-profile"
-  ) {
-    return <Navigate to="/complete-profile" replace />;
   }
 
   // Redirect to welcome/onboarding if profile is complete but onboarding is not

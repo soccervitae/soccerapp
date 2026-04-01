@@ -37,7 +37,7 @@ import Chat from "./pages/Chat";
 
 import TwoFactorVerify from "./pages/TwoFactorVerify";
 import ForgotPassword from "./pages/ForgotPassword";
-import CompleteProfile from "./pages/CompleteProfile";
+
 import Welcome from "./pages/Welcome";
 import Teams from "./pages/Teams";
 import SelectTeams from "./pages/SelectTeams";
@@ -183,12 +183,6 @@ const AnimatedRoutes = () => {
         </ProtectedRoute>
       } />
 
-      {/* Complete profile route - requires login but not complete profile or onboarding */}
-      <Route path="/complete-profile" element={
-        <ProtectedRoute requireCompleteProfile={false} requireOnboarding={false}>
-          <PageTransition><CompleteProfile /></PageTransition>
-        </ProtectedRoute>
-      } />
       
       {/* Welcome/onboarding route - requires login and complete profile but not onboarding */}
       <Route path="/welcome" element={
