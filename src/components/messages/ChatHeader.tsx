@@ -29,7 +29,7 @@ interface ChatHeaderProps {
   isDeletedUser?: boolean;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin, isArchived, isDeletedUser }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin, isArchived, isDeletedUser }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
