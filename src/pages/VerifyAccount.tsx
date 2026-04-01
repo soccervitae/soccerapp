@@ -22,7 +22,7 @@ const VerifyAccount = () => {
   // If already verified, redirect
   useEffect(() => {
     if (profile && (profile as any).conta_verificada) {
-      navigate("/complete-profile", { replace: true });
+      navigate("/choose-account-type", { replace: true });
     }
   }, [profile, navigate]);
 
