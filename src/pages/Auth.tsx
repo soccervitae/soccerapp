@@ -8,6 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check, X, ArrowRight, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { registerDevice, isDeviceTrusted, trustCurrentDevice } from "@/services/deviceService";
 import { Checkbox } from "@/components/ui/checkbox";
 import SignupVerification from "@/components/auth/SignupVerification";
