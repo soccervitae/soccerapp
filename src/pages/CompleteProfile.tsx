@@ -194,8 +194,8 @@ const CompleteProfile = () => {
   const isTeamNameValid = teamName.trim().length >= 2 && teamName.trim().length <= 50;
   const isNicknameValid = isTeamOrSchoolAccount ? isTeamNameValid : (nickname.trim().length >= 2 && nickname.trim().length <= 50 && nicknameRegex.test(nickname.trim()));
   
-  const isGenderValid = isTeamOrSchoolAccount || !!gender;
-  const isProfileTypeValid = isTeamOrSchoolAccount || !!profileType;
+  const isGenderValid = true;
+  const isProfileTypeValid = true;
   // Minimum age: 16 years
   const getMaxBirthDate = () => {
     const today = new Date();
