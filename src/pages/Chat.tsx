@@ -16,15 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
-import { useVideoCall } from "@/hooks/useVideoCall";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { MessageBubble } from "@/components/messages/MessageBubble";
 import { TypingIndicator } from "@/components/messages/TypingIndicator";
 import { ChatInput } from "@/components/messages/ChatInput";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
-import { VideoCallModal } from "@/components/messages/VideoCallModal";
-import { VoiceCallModal } from "@/components/messages/VoiceCallModal";
-import { IncomingCallModal } from "@/components/messages/IncomingCallModal";
 import { ChatSkeleton } from "@/components/skeletons/ChatSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,29 +60,6 @@ const Chat = () => {
     }
   }, [isLoading, messages.length, refetchConversations]);
 
-  // Video call hook
-  const {
-    isCallActive,
-    isIncomingCall,
-    isCalling,
-    isVideoEnabled,
-    isAudioEnabled,
-    localStream,
-    remoteStream,
-    callerInfo,
-    connectionStatus,
-    callType,
-    startCall,
-    acceptCall,
-    rejectCall,
-    endCall,
-    toggleVideo,
-    toggleAudio,
-  } = useVideoCall(conversationId || null, participant);
-
-  // Call handlers
-  const handleVideoCall = useCallback(() => startCall('video'), [startCall]);
-  const handleVoiceCall = useCallback(() => startCall('voice'), [startCall]);
 
   // Fetch other participant, mute and pin status
   useEffect(() => {
@@ -334,9 +307,6 @@ const Chat = () => {
       <ChatHeader 
         participant={participant} 
         isTyping={isAnyoneTyping}
-        onVideoCall={handleVideoCall}
-        onVoiceCall={handleVoiceCall}
-        isCallActive={isCallActive}
         onArchive={handleToggleArchiveConversation}
         onDelete={() => setShowDeleteDialog(true)}
         isMuted={isMuted}
@@ -368,45 +338,6 @@ const Chat = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Incoming call modal */}
-      <IncomingCallModal
-        isOpen={isIncomingCall}
-        caller={callerInfo}
-        callType={callType || 'video'}
-        onAccept={acceptCall}
-        onReject={rejectCall}
-      />
-
-      {/* Video call modal */}
-      {callType === 'video' && (
-        <VideoCallModal
-          isOpen={isCallActive || isCalling}
-          participant={participant}
-          localStream={localStream}
-          remoteStream={remoteStream}
-          isCalling={isCalling}
-          isVideoEnabled={isVideoEnabled}
-          isAudioEnabled={isAudioEnabled}
-          connectionStatus={connectionStatus}
-          onToggleVideo={toggleVideo}
-          onToggleAudio={toggleAudio}
-          onEndCall={endCall}
-        />
-      )}
-
-      {/* Voice call modal */}
-      {callType === 'voice' && (
-        <VoiceCallModal
-          isOpen={isCallActive || isCalling}
-          participant={participant}
-          remoteStream={remoteStream}
-          isCalling={isCalling}
-          isAudioEnabled={isAudioEnabled}
-          connectionStatus={connectionStatus}
-          onToggleAudio={toggleAudio}
-          onEndCall={endCall}
-        />
-      )}
 
       {/* Offline indicator */}
       {isOffline && (

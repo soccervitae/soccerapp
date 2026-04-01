@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Video, MoreVertical, Trash2, Archive, ArchiveRestore, BellOff, BellRing, Pin, PinOff } from "lucide-react";
+import { ArrowLeft, MoreVertical, Trash2, Archive, ArchiveRestore, BellOff, BellRing, Pin, PinOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,9 +19,6 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 interface ChatHeaderProps {
   participant: Profile | null;
   isTyping?: boolean;
-  onVideoCall?: () => void;
-  onVoiceCall?: () => void;
-  isCallActive?: boolean;
   onArchive?: () => void;
   onDelete?: () => void;
   isMuted?: boolean;
@@ -32,7 +29,7 @@ interface ChatHeaderProps {
   isDeletedUser?: boolean;
 }
 
-export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, isCallActive, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin, isArchived, isDeletedUser }: ChatHeaderProps) => {
+export const ChatHeader = ({ participant, isTyping, onArchive, onDelete, isMuted, onToggleMute, isPinned, onTogglePin, isArchived, isDeletedUser }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -94,28 +91,6 @@ export const ChatHeader = ({ participant, isTyping, onVideoCall, onVoiceCall, is
       {/* Call buttons and menu - hidden for deleted users */}
       {!isDeletedUser && !isUnknownUser && (
         <div className="flex items-center gap-1">
-          {/* Voice call button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onVoiceCall}
-            disabled={!participant || isCallActive}
-            className="text-primary hover:text-primary/80"
-          >
-            <Phone className="h-5 w-5" />
-          </Button>
-
-          {/* Video call button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onVideoCall}
-            disabled={!participant || isCallActive}
-            className="text-primary hover:text-primary/80"
-          >
-            <Video className="h-5 w-5" />
-          </Button>
-
           {/* Options menu (3 dots) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

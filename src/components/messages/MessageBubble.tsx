@@ -3,7 +3,13 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import type { MessageWithSender } from "@/hooks/useMessages";
 import type { ReactionWithUser } from "@/hooks/useMessageReactions";
-import type { VideoCallMetadata } from "@/hooks/useVideoCall";
+
+interface VideoCallMetadata {
+  status: string;
+  duration?: number;
+  initiator?: string;
+  callType?: string;
+}
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
