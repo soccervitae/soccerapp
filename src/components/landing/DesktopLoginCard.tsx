@@ -284,7 +284,6 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
       password,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      accountType: accountType || undefined,
     });
 
     if (error) {
