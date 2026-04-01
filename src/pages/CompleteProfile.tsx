@@ -168,6 +168,7 @@ const CompleteProfile = () => {
       }
       if ((profile as any).foundation_year) setFoundationYear((profile as any).foundation_year.toString());
       if ((profile as any).team_category) setTeamCategory((profile as any).team_category);
+      if ((profile as any).city) setCity((profile as any).city);
     }
   }, [profile]);
 
