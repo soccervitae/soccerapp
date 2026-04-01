@@ -93,6 +93,15 @@ const ProtectedRouteInner = ({
     return <Navigate to="/install" replace />;
   }
 
+  // Redirect to verify account if email is not verified
+  if (
+    profile &&
+    !(profileData.conta_verificada) &&
+    location.pathname !== "/verify-account"
+  ) {
+    return <Navigate to="/verify-account" replace />;
+  }
+
   // Redirect to complete profile if profile is not completed
   if (
     requireCompleteProfile &&
