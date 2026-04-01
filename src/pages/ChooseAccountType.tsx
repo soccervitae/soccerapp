@@ -302,6 +302,7 @@ const ChooseAccountType = () => {
                       setNickname(""); setTeamName(""); setBirthDay(""); setBirthMonth(""); setBirthYear(""); setBirthDate("");
                       setPosition(""); setStaffFunction(""); setHeight(""); setWeight(""); setPreferredFoot("");
                       setCity(""); setFoundationYear(""); setTeamCategory(""); setEmblemFile(null); setEmblemPreview(null);
+                      setNationality(""); setEstado("");
                       setTouched({ nickname: false, birthDate: false, position: false, staffFunction: false, nationality: false, height: false, weight: false, preferredFoot: false });
                     }}
                     className={`w-full p-5 rounded-2xl border-2 transition-all duration-200 text-left flex items-center gap-4 ${
