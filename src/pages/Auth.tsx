@@ -724,9 +724,12 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   }
 
 
+  const isGenderValid = gender.length > 0;
+
   const isFormValid = 
     firstName.trim().length >= 2 && 
     lastName.trim().length >= 2 &&
+    isGenderValid &&
     emailStatus === "valid" &&
     isPasswordValid &&
     password === confirmPassword;
