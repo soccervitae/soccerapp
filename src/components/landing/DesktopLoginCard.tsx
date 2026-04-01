@@ -301,7 +301,7 @@ const SignupForm = ({ onSwitchToLogin }: SignupFormProps) => {
 
     await supabase
       .from("profiles")
-      .update({ account_type: accountType, gender: gender || null } as any)
+      .update({ gender: gender || null } as any)
       .eq("id", user.id);
 
     const { error: sendError } = await supabase.functions.invoke("send-signup-verification", {
