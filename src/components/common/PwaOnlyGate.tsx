@@ -21,11 +21,11 @@ const PwaOnlyGate = ({ children }: PwaOnlyGateProps) => {
         <div className="max-w-sm space-y-6">
           <img
             src={logoVerde}
-            alt="Soccer Vitae"
+            alt="SOCCER VITAE"
             className="h-7 w-auto object-contain mx-auto"
           />
           <p className="text-muted-foreground text-base">
-            Para fazer login ou criar sua conta, baixe o app Soccer Vitae.
+            Para fazer login ou criar sua conta, baixe o app SOCCER VITAE.
           </p>
           <Button
             onClick={() => setShowInstall(true)}

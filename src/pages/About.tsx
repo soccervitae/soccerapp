@@ -65,8 +65,8 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Sobre | Soccer Vitae</title>
-        <meta name="description" content="Conheça a Soccer Vitae, a rede social exclusiva para atletas de futebol. Nossa missão, valores e o que oferecemos para impulsionar sua carreira." />
+        <title>Sobre | SOCCER VITAE</title>
+        <meta name="description" content="Conheça o SOCCER VITAE, a rede social exclusiva para atletas de futebol. Nossa missão, valores e o que oferecemos para impulsionar sua carreira." />
       </Helmet>
 
       {/* Header */}
@@ -78,7 +78,7 @@ const About = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-semibold">Sobre a Soccer Vitae</h1>
+          <h1 className="text-lg font-semibold">Sobre o SOCCER VITAE</h1>
         </div>
       </header>
 
@@ -87,7 +87,7 @@ const About = () => {
         <section className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-              <img src={soccerVitaeLogo} alt="Soccer Vitae" className="w-16 h-16 object-contain" />
+              <img src={soccerVitaeLogo} alt="SOCCER VITAE" className="w-16 h-16 object-contain" />
             </div>
           </div>
           <div>
@@ -178,7 +178,7 @@ const About = () => {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Entre em Contato</h3>
               <p className="text-muted-foreground text-sm mb-3">
-                Tem dúvidas, sugestões ou quer saber mais sobre a Soccer Vitae? 
+                Tem dúvidas, sugestões ou quer saber mais sobre o SOCCER VITAE? 
                 Entre em contato conosco.
               </p>
               <a 
@@ -193,7 +193,7 @@ const About = () => {
 
         {/* Footer Note */}
         <p className="text-center text-xs text-muted-foreground pb-4">
-          © 2024 Soccer Vitae. Todos os direitos reservados.
+          © 2024 SOCCER VITAE. Todos os direitos reservados.
         </p>
       </main>
     </div>

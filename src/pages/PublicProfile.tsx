@@ -38,19 +38,19 @@ const PublicProfile = ({ profileType }: { profileType: "atleta" | "treinador" | 
   }, [slug]);
 
   const getTitle = () => {
-    if (!profile) return "Perfil | Soccer Vitae";
+    if (!profile) return "Perfil | SOCCER VITAE";
     const name = profile.full_name || profile.nickname || profile.username;
-    if (profileType === "atleta") return `${name} | Jogador de Futebol | Soccer Vitae`;
-    if (profileType === "treinador") return `${name} | Treinador de Futebol | Soccer Vitae`;
-    return `${name}${profile.city ? ` | ${profile.city}` : ""} | Soccer Vitae`;
+    if (profileType === "atleta") return `${name} | Jogador de Futebol | SOCCER VITAE`;
+    if (profileType === "treinador") return `${name} | Treinador de Futebol | SOCCER VITAE`;
+    return `${name}${profile.city ? ` | ${profile.city}` : ""} | SOCCER VITAE`;
   };
 
   const getDescription = () => {
-    if (!profile) return "Perfil na Soccer Vitae, a rede social do futebol.";
+    if (!profile) return "Perfil no SOCCER VITAE, a rede social do futebol.";
     const name = profile.full_name || profile.nickname || profile.username;
-    if (profileType === "atleta") return `${name} é jogador de futebol${profile.city ? ` de ${profile.city}` : ""}. Veja estatísticas, vídeos e histórico de carreira no Soccer Vitae.`;
-    if (profileType === "treinador") return `${name}, treinador de futebol. Conecte-se na Soccer Vitae, a rede social do futebol brasileiro.`;
-    return `Conheça o ${name}${profile.city ? ` de ${profile.city}` : ""} na Soccer Vitae. Plantel, comissão técnica e oportunidades.`;
+    if (profileType === "atleta") return `${name} é jogador de futebol${profile.city ? ` de ${profile.city}` : ""}. Veja estatísticas, vídeos e histórico de carreira no SOCCER VITAE.`;
+    if (profileType === "treinador") return `${name}, treinador de futebol. Conecte-se no SOCCER VITAE, a rede social do futebol brasileiro.`;
+    return `Conheça o ${name}${profile.city ? ` de ${profile.city}` : ""} no SOCCER VITAE. Plantel, comissão técnica e oportunidades.`;
   };
 
   if (loading) {
@@ -85,7 +85,7 @@ const PublicProfile = ({ profileType }: { profileType: "atleta" | "treinador" | 
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>

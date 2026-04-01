@@ -23,7 +23,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground">
-            Visão geral do Soccer Vitae
+            Visão geral do SOCCER VITAE
           </p>
         </div>
 

@@ -174,7 +174,7 @@ export default function Settings() {
             />
             <SettingsItem 
               icon="info"
-              label="Sobre o Soccer Vitae"
+              label="Sobre o SOCCER VITAE"
               onClick={() => {}}
             />
             {!isPWA && (

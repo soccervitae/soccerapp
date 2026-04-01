@@ -69,7 +69,7 @@ function SidebarContent({ onItemClick }: { onItemClick?: () => void }) {
         </div>
         <div>
           <h1 className="font-bold text-foreground">Admin Panel</h1>
-          <p className="text-xs text-muted-foreground">Soccer Vitae</p>
+          <p className="text-xs text-muted-foreground">SOCCER VITAE</p>
         </div>
       </div>
 

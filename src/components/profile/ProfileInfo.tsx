@@ -760,7 +760,7 @@ export const ProfileInfo = ({
       <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
         <ResponsiveModalContent className="sm:max-w-sm">
           <ResponsiveModalHeader>
-            <ResponsiveModalTitle className="text-center">Entre na Soccer Vitae</ResponsiveModalTitle>
+            <ResponsiveModalTitle className="text-center">Entre no SOCCER VITAE</ResponsiveModalTitle>
           </ResponsiveModalHeader>
           <div className="flex flex-col items-center gap-4 py-4 px-2">
             <p className="text-sm text-muted-foreground text-center">

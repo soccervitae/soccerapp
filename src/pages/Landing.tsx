@@ -44,8 +44,8 @@ const Landing = () => {
 
   return <>
       <Helmet>
-        <title>Soccer Vitae | A Rede Social do Futebol Brasileiro</title>
-        <meta name="description" content="Soccer Vitae é a rede social do futebol: atletas, treinadores e times num só lugar. Crie seu perfil, conecte-se com o mercado e seja descoberto. Grátis para começar." />
+        <title>SOCCER VITAE | A Rede Social do Futebol Brasileiro</title>
+        <meta name="description" content="SOCCER VITAE é a rede social do futebol: atletas, treinadores e times num só lugar. Crie seu perfil, conecte-se com o mercado e seja descoberto. Grátis para começar." />
         <link rel="canonical" href="https://soccervitae.com/" />
       </Helmet>
       

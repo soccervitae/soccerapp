@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recuperação de Senha - Soccer Vitae</title>
+  <title>Recuperação de Senha - SOCCER VITAE</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:40px 16px;">
@@ -149,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Header with Logo -->
           <tr>
             <td style="padding:32px 24px 24px;text-align:center;border-bottom:1px solid #e5e7eb;">
-              <img src="${logoUrl}" alt="Soccer Vitae" width="140" height="auto" style="display:inline-block;max-width:140px;height:auto;" />
+              <img src="${logoUrl}" alt="SOCCER VITAE" width="140" height="auto" style="display:inline-block;max-width:140px;height:auto;" />
             </td>
           </tr>
 
@@ -213,7 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td style="padding:24px 28px 28px;text-align:center;">
               <p style="margin:0;font-size:11px;color:#9ca3af;">
-                © ${year} Soccer Vitae — Todos os direitos reservados.
+                © ${year} SOCCER VITAE — Todos os direitos reservados.
               </p>
             </td>
           </tr>

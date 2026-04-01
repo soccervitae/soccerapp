@@ -16,8 +16,8 @@ const ComoFunciona = () => {
   return (
     <>
       <Helmet>
-        <title>Como Funciona | Soccer Vitae</title>
-        <meta name="description" content="Veja como a Soccer Vitae funciona em 3 passos simples: crie seu perfil, conecte-se com o mercado do futebol e seja descoberto por clubes e olheiros." />
+        <title>Como Funciona | SOCCER VITAE</title>
+        <meta name="description" content="Veja como a SOCCER VITAE funciona em 3 passos simples: crie seu perfil, conecte-se com o mercado do futebol e seja descoberto por clubes e olheiros." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://soccervitae.com/como-funciona" />
       </Helmet>
@@ -25,14 +25,14 @@ const ComoFunciona = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>
 
         <section className="px-6 py-16 md:py-24 text-center max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-6">
-            Como a Soccer Vitae Funciona
+            Como o SOCCER VITAE Funciona
           </h1>
           <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
             Em 3 passos simples você cria seu perfil profissional e começa a ser visto pelo mercado do futebol.

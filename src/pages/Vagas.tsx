@@ -9,7 +9,7 @@ const Vagas = () => {
   return (
     <>
       <Helmet>
-        <title>Vagas no Futebol | Oportunidades | Soccer Vitae</title>
+        <title>Vagas no Futebol | Oportunidades | SOCCER VITAE</title>
         <meta name="description" content="Encontre vagas e oportunidades no futebol brasileiro. Para atletas, treinadores e profissionais do esporte." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://soccervitae.com/vagas" />
@@ -18,7 +18,7 @@ const Vagas = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <img src={logoGreen} alt="Soccer Vitae logo" className="h-7 w-auto" loading="eager" />
+            <img src={logoGreen} alt="SOCCER VITAE logo" className="h-7 w-auto" loading="eager" />
             <Button variant="outline" size="sm" onClick={() => navigate("/")}>Voltar</Button>
           </div>
         </header>

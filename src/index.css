@@ -184,3 +184,7 @@ div[style*="Edit with Lovable"],
   z-index: -9999 !important;
 }
 
+.brand-name {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
