@@ -659,7 +659,6 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
       password,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      accountType: accountType || undefined,
     });
 
     if (error) {
