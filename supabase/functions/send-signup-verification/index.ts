@@ -191,7 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "SOCCER VITAE <naoresponda@soccervitae.com>",
         to: [email],
-        subject: `⚽ Bem-vindo ao Soccer Vitae! Confirme seu cadastro`,
+        subject: `Bem-vindo a SOCCER VITAE. Confirme seu cadastro`,
         html: emailHtml,
       }),
     });
