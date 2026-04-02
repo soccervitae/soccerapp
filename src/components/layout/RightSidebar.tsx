@@ -244,7 +244,7 @@ export const RightSidebar = () => {
             {onlineFollowing.slice(0, 8).map((u) => (
               <button
                 key={u.id}
-                onClick={() => handleStartChat(u.id)}
+                onClick={() => handleStartChat(u)}
                 className="w-full flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <div className="relative">
