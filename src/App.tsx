@@ -363,7 +363,7 @@ const App = () => {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <AuthProvider>
+          <AuthProvider queryClient={queryClient}>
             <PresenceProvider>
               <AnimatePresence mode="wait">
                 {showSplash && <SplashScreen key="splash" />}
