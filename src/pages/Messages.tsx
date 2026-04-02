@@ -89,6 +89,21 @@ const Messages = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(routeConversationId || null);
+
+  // Auto-select first conversation on desktop if none selected
+  useEffect(() => {
+    if (!isMobile && !activeConversationId && !routeConversationId && allConversations.length > 0) {
+      setActiveConversationId(allConversations[0].id);
+    }
+  }, [isMobile, activeConversationId, routeConversationId, conversations]);
+
+  // Sync route param to active conversation
+  useEffect(() => {
+    if (routeConversationId) {
+      setActiveConversationId(routeConversationId);
+    }
+  }, [routeConversationId]);
 
   // Set de IDs de usuários com conversas existentes
   const existingConversationUserIds = useMemo(() => {
