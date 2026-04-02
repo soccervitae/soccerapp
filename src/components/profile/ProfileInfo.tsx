@@ -463,6 +463,9 @@ export const ProfileInfo = ({
             </div>
           )}
 
+        </div>
+      </section>
+    );
   }
 
   // Mobile layout (original)
