@@ -253,10 +253,12 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     setEmailNotConfirmed(false);
+    loginInProgressRef.current = true;
 
     const { error } = await signIn(email, password);
 
     if (error) {
+      loginInProgressRef.current = false;
       // Check if it's an email not confirmed error
       if (error.message.includes("Email not confirmed")) {
         setEmailNotConfirmed(true);
