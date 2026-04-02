@@ -273,8 +273,13 @@ const ChooseAccountType = () => {
 
       await cacheProfile(nextProfile);
 
-      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      // Navigate first, then invalidate in background so stale refetch doesn't cause redirect loop
       navigate("/welcome", { replace: true });
+      
+      // Delay invalidation to avoid race condition with ProtectedRoute
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }, 500);
     } catch (err) {
       console.error("Error saving profile:", err);
       toast.error("Erro ao salvar perfil. Tente novamente.");
