@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+import { GuestContactModal } from "@/components/profile/GuestContactModal";
 
 function FavoriteButton({ profileId, onDone }: { profileId: string; onDone: () => void }) {
   const { user } = useAuth();
