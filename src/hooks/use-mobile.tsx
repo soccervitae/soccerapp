@@ -8,9 +8,9 @@ export function useIsMobile() {
   React.useEffect(() => {
     const checkMobile = () => {
       const width = window.innerWidth;
-      const height = window.innerHeight;
-      // Consider mobile if width < 768, OR if in landscape with small height (rotated phone)
-      setIsMobile(width < MOBILE_BREAKPOINT || (height < 500 && width < 1024));
+      // Only use width for mobile detection - no height-based landscape heuristic
+      // which causes false positives in embedded previews and short desktop windows
+      setIsMobile(width < MOBILE_BREAKPOINT);
     };
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
     const onChange = () => checkMobile();
