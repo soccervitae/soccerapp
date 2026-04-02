@@ -22,7 +22,6 @@ export const ProtectedRoute = ({
   const { shouldBlockAccess, isLoading: pwaLoading } = useRequirePwa();
   const location = useLocation();
 
-  // Wait for auth to resolve first before running any queries
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -35,7 +34,6 @@ export const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Only render inner component (which runs profile/admin queries) after auth is confirmed
   return (
     <ProtectedRouteInner
       requireCompleteProfile={requireCompleteProfile}
@@ -50,9 +48,6 @@ export const ProtectedRoute = ({
   );
 };
 
-// Inner component that only mounts when user is confirmed authenticated.
-// This ensures useProfile and useIsAdmin queries run with a valid auth session,
-// preventing the race condition where auth.uid() is null in RLS policies.
 const ProtectedRouteInner = ({ 
   children, 
   requireCompleteProfile,
@@ -88,40 +83,36 @@ const ProtectedRouteInner = ({
     return <Navigate to="/admin" replace />;
   }
 
-  // Redirect to install page if mobile and not PWA
-  if (requirePwa && shouldBlockAccess && location.pathname !== "/install") {
-    return <Navigate to="/install" replace />;
-  }
+  // Single-pass redirect calculation to avoid cascade
+  const currentPath = location.pathname;
+  
+  // Determine the correct redirect destination in priority order
+  let redirectTo: string | null = null;
 
-  // Redirect to verify account if email is not verified
-  if (
-    profile &&
-    !(profileData.conta_verificada) &&
-    location.pathname !== "/verify-account"
-  ) {
-    return <Navigate to="/verify-account" replace />;
-  }
-
-  // Redirect to choose account type if no account_type or profile not completed
-  if (
+  if (requirePwa && shouldBlockAccess && currentPath !== "/install") {
+    redirectTo = "/install";
+  } else if (profile && !(profileData.conta_verificada) && currentPath !== "/verify-account") {
+    redirectTo = "/verify-account";
+  } else if (
     profile &&
     profileData.conta_verificada &&
     (!profileData.account_type || (requireCompleteProfile && !profileData.profile_completed)) &&
-    location.pathname !== "/choose-account-type"
+    currentPath !== "/choose-account-type"
   ) {
-    return <Navigate to="/choose-account-type" replace />;
-  }
-
-  // Redirect to welcome/onboarding if profile is complete but onboarding is not
-  if (
+    redirectTo = "/choose-account-type";
+  } else if (
     requireOnboarding &&
     profile &&
     profileData.profile_completed &&
     !profileData.onboarding_completed &&
-    location.pathname !== "/welcome" &&
-    location.pathname !== "/complete-profile"
+    currentPath !== "/welcome" &&
+    currentPath !== "/complete-profile"
   ) {
-    return <Navigate to="/welcome" replace />;
+    redirectTo = "/welcome";
+  }
+
+  if (redirectTo) {
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <>{children}</>;

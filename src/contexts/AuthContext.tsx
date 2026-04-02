@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
+import { QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { clearVideoMetadataCache } from "@/lib/videoMetadataCache";
 import { getSessionFromIndexedDB, saveSessionToIndexedDB, clearSessionFromIndexedDB } from "@/lib/sessionStorage";
@@ -33,6 +34,7 @@ export const useAuth = () => {
 
 interface AuthProviderProps {
   children: ReactNode;
+  queryClient?: QueryClient;
 }
 
 // Check if running as PWA
@@ -44,31 +46,58 @@ const isPWA = (): boolean => {
   );
 };
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children, queryClient }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const sessionRestoredRef = useRef(false);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
+    // CRITICAL: Set up onAuthStateChange BEFORE getSession (Supabase best practice)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('[Auth] onAuthStateChange:', event);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+        
+        // Save session to IndexedDB in ALL modes (not just browser)
+        if (currentSession) {
+          saveSessionToIndexedDB(
+            currentSession.access_token,
+            currentSession.refresh_token,
+            currentSession.expires_at
+          );
+        }
+
+        // Invalidate profile cache on sign in to ensure fresh data
+        if (event === 'SIGNED_IN' && queryClient) {
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
+          }, 100);
+        }
+      }
+    );
+
+    // Now get the initial session
     const initializeAuth = async () => {
-      // Check for existing session
+      if (initializedRef.current) return;
+      initializedRef.current = true;
+
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       
       if (existingSession) {
-        // Already has session, use it
         setSession(existingSession);
         setUser(existingSession.user);
         setLoading(false);
         
-        // Save to IndexedDB for future PWA transfer (if in browser)
-        if (!isPWA() && existingSession.access_token && existingSession.refresh_token) {
-          saveSessionToIndexedDB(
-            existingSession.access_token,
-            existingSession.refresh_token,
-            existingSession.expires_at
-          );
-        }
+        // Save to IndexedDB for PWA persistence
+        saveSessionToIndexedDB(
+          existingSession.access_token,
+          existingSession.refresh_token,
+          existingSession.expires_at
+        );
         return;
       }
 
@@ -89,13 +118,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             if (data.session && !error) {
               console.log('[Auth] Session restored successfully');
-              setSession(data.session);
-              setUser(data.session.user);
-              
-              // Clear transfer session after successful restoration in PWA
-              if (isPWA()) {
-                await clearSessionFromIndexedDB();
-              }
+              // onAuthStateChange will handle setting state
             } else {
               console.log('[Auth] Session restoration failed:', error?.message);
               await clearSessionFromIndexedDB();
@@ -111,26 +134,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     initializeAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
-        
-        // Save session to IndexedDB when authenticated (for PWA transfer)
-        if (currentSession && !isPWA()) {
-          saveSessionToIndexedDB(
-            currentSession.access_token,
-            currentSession.refresh_token,
-            currentSession.expires_at
-          );
-        }
-      }
-    );
-
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   const signUp = async ({ email, password, firstName, lastName, accountType }: SignUpData) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -160,7 +165,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { error };
     }
 
-    // Check if user is banned
+    // Check if user is banned (non-blocking)
     if (data.user) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -173,16 +178,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Check if temporary ban has expired
         if (bannedUntil && new Date(bannedUntil) < new Date()) {
-          // Ban has expired, remove it automatically
-          await supabase
+          supabase
             .from("profiles")
             .update({ 
               banned_at: null, 
               ban_reason: null, 
               banned_until: null 
             })
-            .eq("id", data.user.id);
-          // Allow login to continue
+            .eq("id", data.user.id)
+            .then(() => {});
           return { error: null };
         }
 
@@ -217,8 +221,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
-    // Clear video metadata cache on logout
     await clearVideoMetadataCache();
+    await clearSessionFromIndexedDB();
     await supabase.auth.signOut();
   };
 
