@@ -91,13 +91,6 @@ const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(routeConversationId || null);
 
-  // Auto-select first conversation on desktop if none selected
-  useEffect(() => {
-    if (!isMobile && !activeConversationId && !routeConversationId && allConversations.length > 0) {
-      setActiveConversationId(allConversations[0].id);
-    }
-  }, [isMobile, activeConversationId, routeConversationId, conversations]);
-
   // Sync route param to active conversation
   useEffect(() => {
     if (routeConversationId) {
