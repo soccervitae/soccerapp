@@ -145,7 +145,11 @@ const Messages = () => {
     try {
       const conversationId = await createConversation(userId);
       if (conversationId) {
-        navigate(`/messages/${conversationId}`);
+        if (isMobile) {
+          navigate(`/messages/${conversationId}`);
+        } else {
+          setActiveConversationId(conversationId);
+        }
       } else {
         console.log("No conversation ID returned");
       }
