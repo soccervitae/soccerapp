@@ -603,7 +603,14 @@ const Messages = () => {
                           <ConversationItem 
                             key={conversation.id} 
                             conversation={conversation} 
-                            onClick={() => navigate(`/messages/${conversation.id}`)} 
+                            isActive={!isMobile && activeConversationId === conversation.id}
+                            onClick={() => {
+                              if (isMobile) {
+                                navigate(`/messages/${conversation.id}`);
+                              } else {
+                                setActiveConversationId(conversation.id);
+                              }
+                            }} 
                           />
                         ))}
                       </div>
