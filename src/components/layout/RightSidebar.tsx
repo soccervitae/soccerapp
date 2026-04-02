@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useFollowUser } from "@/hooks/useProfile";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
+import { useChatPopup } from "@/contexts/ChatPopupContext";
+import { useCreateConversation } from "@/hooks/useMessages";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const trendingTopics = [
@@ -24,6 +26,8 @@ export const RightSidebar = () => {
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
   const { totalUnread } = useConversationsContext();
+  const { openChat } = useChatPopup();
+  const { createConversation } = useCreateConversation();
 
   // Fetch following users for online section
   const { data: followingUsers } = useQuery({
@@ -52,8 +56,16 @@ export const RightSidebar = () => {
     return followingUsers?.filter(u => isUserOnline(u.id)) || [];
   }, [followingUsers, isUserOnline]);
 
-  const handleStartChat = async (userId: string) => {
-    navigate(`/chat/${userId}`);
+  const handleStartChat = async (userProfile: { id: string; username: string; full_name: string | null; avatar_url: string | null }) => {
+    const conversationId = await createConversation(userProfile.id);
+    if (conversationId) {
+      openChat(conversationId, {
+        id: userProfile.id,
+        username: userProfile.username,
+        full_name: userProfile.full_name,
+        avatar_url: userProfile.avatar_url,
+      });
+    }
   };
 
   const { data: suggestions, isLoading } = useQuery({
@@ -232,7 +244,7 @@ export const RightSidebar = () => {
             {onlineFollowing.slice(0, 8).map((u) => (
               <button
                 key={u.id}
-                onClick={() => handleStartChat(u.id)}
+                onClick={() => handleStartChat(u)}
                 className="w-full flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <div className="relative">

@@ -8,10 +8,12 @@ import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ConversationsProvider } from "@/contexts/ConversationsContext";
+import { ChatPopupProvider } from "@/contexts/ChatPopupContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { MessageNotificationProvider } from "@/components/notifications/MessageNotificationProvider";
+import { DesktopChatPopup } from "@/components/messages/DesktopChatPopup";
 
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
@@ -373,12 +375,15 @@ const App = () => {
               <PwaAutoUpdate />
               <BrowserRouter>
                 <ConversationsProvider>
-                  <MessageNotificationProvider>
-                    
-                    <ScrollToTop />
-                    <GlobalOfflineBanner />
-                    <AnimatedRoutes />
-                  </MessageNotificationProvider>
+                  <ChatPopupProvider>
+                    <MessageNotificationProvider>
+                      
+                      <ScrollToTop />
+                      <GlobalOfflineBanner />
+                      <AnimatedRoutes />
+                      <DesktopChatPopup />
+                    </MessageNotificationProvider>
+                  </ChatPopupProvider>
                 </ConversationsProvider>
               </BrowserRouter>
             </PresenceProvider>

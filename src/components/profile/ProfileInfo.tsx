@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCreateConversation } from "@/hooks/useMessages";
+import { useChatPopup } from "@/contexts/ChatPopupContext";
 import { type Profile, calculateAge, useFollowUser } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStories } from "@/hooks/useStories";
@@ -200,6 +201,7 @@ export const ProfileInfo = ({
       onSuccess: () => setIsCheering(!isCheering)
     });
   };
+  const { openChat } = useChatPopup();
   const handleMessageClick = async () => {
     if (!user) {
       if (!isMobile) {
@@ -213,7 +215,18 @@ export const ProfileInfo = ({
     try {
       const conversationId = await createConversation(profile.id);
       if (conversationId) {
-        navigate(`/messages/${conversationId}`);
+        if (!isMobile) {
+          openChat(conversationId, {
+            id: profile.id,
+            username: profile.username,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            nickname: profile.nickname,
+            account_type: profile.account_type,
+          });
+        } else {
+          navigate(`/messages/${conversationId}`);
+        }
       }
     } catch (error) {
       console.error("Error starting conversation:", error);
