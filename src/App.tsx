@@ -375,12 +375,15 @@ const App = () => {
               <PwaAutoUpdate />
               <BrowserRouter>
                 <ConversationsProvider>
-                  <MessageNotificationProvider>
-                    
-                    <ScrollToTop />
-                    <GlobalOfflineBanner />
-                    <AnimatedRoutes />
-                  </MessageNotificationProvider>
+                  <ChatPopupProvider>
+                    <MessageNotificationProvider>
+                      
+                      <ScrollToTop />
+                      <GlobalOfflineBanner />
+                      <AnimatedRoutes />
+                      <DesktopChatPopup />
+                    </MessageNotificationProvider>
+                  </ChatPopupProvider>
                 </ConversationsProvider>
               </BrowserRouter>
             </PresenceProvider>

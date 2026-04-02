@@ -201,6 +201,7 @@ export const ProfileInfo = ({
       onSuccess: () => setIsCheering(!isCheering)
     });
   };
+  const { openChat } = useChatPopup();
   const handleMessageClick = async () => {
     if (!user) {
       if (!isMobile) {
@@ -214,7 +215,18 @@ export const ProfileInfo = ({
     try {
       const conversationId = await createConversation(profile.id);
       if (conversationId) {
-        navigate(`/messages/${conversationId}`);
+        if (!isMobile) {
+          openChat(conversationId, {
+            id: profile.id,
+            username: profile.username,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            nickname: profile.nickname,
+            account_type: profile.account_type,
+          });
+        } else {
+          navigate(`/messages/${conversationId}`);
+        }
       }
     } catch (error) {
       console.error("Error starting conversation:", error);
