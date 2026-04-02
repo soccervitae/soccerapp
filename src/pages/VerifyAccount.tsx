@@ -6,6 +6,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import SignupVerification from "@/components/auth/SignupVerification";
 import { useQueryClient } from "@tanstack/react-query";
+import { cacheProfile } from "@/lib/offlineStorage";
+
+const getPostVerificationRoute = (profile: {
+  conta_verificada?: boolean | null;
+  account_type?: string | null;
+  profile_completed?: boolean | null;
+  onboarding_completed?: boolean | null;
+  username?: string | null;
+}) => {
+  if (!profile?.conta_verificada) return "/verify-account";
+  if (!profile.account_type || !profile.profile_completed) return "/choose-account-type";
+  if (!profile.onboarding_completed) return "/welcome";
+  return profile.username ? `/${profile.username}` : "/";
+};
 
 const VerifyAccount = () => {
   const navigate = useNavigate();
@@ -22,7 +36,7 @@ const VerifyAccount = () => {
   // If already verified, redirect
   useEffect(() => {
     if (profile && (profile as any).conta_verificada) {
-      navigate("/choose-account-type", { replace: true });
+      navigate(getPostVerificationRoute(profile), { replace: true });
     }
   }, [profile, navigate]);
 
@@ -53,8 +67,35 @@ const VerifyAccount = () => {
   }, [user, userEmail, codeSent, sending, firstName]);
 
   const handleVerified = async () => {
+    let redirectTo = "/choose-account-type";
+
+    if (user) {
+      try {
+        const { data: refreshedProfile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (refreshedProfile) {
+          await cacheProfile(refreshedProfile);
+          queryClient.setQueryData(["profile", user.id], refreshedProfile);
+
+          if (refreshedProfile.username) {
+            queryClient.setQueryData(["profile", "username", refreshedProfile.username], refreshedProfile);
+          }
+
+          redirectTo = getPostVerificationRoute(refreshedProfile);
+        }
+      } catch (error) {
+        console.error("Error refreshing verified profile:", error);
+      }
+    }
+
     await queryClient.invalidateQueries({ queryKey: ["profile"] });
-    navigate("/choose-account-type", { replace: true });
+    navigate(redirectTo, { replace: true });
   };
 
   const handleBack = async () => {
