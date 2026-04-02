@@ -253,13 +253,13 @@ export const ProfileInfo = ({
     setFullscreenImageOpen(true);
   };
 
-  // Desktop layout - MatDash inspired
+  // Desktop layout - reference-inspired (avatar bottom-left, info right)
   if (isDesktop) {
     return (
       <section className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border/50">
         {/* Cover Photo - wide banner */}
         <div 
-          className={`w-full h-52 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
+          className={`w-full h-56 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
           onClick={handleCoverClick}
         >
           {profile.cover_url ? (
@@ -267,83 +267,83 @@ export const ProfileInfo = ({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-muted/30" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
         </div>
 
-        {/* Centered profile info */}
-        <div className="flex flex-col items-center -mt-16 relative z-10 pb-6">
-          {/* Avatar - centered, overlapping banner */}
-          <div 
-            className={`w-32 h-32 rounded-full p-[3px] transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : profile.avatar_url ? 'cursor-pointer' : ''}`} 
-            onClick={handleAvatarClick}
-          >
-            {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-card bg-muted object-cover" />
-            ) : (
-              <div className="w-full h-full rounded-full border-4 border-card bg-muted flex items-center justify-center">
-                <span className="material-symbols-outlined text-5xl text-muted-foreground">person</span>
+        {/* Profile info row: avatar left, info center, stats right */}
+        <div className="relative px-6 pb-6">
+          <div className="flex items-end gap-5 -mt-14">
+            {/* Avatar - bottom-left overlapping cover */}
+            <div 
+              className={`w-28 h-28 rounded-full p-[3px] flex-shrink-0 transition-all duration-200 ${hasActiveStories ? hasUnviewedStories ? 'bg-gradient-to-tr from-primary to-emerald-400 cursor-pointer animate-story-ring-pulse' : 'bg-muted-foreground/40 cursor-pointer' : profile.avatar_url ? 'cursor-pointer' : ''}`} 
+              onClick={handleAvatarClick}
+            >
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-card bg-muted object-cover" />
+              ) : (
+                <div className="w-full h-full rounded-full border-4 border-card bg-muted flex items-center justify-center">
+                  <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
+                </div>
+              )}
+            </div>
+
+            {/* Name, position, bio */}
+            <div className="flex-1 min-w-0 pt-16">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-foreground truncate">
+                  {profile.nickname || profile.full_name || profile.username}
+                </h2>
+                {(profile as any).is_official_account ? (
+                  <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[14px] font-bold">star</span>
+                  </div>
+                ) : profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) ? (
+                  <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
+                  </div>
+                ) : profile.conta_verificada && (
+                  <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
+                  </div>
+                )}
+              </div>
+              {profile.position_name && profile.account_type !== 'time' && (
+                <p className="text-muted-foreground text-sm mt-0.5">{profile.position_name}</p>
+              )}
+              {profile.account_type === 'time' && (
+                <p className="text-muted-foreground font-medium text-sm mt-0.5">Time de Futebol</p>
+              )}
+              {profile.team && profile.account_type !== 'time' && (
+                <p className="text-muted-foreground font-medium text-sm mt-0.5">{profile.team}</p>
+              )}
+            </div>
+
+            {/* Stats on the right */}
+            {followStats && user && (
+              <div className="flex items-center gap-0 flex-shrink-0 pt-16">
+                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex flex-col items-center px-6 hover:opacity-70 transition-opacity">
+                  <span className="text-muted-foreground text-xs">Torcedores</span>
+                  <span className="text-2xl font-bold text-foreground">{followStats.followers}</span>
+                </button>
+                <div className="w-px h-10 bg-border" />
+                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex flex-col items-center px-6 hover:opacity-70 transition-opacity">
+                  <span className="text-muted-foreground text-xs">Torcendo</span>
+                  <span className="text-2xl font-bold text-foreground">{followStats.following}</span>
+                </button>
               </div>
             )}
           </div>
 
-          {/* Name & role - centered */}
-          <div className="mt-3 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <h2 className="text-2xl font-bold text-foreground">
-                {profile.nickname || profile.full_name || profile.username}
-              </h2>
-              {(profile as any).is_official_account ? (
-                <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-[14px] font-bold">star</span>
-                </div>
-              ) : profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) ? (
-                <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
-                </div>
-              ) : profile.conta_verificada && (
-                <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
-                </div>
-              )}
-            </div>
-            {profile.position_name && profile.account_type !== 'time' && (
-              <p className="text-muted-foreground/70 text-sm mt-0.5">
-                {profile.position_name}
-              </p>
-            )}
-            {profile.account_type === 'time' && (
-              <p className="text-muted-foreground font-medium text-sm mt-0.5">Time de Futebol</p>
-            )}
-            {profile.team && profile.account_type !== 'time' && (
-              <p className="text-muted-foreground font-medium text-sm mt-0.5">{profile.team}</p>
-            )}
-            {profile.bio && (
-              <p className="text-muted-foreground/80 text-sm mt-2 max-w-md mx-auto leading-relaxed line-clamp-3 px-6">
-                {profile.bio}
-              </p>
-            )}
-          </div>
-
-          {/* Stats counters - prominent row */}
-          <div className="flex items-center gap-0 mt-5">
-            {followStats && user && (
-              <>
-                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex flex-col items-center px-8 hover:opacity-70 transition-opacity">
-                  <span className="text-2xl font-bold text-foreground">{followStats.followers}</span>
-                  <span className="text-muted-foreground text-xs mt-0.5">Torcedores</span>
-                </button>
-                <div className="w-px h-10 bg-border" />
-                <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex flex-col items-center px-8 hover:opacity-70 transition-opacity">
-                  <span className="text-2xl font-bold text-foreground">{followStats.following}</span>
-                  <span className="text-muted-foreground text-xs mt-0.5">Torcendo</span>
-                </button>
-              </>
-            )}
-          </div>
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-muted-foreground/80 text-sm mt-3 max-w-xl leading-relaxed line-clamp-3 ml-[8.5rem]">
+              {profile.bio}
+            </p>
+          )}
 
           {/* Physical stats chips */}
           {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-4 ml-[8.5rem]">
               <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
                 <span className="material-symbols-outlined text-[14px] text-muted-foreground">cake</span>
                 <span className="font-semibold text-foreground">{age || "-"} anos</span>
@@ -363,9 +363,9 @@ export const ProfileInfo = ({
             </div>
           )}
 
-          {/* Team Stats - Desktop */}
+          {/* Team Stats */}
           {profile.account_type === 'time' && (
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-4 ml-[8.5rem]">
               <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
                 <span className="material-symbols-outlined text-[14px] text-muted-foreground">calendar_month</span>
                 <span className="font-semibold text-foreground">{profile.foundation_year || "-"}</span>
@@ -381,8 +381,8 @@ export const ProfileInfo = ({
             </div>
           )}
 
-          {/* Action buttons - centered */}
-          <div className="flex gap-3 mt-5">
+          {/* Action buttons */}
+          <div className="flex gap-3 mt-5 ml-[8.5rem]">
             {isOwnProfile ? (
               <>
                 <button onClick={() => navigate("/settings/profile")} className="bg-primary text-primary-foreground h-10 px-6 rounded-full font-semibold text-sm transition-colors hover:bg-primary/90 flex items-center gap-2">
@@ -489,7 +489,6 @@ export const ProfileInfo = ({
             )}
           </div>
         </div>
-
       </section>
     );
   }
