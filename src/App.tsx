@@ -88,6 +88,13 @@ import Vagas from "./pages/Vagas";
 import Peneiras from "./pages/Peneiras";
 import Explorar from "./pages/Explorar";
 import PublicProfile from "./pages/PublicProfile";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const ChatOrMessages = () => {
+  const isMobile = useIsMobile();
+  return isMobile ? <Chat /> : <Messages />;
+};
+
 const queryClient = new QueryClient();
 
 
