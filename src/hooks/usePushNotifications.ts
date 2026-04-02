@@ -2,21 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 
 type NotificationPermissionState = "default" | "granted" | "denied";
 
-let serviceWorkerRegistrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
-
+// Use the service worker already registered by VitePWA instead of manually registering a separate one
 const getServiceWorkerRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
   if (!("serviceWorker" in navigator)) return null;
-
-  if (!serviceWorkerRegistrationPromise) {
-    serviceWorkerRegistrationPromise = navigator.serviceWorker
-      .getRegistration("/")
-      .then(async (existingRegistration) => {
-        if (existingRegistration) return existingRegistration;
-        return navigator.serviceWorker.register("/sw.js", { scope: "/" });
-      });
+  
+  try {
+    // Wait for the VitePWA-registered service worker to be ready
+    const registration = await navigator.serviceWorker.ready;
+    return registration;
+  } catch (error) {
+    console.error("[PushNotifications] Failed to get SW registration:", error);
+    return null;
   }
-
-  return serviceWorkerRegistrationPromise;
 };
 
 export const usePushNotifications = () => {
@@ -41,7 +38,7 @@ export const usePushNotifications = () => {
     getServiceWorkerRegistration()
       .then((reg) => {
         if (reg) {
-          console.log("Service Worker registered:", reg);
+          console.log("Service Worker ready:", reg);
           setRegistration(reg);
         }
       })

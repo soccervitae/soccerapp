@@ -1,18 +1,8 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'soccervitae-v1';
-
-// Install event
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installed');
-  self.skipWaiting();
-});
-
-// Activate event
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activated');
-  event.waitUntil(self.clients.claim());
-});
+// This file is imported by VitePWA's workbox-generated service worker via importScripts.
+// Only push notification and message handling logic goes here.
+// Do NOT add install/activate/fetch handlers — workbox manages those.
 
 // Push notification event
 self.addEventListener('push', (event) => {
@@ -51,7 +41,6 @@ self.addEventListener('notificationclick', (event) => {
   // Handle call notifications
   if (data?.isCall) {
     if (event.action === 'reject') {
-      // Send message to reject the call
       event.waitUntil(
         self.clients.matchAll({ type: 'window' }).then((clientList) => {
           for (const client of clientList) {
@@ -66,7 +55,6 @@ self.addEventListener('notificationclick', (event) => {
       return;
     }
 
-    // Answer action or simple click - open/focus the chat
     event.waitUntil(
       self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
         for (const client of clientList) {
@@ -80,7 +68,6 @@ self.addEventListener('notificationclick', (event) => {
             return;
           }
         }
-        // Open new window at the chat with answerCall param
         if (self.clients.openWindow) {
           return self.clients.openWindow(`/messages/${data.conversationId}?answerCall=true`);
         }
@@ -94,7 +81,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Check if there's already a window open
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           client.focus();
@@ -105,7 +91,6 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Open new window if none exists
       if (self.clients.openWindow) {
         return self.clients.openWindow(url);
       }
@@ -128,13 +113,11 @@ self.addEventListener('message', (event) => {
       renotify: true,
     });
 
-    // Update PWA app badge
     if (navigator.setAppBadge) {
       navigator.setAppBadge().catch(() => {});
     }
   }
 
-  // Update app badge count
   if (event.data?.type === 'UPDATE_APP_BADGE') {
     const { count } = event.data;
     if (navigator.setAppBadge && count > 0) {
@@ -144,19 +127,16 @@ self.addEventListener('message', (event) => {
     }
   }
 
-  // Handle call notifications
   if (event.data?.type === 'SHOW_CALL_NOTIFICATION') {
     const { callerName, callType, conversationId, callerId } = event.data;
     
     const callTypeText = callType === 'video' ? 'Videochamada' : 'Chamada de voz';
     
-    // Extended vibration pattern to simulate continuous ringtone
-    // Pattern: [vibrate, pause, vibrate, pause, ...] - total ~8 seconds
     const extendedVibration = [
-      300, 200, 300, 200, 300, 500,  // Ring 1
-      300, 200, 300, 200, 300, 500,  // Ring 2
-      300, 200, 300, 200, 300, 500,  // Ring 3
-      300, 200, 300, 200, 300, 500,  // Ring 4
+      300, 200, 300, 200, 300, 500,
+      300, 200, 300, 200, 300, 500,
+      300, 200, 300, 200, 300, 500,
+      300, 200, 300, 200, 300, 500,
     ];
     
     self.registration.showNotification(`${callerName} está ligando`, {
