@@ -26,6 +26,8 @@ export const RightSidebar = () => {
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
   const { totalUnread } = useConversationsContext();
+  const { openChat } = useChatPopup();
+  const { createConversation } = useCreateConversation();
 
   // Fetch following users for online section
   const { data: followingUsers } = useQuery({
