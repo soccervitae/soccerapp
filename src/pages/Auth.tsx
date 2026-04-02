@@ -95,6 +95,9 @@ const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }
   );
 };
 
+// Ref shared between Auth and LoginForm to prevent race conditions
+const loginInProgressRef = { current: false };
+
 const Auth = () => {
   const location = useLocation();
   const initialTab = (location.state as any)?.tab === "signup" ? "signup" : "login";
@@ -103,9 +106,9 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (but NOT during active login flow)
   useEffect(() => {
-    if (user) {
+    if (user && !loginInProgressRef.current) {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
