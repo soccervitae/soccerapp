@@ -248,6 +248,25 @@ const Profile = () => {
   }, [activeTab]);
 
   if (isLoading) {
+    if (!isMobile) {
+      const showDesktopSidebars = !isGuest && !isAdminViewingProfile;
+
+      return (
+        <div className="min-h-screen bg-muted/30">
+          {isGuest || isAdminViewingProfile ? null : <DesktopHeader />}
+          <div className={`flex ${isGuest || isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
+            {isAdminViewingProfile ? <AdminSidebar /> : showDesktopSidebars ? <DesktopSidebar /> : null}
+            <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+              <div className={`${isGuest ? 'max-w-3xl' : 'max-w-2xl'} mx-auto`}>
+                <ProfileSkeleton />
+              </div>
+            </main>
+            {showDesktopSidebars ? <RightSidebar /> : null}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <main className="bg-background min-h-screen relative pb-24">
         <div className="pt-[50px]">
@@ -259,6 +278,28 @@ const Profile = () => {
   }
 
   if (!profile) {
+    if (!isMobile) {
+      const showDesktopSidebars = !isGuest && !isAdminViewingProfile;
+
+      return (
+        <div className="min-h-screen bg-muted/30">
+          {isGuest || isAdminViewingProfile ? null : <DesktopHeader />}
+          <div className={`flex ${isGuest || isAdminViewingProfile ? '' : 'pt-14'} max-w-screen-2xl mx-auto`}>
+            {isAdminViewingProfile ? <AdminSidebar /> : showDesktopSidebars ? <DesktopSidebar /> : null}
+            <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+              <div className={`${isGuest ? 'max-w-3xl' : 'max-w-2xl'} mx-auto flex min-h-[60vh] items-center justify-center`}>
+                <div className="text-center">
+                  <span className="material-symbols-outlined text-[64px] text-muted-foreground">person_off</span>
+                  <p className="text-muted-foreground mt-2">Perfil não encontrado</p>
+                </div>
+              </div>
+            </main>
+            {showDesktopSidebars ? <RightSidebar /> : null}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <main className="bg-background min-h-screen relative pb-24 flex items-center justify-center">
         <div className="text-center">
