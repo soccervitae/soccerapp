@@ -680,18 +680,22 @@ const Messages = () => {
     );
   }
 
-  // Desktop Layout
+  // Desktop Layout - 3 columns: sidebar | chat | conversations
   return (
     <div className="min-h-screen bg-muted/30">
       <DesktopHeader />
       <div className="flex pt-14 max-w-screen-2xl mx-auto">
         <DesktopSidebar />
-        <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
-          <div className="max-w-2xl mx-auto">
+        <main className="flex-1 min-w-0 flex h-[calc(100vh-3.5rem)]">
+          {/* Chat panel */}
+          <div className="flex-1 min-w-0 border-r border-border bg-background">
+            <DesktopChatPanel conversationId={activeConversationId} />
+          </div>
+          {/* Conversation list */}
+          <div className="w-80 xl:w-96 flex-shrink-0 overflow-y-auto bg-background">
             {messagesContent}
           </div>
         </main>
-        <RightSidebar />
       </div>
     </div>
   );
