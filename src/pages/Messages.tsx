@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
@@ -13,7 +13,7 @@ import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { DesktopChatPanel } from "@/components/messages/DesktopChatPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, ArrowLeft } from "lucide-react";
