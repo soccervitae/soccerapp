@@ -115,7 +115,7 @@ export const DesktopSidebar = () => {
               <button 
                 key={item.id} 
                 onClick={() => handleNavClick(item)} 
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active ? "bg-primary text-primary-foreground font-semibold" : "text-foreground hover:bg-muted"}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active ? "text-primary font-semibold" : "text-foreground hover:bg-muted"}`}
               >
                 <span className={`material-symbols-outlined text-[24px] ${active ? "fill-1" : ""}`}>
                   {item.icon}
