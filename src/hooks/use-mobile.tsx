@@ -2,26 +2,27 @@ import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
+function getIsMobile() {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < MOBILE_BREAKPOINT;
+}
+
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+  const [isMobile, setIsMobile] = React.useState<boolean>(getIsMobile);
 
   React.useEffect(() => {
     const checkMobile = () => {
-      const width = window.innerWidth;
-      // Only use width for mobile detection - no height-based landscape heuristic
-      // which causes false positives in embedded previews and short desktop windows
-      setIsMobile(width < MOBILE_BREAKPOINT);
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
     const onChange = () => checkMobile();
     mql.addEventListener("change", onChange);
     window.addEventListener("resize", checkMobile);
-    checkMobile();
     return () => {
       mql.removeEventListener("change", onChange);
       window.removeEventListener("resize", checkMobile);
     };
   }, []);
 
-  return !!isMobile;
+  return isMobile;
 }
