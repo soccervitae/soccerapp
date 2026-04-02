@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -95,6 +95,9 @@ const SocialLoginButtons = ({ onError }: { onError?: (message: string) => void }
   );
 };
 
+// Ref shared between Auth and LoginForm to prevent race conditions
+const loginInProgressRef = { current: false };
+
 const Auth = () => {
   const location = useLocation();
   const initialTab = (location.state as any)?.tab === "signup" ? "signup" : "login";
@@ -103,9 +106,9 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (but NOT during active login flow)
   useEffect(() => {
-    if (user) {
+    if (user && !loginInProgressRef.current) {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
@@ -250,10 +253,12 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     setEmailNotConfirmed(false);
+    loginInProgressRef.current = true;
 
     const { error } = await signIn(email, password);
 
     if (error) {
+      loginInProgressRef.current = false;
       // Check if it's an email not confirmed error
       if (error.message.includes("Email not confirmed")) {
         setEmailNotConfirmed(true);
@@ -313,7 +318,8 @@ const LoginForm = () => {
         
         if (trusted) {
           // Device is trusted, skip 2FA - redirect based on role
-          navigate(isAdmin ? "/admin" : "/");
+          loginInProgressRef.current = false;
+          navigate(isAdmin ? "/admin" : "/", { replace: true });
           setLoading(false);
           return;
         }
@@ -329,12 +335,14 @@ const LoginForm = () => {
         if (sendError) {
           console.error("Error sending 2FA code:", sendError);
           setErrorMessage("Não foi possível enviar o código de verificação.");
+          loginInProgressRef.current = false;
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
 
         // Redirect to 2FA verification page with admin info
+        loginInProgressRef.current = false;
         navigate("/two-factor-verify", {
           state: {
             email: email,
@@ -349,12 +357,14 @@ const LoginForm = () => {
       }
 
       // No 2FA, redirect based on role
-      navigate(isAdmin ? "/admin" : "/");
+      loginInProgressRef.current = false;
+      navigate(isAdmin ? "/admin" : "/", { replace: true });
       setLoading(false);
       return;
     }
 
-    navigate("/");
+    loginInProgressRef.current = false;
+    navigate("/", { replace: true });
     setLoading(false);
   };
 

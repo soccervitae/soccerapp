@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -65,10 +66,19 @@ const ProtectedRouteInner = ({
   pwaLoading: boolean;
   location: ReturnType<typeof useLocation>;
 }) => {
-  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { data: profile, isLoading: profileLoading, isError: profileError } = useProfile();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
-  if (profileLoading || pwaLoading || adminLoading) {
+  // Safety timeout to prevent infinite loading spinners
+  useEffect(() => {
+    const timer = setTimeout(() => setLoadingTimeout(true), 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const isStillLoading = (profileLoading || pwaLoading || adminLoading) && !loadingTimeout;
+
+  if (isStillLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
