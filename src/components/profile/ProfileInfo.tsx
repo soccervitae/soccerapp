@@ -407,7 +407,7 @@ export const ProfileInfo = ({
                         </motion.span>
                       </AnimatePresence>
                     </button>
-                    <button onClick={handleMessageClick} disabled={isStartingChat} className="bg-muted text-foreground h-10 w-10 rounded-full text-sm transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]">
+                    <button onClick={handleMessageClick} disabled={isStartingChat} className="bg-muted text-foreground h-10 w-10 rounded-lg text-sm transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]">
                       <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                     </button>
                   </>
