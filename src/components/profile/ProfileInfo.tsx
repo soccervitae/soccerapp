@@ -423,42 +423,42 @@ export const ProfileInfo = ({
             </p>
           )}
 
-          {/* Physical stats chips */}
+          {/* Physical stats - grid like mobile */}
           {profile.account_type !== 'time' && (profile.role === 'atleta' || !profile.role && (profile.posicaomas || profile.posicaofem) || !profile.role && !profile.funcao) && (
-            <div className="flex items-center gap-2 mt-4 ml-[8.5rem]">
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">cake</span>
-                <span className="font-semibold text-foreground">{age || "-"} anos</span>
+            <div className="grid grid-cols-4 gap-2 bg-muted/30 p-3 w-full mt-4 rounded-xl border border-border/50">
+              <div className="flex flex-col gap-1 p-2 text-center">
+                <p className="text-foreground text-sm font-bold">{age || "-"}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Idade</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">height</span>
-                <span className="font-semibold text-foreground">{formatHeight(profile.height)}</span>
+              <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+                <p className="text-foreground text-sm font-bold">{formatHeight(profile.height)}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Altura</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">monitor_weight</span>
-                <span className="font-semibold text-foreground">{formatWeight(profile.weight ? Number(profile.weight) : null)}</span>
+              <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+                <p className="text-foreground text-sm font-bold">{formatWeight(profile.weight ? Number(profile.weight) : null)}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Peso</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">footprint</span>
-                <span className="font-semibold text-foreground">{formatFoot(profile.preferred_foot)}</span>
+              <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+                <p className="text-foreground text-sm font-bold">{formatFoot(profile.preferred_foot)}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Pé</p>
               </div>
             </div>
           )}
 
-          {/* Team Stats */}
+          {/* Team Stats - grid like mobile */}
           {profile.account_type === 'time' && (
-            <div className="flex items-center gap-2 mt-4 ml-[8.5rem]">
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">calendar_month</span>
-                <span className="font-semibold text-foreground">{profile.foundation_year || "-"}</span>
+            <div className="grid grid-cols-3 gap-2 bg-muted/30 p-3 w-full mt-4 rounded-xl border border-border/50">
+              <div className="flex flex-col gap-1 p-2 text-center">
+                <p className="text-foreground text-sm font-bold">{profile.foundation_year || "-"}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Fundação</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">location_on</span>
-                <span className="font-semibold text-foreground">{profile.city || "-"}</span>
+              <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+                <p className="text-foreground text-sm font-bold">{profile.city || "-"}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Cidade</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-muted/60 rounded-full px-3 py-1.5 text-xs">
-                <span className="material-symbols-outlined text-[14px] text-muted-foreground">category</span>
-                <span className="font-semibold text-foreground">{profile.team_category || "-"}</span>
+              <div className="flex flex-col gap-1 p-2 border-l border-border text-center">
+                <p className="text-foreground text-sm font-bold capitalize">{profile.team_category || "-"}</p>
+                <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Categoria</p>
               </div>
             </div>
           )}
