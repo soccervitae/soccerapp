@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryViewer } from "@/components/feed/StoryViewer";
 import { FullscreenImageViewer } from "@/components/feed/FullscreenImageViewer";
+import { GuestContactModal } from "@/components/profile/GuestContactModal";
 
 function FavoriteButton({ profileId, onDone }: { profileId: string; onDone: () => void }) {
   const { user } = useAuth();
@@ -102,6 +103,7 @@ export const ProfileInfo = ({
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [cheeringSheetOpen, setCheeringSheetOpen] = useState(false);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [guestContactOpen, setGuestContactOpen] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -200,7 +202,11 @@ export const ProfileInfo = ({
   };
   const handleMessageClick = async () => {
     if (!user) {
-      navigate(`/${profile.username}/contact`);
+      if (!isMobile) {
+        setGuestContactOpen(true);
+      } else {
+        navigate(`/${profile.username}/contact`);
+      }
       return;
     }
     setIsStartingChat(true);
@@ -738,5 +744,11 @@ export const ProfileInfo = ({
           </div>
         </ResponsiveModalContent>
       </ResponsiveModal>
+      {/* Guest Contact Modal (Desktop) */}
+      <GuestContactModal
+        open={guestContactOpen}
+        onOpenChange={setGuestContactOpen}
+        profile={profile}
+      />
     </section>;
 };
