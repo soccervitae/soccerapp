@@ -293,7 +293,7 @@ const AnimatedRoutes = () => {
       } />
       <Route path="/messages/:conversationId" element={
         <ProtectedRoute>
-          <PageTransition><Chat /></PageTransition>
+          <PageTransition><ChatOrMessages /></PageTransition>
         </ProtectedRoute>
       } />
       <Route path="/teams" element={
