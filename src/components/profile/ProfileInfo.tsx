@@ -300,17 +300,11 @@ export const ProfileInfo = ({
                   {profile.nickname || profile.full_name || profile.username}
                 </h2>
                 {(profile as any).is_official_account ? (
-                  <div className="bg-amber-500 text-white rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-[14px] font-bold">star</span>
-                  </div>
+                  <span className="material-symbols-outlined text-[20px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 ) : profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) ? (
-                  <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
-                  </div>
+                  <span className="material-symbols-outlined text-[20px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 ) : profile.conta_verificada && (
-                  <div className="bg-primary text-primary-foreground rounded-full p-1 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-[14px] font-bold">verified</span>
-                  </div>
+                  <span className="material-symbols-outlined text-[20px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 )}
               </div>
               {profile.position_name && profile.account_type !== 'time' && (
