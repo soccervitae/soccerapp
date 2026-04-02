@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useFollowUser } from "@/hooks/useProfile";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
+import { useChatPopup } from "@/contexts/ChatPopupContext";
+import { useCreateConversation } from "@/hooks/useMessages";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const trendingTopics = [
