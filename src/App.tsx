@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
 import { ConversationsProvider } from "@/contexts/ConversationsContext";
+import { ChatPopupProvider } from "@/contexts/ChatPopupContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
