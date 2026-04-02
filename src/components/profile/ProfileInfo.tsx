@@ -393,7 +393,7 @@ export const ProfileInfo = ({
                   </>
                 ) : !user ? (
                   <>
-                    <button onClick={handleMessageClick} className="bg-muted hover:bg-muted/80 text-foreground h-10 px-5 rounded-full font-semibold text-sm transition-colors border border-border flex items-center gap-2">
+                    <button onClick={handleMessageClick} className="bg-muted hover:bg-muted/80 text-foreground h-10 px-5 rounded-lg font-semibold text-sm transition-colors border border-border flex items-center gap-2">
                       <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                       Mensagem
                     </button>
