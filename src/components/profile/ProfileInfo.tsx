@@ -320,19 +320,6 @@ export const ProfileInfo = ({
 
             {/* Stats + action buttons on the right */}
             <div className="flex items-center gap-4 flex-shrink-0 pt-16">
-              {followStats && user && (
-                <div className="flex items-center gap-0">
-                  <button onClick={() => navigate(isOwnProfile ? "/followers?tab=followers" : `/${profile.username}/followers?tab=followers`)} className="flex flex-col items-center px-4 hover:opacity-70 transition-opacity">
-                    <span className="text-muted-foreground text-xs">Torcedores</span>
-                    <span className="text-2xl font-bold text-foreground">{followStats.followers}</span>
-                  </button>
-                  <div className="w-px h-10 bg-border" />
-                  <button onClick={() => navigate(isOwnProfile ? "/followers?tab=following" : `/${profile.username}/followers?tab=following`)} className="flex flex-col items-center px-4 hover:opacity-70 transition-opacity">
-                    <span className="text-muted-foreground text-xs">Torcendo</span>
-                    <span className="text-2xl font-bold text-foreground">{followStats.following}</span>
-                  </button>
-                </div>
-              )}
 
               {/* Action buttons inline */}
               <div className="flex items-center gap-2">
