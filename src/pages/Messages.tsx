@@ -11,6 +11,10 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { OfflineIndicator } from "@/components/messages/OfflineIndicator";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,6 +51,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { conversations, isLoading, isFetching, refetch } = useConversationsContext();
   const { createConversation } = useCreateConversation();
   const { data: followingUsers, isLoading: isLoadingFollowing, isFetching: isFetchingFollowing } = useFollowing(user?.id || "");
@@ -283,88 +288,162 @@ const Messages = () => {
     </div>
   );
 
-  return (
-    <RefreshableContainer
-      onRefresh={handleRefresh}
-      isRefreshing={isRefetching}
-      className="min-h-screen bg-background pb-20"
-    >
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center justify-between">
-        <AnimatePresence mode="wait">
-          {showSearch ? (
-            <motion.div
-              key="search-header"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="flex items-center gap-2 w-full"
-            >
-              <button
-                onClick={() => { setShowSearch(false); setSearchQuery(""); }}
-                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+  const messagesContent = (
+    <>
+      {/* Header - only on mobile */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center justify-between">
+          <AnimatePresence mode="wait">
+            {showSearch ? (
+              <motion.div
+                key="search-header"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="flex items-center gap-2 w-full"
               >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <Input
-                autoFocus
-                placeholder="Buscar entre quem você torce..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="h-8 text-sm"
-              />
-            </motion.div>
-          ) : showArchived ? (
-            <motion.div
-              key="archived-header"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="flex items-center gap-3"
-            >
-              <button
-                onClick={() => setShowArchived(false)}
-                className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
+                <button
+                  onClick={() => { setShowSearch(false); setSearchQuery(""); }}
+                  className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <Input
+                  autoFocus
+                  placeholder="Buscar entre quem você torce..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </motion.div>
+            ) : showArchived ? (
+              <motion.div
+                key="archived-header"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center gap-3"
               >
-                <ArrowLeft className="w-6 h-6" />
-              </button>
-              <h1 className="text-lg font-semibold">Arquivadas</h1>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="main-header"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="flex items-center justify-between w-full"
-            >
-              <h1 className="text-lg font-semibold">Mensagens</h1>
-              <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setShowSearch(true)}
-                  className="p-1.5 hover:bg-muted rounded-full transition-colors"
+                  onClick={() => setShowArchived(false)}
+                  className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
                 >
-                  <Search className="w-5 h-5" />
+                  <ArrowLeft className="w-6 h-6" />
                 </button>
+                <h1 className="text-lg font-semibold">Arquivadas</h1>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="main-header"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center justify-between w-full"
+              >
+                <h1 className="text-lg font-semibold">Mensagens</h1>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowSearch(true)}
+                    className="p-1.5 hover:bg-muted rounded-full transition-colors"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setShowArchived(true)}
+                    className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
+                  >
+                    <Archive className="w-5 h-5" />
+                    {archivedConversations.length > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
+                        {archivedConversations.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Desktop inline header */}
+      {!isMobile && (
+        <div className="flex items-center justify-between mb-4">
+          <AnimatePresence mode="wait">
+            {showSearch ? (
+              <motion.div
+                key="search-header"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="flex items-center gap-2 w-full"
+              >
                 <button
-                  onClick={() => setShowArchived(true)}
-                  className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
+                  onClick={() => { setShowSearch(false); setSearchQuery(""); }}
+                  className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors flex-shrink-0"
                 >
-                  <Archive className="w-5 h-5" />
-                  {archivedConversations.length > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
-                      {archivedConversations.length}
-                    </span>
-                  )}
+                  <ArrowLeft className="w-5 h-5" />
                 </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                <Input
+                  autoFocus
+                  placeholder="Buscar entre quem você torce..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </motion.div>
+            ) : showArchived ? (
+              <motion.div
+                key="archived-header"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center gap-3"
+              >
+                <button
+                  onClick={() => setShowArchived(false)}
+                  className="p-1 -ml-1 hover:bg-muted rounded-full transition-colors"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <h1 className="text-lg font-semibold">Arquivadas</h1>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="main-header"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center justify-between w-full"
+              >
+                <h1 className="text-lg font-semibold">Mensagens</h1>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowSearch(true)}
+                    className="p-1.5 hover:bg-muted rounded-full transition-colors"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setShowArchived(true)}
+                    className="p-1.5 hover:bg-muted rounded-full transition-colors relative"
+                  >
+                    <Archive className="w-5 h-5" />
+                    {archivedConversations.length > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-medium bg-muted-foreground text-background rounded-full flex items-center justify-center">
+                        {archivedConversations.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* Content */}
-      <div className="pt-[50px]">
+      <div className={isMobile ? "pt-[50px]" : ""}>
         {/* Offline indicator */}
         <div className="px-3 py-2">
           <OfflineIndicator />
@@ -405,9 +484,6 @@ const Messages = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.2 }}
             >
-
-
-
               {/* Loading state */}
               {isLoadingFollowing && (
                 <div className="px-3">
@@ -441,7 +517,7 @@ const Messages = () => {
 
               {/* Main content */}
               {!isLoadingFollowing && filteredUsers.length > 0 && (
-                <ScrollArea className="h-[calc(100vh-200px)] px-3">
+                <ScrollArea className={isMobile ? "h-[calc(100vh-200px)] px-3" : "h-[calc(100vh-180px)] px-3"}>
                   {/* Seção Online - Horizontal scroll (hide during search) */}
                   {onlineUsers.length > 0 && searchQuery.length < 2 && (
                     <div className="mb-4">
@@ -560,9 +636,37 @@ const Messages = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </>
+  );
 
-      <BottomNavigation />
-    </RefreshableContainer>
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <RefreshableContainer
+        onRefresh={handleRefresh}
+        isRefreshing={isRefetching}
+        className="min-h-screen bg-background pb-20"
+      >
+        {messagesContent}
+        <BottomNavigation />
+      </RefreshableContainer>
+    );
+  }
+
+  // Desktop Layout
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <DesktopHeader />
+      <div className="flex pt-14 max-w-screen-2xl mx-auto">
+        <DesktopSidebar />
+        <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+          <div className="max-w-2xl mx-auto">
+            {messagesContent}
+          </div>
+        </main>
+        <RightSidebar />
+      </div>
+    </div>
   );
 };
 
