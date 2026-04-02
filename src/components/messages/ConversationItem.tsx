@@ -11,7 +11,7 @@ interface ConversationItemProps {
   isActive?: boolean;
 }
 
-export const ConversationItem = ({ conversation, onClick }: ConversationItemProps) => {
+export const ConversationItem = ({ conversation, onClick, isActive }: ConversationItemProps) => {
   const { participant, lastMessage, unreadCount, isMuted, isPinned } = conversation;
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
