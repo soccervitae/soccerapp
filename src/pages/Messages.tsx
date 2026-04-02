@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { useFollowing } from "@/hooks/useFollowList";
@@ -13,7 +13,7 @@ import { BottomNavigation } from "@/components/profile/BottomNavigation";
 import { RefreshableContainer } from "@/components/common/RefreshableContainer";
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { DesktopChatPanel } from "@/components/messages/DesktopChatPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Search, UserPlus, Circle, Archive, ArchiveRestore, Trash2, MoreVertical, MessageCircle, ArrowLeft } from "lucide-react";
@@ -50,6 +50,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 const Messages = () => {
   const navigate = useNavigate();
+  const { conversationId: routeConversationId } = useParams<{ conversationId?: string }>();
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { conversations, isLoading, isFetching, refetch } = useConversationsContext();
@@ -88,6 +89,14 @@ const Messages = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(routeConversationId || null);
+
+  // Sync route param to active conversation
+  useEffect(() => {
+    if (routeConversationId) {
+      setActiveConversationId(routeConversationId);
+    }
+  }, [routeConversationId]);
 
   // Set de IDs de usuários com conversas existentes
   const existingConversationUserIds = useMemo(() => {
@@ -105,6 +114,13 @@ const Messages = () => {
       return name.includes(query) || username.includes(query);
     });
   }, [conversations, searchQuery]);
+
+  // Auto-select first conversation on desktop if none selected
+  useEffect(() => {
+    if (!isMobile && !activeConversationId && !routeConversationId && allConversations.length > 0) {
+      setActiveConversationId(allConversations[0].id);
+    }
+  }, [isMobile, activeConversationId, routeConversationId, allConversations]);
 
   const archivedConversations = useMemo(() => {
     return conversations.filter(c => c.isArchived);
@@ -129,7 +145,11 @@ const Messages = () => {
     try {
       const conversationId = await createConversation(userId);
       if (conversationId) {
-        navigate(`/messages/${conversationId}`);
+        if (isMobile) {
+          navigate(`/messages/${conversationId}`);
+        } else {
+          setActiveConversationId(conversationId);
+        }
       } else {
         console.log("No conversation ID returned");
       }
@@ -583,7 +603,14 @@ const Messages = () => {
                           <ConversationItem 
                             key={conversation.id} 
                             conversation={conversation} 
-                            onClick={() => navigate(`/messages/${conversation.id}`)} 
+                            isActive={!isMobile && activeConversationId === conversation.id}
+                            onClick={() => {
+                              if (isMobile) {
+                                navigate(`/messages/${conversation.id}`);
+                              } else {
+                                setActiveConversationId(conversation.id);
+                              }
+                            }} 
                           />
                         ))}
                       </div>
@@ -653,18 +680,22 @@ const Messages = () => {
     );
   }
 
-  // Desktop Layout
+  // Desktop Layout - 3 columns: sidebar | chat | conversations
   return (
     <div className="min-h-screen bg-muted/30">
       <DesktopHeader />
       <div className="flex pt-14 max-w-screen-2xl mx-auto">
         <DesktopSidebar />
-        <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
-          <div className="max-w-2xl mx-auto">
+        <main className="flex-1 min-w-0 flex h-[calc(100vh-3.5rem)]">
+          {/* Chat panel */}
+          <div className="flex-1 min-w-0 border-r border-border bg-background">
+            <DesktopChatPanel conversationId={activeConversationId} />
+          </div>
+          {/* Conversation list */}
+          <div className="w-80 xl:w-96 flex-shrink-0 overflow-y-auto bg-background">
             {messagesContent}
           </div>
         </main>
-        <RightSidebar />
       </div>
     </div>
   );

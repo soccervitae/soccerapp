@@ -8,9 +8,10 @@ import { BellOff, Pin } from "lucide-react";
 interface ConversationItemProps {
   conversation: ConversationWithDetails;
   onClick: () => void;
+  isActive?: boolean;
 }
 
-export const ConversationItem = ({ conversation, onClick }: ConversationItemProps) => {
+export const ConversationItem = ({ conversation, onClick, isActive }: ConversationItemProps) => {
   const { participant, lastMessage, unreadCount, isMuted, isPinned } = conversation;
   const { isUserOnline } = usePresenceContext();
   const isOnline = participant?.id ? isUserOnline(participant.id) : false;
@@ -61,7 +62,7 @@ export const ConversationItem = ({ conversation, onClick }: ConversationItemProp
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-all rounded-lg ${
-        hasUnread ? "bg-primary/5" : ""
+        isActive ? "bg-muted" : hasUnread ? "bg-primary/5" : ""
       }`}
     >
       <div className="relative">
