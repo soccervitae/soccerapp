@@ -318,7 +318,8 @@ const LoginForm = () => {
         
         if (trusted) {
           // Device is trusted, skip 2FA - redirect based on role
-          navigate(isAdmin ? "/admin" : "/");
+          loginInProgressRef.current = false;
+          navigate(isAdmin ? "/admin" : "/", { replace: true });
           setLoading(false);
           return;
         }
@@ -334,12 +335,14 @@ const LoginForm = () => {
         if (sendError) {
           console.error("Error sending 2FA code:", sendError);
           setErrorMessage("Não foi possível enviar o código de verificação.");
+          loginInProgressRef.current = false;
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
 
         // Redirect to 2FA verification page with admin info
+        loginInProgressRef.current = false;
         navigate("/two-factor-verify", {
           state: {
             email: email,
@@ -354,12 +357,14 @@ const LoginForm = () => {
       }
 
       // No 2FA, redirect based on role
-      navigate(isAdmin ? "/admin" : "/");
+      loginInProgressRef.current = false;
+      navigate(isAdmin ? "/admin" : "/", { replace: true });
       setLoading(false);
       return;
     }
 
-    navigate("/");
+    loginInProgressRef.current = false;
+    navigate("/", { replace: true });
     setLoading(false);
   };
 
