@@ -56,8 +56,16 @@ export const RightSidebar = () => {
     return followingUsers?.filter(u => isUserOnline(u.id)) || [];
   }, [followingUsers, isUserOnline]);
 
-  const handleStartChat = async (userId: string) => {
-    navigate(`/chat/${userId}`);
+  const handleStartChat = async (userProfile: { id: string; username: string; full_name: string | null; avatar_url: string | null }) => {
+    const conversationId = await createConversation(userProfile.id);
+    if (conversationId) {
+      openChat(conversationId, {
+        id: userProfile.id,
+        username: userProfile.username,
+        full_name: userProfile.full_name,
+        avatar_url: userProfile.avatar_url,
+      });
+    }
   };
 
   const { data: suggestions, isLoading } = useQuery({
