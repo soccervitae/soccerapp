@@ -140,13 +140,13 @@ export const DesktopChatPopup = () => {
                     key={msg.id}
                     message={msg}
                     reactions={getReactionsForMessage(msg.id)}
-                    onReaction={(emoji) => addReaction(msg.id, emoji)}
+                    onAddReaction={(messageId, emoji) => addReaction(messageId, emoji)}
                     onReply={() => setReplyTo(msg)}
-                    onDelete={() => deleteMessage(msg.id)}
+                    onDelete={(messageId) => deleteMessage(messageId)}
                   />
                 ))
               )}
-              {isAnyoneTyping && <TypingIndicator users={typingUsers} />}
+              {isAnyoneTyping && <TypingIndicator username={typingUsers[0]?.username} />}
               <div ref={messagesEndRef} />
             </div>
 
