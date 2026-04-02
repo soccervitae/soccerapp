@@ -50,6 +50,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 const Messages = () => {
   const navigate = useNavigate();
+  const { conversationId: routeConversationId } = useParams<{ conversationId?: string }>();
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { conversations, isLoading, isFetching, refetch } = useConversationsContext();
