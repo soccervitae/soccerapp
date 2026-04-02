@@ -400,7 +400,7 @@ export const ProfileInfo = ({
                   </>
                 ) : (
                   <>
-                    <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`h-10 px-5 rounded-full font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"}`}>
+                    <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"}`}>
                       <AnimatePresence mode="wait" initial={false}>
                         <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
                           {isCheering ? <>Torcendo <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></> : "Torcer"}
