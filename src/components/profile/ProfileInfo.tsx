@@ -202,7 +202,11 @@ export const ProfileInfo = ({
   };
   const handleMessageClick = async () => {
     if (!user) {
-      navigate(`/${profile.username}/contact`);
+      if (!isMobile) {
+        setGuestContactOpen(true);
+      } else {
+        navigate(`/${profile.username}/contact`);
+      }
       return;
     }
     setIsStartingChat(true);
