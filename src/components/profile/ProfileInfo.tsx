@@ -256,7 +256,7 @@ export const ProfileInfo = ({
   // Desktop layout - reference-inspired (avatar bottom-left, info right)
   if (isDesktop) {
     return (
-      <section className="bg-card rounded-2xl shadow-sm overflow-hidden border border-border/50">
+      <section className="bg-card shadow-sm overflow-hidden border border-border/50">
         {/* Cover Photo - wide banner */}
         <div 
           className={`w-full h-56 relative overflow-hidden ${profile.cover_url ? 'cursor-pointer' : ''}`}
