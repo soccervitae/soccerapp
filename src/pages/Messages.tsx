@@ -115,6 +115,13 @@ const Messages = () => {
     });
   }, [conversations, searchQuery]);
 
+  // Auto-select first conversation on desktop if none selected
+  useEffect(() => {
+    if (!isMobile && !activeConversationId && !routeConversationId && allConversations.length > 0) {
+      setActiveConversationId(allConversations[0].id);
+    }
+  }, [isMobile, activeConversationId, routeConversationId, allConversations]);
+
   const archivedConversations = useMemo(() => {
     return conversations.filter(c => c.isArchived);
   }, [conversations]);
