@@ -8,6 +8,7 @@ import { BellOff, Pin } from "lucide-react";
 interface ConversationItemProps {
   conversation: ConversationWithDetails;
   onClick: () => void;
+  isActive?: boolean;
 }
 
 export const ConversationItem = ({ conversation, onClick }: ConversationItemProps) => {
