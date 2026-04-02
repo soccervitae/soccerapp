@@ -130,9 +130,9 @@ export const CreateMenuSheet = ({
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange}>
-      <ResponsiveModalContent className="sm:max-w-md !bg-black !border-zinc-800" useFullHeight overlayClassName="bg-black/80">
+      <ResponsiveModalContent className="sm:max-w-md" useFullHeight>
         <ResponsiveModalHeader className="pb-4">
-          <ResponsiveModalTitle className="text-center text-white">O que você quer criar?</ResponsiveModalTitle>
+          <ResponsiveModalTitle className="text-center text-foreground">O que você quer criar?</ResponsiveModalTitle>
         </ResponsiveModalHeader>
 
         <div className="flex flex-col gap-2 px-2">
@@ -140,7 +140,7 @@ export const CreateMenuSheet = ({
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              className={`flex items-center gap-4 p-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 transition-colors active:scale-[0.98] ${
+              className={`flex items-center gap-4 p-4 rounded-xl bg-muted hover:bg-muted/80 border border-border transition-colors active:scale-[0.98] ${
                 option.proOnly && !isPro && !isOfficialAccount ? 'opacity-60' : ''
               }`}
             >
@@ -150,8 +150,8 @@ export const CreateMenuSheet = ({
                 </span>
               </div>
               <div className="text-left flex-1">
-                <p className="font-medium text-white">{option.label}</p>
-                <p className="text-sm text-zinc-400">{option.description}</p>
+                <p className="font-medium text-foreground">{option.label}</p>
+                <p className="text-sm text-muted-foreground">{option.description}</p>
               </div>
               {option.proOnly && !isPro && !isOfficialAccount && (
                 <span className="material-symbols-outlined text-[20px] text-amber-400">lock</span>
@@ -162,7 +162,7 @@ export const CreateMenuSheet = ({
           {/* Show message for admin users */}
           {isAdmin && !isOfficialAccount && (
             <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
+              <p className="text-sm text-amber-600 text-center">
                 Para criar posts e destaques, acesse a{" "}
                 <span className="font-semibold">área administrativa</span>.
               </p>
