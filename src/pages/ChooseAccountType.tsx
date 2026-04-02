@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { cacheProfile } from "@/lib/offlineStorage";
 
 interface AccountType {
   id: string;
@@ -88,9 +89,18 @@ const ChooseAccountType = () => {
 
   // If already has profile_completed, redirect
   useEffect(() => {
-    if (profile && (profile as any).profile_completed) {
-      navigate("/welcome", { replace: true });
-    }
+    if (!profile) return;
+
+    const profileData = profile as any;
+    const isProfileReady = !!profileData.account_type && !!profileData.profile_completed;
+
+    if (!isProfileReady) return;
+
+    const redirectTo = profileData.onboarding_completed
+      ? (profileData.username ? `/${profileData.username}` : "/")
+      : "/welcome";
+
+    navigate(redirectTo, { replace: true });
   }, [profile, navigate]);
 
   // Load account types
@@ -249,6 +259,19 @@ const ChooseAccountType = () => {
 
       const { error } = await supabase.from("profiles").update(updateData).eq("id", user.id);
       if (error) throw error;
+
+      const nextProfile = {
+        ...(profile as any),
+        ...updateData,
+      };
+
+      queryClient.setQueryData(["profile", user.id], nextProfile);
+
+      if ((profile as any)?.username) {
+        queryClient.setQueryData(["profile", "username", (profile as any).username], nextProfile);
+      }
+
+      await cacheProfile(nextProfile);
 
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
       navigate("/welcome", { replace: true });
