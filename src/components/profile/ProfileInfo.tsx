@@ -744,5 +744,11 @@ export const ProfileInfo = ({
           </div>
         </ResponsiveModalContent>
       </ResponsiveModal>
+      {/* Guest Contact Modal (Desktop) */}
+      <GuestContactModal
+        open={guestContactOpen}
+        onOpenChange={setGuestContactOpen}
+        profile={profile}
+      />
     </section>;
 };
