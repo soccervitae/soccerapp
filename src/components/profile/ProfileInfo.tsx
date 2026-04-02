@@ -325,7 +325,7 @@ export const ProfileInfo = ({
               <div className="flex items-center gap-2">
                 {isOwnProfile ? (
                   <>
-                    <button onClick={() => navigate("/settings/profile")} <button onClick={() => navigate("/settings/profile")} className="bg-primary text-primary-foreground h-10 px-5 rounded-sm font-semibold text-sm transition-colors hover:bg-primary/90 flex items-center gap-2">>
+                    <button onClick={() => navigate("/settings/profile")} className="bg-primary text-primary-foreground h-10 px-5 rounded-sm font-semibold text-sm transition-colors hover:bg-primary/90 flex items-center gap-2">
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                       Editar
                     </button>
