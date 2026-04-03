@@ -227,7 +227,6 @@ export default function MyPosts() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
     </SettingsPageLayout>
   );
 }
