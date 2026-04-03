@@ -23,7 +23,7 @@ const navItems = [{
   path: "/explore"
 }, {
   id: "create",
-  icon: "add",
+  icon: "add_circle",
   label: "Criar",
   path: null
 }, {
