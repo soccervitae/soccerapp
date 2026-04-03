@@ -1267,7 +1267,7 @@ const Security = () => {
         }}
         confirmVariant="default"
       />
-    </div>
+    </SettingsPageLayout>
   );
 };
 

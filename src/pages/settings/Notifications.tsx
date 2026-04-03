@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 interface NotificationPreferences {
   notify_messages: boolean;
