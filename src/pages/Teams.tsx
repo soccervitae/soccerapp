@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/select";
 import { Search, ArrowLeft, Shield, Globe, MapPin, Download } from "lucide-react";
 import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 import type { Team } from "@/hooks/useTeams";
 
 // Componente separado para o card do time com estado próprio para controlar erro de imagem
@@ -45,6 +49,7 @@ const TeamCard = memo(({ team }: { team: Team }) => {
 const Teams = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(26); // Default Brasil
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(17); // Default Pernambuco
   const [search, setSearch] = useState("");
@@ -125,15 +130,123 @@ const Teams = () => {
     queryClient.invalidateQueries({ queryKey: ["estados-with-counts"] });
   };
 
+  const filters = (
+    <div className="space-y-3">
+      <Select value={selectedPaisId?.toString() || ""} onValueChange={handlePaisChange}>
+        <SelectTrigger className="w-full bg-muted/50 border-0">
+          <Globe className="w-4 h-4 mr-2 text-muted-foreground" />
+          <SelectValue placeholder="Selecione o país" />
+        </SelectTrigger>
+        <SelectContent className="bg-background border border-border z-50">
+          {paisesLoading ? (
+            <div className="p-2"><Skeleton className="h-8 w-full" /></div>
+          ) : (
+            paises?.map((pais) => (
+              <SelectItem key={pais.id} value={pais.id.toString()}>
+                <div className="flex items-center gap-2">
+                  {pais.bandeira_url && <img src={pais.bandeira_url} alt={pais.nome} className="w-5 h-4 object-cover rounded-sm" />}
+                  {pais.nome}
+                </div>
+              </SelectItem>
+            ))
+          )}
+        </SelectContent>
+      </Select>
+
+      <Select value={selectedEstadoId?.toString() || ""} onValueChange={handleEstadoChange} disabled={!selectedPaisId}>
+        <SelectTrigger className="w-full bg-muted/50 border-0">
+          <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+          <SelectValue placeholder="Selecione o estado" />
+        </SelectTrigger>
+        <SelectContent className="bg-background border border-border z-50 max-h-60">
+          {estadosLoading ? (
+            <div className="p-2"><Skeleton className="h-8 w-full" /></div>
+          ) : estados && estados.length > 0 ? (
+            estados.map((estado) => (
+              <SelectItem key={estado.id} value={estado.id.toString()}>
+                <div className="flex items-center gap-2 w-full">
+                  {estado.bandeira_url && <img src={estado.bandeira_url} alt={estado.nome} className="w-5 h-4 object-cover rounded-sm" />}
+                  <span className="flex-1">{estado.nome}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{estado.teamCount} {estado.teamCount === 1 ? 'time' : 'times'}</span>
+                </div>
+              </SelectItem>
+            ))
+          ) : (
+            <div className="p-2 text-sm text-muted-foreground text-center">Nenhum estado encontrado</div>
+          )}
+        </SelectContent>
+      </Select>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input type="text" placeholder="Buscar time..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-muted/50 border-0" />
+      </div>
+    </div>
+  );
+
+  const teamsGrid = (
+    <>
+      {teamsLoading ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-2">
+              <Skeleton className="w-16 h-16 rounded-full" />
+              <Skeleton className="h-3 w-14" />
+            </div>
+          ))}
+        </div>
+      ) : teams && teams.length > 0 ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+          {teams.map((team) => (
+            <TeamCard key={team.id} team={team} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Shield className="w-16 h-16 text-muted-foreground/50 mb-4" />
+          <p className="text-muted-foreground">
+            {search ? "Nenhum time encontrado" : "Selecione um país e estado para ver os times"}
+          </p>
+        </div>
+      )}
+    </>
+  );
+
+  if (!isMobile) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-xl font-semibold text-foreground">Times</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {teamsLoading ? "Carregando..." : `${teams?.length || 0} times`}
+                  </p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setScrapeSheetOpen(true)} className="text-muted-foreground hover:text-foreground">
+                  <Download className="w-5 h-5" />
+                </Button>
+              </div>
+              <div className="mb-4">{filters}</div>
+              {teamsGrid}
+            </div>
+          </main>
+          <RightSidebar />
+        </div>
+        <ScrapeTeamsSheet open={scrapeSheetOpen} onOpenChange={setScrapeSheetOpen} onTeamsImported={handleTeamsImported} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
-          >
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
@@ -142,139 +255,16 @@ const Teams = () => {
               {teamsLoading ? "Carregando..." : `${teams?.length || 0} times`}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setScrapeSheetOpen(true)}
-            className="text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="ghost" size="icon" onClick={() => setScrapeSheetOpen(true)} className="text-muted-foreground hover:text-foreground">
             <Download className="w-5 h-5" />
           </Button>
         </div>
-
-        {/* Filters */}
-        <div className="px-4 pb-3 space-y-3">
-          {/* Country Selector */}
-          <Select
-            value={selectedPaisId?.toString() || ""}
-            onValueChange={handlePaisChange}
-          >
-            <SelectTrigger className="w-full bg-muted/50 border-0">
-              <Globe className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Selecione o país" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border z-50">
-              {paisesLoading ? (
-                <div className="p-2">
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              ) : (
-                paises?.map((pais) => (
-                  <SelectItem key={pais.id} value={pais.id.toString()}>
-                    <div className="flex items-center gap-2">
-                      {pais.bandeira_url && (
-                        <img
-                          src={pais.bandeira_url}
-                          alt={pais.nome}
-                          className="w-5 h-4 object-cover rounded-sm"
-                        />
-                      )}
-                      {pais.nome}
-                    </div>
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-
-          {/* State Selector */}
-          <Select
-            value={selectedEstadoId?.toString() || ""}
-            onValueChange={handleEstadoChange}
-            disabled={!selectedPaisId}
-          >
-            <SelectTrigger className="w-full bg-muted/50 border-0">
-              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Selecione o estado" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border z-50 max-h-60">
-              {estadosLoading ? (
-                <div className="p-2">
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              ) : estados && estados.length > 0 ? (
-                estados.map((estado) => (
-                  <SelectItem key={estado.id} value={estado.id.toString()}>
-                    <div className="flex items-center gap-2 w-full">
-                      {estado.bandeira_url && (
-                        <img
-                          src={estado.bandeira_url}
-                          alt={estado.nome}
-                          className="w-5 h-4 object-cover rounded-sm"
-                        />
-                      )}
-                      <span className="flex-1">{estado.nome}</span>
-                      <span className="text-xs text-muted-foreground ml-auto">
-                        {estado.teamCount} {estado.teamCount === 1 ? 'time' : 'times'}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="p-2 text-sm text-muted-foreground text-center">
-                  Nenhum estado encontrado
-                </div>
-              )}
-            </SelectContent>
-          </Select>
-
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar time..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-muted/50 border-0"
-            />
-          </div>
-        </div>
+        <div className="px-4 pb-3">{filters}</div>
       </header>
 
-      {/* Teams Grid */}
-      <main className="p-4">
-        {teamsLoading ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <Skeleton className="w-16 h-16 rounded-full" />
-                <Skeleton className="h-3 w-14" />
-              </div>
-            ))}
-          </div>
-        ) : teams && teams.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-            {teams.map((team) => (
-              <TeamCard key={team.id} team={team} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Shield className="w-16 h-16 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">
-              {search ? "Nenhum time encontrado" : "Selecione um país e estado para ver os times"}
-            </p>
-          </div>
-        )}
-      </main>
+      <main className="p-4">{teamsGrid}</main>
 
-      {/* Scrape Teams Sheet */}
-      <ScrapeTeamsSheet
-        open={scrapeSheetOpen}
-        onOpenChange={setScrapeSheetOpen}
-        onTeamsImported={handleTeamsImported}
-      />
+      <ScrapeTeamsSheet open={scrapeSheetOpen} onOpenChange={setScrapeSheetOpen} onTeamsImported={handleTeamsImported} />
     </div>
   );
 };

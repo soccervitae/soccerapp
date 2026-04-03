@@ -7,6 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottomNavigation } from "@/components/profile/BottomNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const FollowList = () => {
   const navigate = useNavigate();
@@ -14,10 +18,10 @@ const FollowList = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "followers";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const isMobile = useIsMobile();
   
   const { user } = useAuth();
   
-  // Get profile by username or current user
   const { data: profileByUsername, isLoading: loadingByUsername } = useProfileByUsername(username || "");
   const { data: ownProfile, isLoading: loadingOwnProfile } = useProfile();
   
@@ -122,22 +126,31 @@ const FollowList = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="flex items-center gap-4 px-4 py-3">
-          <button onClick={() => navigate(-1)} className="text-foreground">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-lg font-semibold">{profile?.full_name || profile?.username}</h1>
-            <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+  const content = (
+    <>
+      {/* Header - mobile only */}
+      {isMobile && (
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border">
+          <div className="flex items-center gap-4 px-4 py-3">
+            <button onClick={() => navigate(-1)} className="text-foreground">
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            <div>
+              <h1 className="text-lg font-semibold">{profile?.full_name || profile?.username}</h1>
+              <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Tabs */}
+      {/* Desktop title */}
+      {!isMobile && (
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold text-foreground">{profile?.full_name || profile?.username}</h1>
+          <p className="text-sm text-muted-foreground">@{profile?.username}</p>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-border bg-transparent h-12">
           <TabsTrigger 
@@ -168,7 +181,27 @@ const FollowList = () => {
           {renderUserList(following, loadingFollowing)}
         </TabsContent>
       </Tabs>
+    </>
+  );
 
+  if (!isMobile) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">{content}</div>
+          </main>
+          <RightSidebar />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      {content}
       <BottomNavigation />
     </div>
   );

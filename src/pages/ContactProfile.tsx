@@ -8,6 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 const contactSchema = z.object({
   sender_name: z.string().trim().min(1, "Nome é obrigatório").max(100),
@@ -21,6 +25,7 @@ const contactSchema = z.object({
 export default function ContactProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [sending, setSending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
@@ -119,6 +124,75 @@ export default function ContactProfile() {
 
   const displayName = profile.nickname || profile.full_name || profile.username;
 
+  const formContent = (
+    <div className="max-w-lg mx-auto">
+      <div className="flex flex-col items-center py-6 gap-2">
+        <Avatar className="h-20 w-20">
+          <AvatarImage src={profile.avatar_url || undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
+            {(displayName || "U").charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <p className="font-bold text-lg text-foreground">{displayName}</p>
+        {profile.position_name && (
+          <p className="text-sm text-muted-foreground">{profile.position_name}</p>
+        )}
+      </div>
+
+      <div className="space-y-4 px-4 pb-8">
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Nome *</label>
+          <Input value={form.sender_name} onChange={e => handleChange("sender_name", e.target.value)} placeholder="Seu nome completo" maxLength={100} />
+          {errors.sender_name && <p className="text-xs text-destructive mt-1">{errors.sender_name}</p>}
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
+          <Input value={form.sender_email} onChange={e => handleChange("sender_email", e.target.value)} placeholder="seu@email.com" type="email" maxLength={255} />
+          {errors.sender_email && <p className="text-xs text-destructive mt-1">{errors.sender_email}</p>}
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">WhatsApp</label>
+          <Input value={form.sender_whatsapp} onChange={e => handleChange("sender_whatsapp", e.target.value)} placeholder="+55 11 99999-9999" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Facebook</label>
+          <Input value={form.sender_facebook} onChange={e => handleChange("sender_facebook", e.target.value)} placeholder="facebook.com/usuario" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Instagram</label>
+          <Input value={form.sender_instagram} onChange={e => handleChange("sender_instagram", e.target.value)} placeholder="@usuario" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Mensagem *</label>
+          <Textarea value={form.message} onChange={e => handleChange("message", e.target.value)} placeholder="Escreva sua mensagem..." rows={4} maxLength={1000} />
+          {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
+          <p className="text-xs text-muted-foreground mt-1 text-right">{form.message.length}/1000</p>
+        </div>
+        <Button onClick={handleSubmit} disabled={sending} className="w-full h-11 font-semibold rounded">
+          {sending ? "Enviando..." : "Enviar mensagem"}
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (!isMobile) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h1 className="text-xl font-semibold text-foreground mb-4">Enviar mensagem</h1>
+              {formContent}
+            </div>
+          </main>
+          <RightSidebar />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
@@ -128,55 +202,8 @@ export default function ContactProfile() {
         <h1 className="text-base font-bold text-foreground ml-2">Enviar mensagem</h1>
       </header>
 
-      <div className="pt-[50px] pb-20 px-4 max-w-lg mx-auto">
-        {/* Profile header */}
-        <div className="flex flex-col items-center py-6 gap-2">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={profile.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
-              {(displayName || "U").charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <p className="font-bold text-lg text-foreground">{displayName}</p>
-          {profile.position_name && (
-            <p className="text-sm text-muted-foreground">{profile.position_name}</p>
-          )}
-        </div>
-
-        {/* Form */}
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Nome *</label>
-            <Input value={form.sender_name} onChange={e => handleChange("sender_name", e.target.value)} placeholder="Seu nome" />
-            {errors.sender_name && <p className="text-xs text-destructive mt-1">{errors.sender_name}</p>}
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
-            <Input type="email" value={form.sender_email} onChange={e => handleChange("sender_email", e.target.value)} placeholder="seu@email.com" />
-            {errors.sender_email && <p className="text-xs text-destructive mt-1">{errors.sender_email}</p>}
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">WhatsApp</label>
-            <Input value={form.sender_whatsapp} onChange={e => handleChange("sender_whatsapp", e.target.value)} placeholder="+55 11 99999-9999" />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Facebook</label>
-            <Input value={form.sender_facebook} onChange={e => handleChange("sender_facebook", e.target.value)} placeholder="facebook.com/usuario" />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Instagram</label>
-            <Input value={form.sender_instagram} onChange={e => handleChange("sender_instagram", e.target.value)} placeholder="@usuario" />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Mensagem *</label>
-            <Textarea value={form.message} onChange={e => handleChange("message", e.target.value)} placeholder="Escreva sua mensagem..." rows={4} maxLength={1000} />
-            {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
-            <p className="text-xs text-muted-foreground mt-1 text-right">{form.message.length}/1000</p>
-          </div>
-          <Button onClick={handleSubmit} disabled={sending} className="w-full h-11 font-semibold rounded">
-            {sending ? "Enviando..." : "Enviar mensagem"}
-          </Button>
-        </div>
+      <div className="pt-[50px] pb-20">
+        {formContent}
       </div>
     </div>
   );
