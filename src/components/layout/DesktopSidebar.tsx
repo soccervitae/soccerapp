@@ -45,7 +45,7 @@ const navItems = [{
   id: "settings",
   icon: "settings",
   label: "Configurações",
-  path: "/settings/edit"
+  path: "/settings"
 }];
 
 export const DesktopSidebar = () => {

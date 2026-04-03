@@ -7,6 +7,10 @@ import { ResponsiveAlertModal } from "@/components/ui/responsive-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsPWA } from "@/hooks/useIsPWA";
 import { SupportSheet } from "@/components/support/SupportSheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 
 export default function Settings() {
   const navigate = useNavigate();
