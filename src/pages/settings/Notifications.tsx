@@ -137,42 +137,18 @@ const Notifications = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-          <div className="flex items-center gap-3 px-4 py-3">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <Skeleton className="h-6 w-32" />
-          </div>
-        </div>
+      <SettingsPageLayout title="Notificações">
         <div className="p-4 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-16 w-full rounded-xl" />
           ))}
         </div>
-      </div>
+      </SettingsPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-safe">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">Notificações</h1>
-          {isSaving && (
-            <span className="text-xs text-muted-foreground ml-auto">Salvando...</span>
-          )}
-        </div>
-      </div>
-
+    <SettingsPageLayout title="Notificações">
       <div className="p-4 space-y-6">
         {/* Push Permission Section */}
         <div className="bg-card rounded-xl p-4 border border-border">
