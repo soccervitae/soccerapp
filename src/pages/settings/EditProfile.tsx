@@ -40,6 +40,7 @@ const EditProfile = () => {
   const updateProfile = useUpdateProfile();
   const uploadMedia = useUploadMedia();
   const { takePhoto, pickFromGallery, isNative } = useDeviceCamera();
+  const isMobile = useIsMobile();
   
 
   // Fetch countries for nationality selector
