@@ -81,6 +81,6 @@ export default function Favorites() {
           </div>
         )}
       </div>
-    </div>
+    </SettingsPageLayout>
   );
 }
