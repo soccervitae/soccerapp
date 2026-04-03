@@ -338,9 +338,9 @@ export const ProfileInfo = ({
               onClick={handleAvatarClick}
             >
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-card bg-muted object-cover" />
+                <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-white bg-muted object-cover" />
               ) : (
-                <div className="w-full h-full rounded-full border-4 border-card bg-muted flex items-center justify-center">
+                <div className="w-full h-full rounded-full border-4 border-white bg-muted flex items-center justify-center">
                   <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
                 </div>
               )}
