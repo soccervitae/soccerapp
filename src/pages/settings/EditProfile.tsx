@@ -593,7 +593,7 @@ const EditProfile = () => {
     return loadingContent;
   }
 
-  return (
+  const editContent = (
     <>
       {/* Unsaved Changes Sheet */}
       <Drawer open={showExitDialog} onOpenChange={setShowExitDialog}>
@@ -623,7 +623,7 @@ const EditProfile = () => {
         </DrawerContent>
       </Drawer>
 
-      <main className="bg-background min-h-screen">
+      <main className={`bg-background ${isMobile ? 'min-h-screen' : ''}`}>
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-[50px]">
