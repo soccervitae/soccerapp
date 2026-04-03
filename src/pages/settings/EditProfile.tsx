@@ -21,6 +21,9 @@ import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
 import { StatePickerSheet } from "@/components/profile/StatePickerSheet";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 
 interface State {
   id: number;
