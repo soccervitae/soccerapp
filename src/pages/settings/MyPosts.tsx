@@ -109,19 +109,7 @@ export default function MyPosts() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
-        <button 
-          onClick={() => navigate('/settings')}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-        </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Meus Posts</h1>
-      </header>
-
-      <div className="pt-[50px] pb-20">
+    <SettingsPageLayout title="Meus Posts">
         {/* Info Card */}
         <div className="p-4">
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
