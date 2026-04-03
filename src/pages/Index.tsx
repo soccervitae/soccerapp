@@ -135,7 +135,7 @@ const Index = () => {
               {isFromCache && <OfflineCacheIndicator lastUpdated={cacheTimestamp} />}
             </AnimatePresence>
             <FeedStories />
-            <CreatePostInline />
+            
             {renderFeed()}
           </div>
         </main>
