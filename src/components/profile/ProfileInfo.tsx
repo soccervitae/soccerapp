@@ -72,6 +72,46 @@ function FavoriteButton({ profileId, onDone }: { profileId: string; onDone: () =
   );
 }
 
+function FavoriteDropdownItem({ profileId }: { profileId: string }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const { data: isFavorited } = useQuery({
+    queryKey: ["is_favorited", user?.id, profileId],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from("favorite_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("favorite_id", profileId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleToggle = async () => {
+    if (!user?.id) return;
+    if (isFavorited) {
+      await supabase.from("favorite_profiles").delete().eq("user_id", user.id).eq("favorite_id", profileId);
+      toast.success("Removido dos favoritos");
+    } else {
+      await supabase.from("favorite_profiles").insert({ user_id: user.id, favorite_id: profileId });
+      toast.success("Perfil favoritado!");
+    }
+    queryClient.invalidateQueries({ queryKey: ["is_favorited", user.id, profileId] });
+    queryClient.invalidateQueries({ queryKey: ["favorite_profiles"] });
+  };
+
+  return (
+    <DropdownMenuItem onClick={handleToggle} className="cursor-pointer">
+      <span className="material-symbols-outlined mr-2 text-[18px]">star</span>
+      {isFavorited ? "Remover dos favoritos" : "Favoritar"}
+    </DropdownMenuItem>
+  );
+}
+
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
