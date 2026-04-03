@@ -72,6 +72,46 @@ function FavoriteButton({ profileId, onDone }: { profileId: string; onDone: () =
   );
 }
 
+function FavoriteDropdownItem({ profileId }: { profileId: string }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const { data: isFavorited } = useQuery({
+    queryKey: ["is_favorited", user?.id, profileId],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from("favorite_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("favorite_id", profileId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleToggle = async () => {
+    if (!user?.id) return;
+    if (isFavorited) {
+      await supabase.from("favorite_profiles").delete().eq("user_id", user.id).eq("favorite_id", profileId);
+      toast.success("Removido dos favoritos");
+    } else {
+      await supabase.from("favorite_profiles").insert({ user_id: user.id, favorite_id: profileId });
+      toast.success("Perfil favoritado!");
+    }
+    queryClient.invalidateQueries({ queryKey: ["is_favorited", user.id, profileId] });
+    queryClient.invalidateQueries({ queryKey: ["favorite_profiles"] });
+  };
+
+  return (
+    <DropdownMenuItem onClick={handleToggle} className="cursor-pointer">
+      <span className="material-symbols-outlined mr-2 text-[18px]">star</span>
+      {isFavorited ? "Remover dos favoritos" : "Favoritar"}
+    </DropdownMenuItem>
+  );
+}
+
 interface ProfileInfoProps {
   profile: Profile;
   followStats?: {
@@ -398,15 +438,36 @@ export const ProfileInfo = ({
                       Mensagem
                     </button>
                   </>
-                ) : (
+                 ) : (
                   <>
-                    <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"}`}>
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
-                          {isCheering ? <>Torcendo <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></> : "Torcer"}
-                        </motion.span>
-                      </AnimatePresence>
-                    </button>
+                    {isCheering ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button ref={buttonRef} className="h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]">
+                            <AnimatePresence mode="wait" initial={false}>
+                              <motion.span key="cheering" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
+                                Torcendo <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+                              </motion.span>
+                            </AnimatePresence>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56 bg-popover">
+                          <FavoriteDropdownItem profileId={profile.id} />
+                          <DropdownMenuItem onClick={handleFollowClick} className="text-destructive focus:text-destructive cursor-pointer">
+                            <span className="material-symbols-outlined mr-2 text-[18px]">person_remove</span>
+                            Deixar de torcer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <button ref={buttonRef} onClick={handleFollowClick} disabled={followUser.isPending} className="h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]">
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.span key="cheer" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
+                            Torcer
+                          </motion.span>
+                        </AnimatePresence>
+                      </button>
+                    )}
                     <button onClick={handleMessageClick} disabled={isStartingChat} className="bg-muted text-foreground h-10 w-10 rounded-lg text-sm transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]">
                       <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                     </button>
@@ -509,27 +570,6 @@ export const ProfileInfo = ({
           />
         )}
 
-        {/* Cheering Options Modal */}
-        <ResponsiveModal open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
-          <ResponsiveModalContent className="sm:max-w-sm">
-            <ResponsiveModalHeader>
-              <ResponsiveModalTitle className="text-center">@{profile.username}</ResponsiveModalTitle>
-            </ResponsiveModalHeader>
-            <div className="flex flex-col gap-2 py-4 px-4">
-              <FavoriteButton profileId={profile.id} onDone={() => setCheeringSheetOpen(false)} />
-              <button
-                onClick={() => {
-                  handleFollowClick();
-                  setCheeringSheetOpen(false);
-                }}
-                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left text-destructive"
-              >
-                <span className="material-symbols-outlined text-[22px]">person_remove</span>
-                <span className="font-medium">Deixar de torcer</span>
-              </button>
-            </div>
-          </ResponsiveModalContent>
-        </ResponsiveModal>
 
         {/* Auth Prompt Modal */}
         <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
