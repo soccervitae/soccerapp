@@ -559,17 +559,7 @@ const Security = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="flex items-center gap-4 px-4 py-3">
-          <button onClick={() => navigate(-1)} className="text-foreground">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <h1 className="text-lg font-semibold">Segurança</h1>
-        </div>
-      </div>
-
+    <SettingsPageLayout title="Segurança">
       <div className="p-4 space-y-6 pb-24">
         {/* Change Password Section */}
         <section className="space-y-4">
