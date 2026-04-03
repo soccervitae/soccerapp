@@ -295,7 +295,7 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
   }, [conversations, onlineFollowing, followingUsers, isUserOnline]);
 
   return (
-    <div className="rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
+    <div className="relative rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
@@ -315,17 +315,61 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
       </div>
 
       {avatarUsers.length > 0 ? (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center w-full group"
+        >
+          <div className="flex items-center -space-x-2">
+            {avatarUsers.slice(0, 8).map((u, i) => (
+              <div key={u.id} className="relative" style={{ zIndex: 8 - i }}>
+                <Avatar className="h-9 w-9 ring-2 ring-card">
+                  <AvatarImage src={u.avatar_url || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                    {getInitials(u.full_name || u.username)}
+                  </AvatarFallback>
+                </Avatar>
+                {u.isOnline && (
+                  <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                )}
+              </div>
+            ))}
+            {avatarUsers.length > 8 && (
+              <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center ring-2 ring-card text-xs font-medium text-muted-foreground" style={{ zIndex: 0 }}>
+                +{avatarUsers.length - 8}
+              </div>
+            )}
+          </div>
+        </button>
+      ) : (
+        <div className="text-center py-3">
+          <span className="material-symbols-outlined text-[28px] text-muted-foreground/50 mb-1">group_off</span>
+          <p className="text-xs text-muted-foreground">Nenhuma conversa ainda</p>
+        </div>
+      )}
+
+      {/* Floating popup */}
+      {expanded && (
         <>
-          {/* Collapsed: stacked avatars overlapping */}
-          {!expanded ? (
-            <button
-              onClick={() => setExpanded(true)}
-              className="flex items-center w-full group"
-            >
-              <div className="flex items-center -space-x-2">
-                {avatarUsers.slice(0, 8).map((u, i) => (
-                  <div key={u.id} className="relative" style={{ zIndex: 8 - i }}>
-                    <Avatar className="h-9 w-9 ring-2 ring-card">
+          <div className="fixed inset-0 z-40" onClick={() => setExpanded(false)} />
+          <div className="absolute bottom-full right-0 mb-2 w-72 z-50 rounded-xl bg-card border border-border shadow-lg overflow-hidden">
+            <div className="flex items-center justify-between p-3 border-b border-border">
+              <h4 className="font-semibold text-foreground text-sm">Mensagens</h4>
+              <button onClick={() => setExpanded(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {avatarUsers.map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => {
+                    setExpanded(false);
+                    handleStartChat(u);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted transition-colors"
+                >
+                  <div className="relative">
+                    <Avatar className="h-9 w-9">
                       <AvatarImage src={u.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
                         {getInitials(u.full_name || u.username)}
@@ -335,63 +379,18 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
                       <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
                     )}
                   </div>
-                ))}
-                {avatarUsers.length > 8 && (
-                  <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center ring-2 ring-card text-xs font-medium text-muted-foreground" style={{ zIndex: 0 }}>
-                    +{avatarUsers.length - 8}
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {u.full_name || u.username}
+                    </p>
+                    {u.isOnline && <p className="text-[11px] text-green-600">Online</p>}
                   </div>
-                )}
-              </div>
-              <span className="material-symbols-outlined text-[18px] text-muted-foreground ml-auto group-hover:text-primary transition-colors">
-                expand_more
-              </span>
-            </button>
-          ) : (
-            /* Expanded: full list */
-            <div>
-              <div className="space-y-1 max-h-60 overflow-y-auto">
-                {avatarUsers.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => handleStartChat(u)}
-                    className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <div className="relative">
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={u.avatar_url || undefined} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                          {getInitials(u.full_name || u.username)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {u.isOnline && (
-                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0 text-left">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {u.full_name || u.username}
-                      </p>
-                      {u.isOnline && <p className="text-[11px] text-green-600">Online</p>}
-                    </div>
-                    <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setExpanded(false)}
-                className="w-full mt-2 text-xs text-primary hover:underline flex items-center justify-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[16px]">expand_less</span>
-                Recolher
-              </button>
+                  <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </>
-      ) : (
-        <div className="text-center py-3">
-          <span className="material-symbols-outlined text-[28px] text-muted-foreground/50 mb-1">group_off</span>
-          <p className="text-xs text-muted-foreground">Nenhuma conversa ainda</p>
-        </div>
       )}
     </div>
   );
