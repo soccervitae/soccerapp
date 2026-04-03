@@ -216,63 +216,16 @@ export const RightSidebar = () => {
       </div>
 
       {/* Messages - Fixed at bottom */}
-      <div className="rounded-xl bg-card border border-border p-4 mt-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
-            <h3 className="font-semibold text-foreground">Mensagens</h3>
-          </div>
-          <button
-            onClick={() => navigate("/messages")}
-            className="relative text-xs text-primary hover:underline"
-          >
-            Ver todas
-            {totalUnread > 0 && (
-              <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full">
-                {totalUnread > 99 ? "99+" : totalUnread}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {onlineFollowing.length > 0 ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-muted-foreground">Online agora ({onlineFollowing.length})</span>
-            </div>
-            {onlineFollowing.slice(0, 8).map((u) => (
-              <button
-                key={u.id}
-                onClick={() => handleStartChat(u)}
-                className="w-full flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted transition-colors"
-              >
-                <div className="relative">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={u.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                      {(u.full_name || u.username || "U").charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {u.full_name || u.username}
-                  </p>
-                  <p className="text-xs text-green-600">Online</p>
-                </div>
-                <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <span className="material-symbols-outlined text-[32px] text-muted-foreground/50 mb-1">group_off</span>
-            <p className="text-xs text-muted-foreground">Nenhum seguido online</p>
-          </div>
-        )}
-      </div>
+      <MessagesSection
+        conversations={conversations}
+        onlineFollowing={onlineFollowing}
+        followingUsers={followingUsers}
+        totalUnread={totalUnread}
+        navigate={navigate}
+        handleStartChat={handleStartChat}
+        getInitials={getInitials}
+        isUserOnline={isUserOnline}
+      />
     </aside>
   );
 };
