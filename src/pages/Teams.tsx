@@ -49,6 +49,8 @@ const TeamCard = memo(({ team }: { team: Team }) => {
 const Teams = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
   const [selectedPaisId, setSelectedPaisId] = useState<number | null>(26); // Default Brasil
   const [selectedEstadoId, setSelectedEstadoId] = useState<number | null>(17); // Default Pernambuco
   const [search, setSearch] = useState("");
