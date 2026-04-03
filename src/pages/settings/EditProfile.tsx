@@ -624,7 +624,8 @@ const EditProfile = () => {
       </Drawer>
 
       <main className={`bg-background ${isMobile ? 'min-h-screen' : ''}`}>
-      {/* Header */}
+      {/* Header - mobile only */}
+      {isMobile && (
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-[50px]">
           <button
@@ -648,6 +649,7 @@ const EditProfile = () => {
           </button>
         </div>
       </header>
+      )}
 
       <form id="edit-profile-form" onSubmit={handleSubmit} className="pt-[50px] pb-8">
         {/* Cover Photo */}
