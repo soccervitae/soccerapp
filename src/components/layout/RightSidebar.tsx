@@ -148,79 +148,75 @@ export const RightSidebar = () => {
   };
 
   return (
-    <aside className="sticky top-14 h-[calc(100vh-3.5rem)] w-80 flex-shrink-0 overflow-y-auto p-4 hidden xl:block">
-      {/* Suggestions */}
-      <div className="rounded-xl bg-card border border-border p-4 mb-4">
-        <h3 className="font-semibold text-foreground mb-4">Sugestões para você</h3>
-        <div className="space-y-3">
-          {isLoading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-24 mb-1" />
-                  <Skeleton className="h-3 w-32" />
+    <aside className="sticky top-14 h-[calc(100vh-3.5rem)] w-80 flex-shrink-0 flex flex-col p-4 hidden xl:block">
+      <div className="flex-1 overflow-y-auto space-y-4">
+        {/* Suggestions */}
+        <div className="rounded-xl bg-card border border-border p-4">
+          <h3 className="font-semibold text-foreground mb-4">Sugestões para você</h3>
+          <div className="space-y-3">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-24 mb-1" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <Skeleton className="h-8 w-16" />
                 </div>
-                <Skeleton className="h-8 w-16" />
-              </div>
-            ))
-          ) : suggestions && suggestions.length > 0 ? (
-            suggestions.map((profile) => (
-              <div key={profile.id} className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={profile.avatar_url || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                    {getInitials(profile.full_name || profile.username)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm truncate">
-                    {profile.full_name || profile.username}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {profile.position_name || "Atleta"} {profile.team && `• ${profile.team}`}
-                  </p>
+              ))
+            ) : suggestions && suggestions.length > 0 ? (
+              suggestions.map((profile) => (
+                <div key={profile.id} className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={profile.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                      {getInitials(profile.full_name || profile.username)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-sm truncate">
+                      {profile.full_name || profile.username}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {profile.position_name || "Atleta"} {profile.team && `• ${profile.team}`}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 text-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => handleFollow(profile.id)}
+                    disabled={followUser.isPending}
+                  >
+                    Torcer
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 px-3 text-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  onClick={() => handleFollow(profile.id)}
-                  disabled={followUser.isPending}
-                >
-                  Torcer
-                </Button>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Nenhuma sugestão disponível
-            </p>
-          )}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhuma sugestão disponível
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Ad Banner */}
+        <div>
+          <AdBanner slot="" format="auto" responsive={true} />
+        </div>
+
+        {/* Footer Links */}
+        <div className="px-2">
+          <p className="text-xs text-muted-foreground">
+            Sobre • Ajuda • Privacidade • Termos
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">© 2025 SOCCER VITAE</p>
         </div>
       </div>
 
-      {/* Ad Banner */}
-      <div className="mb-4">
-        <AdBanner slot="" format="auto" responsive={true} />
-      </div>
-      <div className="rounded-xl bg-card border border-border p-4">
-        <h3 className="font-semibold text-foreground mb-4">Trending no Futebol</h3>
-        <div className="space-y-3">
-          {trendingTopics.map((topic) => (
-            <button
-              key={topic.tag}
-              className="w-full text-left hover:bg-muted rounded-lg p-2 -mx-2 transition-colors"
-            >
-              <p className="font-medium text-primary text-sm">{topic.tag}</p>
-              <p className="text-xs text-muted-foreground">{topic.posts} posts</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Online Users / Messages */}
-      <div className="rounded-xl bg-card border border-border p-4 mt-4">
+      {/* Messages - Fixed at bottom */}
+      <div className="rounded-xl bg-card border border-border p-4 mt-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
@@ -276,14 +272,6 @@ export const RightSidebar = () => {
             <p className="text-xs text-muted-foreground">Nenhum seguido online</p>
           </div>
         )}
-      </div>
-
-      {/* Footer Links */}
-      <div className="mt-4 px-2">
-        <p className="text-xs text-muted-foreground">
-          Sobre • Ajuda • Privacidade • Termos
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">© 2025 SOCCER VITAE</p>
       </div>
     </aside>
   );
