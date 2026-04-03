@@ -11,6 +11,7 @@ import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { HighlightFullscreenView } from "@/components/profile/HighlightFullscreenView";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import useEmblaCarousel from "embla-carousel-react";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 interface SavedPost {
   id: string;
