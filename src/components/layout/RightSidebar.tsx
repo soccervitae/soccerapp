@@ -11,6 +11,7 @@ import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useChatPopup } from "@/contexts/ChatPopupContext";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdBanner } from "@/components/feed/AdBanner";
 
 const trendingTopics = [
   { tag: "#CopaLibertadores2025", posts: "12.4k" },
