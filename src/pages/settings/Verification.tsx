@@ -21,18 +21,8 @@ export default function Verification() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
-        <button
-          onClick={() => navigate("/settings")}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-        </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Plano Pro</h1>
-      </header>
-
-      <div className="pt-[50px] pb-20 px-4">
+    <SettingsPageLayout title="Plano Pro">
+      <div className="px-4">
         {/* Hero */}
         <div className="flex flex-col items-center text-center py-8">
           <span className="material-symbols-outlined text-primary text-[64px] font-bold mb-4">star</span>
