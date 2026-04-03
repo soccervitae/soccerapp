@@ -14,11 +14,13 @@ interface ChatPopupState {
   participant: ChatParticipant | null;
   isOpen: boolean;
   isMinimized: boolean;
+  showContactPicker: boolean;
 }
 
 interface ChatPopupContextType {
   state: ChatPopupState;
   openChat: (conversationId: string, participant: ChatParticipant) => void;
+  openContactPicker: () => void;
   closeChat: () => void;
   toggleMinimize: () => void;
 }
@@ -31,6 +33,7 @@ export const ChatPopupProvider = ({ children }: { children: ReactNode }) => {
     participant: null,
     isOpen: false,
     isMinimized: false,
+    showContactPicker: false,
   });
 
   const openChat = useCallback((conversationId: string, participant: ChatParticipant) => {
@@ -39,6 +42,17 @@ export const ChatPopupProvider = ({ children }: { children: ReactNode }) => {
       participant,
       isOpen: true,
       isMinimized: false,
+      showContactPicker: false,
+    });
+  }, []);
+
+  const openContactPicker = useCallback(() => {
+    setState({
+      conversationId: null,
+      participant: null,
+      isOpen: true,
+      isMinimized: false,
+      showContactPicker: true,
     });
   }, []);
 
@@ -48,6 +62,7 @@ export const ChatPopupProvider = ({ children }: { children: ReactNode }) => {
       participant: null,
       isOpen: false,
       isMinimized: false,
+      showContactPicker: false,
     });
   }, []);
 
@@ -56,7 +71,7 @@ export const ChatPopupProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <ChatPopupContext.Provider value={{ state, openChat, closeChat, toggleMinimize }}>
+    <ChatPopupContext.Provider value={{ state, openChat, closeChat, toggleMinimize, openContactPicker }}>
       {children}
     </ChatPopupContext.Provider>
   );
