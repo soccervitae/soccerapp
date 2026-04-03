@@ -11,6 +11,7 @@ import { generateVideoThumbnailWithCache } from "@/hooks/useVideoThumbnail";
 import { HighlightFullscreenView } from "@/components/profile/HighlightFullscreenView";
 import { UserHighlight, HighlightImage } from "@/hooks/useProfile";
 import useEmblaCarousel from "embla-carousel-react";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 interface SavedPost {
   id: string;
@@ -316,19 +317,7 @@ export default function Saved() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
-        <button 
-          onClick={() => navigate('/settings')}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-        </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Salvos</h1>
-      </header>
-
-      <div className="pt-[50px] pb-20">
+    <SettingsPageLayout title="Salvos">
         <Tabs defaultValue="posts" className="w-full">
           <TabsList className="w-full grid grid-cols-2 bg-transparent border-b border-border rounded-none h-12">
             <TabsTrigger 
@@ -369,7 +358,6 @@ export default function Saved() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
 
       {/* ProfileFeedSheet for saved posts */}
       {selectedPostProfile && (
@@ -442,6 +430,6 @@ export default function Saved() {
         profileUsername={currentHighlightProfile?.username}
         authorAvatarUrl={currentHighlightProfile?.avatar_url || undefined}
       />
-    </div>
+    </SettingsPageLayout>
   );
 }

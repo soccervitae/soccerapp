@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 export default function GuestMessages() {
   const navigate = useNavigate();
@@ -39,15 +40,8 @@ export default function GuestMessages() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center">
-        <button onClick={() => navigate("/settings")} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors">
-          <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-        </button>
-        <h1 className="text-base font-bold text-foreground ml-2">Mensagens de visitantes</h1>
-      </header>
-
-      <div className="pt-[50px] pb-20 px-4 max-w-lg mx-auto">
+    <SettingsPageLayout title="Mensagens de visitantes">
+      <div className="px-4 max-w-lg mx-auto">
         {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -107,6 +101,6 @@ export default function GuestMessages() {
           </div>
         )}
       </div>
-    </div>
+    </SettingsPageLayout>
   );
 }

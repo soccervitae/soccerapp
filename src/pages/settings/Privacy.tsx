@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 interface PrivacySettings {
   is_private: boolean;
@@ -88,20 +89,8 @@ const Privacy = () => {
   };
 
   return (
-    <main className="bg-background min-h-screen">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border px-4 h-[50px] flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted text-foreground transition-colors"
-        >
-          <span className="material-symbols-outlined text-[24px]">arrow_back</span>
-        </button>
-        <h1 className="text-base font-bold text-foreground tracking-wide">Privacidade</h1>
-        <div className="w-10 h-10" />
-      </header>
-
-      <div className="pt-[50px] px-4 pb-8">
+    <SettingsPageLayout title="Privacidade">
+      <div className="px-4 pb-8">
         {loading ? (
           <div className="space-y-6">
             <Skeleton className="h-20 w-full rounded-xl" />
@@ -204,7 +193,7 @@ const Privacy = () => {
           </div>
         )}
       </div>
-    </main>
+    </SettingsPageLayout>
   );
 };
 
