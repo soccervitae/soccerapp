@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 interface PrivacySettings {
   is_private: boolean;
