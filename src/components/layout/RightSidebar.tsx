@@ -9,7 +9,7 @@ import { useFollowUser } from "@/hooks/useProfile";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useChatPopup } from "@/contexts/ChatPopupContext";
-import { useCreateConversation } from "@/hooks/useMessages";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdBanner } from "@/components/feed/AdBanner";
 
