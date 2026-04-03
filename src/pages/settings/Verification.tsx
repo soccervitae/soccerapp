@@ -3,6 +3,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 
 export default function Verification() {
   const navigate = useNavigate();
