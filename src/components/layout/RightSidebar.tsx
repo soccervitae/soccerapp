@@ -26,7 +26,7 @@ export const RightSidebar = () => {
   const navigate = useNavigate();
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
-  const { totalUnread } = useConversationsContext();
+  const { totalUnread, conversations } = useConversationsContext();
   const { openChat } = useChatPopup();
   const { createConversation } = useCreateConversation();
 
@@ -216,63 +216,151 @@ export const RightSidebar = () => {
       </div>
 
       {/* Messages - Fixed at bottom */}
-      <div className="rounded-xl bg-card border border-border p-4 mt-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
-            <h3 className="font-semibold text-foreground">Mensagens</h3>
-          </div>
-          <button
-            onClick={() => navigate("/messages")}
-            className="relative text-xs text-primary hover:underline"
-          >
-            Ver todas
-            {totalUnread > 0 && (
-              <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full">
-                {totalUnread > 99 ? "99+" : totalUnread}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {onlineFollowing.length > 0 ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-muted-foreground">Online agora ({onlineFollowing.length})</span>
-            </div>
-            {onlineFollowing.slice(0, 8).map((u) => (
-              <button
-                key={u.id}
-                onClick={() => handleStartChat(u)}
-                className="w-full flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted transition-colors"
-              >
-                <div className="relative">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={u.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                      {(u.full_name || u.username || "U").charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {u.full_name || u.username}
-                  </p>
-                  <p className="text-xs text-green-600">Online</p>
-                </div>
-                <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <span className="material-symbols-outlined text-[32px] text-muted-foreground/50 mb-1">group_off</span>
-            <p className="text-xs text-muted-foreground">Nenhum seguido online</p>
-          </div>
-        )}
-      </div>
+      <MessagesSection
+        conversations={conversations}
+        onlineFollowing={onlineFollowing}
+        followingUsers={followingUsers}
+        totalUnread={totalUnread}
+        navigate={navigate}
+        handleStartChat={handleStartChat}
+        getInitials={getInitials}
+        isUserOnline={isUserOnline}
+      />
     </aside>
   );
 };
+
+interface MessagesSectionProps {
+  conversations: any[];
+  onlineFollowing: any[];
+  followingUsers: any[] | undefined;
+  totalUnread: number;
+  navigate: (path: string) => void;
+  handleStartChat: (user: any) => void;
+  getInitials: (name: string | null | undefined) => string;
+  isUserOnline: (userId: string) => boolean;
+}
+
+function MessagesSection({ conversations, onlineFollowing, followingUsers, totalUnread, navigate, handleStartChat, getInitials, isUserOnline }: MessagesSectionProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Build avatar list: recent conversation participants first, then online following
+  const avatarUsers = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; isOnline: boolean }[] = [];
+
+    // Recent conversations first (sorted by updated_at desc already)
+    conversations.forEach((conv: any) => {
+      if (conv.participant && !seen.has(conv.participant.id)) {
+        seen.add(conv.participant.id);
+        result.push({
+          id: conv.participant.id,
+          username: conv.participant.username,
+          full_name: conv.participant.nickname || conv.participant.full_name,
+          avatar_url: conv.participant.avatar_url,
+          isOnline: isUserOnline(conv.participant.id),
+        });
+      }
+    });
+
+    // Then online following not already in conversations
+    onlineFollowing.forEach((u: any) => {
+      if (!seen.has(u.id)) {
+        seen.add(u.id);
+        result.push({
+          id: u.id,
+          username: u.username,
+          full_name: u.full_name,
+          avatar_url: u.avatar_url,
+          isOnline: true,
+        });
+      }
+    });
+
+    // Then remaining following
+    followingUsers?.forEach((u: any) => {
+      if (!seen.has(u.id)) {
+        seen.add(u.id);
+        result.push({
+          id: u.id,
+          username: u.username,
+          full_name: u.full_name,
+          avatar_url: u.avatar_url,
+          isOnline: isUserOnline(u.id),
+        });
+      }
+    });
+
+    return result;
+  }, [conversations, onlineFollowing, followingUsers, isUserOnline]);
+
+  const displayedUsers = expanded ? avatarUsers : avatarUsers.slice(0, 6);
+
+  return (
+    <div className="rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
+          <h3 className="font-semibold text-foreground text-sm">Mensagens</h3>
+          {totalUnread > 0 && (
+            <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-destructive text-destructive-foreground rounded-full">
+              {totalUnread > 99 ? "99+" : totalUnread}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => navigate("/messages")}
+          className="text-xs text-primary hover:underline"
+        >
+          Ver todas
+        </button>
+      </div>
+
+      {avatarUsers.length > 0 ? (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {displayedUsers.map((u) => (
+              <button
+                key={u.id}
+                onClick={() => handleStartChat(u)}
+                className="relative group flex flex-col items-center gap-1 w-12"
+                title={u.full_name || u.username}
+              >
+                <div className="relative">
+                  <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
+                    <AvatarImage src={u.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                      {getInitials(u.full_name || u.username)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {u.isOnline && (
+                    <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground truncate w-full text-center leading-tight">
+                  {(u.full_name || u.username || "").split(" ")[0]}
+                </span>
+              </button>
+            ))}
+          </div>
+          {avatarUsers.length > 6 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="w-full mt-2 text-xs text-primary hover:underline flex items-center justify-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {expanded ? "expand_less" : "expand_more"}
+              </span>
+              {expanded ? "Ver menos" : `Ver mais (${avatarUsers.length - 6})`}
+            </button>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-3">
+          <span className="material-symbols-outlined text-[28px] text-muted-foreground/50 mb-1">group_off</span>
+          <p className="text-xs text-muted-foreground">Nenhuma conversa ainda</p>
+        </div>
+      )}
+    </div>
+  );
+}
