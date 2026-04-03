@@ -65,7 +65,7 @@ export const FeedStories = () => {
   return (
     <>
       <div className="bg-background border-b border-border/30">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-4">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar py-4 px-[4px]">
           {/* Add Story Button - Instagram Style */}
           <div className="flex-none w-28 group">
             <div className={`relative h-44 rounded-lg overflow-hidden border border-border/50 ${hasOwnStories ? (hasUnviewedOwnStories ? 'ring-2 ring-primary' : 'ring-2 ring-muted-foreground/30') : ''}`}>
