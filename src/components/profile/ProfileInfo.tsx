@@ -398,15 +398,36 @@ export const ProfileInfo = ({
                       Mensagem
                     </button>
                   </>
-                ) : (
+                 ) : (
                   <>
-                    <button ref={buttonRef} onClick={isCheering ? () => setCheeringSheetOpen(true) : handleFollowClick} disabled={followUser.isPending} className={`h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 ${isCheering ? "bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]" : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"}`}>
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.span key={isCheering ? "cheering" : "cheer"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
-                          {isCheering ? <>Torcendo <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span></> : "Torcer"}
-                        </motion.span>
-                      </AnimatePresence>
-                    </button>
+                    {isCheering ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button ref={buttonRef} className="h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 bg-muted text-primary border border-border hover:bg-muted/80 active:scale-[0.98]">
+                            <AnimatePresence mode="wait" initial={false}>
+                              <motion.span key="cheering" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
+                                Torcendo <span className="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+                              </motion.span>
+                            </AnimatePresence>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56 bg-popover">
+                          <FavoriteDropdownItem profileId={profile.id} />
+                          <DropdownMenuItem onClick={handleFollowClick} className="text-destructive focus:text-destructive cursor-pointer">
+                            <span className="material-symbols-outlined mr-2 text-[18px]">person_remove</span>
+                            Deixar de torcer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <button ref={buttonRef} onClick={handleFollowClick} disabled={followUser.isPending} className="h-10 px-5 rounded-lg font-semibold text-sm transition-all duration-200 ease-out flex items-center justify-center gap-1.5 disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]">
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.span key="cheer" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: "easeOut" }} className="flex items-center gap-1">
+                            Torcer
+                          </motion.span>
+                        </AnimatePresence>
+                      </button>
+                    )}
                     <button onClick={handleMessageClick} disabled={isStartingChat} className="bg-muted text-foreground h-10 w-10 rounded-lg text-sm transition-all duration-200 ease-out border border-border flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 active:scale-[0.98]">
                       <span className="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
                     </button>
