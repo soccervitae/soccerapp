@@ -67,24 +67,26 @@ const Index = () => {
         <FeedSkeleton />
       ) : posts && posts.length > 0 ? (
         posts.map((post, index) => (
-          <motion.div
-            key={post.id}
-            initial={highlightedPostId === post.id ? { scale: 0.95, opacity: 0 } : false}
-            animate={{ 
-              scale: 1, 
-              opacity: 1,
-              boxShadow: highlightedPostId === post.id 
-                ? ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 20px 4px hsl(var(--primary) / 0.4)', '0 0 0 0 hsl(var(--primary) / 0)']
-                : '0 0 0 0 transparent'
-            }}
-            transition={{ 
-              duration: highlightedPostId === post.id ? 0.5 : 0.3,
-              boxShadow: highlightedPostId === post.id ? { duration: 2, repeat: 1, ease: "easeInOut" } : undefined
-            }}
-            className={highlightedPostId === post.id ? 'relative z-10' : ''}
-          >
-            <FeedPost post={post} />
-          </motion.div>
+          <Fragment key={post.id}>
+            <motion.div
+              initial={highlightedPostId === post.id ? { scale: 0.95, opacity: 0 } : false}
+              animate={{ 
+                scale: 1, 
+                opacity: 1,
+                boxShadow: highlightedPostId === post.id 
+                  ? ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 20px 4px hsl(var(--primary) / 0.4)', '0 0 0 0 hsl(var(--primary) / 0)']
+                  : '0 0 0 0 transparent'
+              }}
+              transition={{ 
+                duration: highlightedPostId === post.id ? 0.5 : 0.3,
+                boxShadow: highlightedPostId === post.id ? { duration: 2, repeat: 1, ease: "easeInOut" } : undefined
+              }}
+              className={highlightedPostId === post.id ? 'relative z-10' : ''}
+            >
+              <FeedPost post={post} />
+            </motion.div>
+            {(index + 1) % 5 === 0 && <AdBanner />}
+          </Fragment>
         ))
       ) : (
         <div className="flex flex-col items-center justify-center py-20 px-4">
