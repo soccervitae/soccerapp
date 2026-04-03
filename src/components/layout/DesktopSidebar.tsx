@@ -23,7 +23,7 @@ const navItems = [{
   path: "/explore"
 }, {
   id: "create",
-  icon: "add_box",
+  icon: "add",
   label: "Criar",
   path: null
 }, {
