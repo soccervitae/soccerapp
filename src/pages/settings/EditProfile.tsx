@@ -561,18 +561,36 @@ const EditProfile = () => {
     }
   };
 
-  if (isLoading) {
+  const loadingContent = (
+    <main className="bg-background min-h-screen">
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-24 w-24 rounded-full mx-auto" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    </main>
+  );
+
+  if (isLoading && !isMobile) {
     return (
-      <main className="bg-background min-h-screen">
-        <div className="p-4 space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-24 w-24 rounded-full mx-auto" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              {loadingContent}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     );
+  }
+
+  if (isLoading) {
+    return loadingContent;
   }
 
   return (
