@@ -79,7 +79,7 @@ export default function Verification() {
           </p>
         )}
       </div>
-    </div>
+    </SettingsPageLayout>
   );
 }
 
