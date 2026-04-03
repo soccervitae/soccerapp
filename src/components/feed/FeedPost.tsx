@@ -581,7 +581,7 @@ export const FeedPost = ({
       month: "short"
     });
   };
-  return <article className="border-b border-border/40 bg-background px-4">
+  return <article className="border-b border-border/40 bg-background px-[4px]">
       {/* Header */}
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3">
