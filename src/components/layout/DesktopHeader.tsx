@@ -46,7 +46,7 @@ export const DesktopHeader = () => {
             <img
               src="https://wdgpmpgdlauiawbtbxmn.supabase.co/storage/v1/object/public/site-assets/SOCCERVITAE_LOGO_NOVO_verde.png"
               alt="SOCCER VITAE"
-              className="h-7 object-contain"
+              className="h-5 object-contain"
             />
           </button>
 
