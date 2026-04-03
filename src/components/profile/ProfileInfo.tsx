@@ -323,6 +323,13 @@ export const ProfileInfo = ({
         >
           {profile.cover_url ? (
             <img src={profile.cover_url} alt="Cover photo" className="w-full h-full object-cover" />
+          ) : isOwnProfile ? (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-muted/30 flex items-center justify-center cursor-pointer" onClick={() => navigate("/settings/profile")}>
+              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                <span className="text-xs font-medium">Adicionar capa</span>
+              </div>
+            </div>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-muted/30" />
           )}
@@ -339,6 +346,10 @@ export const ProfileInfo = ({
             >
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-white bg-muted object-cover" />
+              ) : isOwnProfile ? (
+                <div className="w-full h-full rounded-full border-4 border-white bg-muted flex items-center justify-center cursor-pointer" onClick={() => navigate("/settings/profile")}>
+                  <span className="material-symbols-outlined text-3xl text-muted-foreground">photo_camera</span>
+                </div>
               ) : (
                 <div className="w-full h-full rounded-full border-4 border-white bg-muted flex items-center justify-center">
                   <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
