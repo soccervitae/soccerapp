@@ -193,7 +193,7 @@ const Privacy = () => {
           </div>
         )}
       </div>
-    </main>
+    </SettingsPageLayout>
   );
 };
 
