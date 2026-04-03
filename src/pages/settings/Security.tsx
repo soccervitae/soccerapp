@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Loader2, Monitor, Smartphone, Tablet, Shield, Trash2, ShieldCheck, RefreshCw, LogOut, AlertTriangle } from "lucide-react";
+import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
