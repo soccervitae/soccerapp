@@ -708,12 +708,12 @@ export const ProfileInfo = ({
         />
       )}
 
-      {/* Cheering Options Sheet */}
-      <Drawer open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
-        <DrawerContent>
-          <DrawerHeader className="pb-2">
-            <DrawerTitle className="text-center">@{profile.username}</DrawerTitle>
-          </DrawerHeader>
+      {/* Cheering Options Sheet/Modal */}
+      <ResponsiveModal open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
+        <ResponsiveModalContent className="sm:max-w-sm">
+          <ResponsiveModalHeader>
+            <ResponsiveModalTitle className="text-center">@{profile.username}</ResponsiveModalTitle>
+          </ResponsiveModalHeader>
           <div className="flex flex-col gap-2 py-4 px-4">
             <FavoriteButton profileId={profile.id} onDone={() => setCheeringSheetOpen(false)} />
             <button
@@ -727,8 +727,8 @@ export const ProfileInfo = ({
               <span className="font-medium">Deixar de torcer</span>
             </button>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </ResponsiveModalContent>
+      </ResponsiveModal>
 
       {/* Auth Prompt Modal */}
       <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
