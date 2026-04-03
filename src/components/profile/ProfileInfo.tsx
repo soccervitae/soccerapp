@@ -346,6 +346,10 @@ export const ProfileInfo = ({
             >
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full border-4 border-white bg-muted object-cover" />
+              ) : isOwnProfile ? (
+                <div className="w-full h-full rounded-full border-4 border-white bg-muted flex items-center justify-center cursor-pointer" onClick={() => navigate("/settings/profile")}>
+                  <span className="material-symbols-outlined text-3xl text-muted-foreground">photo_camera</span>
+                </div>
               ) : (
                 <div className="w-full h-full rounded-full border-4 border-white bg-muted flex items-center justify-center">
                   <span className="material-symbols-outlined text-4xl text-muted-foreground">person</span>
