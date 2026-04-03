@@ -21,6 +21,9 @@ import { CountryPickerSheet } from "@/components/profile/CountryPickerSheet";
 import { StatePickerSheet } from "@/components/profile/StatePickerSheet";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { getCroppedImg, CropData } from "@/hooks/useImageCrop";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 
 interface State {
   id: number;
@@ -37,6 +40,7 @@ const EditProfile = () => {
   const updateProfile = useUpdateProfile();
   const uploadMedia = useUploadMedia();
   const { takePhoto, pickFromGallery, isNative } = useDeviceCamera();
+  const isMobile = useIsMobile();
   
 
   // Fetch countries for nationality selector
@@ -557,21 +561,39 @@ const EditProfile = () => {
     }
   };
 
-  if (isLoading) {
+  const loadingContent = (
+    <main className="bg-background min-h-screen">
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-24 w-24 rounded-full mx-auto" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    </main>
+  );
+
+  if (isLoading && !isMobile) {
     return (
-      <main className="bg-background min-h-screen">
-        <div className="p-4 space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-24 w-24 rounded-full mx-auto" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+      <div className="min-h-screen bg-muted/30">
+        <DesktopHeader />
+        <div className="flex pt-14 max-w-screen-2xl mx-auto">
+          <DesktopSidebar />
+          <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              {loadingContent}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     );
   }
 
-  return (
+  if (isLoading) {
+    return loadingContent;
+  }
+
+  const editContent = (
     <>
       {/* Unsaved Changes Sheet */}
       <Drawer open={showExitDialog} onOpenChange={setShowExitDialog}>
@@ -601,8 +623,9 @@ const EditProfile = () => {
         </DrawerContent>
       </Drawer>
 
-      <main className="bg-background min-h-screen">
-      {/* Header */}
+      <main className={`bg-background ${isMobile ? 'min-h-screen' : ''}`}>
+      {/* Header - mobile only */}
+      {isMobile && (
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 h-[50px]">
           <button
@@ -626,8 +649,9 @@ const EditProfile = () => {
           </button>
         </div>
       </header>
+      )}
 
-      <form id="edit-profile-form" onSubmit={handleSubmit} className="pt-[50px] pb-8">
+      <form id="edit-profile-form" onSubmit={handleSubmit} className={`${isMobile ? 'pt-[50px]' : 'pt-4'} pb-8`}>
         {/* Cover Photo */}
         <div className="relative mb-14">
           <div className="w-full h-36 bg-muted overflow-hidden">
@@ -1195,6 +1219,41 @@ const EditProfile = () => {
       )}
     </main>
     </>
+  );
+
+  // Mobile
+  if (isMobile) {
+    return editContent;
+  }
+
+  // Desktop
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <DesktopHeader />
+      <div className="flex pt-14 max-w-screen-2xl mx-auto">
+        <DesktopSidebar />
+        <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-semibold text-foreground">Editar Perfil</h1>
+              <button
+                type="submit"
+                form="edit-profile-form"
+                disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Salvar"
+                )}
+              </button>
+            </div>
+            {editContent}
+          </div>
+        </main>
+      </div>
+    </div>
   );
 };
 
