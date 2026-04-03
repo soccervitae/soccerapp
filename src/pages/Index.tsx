@@ -85,7 +85,7 @@ const Index = () => {
             >
               <FeedPost post={post} />
             </motion.div>
-            {(index + 1) % 5 === 0 && <AdBanner />}
+            {(index + 1) % 22 === 0 && <AdBanner />}
           </Fragment>
         ))
       ) : (
