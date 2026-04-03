@@ -85,11 +85,6 @@ const FollowList = () => {
                 alt={user.full_name || user.username}
                 className="w-12 h-12 rounded-full object-cover bg-muted"
               />
-              {user.conta_verificada && (
-                <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-primary-foreground rounded-full p-0.5">
-                  <span className="material-symbols-outlined text-[10px]">verified</span>
-                </div>
-              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-foreground truncate">
