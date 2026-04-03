@@ -110,9 +110,6 @@ const Explore = () => {
                     alt={profile.full_name || profile.username}
                     className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
                   />
-                  {profile.conta_verificada && (
-                    <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground text-sm truncate flex items-center gap-1">
