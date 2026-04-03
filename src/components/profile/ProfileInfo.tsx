@@ -464,6 +464,101 @@ export const ProfileInfo = ({
           )}
 
         </div>
+
+        {/* Modals shared between desktop and mobile */}
+        {/* QR Code Modal */}
+        <ResponsiveModal open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+          <ResponsiveModalContent className="sm:max-w-xs">
+            <ResponsiveModalHeader>
+              <ResponsiveModalTitle className="text-center">QR Code do Perfil</ResponsiveModalTitle>
+            </ResponsiveModalHeader>
+            <div className="flex flex-col items-center gap-4 py-4">
+              <div ref={qrRef} className="bg-white p-4 rounded-xl">
+                <QRCodeSVG value={profileUrl} size={200} level="H" includeMargin={false} />
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                @{profile.username}
+              </p>
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" className="flex-1" onClick={handleShareProfile}>
+                  <span className="material-symbols-outlined text-[18px] mr-2">link</span>
+                  Copiar
+                </Button>
+                <Button className="flex-1" onClick={handleDownloadQR}>
+                  <span className="material-symbols-outlined text-[18px] mr-2">download</span>
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          </ResponsiveModalContent>
+        </ResponsiveModal>
+
+        {/* Story Viewer */}
+        {groupedStories && hasActiveStories && <StoryViewer groupedStories={groupedStories} initialGroupIndex={groupedStories.findIndex(g => g.userId === profile.id)} isOpen={storyViewerOpen} onClose={() => setStoryViewerOpen(false)} originRect={clickOrigin} />}
+
+        {/* Fullscreen Image Viewer */}
+        {fullscreenImageUrl && (
+          <FullscreenImageViewer
+            isOpen={fullscreenImageOpen}
+            onClose={() => {
+              setFullscreenImageOpen(false);
+              setFullscreenImageUrl(null);
+            }}
+            images={[fullscreenImageUrl]}
+            originRect={fullscreenClickOrigin}
+          />
+        )}
+
+        {/* Cheering Options Modal */}
+        <ResponsiveModal open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
+          <ResponsiveModalContent className="sm:max-w-sm">
+            <ResponsiveModalHeader>
+              <ResponsiveModalTitle className="text-center">@{profile.username}</ResponsiveModalTitle>
+            </ResponsiveModalHeader>
+            <div className="flex flex-col gap-2 py-4 px-4">
+              <FavoriteButton profileId={profile.id} onDone={() => setCheeringSheetOpen(false)} />
+              <button
+                onClick={() => {
+                  handleFollowClick();
+                  setCheeringSheetOpen(false);
+                }}
+                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left text-destructive"
+              >
+                <span className="material-symbols-outlined text-[22px]">person_remove</span>
+                <span className="font-medium">Deixar de torcer</span>
+              </button>
+            </div>
+          </ResponsiveModalContent>
+        </ResponsiveModal>
+
+        {/* Auth Prompt Modal */}
+        <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
+          <ResponsiveModalContent className="sm:max-w-sm">
+            <ResponsiveModalHeader>
+              <ResponsiveModalTitle className="text-center">Entre no SOCCER VITAE</ResponsiveModalTitle>
+            </ResponsiveModalHeader>
+            <div className="flex flex-col items-center gap-4 py-4 px-2">
+              <p className="text-sm text-muted-foreground text-center">
+                Você precisa estar logado ou criar sua conta para usar esta funcionalidade.
+              </p>
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" className="flex-1" onClick={() => { setAuthPromptOpen(false); navigate("/login"); }}>
+                  Entrar
+                </Button>
+                <Button className="flex-1" onClick={() => { setAuthPromptOpen(false); navigate("/auth"); }}>
+                  Criar conta
+                </Button>
+              </div>
+            </div>
+          </ResponsiveModalContent>
+        </ResponsiveModal>
+
+        {/* Guest Contact Modal */}
+        <GuestContactModal
+          open={guestContactOpen}
+          onOpenChange={setGuestContactOpen}
+          profile={profile}
+        />
       </section>
     );
   }
