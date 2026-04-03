@@ -312,7 +312,7 @@ const Notifications = () => {
           </p>
         </div>
       </div>
-    </div>
+    </SettingsPageLayout>
   );
 };
 
