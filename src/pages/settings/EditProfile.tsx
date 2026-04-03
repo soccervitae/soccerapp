@@ -1220,6 +1220,41 @@ const EditProfile = () => {
     </main>
     </>
   );
+
+  // Mobile
+  if (isMobile) {
+    return editContent;
+  }
+
+  // Desktop
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <DesktopHeader />
+      <div className="flex pt-14 max-w-screen-2xl mx-auto">
+        <DesktopSidebar />
+        <main className="flex-1 min-w-0 px-4 py-4 lg:px-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-semibold text-foreground">Editar Perfil</h1>
+              <button
+                type="submit"
+                form="edit-profile-form"
+                disabled={isSubmitting || usernameStatus === "taken" || usernameStatus === "checking"}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Salvar"
+                )}
+              </button>
+            </div>
+            {editContent}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 };
 
 export default EditProfile;
