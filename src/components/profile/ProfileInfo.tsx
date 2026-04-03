@@ -570,27 +570,6 @@ export const ProfileInfo = ({
           />
         )}
 
-        {/* Cheering Options Modal */}
-        <ResponsiveModal open={cheeringSheetOpen} onOpenChange={setCheeringSheetOpen}>
-          <ResponsiveModalContent className="sm:max-w-sm">
-            <ResponsiveModalHeader>
-              <ResponsiveModalTitle className="text-center">@{profile.username}</ResponsiveModalTitle>
-            </ResponsiveModalHeader>
-            <div className="flex flex-col gap-2 py-4 px-4">
-              <FavoriteButton profileId={profile.id} onDone={() => setCheeringSheetOpen(false)} />
-              <button
-                onClick={() => {
-                  handleFollowClick();
-                  setCheeringSheetOpen(false);
-                }}
-                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors text-left text-destructive"
-              >
-                <span className="material-symbols-outlined text-[22px]">person_remove</span>
-                <span className="font-medium">Deixar de torcer</span>
-              </button>
-            </div>
-          </ResponsiveModalContent>
-        </ResponsiveModal>
 
         {/* Auth Prompt Modal */}
         <ResponsiveModal open={authPromptOpen} onOpenChange={setAuthPromptOpen}>
