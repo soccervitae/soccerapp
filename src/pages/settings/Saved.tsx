@@ -358,7 +358,6 @@ export default function Saved() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
 
       {/* ProfileFeedSheet for saved posts */}
       {selectedPostProfile && (
