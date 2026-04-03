@@ -430,6 +430,6 @@ export default function Saved() {
         profileUsername={currentHighlightProfile?.username}
         authorAvatarUrl={currentHighlightProfile?.avatar_url || undefined}
       />
-    </div>
+    </SettingsPageLayout>
   );
 }
