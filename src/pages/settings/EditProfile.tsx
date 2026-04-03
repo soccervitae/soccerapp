@@ -651,7 +651,7 @@ const EditProfile = () => {
       </header>
       )}
 
-      <form id="edit-profile-form" onSubmit={handleSubmit} className="pt-[50px] pb-8">
+      <form id="edit-profile-form" onSubmit={handleSubmit} className={`${isMobile ? 'pt-[50px]' : 'pt-4'} pb-8`}>
         {/* Cover Photo */}
         <div className="relative mb-14">
           <div className="w-full h-36 bg-muted overflow-hidden">
