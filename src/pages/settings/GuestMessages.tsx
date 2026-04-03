@@ -101,6 +101,6 @@ export default function GuestMessages() {
           </div>
         )}
       </div>
-    </div>
+    </SettingsPageLayout>
   );
 }
