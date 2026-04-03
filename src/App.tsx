@@ -18,6 +18,7 @@ import { DesktopChatPopup } from "@/components/messages/DesktopChatPopup";
 import PwaAutoUpdate from "@/components/pwa/PwaAutoUpdate";
 import SplashScreen from "@/components/SplashScreen";
 import { GlobalOfflineBanner } from "@/components/common/GlobalOfflineBanner";
+import { CookieConsentBanner } from "@/components/common/CookieConsentBanner";
 import PwaOnlyGate from "@/components/common/PwaOnlyGate";
 
 import Index from "./pages/Index";
@@ -389,6 +390,7 @@ const App = () => {
                       <GlobalOfflineBanner />
                       <AnimatedRoutes />
                       <DesktopChatPopup />
+                      <CookieConsentBanner />
                     </MessageNotificationProvider>
                   </ChatPopupProvider>
                 </ConversationsProvider>
