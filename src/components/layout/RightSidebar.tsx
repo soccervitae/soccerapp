@@ -26,7 +26,7 @@ export const RightSidebar = () => {
   const navigate = useNavigate();
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
-  const { totalUnread } = useConversationsContext();
+  const { totalUnread, conversations } = useConversationsContext();
   const { openChat } = useChatPopup();
   const { createConversation } = useCreateConversation();
 
