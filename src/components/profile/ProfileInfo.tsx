@@ -408,7 +408,7 @@ export const ProfileInfo = ({
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="bg-muted hover:bg-muted/80 text-foreground h-10 w-10 rounded-full text-sm transition-colors border border-border flex items-center justify-center">
+                          <button className="bg-muted hover:bg-muted/80 text-foreground h-10 w-10 rounded-lg text-sm transition-colors border border-border flex items-center justify-center">
                             <span className="material-symbols-outlined text-[18px]">share</span>
                           </button>
                         </DropdownMenuTrigger>
