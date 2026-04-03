@@ -294,8 +294,6 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
     return result;
   }, [conversations, onlineFollowing, followingUsers, isUserOnline]);
 
-  const displayedUsers = expanded ? avatarUsers : avatarUsers.slice(0, 6);
-
   return (
     <div className="rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
       <div className="flex items-center justify-between mb-3">
@@ -318,41 +316,75 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
 
       {avatarUsers.length > 0 ? (
         <>
-          <div className="flex flex-wrap gap-2">
-            {displayedUsers.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => handleStartChat(u)}
-                className="relative group flex flex-col items-center gap-1 w-12"
-                title={u.full_name || u.username}
-              >
-                <div className="relative">
-                  <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
-                    <AvatarImage src={u.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                      {getInitials(u.full_name || u.username)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {u.isOnline && (
-                    <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                  )}
-                </div>
-                <span className="text-[10px] text-muted-foreground truncate w-full text-center leading-tight">
-                  {(u.full_name || u.username || "").split(" ")[0]}
-                </span>
-              </button>
-            ))}
-          </div>
-          {avatarUsers.length > 6 && (
+          {/* Collapsed: stacked avatars overlapping */}
+          {!expanded ? (
             <button
-              onClick={() => setExpanded(!expanded)}
-              className="w-full mt-2 text-xs text-primary hover:underline flex items-center justify-center gap-1"
+              onClick={() => setExpanded(true)}
+              className="flex items-center w-full group"
             >
-              <span className="material-symbols-outlined text-[16px]">
-                {expanded ? "expand_less" : "expand_more"}
+              <div className="flex items-center -space-x-2">
+                {avatarUsers.slice(0, 8).map((u, i) => (
+                  <div key={u.id} className="relative" style={{ zIndex: 8 - i }}>
+                    <Avatar className="h-9 w-9 ring-2 ring-card">
+                      <AvatarImage src={u.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                        {getInitials(u.full_name || u.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {u.isOnline && (
+                      <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    )}
+                  </div>
+                ))}
+                {avatarUsers.length > 8 && (
+                  <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center ring-2 ring-card text-xs font-medium text-muted-foreground" style={{ zIndex: 0 }}>
+                    +{avatarUsers.length - 8}
+                  </div>
+                )}
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-muted-foreground ml-auto group-hover:text-primary transition-colors">
+                expand_more
               </span>
-              {expanded ? "Ver menos" : `Ver mais (${avatarUsers.length - 6})`}
             </button>
+          ) : (
+            /* Expanded: full list */
+            <div>
+              <div className="space-y-1 max-h-60 overflow-y-auto">
+                {avatarUsers.map((u) => (
+                  <button
+                    key={u.id}
+                    onClick={() => handleStartChat(u)}
+                    className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <div className="relative">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={u.avatar_url || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                          {getInitials(u.full_name || u.username)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {u.isOnline && (
+                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {u.full_name || u.username}
+                      </p>
+                      {u.isOnline && <p className="text-[11px] text-green-600">Online</p>}
+                    </div>
+                    <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setExpanded(false)}
+                className="w-full mt-2 text-xs text-primary hover:underline flex items-center justify-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[16px]">expand_less</span>
+                Recolher
+              </button>
+            </div>
           )}
         </>
       ) : (
