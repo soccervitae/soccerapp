@@ -17,6 +17,7 @@ export default function Settings() {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile();
   const isPWA = useIsPWA();
+  const isMobile = useIsMobile();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
