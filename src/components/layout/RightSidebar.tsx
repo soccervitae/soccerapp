@@ -11,6 +11,7 @@ import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useChatPopup } from "@/contexts/ChatPopupContext";
 import { useCreateConversation } from "@/hooks/useMessages";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdBanner } from "@/components/feed/AdBanner";
 
 const trendingTopics = [
   { tag: "#CopaLibertadores2025", posts: "12.4k" },
@@ -199,7 +200,10 @@ export const RightSidebar = () => {
         </div>
       </div>
 
-      {/* Trending */}
+      {/* Ad Banner */}
+      <div className="mb-4">
+        <AdBanner slot="" format="auto" responsive={true} />
+      </div>
       <div className="rounded-xl bg-card border border-border p-4">
         <h3 className="font-semibold text-foreground mb-4">Trending no Futebol</h3>
         <div className="space-y-3">
