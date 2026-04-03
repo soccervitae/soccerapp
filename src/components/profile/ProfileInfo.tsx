@@ -309,7 +309,7 @@ export const ProfileInfo = ({
             {/* Name, position, bio */}
             <div className="flex-1 min-w-0 pt-16">
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold text-foreground truncate">
+                <h2 className="font-bold text-foreground truncate text-base">
                   {profile.nickname || profile.full_name || profile.username}
                 </h2>
                 {(profile as any).is_official_account ? (
