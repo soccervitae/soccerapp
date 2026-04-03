@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/select";
 import { Search, ArrowLeft, Shield, Globe, MapPin, Download } from "lucide-react";
 import { ScrapeTeamsSheet } from "@/components/teams/ScrapeTeamsSheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopHeader } from "@/components/layout/DesktopHeader";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
+import { RightSidebar } from "@/components/layout/RightSidebar";
 import type { Team } from "@/hooks/useTeams";
 
 // Componente separado para o card do time com estado próprio para controlar erro de imagem
