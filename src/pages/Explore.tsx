@@ -111,7 +111,7 @@ const Explore = () => {
                     className="w-11 h-11 rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors"
                   />
                   {profile.conta_verificada && (
-                    <CheckCircle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary fill-primary" />
+                    <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
