@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { useFollowUser } from "@/hooks/useProfile";
 import { usePresenceContext } from "@/contexts/PresenceContext";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useChatPopup } from "@/contexts/ChatPopupContext";
-import { useCreateConversation } from "@/hooks/useMessages";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdBanner } from "@/components/feed/AdBanner";
 
@@ -27,8 +27,6 @@ export const RightSidebar = () => {
   const followUser = useFollowUser();
   const { isUserOnline } = usePresenceContext();
   const { totalUnread, conversations } = useConversationsContext();
-  const { openChat } = useChatPopup();
-  const { createConversation } = useCreateConversation();
 
   // Fetch following users for online section
   const { data: followingUsers } = useQuery({
@@ -57,17 +55,6 @@ export const RightSidebar = () => {
     return followingUsers?.filter(u => isUserOnline(u.id)) || [];
   }, [followingUsers, isUserOnline]);
 
-  const handleStartChat = async (userProfile: { id: string; username: string; full_name: string | null; avatar_url: string | null }) => {
-    const conversationId = await createConversation(userProfile.id);
-    if (conversationId) {
-      openChat(conversationId, {
-        id: userProfile.id,
-        username: userProfile.username,
-        full_name: userProfile.full_name,
-        avatar_url: userProfile.avatar_url,
-      });
-    }
-  };
 
   const { data: suggestions, isLoading } = useQuery({
     queryKey: ["profile-suggestions", user?.id],
@@ -222,7 +209,6 @@ export const RightSidebar = () => {
         followingUsers={followingUsers}
         totalUnread={totalUnread}
         navigate={navigate}
-        handleStartChat={handleStartChat}
         getInitials={getInitials}
         isUserOnline={isUserOnline}
       />
@@ -236,20 +222,17 @@ interface MessagesSectionProps {
   followingUsers: any[] | undefined;
   totalUnread: number;
   navigate: (path: string) => void;
-  handleStartChat: (user: any) => void;
   getInitials: (name: string | null | undefined) => string;
   isUserOnline: (userId: string) => boolean;
 }
 
-function MessagesSection({ conversations, onlineFollowing, followingUsers, totalUnread, navigate, handleStartChat, getInitials, isUserOnline }: MessagesSectionProps) {
-  const [expanded, setExpanded] = useState(false);
+function MessagesSection({ conversations, onlineFollowing, followingUsers, totalUnread, navigate, getInitials, isUserOnline }: MessagesSectionProps) {
+  const { openContactPicker } = useChatPopup();
 
-  // Build avatar list: recent conversation participants first, then online following
   const avatarUsers = useMemo(() => {
     const seen = new Set<string>();
     const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; isOnline: boolean }[] = [];
 
-    // Recent conversations first (sorted by updated_at desc already)
     conversations.forEach((conv: any) => {
       if (conv.participant && !seen.has(conv.participant.id)) {
         seen.add(conv.participant.id);
@@ -263,31 +246,17 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
       }
     });
 
-    // Then online following not already in conversations
     onlineFollowing.forEach((u: any) => {
       if (!seen.has(u.id)) {
         seen.add(u.id);
-        result.push({
-          id: u.id,
-          username: u.username,
-          full_name: u.full_name,
-          avatar_url: u.avatar_url,
-          isOnline: true,
-        });
+        result.push({ id: u.id, username: u.username, full_name: u.full_name, avatar_url: u.avatar_url, isOnline: true });
       }
     });
 
-    // Then remaining following
     followingUsers?.forEach((u: any) => {
       if (!seen.has(u.id)) {
         seen.add(u.id);
-        result.push({
-          id: u.id,
-          username: u.username,
-          full_name: u.full_name,
-          avatar_url: u.avatar_url,
-          isOnline: isUserOnline(u.id),
-        });
+        result.push({ id: u.id, username: u.username, full_name: u.full_name, avatar_url: u.avatar_url, isOnline: isUserOnline(u.id) });
       }
     });
 
@@ -295,7 +264,7 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
   }, [conversations, onlineFollowing, followingUsers, isUserOnline]);
 
   return (
-    <div className="relative rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
+    <div className="rounded-xl bg-card border border-border p-3 mt-4 flex-shrink-0">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
@@ -316,7 +285,7 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
 
       {avatarUsers.length > 0 ? (
         <button
-          onClick={() => setExpanded(!expanded)}
+          onClick={openContactPicker}
           className="flex items-center w-full group"
         >
           <div className="flex items-center -space-x-2">
@@ -345,52 +314,6 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
           <span className="material-symbols-outlined text-[28px] text-muted-foreground/50 mb-1">group_off</span>
           <p className="text-xs text-muted-foreground">Nenhuma conversa ainda</p>
         </div>
-      )}
-
-      {/* Floating popup */}
-      {expanded && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setExpanded(false)} />
-          <div className="absolute bottom-full right-0 mb-2 w-72 z-50 rounded-xl bg-card border border-border shadow-lg overflow-hidden">
-            <div className="flex items-center justify-between p-3 border-b border-border">
-              <h4 className="font-semibold text-foreground text-sm">Mensagens</h4>
-              <button onClick={() => setExpanded(false)} className="text-muted-foreground hover:text-foreground">
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-            <div className="max-h-80 overflow-y-auto">
-              {avatarUsers.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => {
-                    setExpanded(false);
-                    handleStartChat(u);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted transition-colors"
-                >
-                  <div className="relative">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={u.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                        {getInitials(u.full_name || u.username)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {u.isOnline && (
-                      <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {u.full_name || u.username}
-                    </p>
-                    {u.isOnline && <p className="text-[11px] text-green-600">Online</p>}
-                  </div>
-                  <span className="material-symbols-outlined text-[18px] text-muted-foreground">send</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
       )}
     </div>
   );

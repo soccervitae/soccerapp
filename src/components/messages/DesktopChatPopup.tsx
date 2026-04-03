@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChatPopup } from "@/contexts/ChatPopupContext";
-import { useMessages } from "@/hooks/useMessages";
+import { useMessages, useCreateConversation } from "@/hooks/useMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMessageReactions } from "@/hooks/useMessageReactions";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
+import { usePresenceContext } from "@/contexts/PresenceContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -12,7 +13,150 @@ import { TypingIndicator } from "./TypingIndicator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Minus, Maximize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { MessageWithSender } from "@/hooks/useMessages";
+
+const ContactPickerView = () => {
+  const { user } = useAuth();
+  const { openChat, closeChat } = useChatPopup();
+  const { createConversation } = useCreateConversation();
+  const { conversations } = useConversationsContext();
+  const { isUserOnline } = usePresenceContext();
+  const [search, setSearch] = useState("");
+
+  const { data: followingUsers = [] } = useQuery({
+    queryKey: ["following-users-picker", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data: following } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+      if (!following || following.length === 0) return [];
+      const followingIds = following.map(f => f.following_id);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url, nickname, account_type")
+        .in("id", followingIds);
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const contactList = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; nickname?: string | null; account_type?: string | null; isOnline: boolean }[] = [];
+
+    conversations.forEach((conv: any) => {
+      if (conv.participant && !seen.has(conv.participant.id)) {
+        seen.add(conv.participant.id);
+        result.push({
+          ...conv.participant,
+          isOnline: isUserOnline(conv.participant.id),
+        });
+      }
+    });
+
+    followingUsers.forEach((u: any) => {
+      if (!seen.has(u.id)) {
+        seen.add(u.id);
+        result.push({ ...u, isOnline: isUserOnline(u.id) });
+      }
+    });
+
+    return result;
+  }, [conversations, followingUsers, isUserOnline]);
+
+  const filtered = search.trim()
+    ? contactList.filter(u =>
+        (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (u.nickname || "").toLowerCase().includes(search.toLowerCase()) ||
+        u.username.toLowerCase().includes(search.toLowerCase())
+      )
+    : contactList;
+
+  const handleSelect = async (u: typeof contactList[0]) => {
+    const conversationId = await createConversation(u.id);
+    if (conversationId) {
+      openChat(conversationId, {
+        id: u.id,
+        username: u.username,
+        full_name: u.full_name,
+        avatar_url: u.avatar_url,
+        nickname: u.nickname,
+        account_type: u.account_type,
+      });
+    }
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
+        <span className="material-symbols-outlined text-[22px] text-primary">chat</span>
+        <h3 className="flex-1 text-sm font-semibold text-foreground">Nova conversa</h3>
+        <button
+          onClick={closeChat}
+          className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="px-3 py-2 border-b border-border">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar contato..."
+          className="w-full px-3 py-2 text-sm rounded-lg bg-muted border-none outline-none text-foreground placeholder:text-muted-foreground"
+          autoFocus
+        />
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <span className="material-symbols-outlined text-[32px] mb-2">person_search</span>
+            <p className="text-sm">Nenhum contato encontrado</p>
+          </div>
+        ) : (
+          filtered.map((u) => (
+            <button
+              key={u.id}
+              onClick={() => handleSelect(u)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted transition-colors"
+            >
+              <div className="relative">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={u.avatar_url || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                    {getInitials(u.full_name || u.username)}
+                  </AvatarFallback>
+                </Avatar>
+                {u.isOnline && (
+                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {u.nickname || u.full_name || u.username}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+              </div>
+              {u.isOnline && (
+                <span className="text-[11px] text-green-600 font-medium">Online</span>
+              )}
+            </button>
+          ))
+        )}
+      </div>
+    </>
+  );
+};
 
 export const DesktopChatPopup = () => {
   const { state, closeChat, toggleMinimize } = useChatPopup();
@@ -26,12 +170,10 @@ export const DesktopChatPopup = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch reactions when messages change
   useEffect(() => {
     if (messages.length > 0) {
       const ids = messages.map(m => m.id).filter(id => !id.startsWith("pending-"));
@@ -39,7 +181,6 @@ export const DesktopChatPopup = () => {
     }
   }, [messages, fetchReactionsForMessages]);
 
-  // Refetch conversations to update unread
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
       const timer = setTimeout(() => refetchConversations(), 500);
@@ -65,12 +206,32 @@ export const DesktopChatPopup = () => {
     }
   };
 
+  if (!state.isOpen) return null;
+
+  // Contact picker mode
+  if (state.showContactPicker && !state.conversationId) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+          className="fixed bottom-5 right-5 z-50 flex flex-col bg-background border border-border rounded-xl shadow-2xl overflow-hidden"
+          style={{ width: 380, height: 480 }}
+        >
+          <ContactPickerView />
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  if (!state.conversationId) return null;
+
   const participant = state.participant;
   const displayName = participant?.account_type === "time"
     ? participant.full_name
     : participant?.nickname || participant?.full_name || participant?.username || "";
-
-  if (!state.isOpen || !state.conversationId) return null;
 
   return (
     <AnimatePresence>
