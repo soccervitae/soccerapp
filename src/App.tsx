@@ -390,6 +390,7 @@ const App = () => {
                       <GlobalOfflineBanner />
                       <AnimatedRoutes />
                       <DesktopChatPopup />
+                      <CookieConsentBanner />
                     </MessageNotificationProvider>
                   </ChatPopupProvider>
                 </ConversationsProvider>
