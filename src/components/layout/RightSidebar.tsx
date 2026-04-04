@@ -43,8 +43,9 @@ export const RightSidebar = () => {
       const followingIds = following.map(f => f.following_id);
       const { data } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url")
-        .in("id", followingIds);
+        .select("id, username, full_name, avatar_url, is_official_account")
+        .in("id", followingIds)
+        .neq("is_official_account", true);
       
       return data || [];
     },
@@ -234,7 +235,7 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
     const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; isOnline: boolean }[] = [];
 
     conversations.forEach((conv: any) => {
-      if (conv.participant && !seen.has(conv.participant.id)) {
+      if (conv.participant && !seen.has(conv.participant.id) && !conv.participant.is_official_account) {
         seen.add(conv.participant.id);
         result.push({
           id: conv.participant.id,

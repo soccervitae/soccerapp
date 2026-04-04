@@ -37,8 +37,9 @@ const ContactPickerView = () => {
       const followingIds = following.map(f => f.following_id);
       const { data } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, nickname, account_type")
-        .in("id", followingIds);
+        .select("id, username, full_name, avatar_url, nickname, account_type, is_official_account")
+        .in("id", followingIds)
+        .neq("is_official_account", true);
       return data || [];
     },
     enabled: !!user,
@@ -49,7 +50,7 @@ const ContactPickerView = () => {
     const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; nickname?: string | null; account_type?: string | null; isOnline: boolean }[] = [];
 
     conversations.forEach((conv: any) => {
-      if (conv.participant && !seen.has(conv.participant.id)) {
+      if (conv.participant && !seen.has(conv.participant.id) && !conv.participant.is_official_account) {
         seen.add(conv.participant.id);
         result.push({
           ...conv.participant,
@@ -59,7 +60,7 @@ const ContactPickerView = () => {
     });
 
     followingUsers.forEach((u: any) => {
-      if (!seen.has(u.id)) {
+      if (!seen.has(u.id) && !u.is_official_account) {
         seen.add(u.id);
         result.push({ ...u, isOnline: isUserOnline(u.id) });
       }
