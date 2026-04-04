@@ -680,8 +680,8 @@ export const PostMediaViewer = ({
                             <span className="font-semibold text-sm text-gray-900">
                               {post.profile.nickname || post.profile.full_name || post.profile.username}
                             </span>
-                            {post.profile.conta_verificada && (
-                              <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>
+                            {post.profile.is_verified_premium && (
+                              <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
                             )}
                           </div>
                           <p className="text-xs text-gray-600">{getTimeAgo(post.created_at)}</p>

@@ -151,8 +151,8 @@ export const HighlightLikesSheet = ({ highlightId, isOpen, onClose }: HighlightL
                             {getInitials(liker.profile.full_name || liker.profile.username)}
                           </AvatarFallback>
                         </Avatar>
-                        {liker.profile.conta_verificada && (
-                          <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white rounded-full w-4 h-4 flex items-center justify-center border-2 border-background">
+                        {liker.profile.is_verified_premium && (
+                          <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center border-2 border-background">
                             <span className="material-symbols-outlined text-[10px] font-bold">
                               verified
                             </span>

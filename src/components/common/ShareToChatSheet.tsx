@@ -273,8 +273,8 @@ export const ShareToChatSheet = ({
                         <span className="font-medium text-foreground">
                           {followingUser.full_name || followingUser.username}
                         </span>
-                        {followingUser.conta_verificada && (
-                          <span className="material-symbols-outlined text-[14px] text-emerald-500">
+                        {followingUser.is_verified_premium && (
+                          <span className="material-symbols-outlined text-[14px] text-primary">
                             verified
                           </span>
                         )}
