@@ -41,6 +41,7 @@ export const usePostLikes = (postId: string, enabled = true) => {
         nickname: (like.profile as any)?.nickname || null,
         avatar_url: (like.profile as any)?.avatar_url || null,
         conta_verificada: (like.profile as any)?.conta_verificada || false,
+        is_verified_premium: (like.profile as any)?.is_verified_premium || false,
       }));
     },
     enabled: !!postId && enabled,

@@ -87,6 +87,7 @@ export const useCommentLikers = (commentId: string, enabled: boolean = true) => 
         nickname: item.profiles?.nickname || null,
         avatar_url: item.profiles?.avatar_url || null,
         conta_verificada: item.profiles?.conta_verificada || false,
+        is_verified_premium: item.profiles?.is_verified_premium || false,
       }));
     },
     enabled: enabled && !!commentId,

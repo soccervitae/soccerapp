@@ -53,7 +53,8 @@ export const HighlightLikesSheet = ({ highlightId, isOpen, onClose }: HighlightL
             full_name,
             nickname,
             avatar_url,
-            conta_verificada
+            conta_verificada,
+            is_verified_premium
           )
         `)
         .eq("highlight_id", highlightId)
