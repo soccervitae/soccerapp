@@ -89,7 +89,9 @@ const FollowList = () => {
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-foreground truncate flex items-center gap-1">
                 {user.full_name || user.username}
-                {user.conta_verificada && (
+                {user.is_official_account ? (
+                  <span className="material-symbols-outlined text-[14px] text-amber-500 shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                ) : user.is_verified_premium && (!user.verified_premium_expires_at || new Date(user.verified_premium_expires_at) > new Date()) && (
                   <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 )}
               </p>

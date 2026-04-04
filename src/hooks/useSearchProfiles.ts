@@ -23,6 +23,7 @@ export interface SearchProfile {
   conta_verificada: boolean;
   is_verified_premium?: boolean | null;
   verified_premium_expires_at?: string | null;
+  is_official_account?: boolean | null;
   followers_count?: number;
   role?: string | null;
   gender?: string | null;
@@ -92,7 +93,7 @@ export const useSearchProfiles = (filters: SearchFilters, currentUserId?: string
     queryFn: async () => {
       let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, is_verified_premium, verified_premium_expires_at, role, gender, birth_date, nationality, account_type")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, is_verified_premium, verified_premium_expires_at, is_official_account, role, gender, birth_date, nationality, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")
@@ -158,7 +159,7 @@ export const usePopularProfiles = (currentUserId?: string) => {
       // Fetch verified profiles first
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, is_verified_premium, verified_premium_expires_at, role, gender, account_type")
+        .select("id, username, full_name, avatar_url, posicaomas, posicaofem, funcao, team, conta_verificada, is_verified_premium, verified_premium_expires_at, is_official_account, role, gender, account_type")
         .eq("profile_completed", true)
         .not("avatar_url", "is", null)
         .neq("avatar_url", "")

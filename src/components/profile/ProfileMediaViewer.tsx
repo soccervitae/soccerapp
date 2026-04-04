@@ -58,6 +58,7 @@ interface Profile {
   nickname?: string | null;
   avatar_url: string | null;
   conta_verificada?: boolean;
+  is_verified_premium?: boolean | null;
   gender?: string | null;
   role?: string | null;
   posicaomas?: number | null;
@@ -731,7 +732,7 @@ export const ProfileMediaViewer = ({
                             <span className="font-semibold text-sm text-foreground">
                               {profile.nickname || profile.full_name || profile.username}
                             </span>
-                            {profile.conta_verificada && (
+                            {profile.is_verified_premium && (
                               <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
                             )}
                           </div>

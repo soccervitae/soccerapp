@@ -187,8 +187,6 @@ export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVer
             <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
           ) : isVerifiedPremium && (!premiumExpiresAt || new Date(premiumExpiresAt) > new Date()) ? (
             <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-          ) : contaVerificada ? (
-            <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
           ) : null}
         </div>
         <div className="flex items-center gap-1">

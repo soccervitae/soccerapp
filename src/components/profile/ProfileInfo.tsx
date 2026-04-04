@@ -367,9 +367,7 @@ export const ProfileInfo = ({
                   <span className="material-symbols-outlined text-[20px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 ) : profile.is_verified_premium && (!profile.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date()) ? (
                   <span className="material-symbols-outlined text-[20px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                ) : profile.conta_verificada && (
-                  <span className="material-symbols-outlined text-[20px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                )}
+                ) : null}
               </div>
               {profile.position_name && profile.account_type !== 'time' && (
                 <p className="text-muted-foreground text-sm mt-0.5">{profile.position_name}</p>

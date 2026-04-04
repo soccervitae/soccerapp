@@ -8,6 +8,7 @@ export interface PostLikeUser {
   nickname: string | null;
   avatar_url: string | null;
   conta_verificada: boolean;
+  is_verified_premium?: boolean | null;
 }
 
 export const usePostLikes = (postId: string, enabled = true) => {
@@ -24,7 +25,8 @@ export const usePostLikes = (postId: string, enabled = true) => {
             full_name,
             nickname,
             avatar_url,
-            conta_verificada
+            conta_verificada,
+            is_verified_premium
           )
         `)
         .eq("post_id", postId)
@@ -39,6 +41,7 @@ export const usePostLikes = (postId: string, enabled = true) => {
         nickname: (like.profile as any)?.nickname || null,
         avatar_url: (like.profile as any)?.avatar_url || null,
         conta_verificada: (like.profile as any)?.conta_verificada || false,
+        is_verified_premium: (like.profile as any)?.is_verified_premium || false,
       }));
     },
     enabled: !!postId && enabled,
@@ -64,7 +67,8 @@ export const useRecentPostLikes = (postIds: string[]) => {
             full_name,
             nickname,
             avatar_url,
-            conta_verificada
+            conta_verificada,
+            is_verified_premium
           )
         `)
         .in("post_id", postIds)
@@ -87,6 +91,7 @@ export const useRecentPostLikes = (postIds: string[]) => {
             nickname: (like.profile as any)?.nickname || null,
             avatar_url: (like.profile as any)?.avatar_url || null,
             conta_verificada: (like.profile as any)?.conta_verificada || false,
+            is_verified_premium: (like.profile as any)?.is_verified_premium || false,
           });
         }
       }
