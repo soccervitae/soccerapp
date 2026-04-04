@@ -37,8 +37,9 @@ const ContactPickerView = () => {
       const followingIds = following.map(f => f.following_id);
       const { data } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, nickname, account_type")
-        .in("id", followingIds);
+        .select("id, username, full_name, avatar_url, nickname, account_type, is_official_account")
+        .in("id", followingIds)
+        .neq("is_official_account", true);
       return data || [];
     },
     enabled: !!user,
