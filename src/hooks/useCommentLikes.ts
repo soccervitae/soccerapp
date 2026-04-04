@@ -9,6 +9,7 @@ export interface CommentLiker {
   nickname: string | null;
   avatar_url: string | null;
   conta_verificada: boolean;
+  is_verified_premium?: boolean | null;
 }
 
 export const useCommentLikes = (commentIds: string[]) => {
