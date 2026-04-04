@@ -67,7 +67,8 @@ export const useRecentPostLikes = (postIds: string[]) => {
             full_name,
             nickname,
             avatar_url,
-            conta_verificada
+            conta_verificada,
+            is_verified_premium
           )
         `)
         .in("post_id", postIds)
