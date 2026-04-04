@@ -234,7 +234,7 @@ function MessagesSection({ conversations, onlineFollowing, followingUsers, total
     const result: { id: string; username: string; full_name: string | null; avatar_url: string | null; isOnline: boolean }[] = [];
 
     conversations.forEach((conv: any) => {
-      if (conv.participant && !seen.has(conv.participant.id)) {
+      if (conv.participant && !seen.has(conv.participant.id) && !conv.participant.is_official_account) {
         seen.add(conv.participant.id);
         result.push({
           id: conv.participant.id,
