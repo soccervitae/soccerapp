@@ -35,7 +35,7 @@ export const useFollowers = (userId: string) => {
       if (error) throw error;
       
       return (data || [])
-        .map((item) => item.follower)
+        .map((item) => item.follower as FollowUser | null)
         .filter((f): f is FollowUser => f !== null);
     },
     enabled: !!userId,
