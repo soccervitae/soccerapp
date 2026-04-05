@@ -90,6 +90,7 @@ export const useCommentLikers = (commentId: string, enabled: boolean = true) => 
         avatar_url: item.profiles?.avatar_url || null,
         conta_verificada: item.profiles?.conta_verificada || false,
         is_verified_premium: item.profiles?.is_verified_premium || false,
+        is_identity_verified: item.profiles?.is_identity_verified || false,
       }));
     },
     enabled: enabled && !!commentId,
