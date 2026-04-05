@@ -59,7 +59,8 @@ export const useFollowing = (userId: string) => {
             conta_verificada,
             is_verified_premium,
             verified_premium_expires_at,
-            is_official_account
+            is_official_account,
+            is_identity_verified
           )
         `)
         .eq("follower_id", userId);
