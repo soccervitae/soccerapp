@@ -10,6 +10,7 @@ interface FollowUser {
   is_verified_premium?: boolean | null;
   verified_premium_expires_at?: string | null;
   is_official_account?: boolean | null;
+  is_identity_verified?: boolean | null;
 }
 
 export const useFollowers = (userId: string) => {
