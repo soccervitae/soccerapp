@@ -10,6 +10,7 @@ export interface CommentLiker {
   avatar_url: string | null;
   conta_verificada: boolean;
   is_verified_premium?: boolean | null;
+  is_identity_verified?: boolean | null;
 }
 
 export const useCommentLikes = (commentIds: string[]) => {
