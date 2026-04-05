@@ -44,6 +44,7 @@ export const usePostLikes = (postId: string, enabled = true) => {
         avatar_url: (like.profile as any)?.avatar_url || null,
         conta_verificada: (like.profile as any)?.conta_verificada || false,
         is_verified_premium: (like.profile as any)?.is_verified_premium || false,
+        is_identity_verified: (like.profile as any)?.is_identity_verified || false,
       }));
     },
     enabled: !!postId && enabled,
