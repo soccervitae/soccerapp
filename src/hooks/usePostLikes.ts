@@ -9,6 +9,7 @@ export interface PostLikeUser {
   avatar_url: string | null;
   conta_verificada: boolean;
   is_verified_premium?: boolean | null;
+  is_identity_verified?: boolean | null;
 }
 
 export const usePostLikes = (postId: string, enabled = true) => {
@@ -26,7 +27,8 @@ export const usePostLikes = (postId: string, enabled = true) => {
             nickname,
             avatar_url,
             conta_verificada,
-            is_verified_premium
+            is_verified_premium,
+            is_identity_verified
           )
         `)
         .eq("post_id", postId)
@@ -42,6 +44,7 @@ export const usePostLikes = (postId: string, enabled = true) => {
         avatar_url: (like.profile as any)?.avatar_url || null,
         conta_verificada: (like.profile as any)?.conta_verificada || false,
         is_verified_premium: (like.profile as any)?.is_verified_premium || false,
+        is_identity_verified: (like.profile as any)?.is_identity_verified || false,
       }));
     },
     enabled: !!postId && enabled,

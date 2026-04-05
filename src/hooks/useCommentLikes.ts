@@ -10,6 +10,7 @@ export interface CommentLiker {
   avatar_url: string | null;
   conta_verificada: boolean;
   is_verified_premium?: boolean | null;
+  is_identity_verified?: boolean | null;
 }
 
 export const useCommentLikes = (commentIds: string[]) => {
@@ -72,7 +73,8 @@ export const useCommentLikers = (commentId: string, enabled: boolean = true) => 
             nickname,
             avatar_url,
             conta_verificada,
-            is_verified_premium
+            is_verified_premium,
+            is_identity_verified
           )
         `)
         .eq("comment_id", commentId)
@@ -88,6 +90,7 @@ export const useCommentLikers = (commentId: string, enabled: boolean = true) => 
         avatar_url: item.profiles?.avatar_url || null,
         conta_verificada: item.profiles?.conta_verificada || false,
         is_verified_premium: item.profiles?.is_verified_premium || false,
+        is_identity_verified: item.profiles?.is_identity_verified || false,
       }));
     },
     enabled: enabled && !!commentId,

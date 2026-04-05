@@ -38,6 +38,7 @@ interface ProfileHeaderProps {
   premiumExpiresAt?: string | null;
   contaVerificada?: boolean;
   isOfficialAccount?: boolean;
+  isIdentityVerified?: boolean;
 }
 
 const REPORT_REASONS = [
@@ -49,7 +50,7 @@ const REPORT_REASONS = [
   { value: "other", label: "Outro" },
 ];
 
-export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVerifiedPremium, premiumExpiresAt, contaVerificada, isOfficialAccount }: ProfileHeaderProps) => {
+export const ProfileHeader = ({ username, isOwnProfile = false, profileId, isVerifiedPremium, premiumExpiresAt, contaVerificada, isOfficialAccount, isIdentityVerified }: ProfileHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [visitorsSheetOpen, setVisitorsSheetOpen] = useState(false);

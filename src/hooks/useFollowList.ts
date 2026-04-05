@@ -10,6 +10,7 @@ interface FollowUser {
   is_verified_premium?: boolean | null;
   verified_premium_expires_at?: string | null;
   is_official_account?: boolean | null;
+  is_identity_verified?: boolean | null;
 }
 
 export const useFollowers = (userId: string) => {
@@ -27,7 +28,8 @@ export const useFollowers = (userId: string) => {
             conta_verificada,
             is_verified_premium,
             verified_premium_expires_at,
-            is_official_account
+            is_official_account,
+            is_identity_verified
           )
         `)
         .eq("following_id", userId);
@@ -57,7 +59,8 @@ export const useFollowing = (userId: string) => {
             conta_verificada,
             is_verified_premium,
             verified_premium_expires_at,
-            is_official_account
+            is_official_account,
+            is_identity_verified
           )
         `)
         .eq("follower_id", userId);

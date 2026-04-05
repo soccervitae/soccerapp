@@ -375,6 +375,7 @@ const Profile = () => {
       is_verified_premium: profile?.is_verified_premium || false,
       verified_premium_expires_at: profile?.verified_premium_expires_at || null,
       is_official_account: profile?.is_official_account || false,
+      is_identity_verified: (profile as any)?.is_identity_verified || false,
       gender: profile?.gender || null,
       role: profile?.role || null,
       posicaomas: profile?.posicaomas || null,
@@ -809,7 +810,7 @@ const Profile = () => {
           animate="visible"
         >
           <motion.div variants={itemVariants}>
-            <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
+            <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} isIdentityVerified={(profile as any).is_identity_verified} />
           </motion.div>
           
           <div className="pt-12 flex flex-col gap-4">
@@ -849,7 +850,7 @@ const Profile = () => {
         </motion.div>
       ) : (
         <>
-          <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
+          <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} isIdentityVerified={(profile as any).is_identity_verified} />
           <div className={`${isGuest ? '' : 'pt-[50px]'} flex flex-col gap-4`}>
             {profileContentJsx}
           </div>

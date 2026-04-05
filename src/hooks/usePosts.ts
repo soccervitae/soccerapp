@@ -57,6 +57,7 @@ export interface Post {
     is_verified_premium: boolean | null;
     verified_premium_expires_at: string | null;
     is_official_account: boolean | null;
+    is_identity_verified?: boolean | null;
     gender: string | null;
     role: string | null;
     posicaomas: number | null;
@@ -93,6 +94,7 @@ export const usePostById = (postId: string | undefined) => {
             is_verified_premium,
             verified_premium_expires_at,
             is_official_account,
+            is_identity_verified,
             gender,
             role,
             posicaomas,
@@ -225,6 +227,7 @@ export const usePosts = () => {
             is_verified_premium,
             verified_premium_expires_at,
             is_official_account,
+            is_identity_verified,
             gender,
             role,
             posicaomas,

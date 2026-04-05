@@ -618,7 +618,7 @@ export const FeedPost = ({
               <span className="font-bold text-foreground hover:underline text-base">
                 {post.profile.nickname || post.profile.full_name || post.profile.username}
               </span>
-              {post.profile.is_verified_premium && (!post.profile.verified_premium_expires_at || new Date(post.profile.verified_premium_expires_at) > new Date()) && (
+              {(post.profile as any).is_identity_verified && (
                 <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               )}
             </div>

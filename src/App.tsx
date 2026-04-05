@@ -34,6 +34,7 @@ import Settings from "./pages/settings/Index";
 import Saved from "./pages/settings/Saved";
 import MyPosts from "./pages/settings/MyPosts";
 import Verification from "./pages/settings/Verification";
+import IdentityVerification from "./pages/settings/IdentityVerification";
 import Favorites from "./pages/settings/Favorites";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
@@ -68,6 +69,7 @@ import AdminChampionships from "./pages/admin/Championships";
 import AdminAchievements from "./pages/admin/Achievements";
 import AdminSettings from "./pages/admin/Settings";
 import AdminPremium from "./pages/admin/Premium";
+import AdminVerification from "./pages/admin/Verification";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 
 import NotFound from "./pages/NotFound";
@@ -294,6 +296,11 @@ const AnimatedRoutes = () => {
           <PageTransition><Verification /></PageTransition>
         </ProtectedRoute>
       } />
+      <Route path="/settings/identity-verification" element={
+        <ProtectedRoute>
+          <PageTransition><IdentityVerification /></PageTransition>
+        </ProtectedRoute>
+      } />
       <Route path="/messages" element={
         <ProtectedRoute>
           <PageTransition><Messages /></PageTransition>
@@ -331,6 +338,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/account-types/:slug" element={<AdminRoute><AdminAccountTypeDetail /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
       <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
+      <Route path="/admin/verification" element={<AdminRoute><AdminVerification /></AdminRoute>} />
       
       {/* Error pages */}
       <Route path="/403" element={<PageTransition><Forbidden /></PageTransition>} />

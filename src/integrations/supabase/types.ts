@@ -1192,6 +1192,7 @@ export type Database = {
           gender: string | null
           height: number | null
           id: string
+          is_identity_verified: boolean | null
           is_official_account: boolean | null
           is_private: boolean | null
           is_verified_premium: boolean | null
@@ -1250,6 +1251,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id: string
+          is_identity_verified?: boolean | null
           is_official_account?: boolean | null
           is_private?: boolean | null
           is_verified_premium?: boolean | null
@@ -1308,6 +1310,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id?: string
+          is_identity_verified?: boolean | null
           is_official_account?: boolean | null
           is_private?: boolean | null
           is_verified_premium?: boolean | null
@@ -2146,6 +2149,48 @@ export type Database = {
           expires_at?: string
           id?: string
           locked_until?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          created_at: string
+          document_url: string
+          full_name: string
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_url: string
+          full_name: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string
+          full_name?: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

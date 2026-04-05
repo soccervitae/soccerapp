@@ -44,6 +44,7 @@ export interface Profile {
   is_verified_premium?: boolean;
   verified_premium_at?: string | null;
   verified_premium_expires_at?: string | null;
+  is_identity_verified?: boolean;
 }
 
 export const useProfile = (userId?: string) => {
