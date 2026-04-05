@@ -69,6 +69,7 @@ import AdminChampionships from "./pages/admin/Championships";
 import AdminAchievements from "./pages/admin/Achievements";
 import AdminSettings from "./pages/admin/Settings";
 import AdminPremium from "./pages/admin/Premium";
+import AdminVerification from "./pages/admin/Verification";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 
 import NotFound from "./pages/NotFound";
