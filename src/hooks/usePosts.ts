@@ -227,6 +227,7 @@ export const usePosts = () => {
             is_verified_premium,
             verified_premium_expires_at,
             is_official_account,
+            is_identity_verified,
             gender,
             role,
             posicaomas,
