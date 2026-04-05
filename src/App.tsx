@@ -338,6 +338,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/account-types/:slug" element={<AdminRoute><AdminAccountTypeDetail /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
       <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
+      <Route path="/admin/verification" element={<AdminRoute><AdminVerification /></AdminRoute>} />
       
       {/* Error pages */}
       <Route path="/403" element={<PageTransition><Forbidden /></PageTransition>} />
