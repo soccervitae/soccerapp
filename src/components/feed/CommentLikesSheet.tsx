@@ -113,7 +113,7 @@ export const CommentLikesSheet = ({ commentId, open, onOpenChange }: CommentLike
                             {getInitials(liker.full_name || liker.username)}
                           </AvatarFallback>
                         </Avatar>
-                        {liker.is_verified_premium && (
+                        {(liker as any).is_identity_verified && (
                           <div className="absolute -bottom-0.5 -right-0.5 bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center border-2 border-background">
                             <span className="material-symbols-outlined text-[10px] font-bold">
                               verified

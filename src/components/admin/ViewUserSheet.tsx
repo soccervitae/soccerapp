@@ -260,7 +260,7 @@ export function ViewUserSheet({
                     {user.is_official_account && (
                       <Badge variant="secondary">Conta Oficial</Badge>
                     )}
-                    {user.is_verified_premium && (!user.verified_premium_expires_at || new Date(user.verified_premium_expires_at) > new Date()) && (
+                    {(user as any).is_identity_verified && (
                       <span className="material-symbols-outlined text-[18px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     )}
                     {user.banned_at && (
