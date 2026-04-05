@@ -809,7 +809,7 @@ const Profile = () => {
           animate="visible"
         >
           <motion.div variants={itemVariants}>
-            <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} />
+            <ProfileHeader username={profile.username} isOwnProfile={isOwnProfile} profileId={profile.id} isVerifiedPremium={profile.is_verified_premium} premiumExpiresAt={profile.verified_premium_expires_at} contaVerificada={profile.conta_verificada} isOfficialAccount={(profile as any).is_official_account} isIdentityVerified={(profile as any).is_identity_verified} />
           </motion.div>
           
           <div className="pt-12 flex flex-col gap-4">
