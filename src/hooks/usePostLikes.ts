@@ -27,7 +27,8 @@ export const usePostLikes = (postId: string, enabled = true) => {
             nickname,
             avatar_url,
             conta_verificada,
-            is_verified_premium
+            is_verified_premium,
+            is_identity_verified
           )
         `)
         .eq("post_id", postId)
