@@ -93,7 +93,8 @@ export default function Settings() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-3">Conta</p>
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <SettingsItem icon="edit" label="Editar Perfil" onClick={() => navigate("/settings/edit")} />
-          <SettingsItem icon="verified" label="SEJA PRO" onClick={() => navigate("/settings/verification")} />
+          <SettingsItem icon="verified" label="Verificação de Identidade" onClick={() => navigate("/settings/identity-verification")} />
+          <SettingsItem icon="star" label="Plano Pro" onClick={() => navigate("/settings/verification")} />
           <SettingsItem icon="lock" label="Privacidade" onClick={() => navigate("/settings/privacy")} />
           <SettingsItem icon="shield" label="Segurança" onClick={() => navigate("/settings/security")} />
           <SettingsItem icon="notifications" label="Notificações" onClick={() => navigate("/settings/notifications")} isLast />
