@@ -375,6 +375,7 @@ const Profile = () => {
       is_verified_premium: profile?.is_verified_premium || false,
       verified_premium_expires_at: profile?.verified_premium_expires_at || null,
       is_official_account: profile?.is_official_account || false,
+      is_identity_verified: (profile as any)?.is_identity_verified || false,
       gender: profile?.gender || null,
       role: profile?.role || null,
       posicaomas: profile?.posicaomas || null,
