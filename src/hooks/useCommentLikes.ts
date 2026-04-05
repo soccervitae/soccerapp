@@ -73,7 +73,8 @@ export const useCommentLikers = (commentId: string, enabled: boolean = true) => 
             nickname,
             avatar_url,
             conta_verificada,
-            is_verified_premium
+            is_verified_premium,
+            is_identity_verified
           )
         `)
         .eq("comment_id", commentId)
