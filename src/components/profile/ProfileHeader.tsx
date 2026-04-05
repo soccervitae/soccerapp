@@ -38,6 +38,7 @@ interface ProfileHeaderProps {
   premiumExpiresAt?: string | null;
   contaVerificada?: boolean;
   isOfficialAccount?: boolean;
+  isIdentityVerified?: boolean;
 }
 
 const REPORT_REASONS = [
