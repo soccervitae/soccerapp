@@ -34,7 +34,7 @@ const allMenuOptions = [
     icon: "slow_motion_video",
     colorClass: "bg-purple-500/20 text-purple-500",
     adminOnly: false,
-    proOnly: true,
+    proOnly: false,
   },
   {
     id: "highlight" as CreateOption,
@@ -43,7 +43,7 @@ const allMenuOptions = [
     icon: "auto_awesome",
     colorClass: "bg-amber-500/20 text-amber-500",
     adminOnly: false,
-    proOnly: true,
+    proOnly: false,
   },
   {
     id: "times" as CreateOption,
