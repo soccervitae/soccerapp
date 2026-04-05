@@ -296,6 +296,11 @@ const AnimatedRoutes = () => {
           <PageTransition><Verification /></PageTransition>
         </ProtectedRoute>
       } />
+      <Route path="/settings/identity-verification" element={
+        <ProtectedRoute>
+          <PageTransition><IdentityVerification /></PageTransition>
+        </ProtectedRoute>
+      } />
       <Route path="/messages" element={
         <ProtectedRoute>
           <PageTransition><Messages /></PageTransition>
