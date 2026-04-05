@@ -732,7 +732,7 @@ export const ProfileMediaViewer = ({
                             <span className="font-semibold text-sm text-foreground">
                               {profile.nickname || profile.full_name || profile.username}
                             </span>
-                            {profile.is_verified_premium && (
+                            {(profile as any).is_identity_verified && (
                               <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
                             )}
                           </div>

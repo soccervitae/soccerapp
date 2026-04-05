@@ -680,7 +680,7 @@ export const PostMediaViewer = ({
                             <span className="font-semibold text-sm text-gray-900">
                               {post.profile.nickname || post.profile.full_name || post.profile.username}
                             </span>
-                            {post.profile.is_verified_premium && (
+                            {(post.profile as any).is_identity_verified && (
                               <span className="material-symbols-outlined text-[14px] text-primary">verified</span>
                             )}
                           </div>

@@ -91,7 +91,7 @@ const FollowList = () => {
                 {user.full_name || user.username}
                 {user.is_official_account ? (
                   <span className="material-symbols-outlined text-[14px] text-amber-500 shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                ) : user.is_verified_premium && (!user.verified_premium_expires_at || new Date(user.verified_premium_expires_at) > new Date()) && (
+                ) : (user as any).is_identity_verified && (
                   <span className="material-symbols-outlined text-[14px] text-primary shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 )}
               </p>
