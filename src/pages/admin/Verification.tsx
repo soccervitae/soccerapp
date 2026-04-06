@@ -2,11 +2,10 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, Check, X, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, X, Eye, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -21,6 +20,12 @@ import {
 } from "@/components/ui/responsive-modal";
 
 const ITEMS_PER_PAGE = 20;
+const DOC_TYPE_LABELS: Record<string, string> = {
+  rg: "RG",
+  cpf: "CPF",
+  cnh: "CNH",
+  passaporte: "Passaporte",
+};
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -55,7 +60,7 @@ export default function AdminVerification() {
   });
 
   const handleAction = useMutation({
-    mutationFn: async ({ requestId, userId, action, reason }: { requestId: string; userId: string; action: "approve" | "reject"; reason?: string }) => {
+    mutationFn: async ({ requestId, userId, action, reason, documentType }: { requestId: string; userId: string; action: "approve" | "reject"; reason?: string; documentType?: string }) => {
       const updates: any = {
         status: action === "approve" ? "approved" : "rejected",
         reviewed_at: new Date().toISOString(),
@@ -71,9 +76,13 @@ export default function AdminVerification() {
       if (reqError) throw reqError;
 
       if (action === "approve") {
+        const profileUpdate: any = { is_identity_verified: true };
+        if (documentType) {
+          profileUpdate.identity_document_type = documentType;
+        }
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ is_identity_verified: true })
+          .update(profileUpdate)
           .eq("id", userId);
         if (profileError) throw profileError;
       }
@@ -96,16 +105,6 @@ export default function AdminVerification() {
   const getInitials = (name: string | null) => {
     if (!name) return "U";
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-  };
-
-  const getDocUrl = (path: string) => {
-    const { data } = supabase.storage.from("verification-docs").getPublicUrl(path);
-    return data.publicUrl;
-  };
-
-  const getSignedUrl = async (path: string) => {
-    const { data } = await supabase.storage.from("verification-docs").createSignedUrl(path, 3600);
-    return data?.signedUrl || "";
   };
 
   return (
@@ -144,6 +143,7 @@ export default function AdminVerification() {
           ) : (
             requests.map((req: any) => {
               const profile = req.profiles;
+              const aiResult = req.ai_validation_result;
               return (
                 <div key={req.id} className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border">
                   <Avatar className="h-10 w-10">
@@ -157,9 +157,37 @@ export default function AdminVerification() {
                     <p className="font-semibold text-sm text-foreground truncate">
                       {req.full_name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      @{profile?.username} · {format(new Date(req.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>@{profile?.username}</span>
+                      <span>·</span>
+                      <span>{DOC_TYPE_LABELS[req.document_type] || req.document_type || "RG"}</span>
+                      <span>·</span>
+                      <span>{format(new Date(req.created_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                    </div>
+                    {/* AI badge */}
+                    {req.ai_validated && aiResult && (
+                      <div className="mt-1">
+                        {aiResult.overall_valid ? (
+                          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] gap-1">
+                            <span className="material-symbols-outlined text-[12px]">smart_toy</span>
+                            IA: Válido ({aiResult.confidence}%)
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] gap-1">
+                            <span className="material-symbols-outlined text-[12px]">smart_toy</span>
+                            IA: Inválido
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    {!req.ai_validated && req.status === "pending" && (
+                      <div className="mt-1">
+                        <Badge variant="outline" className="text-[10px] gap-1 text-muted-foreground">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Aguardando IA...
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -243,7 +271,14 @@ export default function AdminVerification() {
           confirmText="Aprovar"
           onConfirm={() => {
             if (actionRequest) {
-              handleAction.mutate({ requestId: actionRequest.id, userId: actionRequest.userId, action: "approve" });
+              // Find the request to get document_type
+              const req = requests.find((r: any) => r.id === actionRequest.id);
+              handleAction.mutate({
+                requestId: actionRequest.id,
+                userId: actionRequest.userId,
+                action: "approve",
+                documentType: req?.document_type,
+              });
             }
           }}
         />
@@ -293,6 +328,8 @@ export default function AdminVerification() {
 function ViewRequestModal({ request, open, onOpenChange }: { request: any; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [docUrl, setDocUrl] = useState<string>("");
   const [selfieUrl, setSelfieUrl] = useState<string>("");
+  const [revalidating, setRevalidating] = useState(false);
+  const queryClient = useQueryClient();
 
   const loadUrls = async () => {
     if (!request) return;
@@ -308,17 +345,77 @@ function ViewRequestModal({ request, open, onOpenChange }: { request: any; open:
     loadUrls();
   }
 
+  const handleRevalidate = async () => {
+    if (!request?.id) return;
+    setRevalidating(true);
+    try {
+      const { error } = await supabase.functions.invoke("validate-document", {
+        body: { requestId: request.id },
+      });
+      if (error) throw error;
+      toast.success("Reanálise pela IA iniciada!");
+      queryClient.invalidateQueries({ queryKey: ["admin-verification-requests"] });
+    } catch (err) {
+      toast.error("Erro ao revalidar documento");
+      console.error(err);
+    } finally {
+      setRevalidating(false);
+    }
+  };
+
+  const aiResult = request?.ai_validation_result;
+
   return (
     <ResponsiveModal open={open} onOpenChange={(o) => { if (!o) { setDocUrl(""); setSelfieUrl(""); } onOpenChange(o); }}>
       <ResponsiveModalContent className="max-w-lg">
         <ResponsiveModalHeader>
           <ResponsiveModalTitle>Documentos de Verificação</ResponsiveModalTitle>
         </ResponsiveModalHeader>
-        <div className="p-4 space-y-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Nome completo</p>
-            <p className="font-semibold">{request?.full_name}</p>
+        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Nome completo</p>
+              <p className="font-semibold text-sm">{request?.full_name}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Tipo de documento</p>
+              <p className="font-semibold text-sm">{DOC_TYPE_LABELS[request?.document_type] || request?.document_type || "RG"}</p>
+            </div>
           </div>
+
+          {/* AI Analysis Result */}
+          {aiResult && (
+            <div className={`rounded-xl border p-3 ${aiResult.overall_valid ? 'bg-primary/5 border-primary/20' : 'bg-destructive/5 border-destructive/20'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+                <span className="font-semibold text-sm">Análise da IA</span>
+                <Badge className={`ml-auto text-[10px] ${aiResult.overall_valid ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                  {aiResult.overall_valid ? "Válido" : "Inválido"} · {aiResult.confidence}%
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 text-xs mb-2">
+                <CheckItem label="Documento válido" ok={aiResult.is_valid_document} />
+                <CheckItem label="Legível" ok={aiResult.document_readable} />
+                <CheckItem label="Selfie com documento" ok={aiResult.selfie_has_document} />
+                <CheckItem label="Rostos compatíveis" ok={aiResult.faces_match} />
+                <CheckItem label="Nome compatível" ok={aiResult.name_matches} />
+              </div>
+              {aiResult.summary && (
+                <p className="text-xs text-muted-foreground mt-1">{aiResult.summary}</p>
+              )}
+              {aiResult.issues?.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-destructive">Problemas:</p>
+                  <ul className="text-xs text-muted-foreground list-disc pl-4 mt-1">
+                    {aiResult.issues.map((issue: string, i: number) => (
+                      <li key={i}>{issue}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-2">Documento</p>
             {docUrl ? (
@@ -335,8 +432,32 @@ function ViewRequestModal({ request, open, onOpenChange }: { request: any; open:
               <Skeleton className="w-full h-48 rounded-lg" />
             )}
           </div>
+
+          {request?.status === "pending" && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={handleRevalidate}
+              disabled={revalidating}
+            >
+              {revalidating ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="material-symbols-outlined text-[16px]">smart_toy</span>}
+              {revalidating ? "Analisando..." : "Reanalisar com IA"}
+            </Button>
+          )}
         </div>
       </ResponsiveModalContent>
     </ResponsiveModal>
+  );
+}
+
+function CheckItem({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`material-symbols-outlined text-[14px] ${ok ? 'text-primary' : 'text-destructive'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+        {ok ? "check_circle" : "cancel"}
+      </span>
+      <span className={ok ? "text-foreground" : "text-destructive"}>{label}</span>
+    </div>
   );
 }

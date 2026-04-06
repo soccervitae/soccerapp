@@ -1192,6 +1192,7 @@ export type Database = {
           gender: string | null
           height: number | null
           id: string
+          identity_document_type: string | null
           is_identity_verified: boolean | null
           is_official_account: boolean | null
           is_private: boolean | null
@@ -1251,6 +1252,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id: string
+          identity_document_type?: string | null
           is_identity_verified?: boolean | null
           is_official_account?: boolean | null
           is_private?: boolean | null
@@ -1310,6 +1312,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id?: string
+          identity_document_type?: string | null
           is_identity_verified?: boolean | null
           is_official_account?: boolean | null
           is_private?: boolean | null
@@ -2155,7 +2158,10 @@ export type Database = {
       }
       verification_requests: {
         Row: {
+          ai_validated: boolean | null
+          ai_validation_result: Json | null
           created_at: string
+          document_type: string | null
           document_url: string
           full_name: string
           id: string
@@ -2168,7 +2174,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_validated?: boolean | null
+          ai_validation_result?: Json | null
           created_at?: string
+          document_type?: string | null
           document_url: string
           full_name: string
           id?: string
@@ -2181,7 +2190,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_validated?: boolean | null
+          ai_validation_result?: Json | null
           created_at?: string
+          document_type?: string | null
           document_url?: string
           full_name?: string
           id?: string
