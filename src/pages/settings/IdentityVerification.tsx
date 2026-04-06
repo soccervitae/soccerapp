@@ -8,12 +8,21 @@ import { SettingsPageLayout } from "@/components/layout/SettingsPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+
+const DOCUMENT_TYPES = [
+  { value: "rg", label: "RG" },
+  { value: "cpf", label: "CPF" },
+  { value: "cnh", label: "CNH" },
+  { value: "passaporte", label: "Passaporte" },
+];
 
 export default function IdentityVerification() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const [fullName, setFullName] = useState("");
+  const [documentType, setDocumentType] = useState("rg");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,21 +86,30 @@ export default function IdentityVerification() {
       if (docUpload.error) throw docUpload.error;
       if (selfieUpload.error) throw selfieUpload.error;
 
-      const { error } = await supabase.from("verification_requests").insert({
+      const { data: insertedReq, error } = await supabase.from("verification_requests").insert({
         user_id: user.id,
         document_url: docPath,
         selfie_url: selfiePath,
         full_name: fullName.trim(),
-      });
+        document_type: documentType,
+      }).select("id").single();
 
       if (error) throw error;
 
-      toast.success("Solicitação enviada com sucesso!");
+      // Trigger AI validation in background
+      if (insertedReq?.id) {
+        supabase.functions.invoke("validate-document", {
+          body: { requestId: insertedReq.id },
+        }).catch(console.error);
+      }
+
+      toast.success("Solicitação enviada com sucesso! A IA está analisando seus documentos.");
       setDocumentFile(null);
       setSelfieFile(null);
       setDocumentPreview(null);
       setSelfiePreview(null);
       setFullName("");
+      setDocumentType("rg");
       refetch();
     } catch (err: any) {
       toast.error("Erro ao enviar solicitação");
@@ -133,7 +151,7 @@ export default function IdentityVerification() {
               <span className="font-bold text-amber-600">Solicitação em Análise</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Sua solicitação está sendo analisada. Você receberá uma resposta em breve.
+              Sua solicitação está sendo analisada pela IA. Você receberá uma resposta em breve.
             </p>
           </div>
         ) : (
@@ -161,13 +179,19 @@ export default function IdentityVerification() {
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <span className="material-symbols-outlined text-primary text-[18px]">badge</span>
                   </div>
-                  <span className="text-sm text-foreground">Documento com foto (RG ou CNH)</span>
+                  <span className="text-sm text-foreground">Documento com foto (RG, CPF, CNH ou Passaporte)</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <span className="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
                   </div>
                   <span className="text-sm text-foreground">Selfie segurando o documento</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+                  </div>
+                  <span className="text-sm text-foreground">Análise automática por IA</span>
                 </div>
               </div>
             </div>
@@ -182,6 +206,22 @@ export default function IdentityVerification() {
                   placeholder="Seu nome completo"
                   className="mt-1"
                 />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium">Tipo de documento</Label>
+                <Select value={documentType} onValueChange={setDocumentType}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOCUMENT_TYPES.map((dt) => (
+                      <SelectItem key={dt.value} value={dt.value}>
+                        {dt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
