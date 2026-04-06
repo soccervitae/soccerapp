@@ -70,7 +70,7 @@ export const useFollowing = (userId: string) => {
       return (data || [])
         .map((item) => item.following as FollowUser | null)
         .filter((f): f is FollowUser => f !== null)
-        .filter((f) => !f.is_official_account);
+        
     },
     enabled: !!userId,
   });
