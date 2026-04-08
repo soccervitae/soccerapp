@@ -78,7 +78,8 @@ export const useProfileVisitorsCount = () => {
         .from("profile_views")
         .select("visitor_id", { count: "exact", head: true })
         .eq("profile_id", user.id)
-        .neq("visitor_id", user.id);
+        .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID);
 
       if (error) throw error;
       return count || 0;
