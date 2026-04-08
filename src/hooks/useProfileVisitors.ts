@@ -114,6 +114,7 @@ export const useNewVisitorsCount = () => {
         .select("visitor_id, viewed_at")
         .eq("profile_id", user.id)
         .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID)
         .order("viewed_at", { ascending: false });
 
       const { data: visits, error: visitsError } = await query;
