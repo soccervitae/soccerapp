@@ -333,7 +333,7 @@ export const ProfileInfo = ({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-muted/30" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
+          
         </div>
 
         {/* Profile info row: avatar left, info center, stats right */}
