@@ -623,7 +623,7 @@ export const ProfileInfo = ({
             <span className="material-symbols-outlined text-3xl text-muted-foreground/50">add_photo_alternate</span>
             {isOwnProfile && <span className="text-xs text-muted-foreground/50">Adicionar foto de capa</span>}
           </div>}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
+        
       </div>
 
       {/* Profile Picture */}
