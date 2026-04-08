@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+const OFFICIAL_ACCOUNT_ID = "9d01169e-44be-4651-9eab-221a7b7780ac";
+
 interface ProfileVisitor {
   id: string;
   visitor_id: string;
