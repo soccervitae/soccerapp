@@ -39,7 +39,8 @@ export const useProfileVisitors = () => {
           )
         `)
         .eq("profile_id", user.id)
-        .neq("visitor_id", user.id) // Não mostrar próprias visitas
+        .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID)
         .order("viewed_at", { ascending: false });
 
       if (error) throw error;
