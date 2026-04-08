@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+const OFFICIAL_ACCOUNT_ID = "9d01169e-44be-4651-9eab-221a7b7780ac";
+
 interface ProfileVisitor {
   id: string;
   visitor_id: string;
@@ -37,7 +39,8 @@ export const useProfileVisitors = () => {
           )
         `)
         .eq("profile_id", user.id)
-        .neq("visitor_id", user.id) // Não mostrar próprias visitas
+        .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID)
         .order("viewed_at", { ascending: false });
 
       if (error) throw error;
@@ -75,7 +78,8 @@ export const useProfileVisitorsCount = () => {
         .from("profile_views")
         .select("visitor_id", { count: "exact", head: true })
         .eq("profile_id", user.id)
-        .neq("visitor_id", user.id);
+        .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID);
 
       if (error) throw error;
       return count || 0;
@@ -110,6 +114,7 @@ export const useNewVisitorsCount = () => {
         .select("visitor_id, viewed_at")
         .eq("profile_id", user.id)
         .neq("visitor_id", user.id)
+        .neq("visitor_id", OFFICIAL_ACCOUNT_ID)
         .order("viewed_at", { ascending: false });
 
       const { data: visits, error: visitsError } = await query;
