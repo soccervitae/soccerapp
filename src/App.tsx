@@ -137,6 +137,12 @@ const LandingOrIndex = () => {
   );
 };
 
+const SaibaMaisGuard = () => {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/" replace />;
+  return <PageTransition><SaibaMais /></PageTransition>;
+};
+
 const AnimatedRoutes = () => {
   return (
     <Routes>
