@@ -104,23 +104,6 @@ export const CreateMenuSheet = ({
   });
 
   const handleSelect = (option: CreateOption) => {
-    // Check if option requires Pro and user is not Pro/official
-    const menuOption = allMenuOptions.find(o => o.id === option);
-    if (menuOption?.proOnly && !isPro && !isOfficialAccount) {
-      onOpenChange(false);
-      setTimeout(() => {
-        navigate("/settings/verification");
-      }, 200);
-      toast("SEJA PRO e tenha mais recursos! 🌟", {
-        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
-        action: {
-          label: "Ver planos",
-          onClick: () => navigate("/settings/verification"),
-        },
-      });
-      return;
-    }
-    
     onOpenChange(false);
     // Small delay to allow sheet close animation
     setTimeout(() => {

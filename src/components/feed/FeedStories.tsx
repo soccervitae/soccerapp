@@ -30,12 +30,6 @@ export const FeedStories = () => {
       navigate("/login");
       return;
     }
-    const isPro = profile?.is_verified_premium === true;
-    const isOfficial = profile?.is_official_account === true;
-    if (!isPro && !isOfficial) {
-      navigate("/settings/verification");
-      return;
-    }
     navigate("/create-replay");
   };
 
