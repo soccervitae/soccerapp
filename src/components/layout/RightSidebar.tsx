@@ -155,7 +155,7 @@ export const RightSidebar = () => {
               ))
             ) : suggestions && suggestions.length > 0 ? (
               suggestions.map((profile) => (
-                <div key={profile.id} className="flex items-center gap-3">
+                <div key={profile.id} className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors" onClick={() => navigate(`/${profile.username}`)}>
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={profile.avatar_url || undefined} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
@@ -174,7 +174,7 @@ export const RightSidebar = () => {
                     size="sm"
                     variant="outline"
                     className="h-8 px-3 text-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                    onClick={() => handleFollow(profile.id)}
+                    onClick={(e) => { e.stopPropagation(); handleFollow(profile.id); }}
                     disabled={followUser.isPending}
                   >
                     Torcer
