@@ -75,7 +75,7 @@ const allMenuOptions = [
 ];
 
 // Options blocked for non-official admin accounts (they should use admin page)
-const contentCreationOptions: CreateOption[] = ["post", "replay", "highlight"];
+const contentCreationOptions: CreateOption[] = ["post"];
 
 export const CreateMenuSheet = ({
   open,
