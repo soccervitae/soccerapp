@@ -31,7 +31,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Sparkles, label: "Conteúdo", path: "/admin/content" },
   { icon: Users, label: "Usuários", path: "/admin/users" },
-  { icon: BadgeCheck, label: "Premium", path: "/admin/premium" },
+  // { icon: BadgeCheck, label: "Premium", path: "/admin/premium" },
   { icon: ShieldCheck, label: "Verificação", path: "/admin/verification" },
   { icon: FileText, label: "Posts", path: "/admin/posts" },
   { icon: Eye, label: "Moderação", path: "/admin/moderation" },
