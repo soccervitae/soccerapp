@@ -174,7 +174,7 @@ export const RightSidebar = () => {
                     size="sm"
                     variant="outline"
                     className="h-8 px-3 text-xs border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                    onClick={() => handleFollow(profile.id)}
+                    onClick={(e) => { e.stopPropagation(); handleFollow(profile.id); }}
                     disabled={followUser.isPending}
                   >
                     Torcer
