@@ -736,54 +736,29 @@ const EditProfile = () => {
             )}
           </div>
 
-          {(() => {
-            const isPremiumActive = profile?.is_verified_premium === true && 
-              (!profile?.verified_premium_expires_at || new Date(profile.verified_premium_expires_at) > new Date());
-            
-            return (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <Label>Nome de Usuário</Label>
-                </div>
-                {isPremiumActive ? (
-                  <>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
-                      <Input
-                        value={formData.username}
-                        onChange={(e) => handleUsernameChange(e.target.value)}
-                        className="pl-7"
-                        maxLength={20}
-                      />
-                      {usernameStatus === "checking" && (
-                        <span className="text-xs text-muted-foreground mt-1 block">Verificando...</span>
-                      )}
-                      {usernameStatus === "taken" && (
-                        <span className="text-xs text-destructive mt-1 block">Nome de usuário já em uso</span>
-                      )}
-                      {usernameStatus === "available" && formData.username !== profile?.username && (
-                        <span className="text-xs text-emerald-500 mt-1 block">Disponível!</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-primary flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                      Você pode alterar seu nome de usuário como benefício Premium
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted/50 text-muted-foreground">
-                      @{formData.username}
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">lock</span>
-                      Assine o <button onClick={() => navigate("/settings/verification")} className="text-primary font-semibold underline">Premium</button> para alterar seu nome de usuário
-                    </p>
-                  </>
-                )}
-              </div>
-            );
-          })()}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Label>Nome de Usuário</Label>
+            </div>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+              <Input
+                value={formData.username}
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                className="pl-7"
+                maxLength={20}
+              />
+              {usernameStatus === "checking" && (
+                <span className="text-xs text-muted-foreground mt-1 block">Verificando...</span>
+              )}
+              {usernameStatus === "taken" && (
+                <span className="text-xs text-destructive mt-1 block">Nome de usuário já em uso</span>
+              )}
+              {usernameStatus === "available" && formData.username !== profile?.username && (
+                <span className="text-xs text-emerald-500 mt-1 block">Disponível!</span>
+              )}
+            </div>
+          </div>
 
           {!isTeamOrSchool && (
             <div className="space-y-2">

@@ -109,11 +109,6 @@ export const ProfileSettingsSheet = ({ open, onOpenChange }: ProfileSettingsShee
                   onClick={() => handleNavigation("/settings/favorites")}
                 />
                 <SettingsItem
-                  icon="verified"
-                  label="Verificação Premium"
-                  onClick={() => handleNavigation("/settings/verification")}
-                />
-                <SettingsItem
                   icon="lock"
                   label="Privacidade"
                   onClick={() => handleNavigation("/settings/privacy")}
