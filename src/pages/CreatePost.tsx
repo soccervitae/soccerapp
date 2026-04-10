@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,7 @@ const MAX_PHOTOS = 10;
 
 const CreatePost = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: profile } = useProfile();
   const [caption, setCaption] = useState("");
   const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
