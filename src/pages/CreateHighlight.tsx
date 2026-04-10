@@ -218,7 +218,6 @@ const CreateHighlight = () => {
       window.history.replaceState({}, document.title);
     }
   }, []);
-  const [isUploading, setIsUploading] = useState(false);
   
   // Edit mode state
   const [localImages, setLocalImages] = useState<HighlightImage[]>([]);

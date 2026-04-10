@@ -99,7 +99,31 @@ const CreatePost = () => {
   const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
-  const isPro = profile?.is_verified_premium === true;
+  // Handle pre-selected media from MediaPickerSheet
+  useEffect(() => {
+    const state = location.state as { preSelectedMedia?: File[] } | null;
+    if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
+      const files = state.preSelectedMedia;
+      const isVideo = files[0].type.startsWith("video/");
+      
+      if (isVideo) {
+        const url = URL.createObjectURL(files[0]);
+        setSelectedMediaList([{ url, file: files[0], isLocal: true }]);
+        setSelectedMediaType("video");
+      } else {
+        const items: MediaItem[] = files.map(file => ({
+          url: URL.createObjectURL(file),
+          file,
+          isLocal: true,
+        }));
+        setSelectedMediaList(items);
+        setSelectedMediaType("photo");
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
+
+
   const isOfficialAccount = profile?.is_official_account === true;
 
   const getYoutubeEmbedUrl = (url: string): string | null => {

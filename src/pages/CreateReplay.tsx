@@ -15,6 +15,7 @@ type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-ed
 
 const CreateReplay = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: replayProfile } = useProfile();
 
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
