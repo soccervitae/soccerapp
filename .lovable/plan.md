@@ -1,62 +1,49 @@
 
 
-# Chat Popup no Desktop (estilo redes sociais)
+## Plan: Fluxo de postagem mobile com seleção de mídia via sheet e limite de 90s
 
-## Problema
-Quando o usuário está no desktop e clica no botão de mensagem no perfil de outro usuário, ele é redirecionado para uma página inteira de chat (`/messages/:conversationId`). O usuário quer um chat flutuante no canto inferior direito, como Facebook Messenger e Instagram fazem no desktop.
+### Resumo
+Quando o usuario clicar em Post, Replay ou Destaque no menu de criação (mobile), ao invés de navegar diretamente para a página de criação, um sheet abrirá com o input nativo do dispositivo para selecionar mídia. Após selecionar, navega para a página de criação com a mídia já carregada. Vídeos terão limite de 90 segundos em todos os tipos de conteúdo.
 
-## Solução
-Criar um sistema de chat popup flutuante que aparece no canto inferior direito da tela quando o usuário está em desktop. No mobile, o comportamento atual (navegar para a página de chat) será mantido.
+### Mudanças
 
-## Arquitetura
+#### 1. Remover bloqueios Pro restantes
+- **CreateReplay.tsx** (linhas 20-27): Remover o `useEffect` que redireciona usuários não-premium
+- **CreateHighlight.tsx** (linhas 184-191): Remover o `useEffect` que redireciona usuários não-premium
 
-```text
-┌─────────────────────────────────────────────┐
-│  Qualquer página desktop                    │
-│                                             │
-│                          ┌──────────────┐   │
-│                          │ Chat Popup   │   │
-│                          │ ┌──────────┐ │   │
-│                          │ │ Header   │ │   │
-│                          │ │ Messages │ │   │
-│                          │ │ Input    │ │   │
-│                          │ └──────────┘ │   │
-│                          └──────────────┘   │
-└─────────────────────────────────────────────┘
-```
+#### 2. Remover restrição de vídeo para não-Pro no CreatePost
+- **CreatePost.tsx** (linhas 772-794): Remover o condicional `isPro || isOfficialAccount` que esconde os botões de vídeo e mostra YouTube. Todos os usuários terão acesso a vídeo da galeria e gravação.
 
-## Plano de implementação
+#### 3. Criar componente `MediaPickerSheet`
+Novo arquivo `src/components/feed/MediaPickerSheet.tsx`:
+- Recebe `open`, `onOpenChange`, `type` (post/replay/highlight)
+- Abre como Drawer (mobile) usando o componente Drawer existente
+- Dispara o input nativo de arquivo (`<input type="file">`) automaticamente ao abrir
+- Para **Post**: aceita imagens e vídeos (`accept="image/*,video/*"`, multiple para imagens)
+- Para **Replay**: aceita 1 imagem ou vídeo (`accept="image/*,video/*"`)
+- Para **Highlight**: aceita imagens e vídeos (`accept="image/*,video/*"`, multiple)
+- Valida duração do vídeo (max 90s) usando `<video>` element
+- Exibe mensagem informativa: "Vídeos devem ter no máximo 90 segundos"
+- Após seleção válida, navega para a página de criação passando arquivos via `location.state`
 
-### 1. Criar contexto global de Chat Popup
-- Novo arquivo: `src/contexts/ChatPopupContext.tsx`
-- Estado global: `activeChat` (conversationId + participant info), `isOpen`, `isMinimized`
-- Funções: `openChat(conversationId, participant)`, `closeChat()`, `toggleMinimize()`
-- Envolver o App com este provider
+#### 4. Integrar MediaPickerSheet no fluxo de navegação
+- **BottomNavigation.tsx**: No `handleSelectOption`, para post/replay/highlight, abrir o `MediaPickerSheet` em vez de navegar diretamente
+- Adicionar estado para controlar qual tipo está sendo criado e se o sheet está aberto
 
-### 2. Criar componente `DesktopChatPopup`
-- Novo arquivo: `src/components/messages/DesktopChatPopup.tsx`
-- Janela flutuante fixa no canto inferior direito (width: 380px, height: ~500px)
-- Reutiliza os componentes existentes: `ChatHeader` (versão compacta), `MessageBubble`, `ChatInput`
-- Usa os hooks existentes: `useMessages`, `useTypingIndicator`, `useMessageReactions`
-- Estado minimizado: mostra apenas o header com nome e avatar
-- Botão de fechar e minimizar no header
-- Animação de entrada/saída suave
+#### 5. Atualizar páginas de criação para aceitar mídia pré-selecionada
+- **CreatePost.tsx**: Ler arquivos de `location.state.preSelectedMedia` e popular `selectedMediaList`
+- **CreateReplay.tsx**: Ler arquivo de `location.state.preSelectedMedia` e popular `capturedMedia`
+- **CreateHighlight.tsx**: Ler arquivos de `location.state.preSelectedMedia` e popular `mediaItems`
 
-### 3. Modificar `ProfileInfo.tsx` - `handleMessageClick`
-- No desktop (`!isMobile`), em vez de `navigate(/messages/${conversationId})`, chamar `openChat(conversationId, participant)` do contexto
-- No mobile, manter o `navigate` atual
+#### 6. Validação de 90s em todos os fluxos
+Adicionar validação nos 3 fluxos quando o usuário adiciona vídeos adicionais diretamente nas páginas de criação. Mostrar toast de erro "Vídeo excede o limite de 90 segundos" se falhar. Exibir aviso informativo nas áreas de seleção de mídia.
 
-### 4. Modificar `RightSidebar.tsx` - `handleStartChat`
-- Mesmo ajuste: no desktop, abrir popup em vez de navegar
+### Arquivos a criar
+- `src/components/feed/MediaPickerSheet.tsx`
 
-### 5. Integrar no App
-- Renderizar `DesktopChatPopup` globalmente no layout (apenas em desktop)
-- O popup aparece sobre qualquer página sem mudar a rota
-
-## Detalhes técnicos
-- O popup usa `position: fixed` com `bottom: 20px; right: 20px` e `z-index: 50`
-- Scroll automático para novas mensagens (reutiliza lógica do Chat.tsx)
-- Suporte a reply, reactions, typing indicator (mesmos hooks)
-- Shadow e border para destacar do conteúdo
-- Transição com framer-motion para abrir/fechar
+### Arquivos a modificar
+- `src/components/profile/BottomNavigation.tsx` — integrar MediaPickerSheet
+- `src/pages/CreatePost.tsx` — aceitar mídia via state, remover restrição Pro em vídeo, adicionar validação 90s
+- `src/pages/CreateReplay.tsx` — aceitar mídia via state, remover bloqueio Pro
+- `src/pages/CreateHighlight.tsx` — aceitar mídia via state, remover bloqueio Pro, adicionar validação 90s
 
