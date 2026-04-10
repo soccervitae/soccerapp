@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,7 @@ const MAX_PHOTOS = 10;
 
 const CreatePost = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: profile } = useProfile();
   const [caption, setCaption] = useState("");
   const [selectedMediaList, setSelectedMediaList] = useState<MediaItem[]>([]);
@@ -98,7 +99,31 @@ const CreatePost = () => {
   const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
-  const isPro = profile?.is_verified_premium === true;
+  // Handle pre-selected media from MediaPickerSheet
+  useEffect(() => {
+    const state = location.state as { preSelectedMedia?: File[] } | null;
+    if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
+      const files = state.preSelectedMedia;
+      const isVideo = files[0].type.startsWith("video/");
+      
+      if (isVideo) {
+        const url = URL.createObjectURL(files[0]);
+        setSelectedMediaList([{ url, file: files[0], isLocal: true }]);
+        setSelectedMediaType("video");
+      } else {
+        const items: MediaItem[] = files.map(file => ({
+          url: URL.createObjectURL(file),
+          file,
+          isLocal: true,
+        }));
+        setSelectedMediaList(items);
+        setSelectedMediaType("photo");
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
+
+
   const isOfficialAccount = profile?.is_official_account === true;
 
   const getYoutubeEmbedUrl = (url: string): string | null => {
@@ -769,50 +794,19 @@ const CreatePost = () => {
                       </div>
                       <span className="text-xs font-medium text-white/60">Foto</span>
                     </button>
-                    {isPro || isOfficialAccount ? (
-                      <>
-                        <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-purple-500/10">
-                            <span className="material-symbols-outlined text-[24px] text-purple-400">video_library</span>
-                          </div>
-                          <span className="text-xs font-medium text-white/60">Vídeo</span>
-                        </button>
-                        <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
-                            <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
-                          </div>
-                          <span className="text-xs font-medium text-white/60">Gravar</span>
-                        </button>
-                      </>
-                    ) : (
-                      <button onClick={() => setShowYoutubeInput(true)} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
-                          <span className="material-symbols-outlined text-[24px] text-red-400">smart_display</span>
-                        </div>
-                        <span className="text-xs font-medium text-white/60">YouTube</span>
-                      </button>
-                    )}
-                  </div>
-                  {showYoutubeInput && !isPro && !isOfficialAccount && (
-                    <div className="mt-4 w-full max-w-[280px] space-y-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Cole o link do YouTube aqui"
-                          value={youtubeUrl}
-                          onChange={(e) => setYoutubeUrl(e.target.value)}
-                          className="flex-1 h-10 bg-zinc-900 border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                        <button
-                          onClick={handleYoutubeLink}
-                          className="px-3 h-10 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                        >
-                          OK
-                        </button>
+                    <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-purple-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-purple-400">video_library</span>
                       </div>
-                      <p className="text-[10px] text-white/40 text-center">Apenas links do YouTube são aceitos</p>
-                    </div>
-                  )}
+                      <span className="text-xs font-medium text-white/60">Vídeo</span>
+                    </button>
+                    <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Gravar</span>
+                    </button>
+                  </div>
                 </>
               )}
             </div>

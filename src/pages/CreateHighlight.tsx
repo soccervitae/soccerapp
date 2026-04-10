@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,17 +178,10 @@ const SortableExistingMedia = ({
 
 const CreateHighlight = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { data: highlightProfile } = useProfile();
 
-  useEffect(() => {
-    if (highlightProfile && !highlightProfile.is_verified_premium && !highlightProfile.is_official_account) {
-      toast("SEJA PRO e tenha mais recursos! 🌟", {
-        description: "Desbloqueie Destaques, Replays e muito mais com o Plano Pro.",
-      });
-      navigate("/", { replace: true });
-    }
-  }, [highlightProfile, navigate]);
   const { data: highlights = [] } = useUserHighlights(user?.id);
   const addHighlight = useAddHighlight();
   const addHighlightImage = useAddHighlightImage();
@@ -205,6 +198,26 @@ const CreateHighlight = () => {
   const [title, setTitle] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Handle pre-selected media from MediaPickerSheet
+  useEffect(() => {
+    const state = location.state as { preSelectedMedia?: File[] } | null;
+    if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
+      const files = state.preSelectedMedia;
+      const items: MediaPreview[] = files.map(file => {
+        const isVideo = file.type.startsWith("video/");
+        return {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview: URL.createObjectURL(file),
+          type: isVideo ? "video" as const : "image" as const,
+        };
+      });
+      setMediaItems(items);
+      setViewMode("create");
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
   
   // Edit mode state
   const [localImages, setLocalImages] = useState<HighlightImage[]>([]);

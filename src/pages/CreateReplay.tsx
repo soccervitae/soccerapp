@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
@@ -15,16 +15,9 @@ type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-ed
 
 const CreateReplay = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: replayProfile } = useProfile();
 
-  useEffect(() => {
-    if (replayProfile && !replayProfile.is_verified_premium && !replayProfile.is_official_account) {
-      toast("SEJA PRO e tenha mais recursos! 🌟", {
-        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
-      });
-      navigate("/", { replace: true });
-    }
-  }, [replayProfile, navigate]);
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);
@@ -38,6 +31,21 @@ const CreateReplay = () => {
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle pre-selected media from MediaPickerSheet
+  useEffect(() => {
+    const state = location.state as { preSelectedMedia?: File[] } | null;
+    if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
+      const file = state.preSelectedMedia[0];
+      const url = URL.createObjectURL(file);
+      const type: MediaType = file.type.startsWith("video/") ? "video" : "photo";
+      setCapturedMedia([{ url, type, blob: file }]);
+      setSelectedMedia(url);
+      setSelectedMediaType(type);
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
+
 
   const {
     takePhoto,
