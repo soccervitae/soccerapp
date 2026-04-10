@@ -17,14 +17,6 @@ const CreateReplay = () => {
   const navigate = useNavigate();
   const { data: replayProfile } = useProfile();
 
-  useEffect(() => {
-    if (replayProfile && !replayProfile.is_verified_premium && !replayProfile.is_official_account) {
-      toast("SEJA PRO e tenha mais recursos! 🌟", {
-        description: "Desbloqueie Replays, Destaques e muito mais com o Plano Pro.",
-      });
-      navigate("/", { replace: true });
-    }
-  }, [replayProfile, navigate]);
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
   const [multiSelect, setMultiSelect] = useState(false);

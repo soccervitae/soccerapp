@@ -769,29 +769,18 @@ const CreatePost = () => {
                       </div>
                       <span className="text-xs font-medium text-white/60">Foto</span>
                     </button>
-                    {isPro || isOfficialAccount ? (
-                      <>
-                        <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-purple-500/10">
-                            <span className="material-symbols-outlined text-[24px] text-purple-400">video_library</span>
-                          </div>
-                          <span className="text-xs font-medium text-white/60">Vídeo</span>
-                        </button>
-                        <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
-                            <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
-                          </div>
-                          <span className="text-xs font-medium text-white/60">Gravar</span>
-                        </button>
-                      </>
-                    ) : (
-                      <button onClick={() => setShowYoutubeInput(true)} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
-                          <span className="material-symbols-outlined text-[24px] text-red-400">smart_display</span>
-                        </div>
-                        <span className="text-xs font-medium text-white/60">YouTube</span>
-                      </button>
-                    )}
+                    <button onClick={handlePickVideoFromGallery} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-600/10 flex items-center justify-center shadow-lg shadow-purple-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-purple-400">video_library</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Vídeo</span>
+                    </button>
+                    <button onClick={() => setViewMode("video-recorder")} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-900/80 border border-white/10 hover:border-white/20 transition-all duration-200">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/10 flex items-center justify-center shadow-lg shadow-red-500/10">
+                        <span className="material-symbols-outlined text-[24px] text-red-400">videocam</span>
+                      </div>
+                      <span className="text-xs font-medium text-white/60">Gravar</span>
+                    </button>
                   </div>
                   {showYoutubeInput && !isPro && !isOfficialAccount && (
                     <div className="mt-4 w-full max-w-[280px] space-y-2">

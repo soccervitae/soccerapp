@@ -2,6 +2,7 @@ import { forwardRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CreateMenuSheet } from "@/components/feed/CreateMenuSheet";
+import { MediaPickerSheet } from "@/components/feed/MediaPickerSheet";
 import { AddChampionshipSheet } from "@/components/profile/AddChampionshipSheet";
 import { AddAchievementSheet } from "@/components/profile/AddAchievementSheet";
 
@@ -60,6 +61,7 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChampionshipOpen, setIsChampionshipOpen] = useState(false);
   const [isAchievementOpen, setIsAchievementOpen] = useState(false);
+  const [mediaPickerType, setMediaPickerType] = useState<"post" | "replay" | "highlight" | null>(null);
   
   // Detect current tab based on route
   const getCurrentTab = (): "home" | "search" | "add" | "messages" | "profile" => {
@@ -141,13 +143,9 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
   const handleSelectOption = (option: "post" | "replay" | "highlight" | "times" | "championship" | "achievement") => {
     switch (option) {
       case "post":
-        navigate("/create-post");
-        break;
       case "replay":
-        navigate("/create-replay");
-        break;
       case "highlight":
-        navigate("/create-highlight");
+        setMediaPickerType(option);
         break;
       case "times":
         navigate("/select-teams");
@@ -225,6 +223,12 @@ export const BottomNavigation = forwardRef<HTMLElement, BottomNavigationProps>((
         open={isAchievementOpen} 
         onOpenChange={setIsAchievementOpen}
         userTeams={userTeams}
+      />
+
+      <MediaPickerSheet
+        open={!!mediaPickerType}
+        onOpenChange={(open) => { if (!open) setMediaPickerType(null); }}
+        type={mediaPickerType || "post"}
       />
     </>
   );
