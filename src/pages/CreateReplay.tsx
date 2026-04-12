@@ -19,6 +19,7 @@ const CreateReplay = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: replayProfile } = useProfile();
+  const createStory = useCreateStory();
 
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
