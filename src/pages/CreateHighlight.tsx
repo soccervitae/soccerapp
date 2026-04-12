@@ -543,6 +543,46 @@ const CreateHighlight = () => {
 
   const canSave = viewMode === "create" && title.trim() && mediaItems.length > 0 && !isUploading;
 
+  // Video trimmer view
+  if (viewMode === "video-trimmer" && pendingTrimVideos.length > 0) {
+    const currentVideo = pendingTrimVideos[0];
+    return (
+      <VideoTrimmer
+        videoUrl={currentVideo.url}
+        videoFile={currentVideo.file}
+        onConfirm={(startTime, endTime) => {
+          // Add the trimmed video to media items
+          const videoItem: MediaPreview = {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            file: currentVideo.file,
+            preview: currentVideo.url,
+            type: "video",
+          };
+          setMediaItems(prev => [...prev, videoItem]);
+
+          // Move to next video or back to create
+          const remaining = pendingTrimVideos.slice(1);
+          if (remaining.length > 0) {
+            setPendingTrimVideos(remaining);
+          } else {
+            setPendingTrimVideos([]);
+            setViewMode(previousViewMode);
+          }
+        }}
+        onCancel={() => {
+          // Skip this video, move to next or back
+          const remaining = pendingTrimVideos.slice(1);
+          if (remaining.length > 0) {
+            setPendingTrimVideos(remaining);
+          } else {
+            setPendingTrimVideos([]);
+            setViewMode(previousViewMode);
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header - Glassmorphism style */}
