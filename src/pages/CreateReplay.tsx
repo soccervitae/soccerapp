@@ -228,6 +228,34 @@ const CreateReplay = () => {
     return true;
   });
 
+  // Show video trimmer fullscreen
+  if (viewMode === "video-trimmer" && pendingTrimVideo) {
+    return (
+      <VideoTrimmer
+        videoUrl={pendingTrimVideo.url}
+        videoFile={pendingTrimVideo.file}
+        onConfirm={(startTime, endTime) => {
+          // Store trim info and proceed
+          setCapturedMedia([{
+            url: pendingTrimVideo.url,
+            type: "video",
+            blob: pendingTrimVideo.file,
+            trimStart: startTime,
+            trimEnd: endTime,
+          } as any]);
+          setSelectedMedia(pendingTrimVideo.url);
+          setSelectedMediaType("video");
+          setPendingTrimVideo(null);
+          setViewMode("default");
+        }}
+        onCancel={() => {
+          setPendingTrimVideo(null);
+          setViewMode("default");
+        }}
+      />
+    );
+  }
+
   // Show video recorder fullscreen
   if (viewMode === "video-recorder") {
     return <VideoRecorder onVideoRecorded={handleVideoRecorded} onClose={() => setViewMode("default")} />;
