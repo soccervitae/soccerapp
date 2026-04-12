@@ -36,7 +36,7 @@ interface MediaPreview {
   type: 'image' | 'video';
 }
 
-type ViewMode = "select" | "create" | "edit";
+type ViewMode = "select" | "create" | "edit" | "video-trimmer";
 
 const SortableMedia = ({ 
   media, 
