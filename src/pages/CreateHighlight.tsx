@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2, X, GripVertical, Play, Film, Plus, Image as ImageIcon, Pencil, Check, ArrowLeft } from "lucide-react";
+import { VideoTrimmer } from "@/components/feed/VideoTrimmer";
 import { useImageCompression } from "@/hooks/useImageCompression";
 import {
   DndContext,
@@ -35,7 +36,7 @@ interface MediaPreview {
   type: 'image' | 'video';
 }
 
-type ViewMode = "select" | "create" | "edit";
+type ViewMode = "select" | "create" | "edit" | "video-trimmer";
 
 const SortableMedia = ({ 
   media, 
@@ -198,23 +199,47 @@ const CreateHighlight = () => {
   const [title, setTitle] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingTrimVideos, setPendingTrimVideos] = useState<{ file: File; url: string }[]>([]);
+  const [trimmedFiles, setTrimmedFiles] = useState<{ file: File; url: string }[]>([]);
+  const [previousViewMode, setPreviousViewMode] = useState<ViewMode>("create");
 
   // Handle pre-selected media from MediaPickerSheet
   useEffect(() => {
     const state = location.state as { preSelectedMedia?: File[] } | null;
     if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
       const files = state.preSelectedMedia;
-      const items: MediaPreview[] = files.map(file => {
-        const isVideo = file.type.startsWith("video/");
-        return {
+      const imageFiles: File[] = [];
+      const videoFiles: { file: File; url: string }[] = [];
+
+      files.forEach(file => {
+        if (file.type.startsWith("video/")) {
+          videoFiles.push({ file, url: URL.createObjectURL(file) });
+        } else {
+          imageFiles.push(file);
+        }
+      });
+
+      // Add images immediately
+      if (imageFiles.length > 0) {
+        const items: MediaPreview[] = imageFiles.map(file => ({
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           file,
           preview: URL.createObjectURL(file),
-          type: isVideo ? "video" as const : "image" as const,
-        };
-      });
-      setMediaItems(items);
-      setViewMode("create");
+          type: "image" as const,
+        }));
+        setMediaItems(items);
+      }
+
+      // Queue videos for trimming
+      if (videoFiles.length > 0) {
+        setPendingTrimVideos(videoFiles);
+        setTrimmedFiles([]);
+        setPreviousViewMode("create");
+        setViewMode("video-trimmer");
+      } else {
+        setViewMode("create");
+      }
+
       window.history.replaceState({}, document.title);
     }
   }, []);
@@ -250,21 +275,13 @@ const CreateHighlight = () => {
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const videoFiles: { file: File; url: string }[] = [];
     
     files.forEach((file) => {
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
-        const preview = URL.createObjectURL(file);
-        setMediaItems((prev) => [
-          ...prev,
-          {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            file,
-            preview,
-            type: 'video',
-          },
-        ]);
+        videoFiles.push({ file, url: URL.createObjectURL(file) });
       } else {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -281,6 +298,13 @@ const CreateHighlight = () => {
         reader.readAsDataURL(file);
       }
     });
+
+    // Route videos through trimmer
+    if (videoFiles.length > 0) {
+      setPendingTrimVideos(videoFiles);
+      setPreviousViewMode("create");
+      setViewMode("video-trimmer");
+    }
     
     e.target.value = "";
   };
@@ -517,6 +541,46 @@ const CreateHighlight = () => {
     : 0;
 
   const canSave = viewMode === "create" && title.trim() && mediaItems.length > 0 && !isUploading;
+
+  // Video trimmer view
+  if (viewMode === "video-trimmer" && pendingTrimVideos.length > 0) {
+    const currentVideo = pendingTrimVideos[0];
+    return (
+      <VideoTrimmer
+        videoUrl={currentVideo.url}
+        videoFile={currentVideo.file}
+        onConfirm={(startTime, endTime) => {
+          // Add the trimmed video to media items
+          const videoItem: MediaPreview = {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            file: currentVideo.file,
+            preview: currentVideo.url,
+            type: "video",
+          };
+          setMediaItems(prev => [...prev, videoItem]);
+
+          // Move to next video or back to create
+          const remaining = pendingTrimVideos.slice(1);
+          if (remaining.length > 0) {
+            setPendingTrimVideos(remaining);
+          } else {
+            setPendingTrimVideos([]);
+            setViewMode(previousViewMode);
+          }
+        }}
+        onCancel={() => {
+          // Skip this video, move to next or back
+          const remaining = pendingTrimVideos.slice(1);
+          if (remaining.length > 0) {
+            setPendingTrimVideos(remaining);
+          } else {
+            setPendingTrimVideos([]);
+            setViewMode(previousViewMode);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">

@@ -9,9 +9,10 @@ import { VideoRecorder } from "@/components/feed/VideoRecorder";
 import { MusicPicker } from "@/components/feed/MusicPicker";
 import { ReplayTextStickerEditor } from "@/components/feed/ReplayTextStickerEditor";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
+import { VideoTrimmer } from "@/components/feed/VideoTrimmer";
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor";
+type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor" | "video-trimmer";
 
 const CreateReplay = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const CreateReplay = () => {
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusicWithTrim | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [pendingTrimVideo, setPendingTrimVideo] = useState<{ url: string; file?: File | Blob } | null>(null);
 
   // Handle pre-selected media from MediaPickerSheet
   useEffect(() => {
@@ -39,9 +41,14 @@ const CreateReplay = () => {
       const file = state.preSelectedMedia[0];
       const url = URL.createObjectURL(file);
       const type: MediaType = file.type.startsWith("video/") ? "video" : "photo";
-      setCapturedMedia([{ url, type, blob: file }]);
-      setSelectedMedia(url);
-      setSelectedMediaType(type);
+      if (type === "video") {
+        setPendingTrimVideo({ url, file });
+        setViewMode("video-trimmer");
+      } else {
+        setCapturedMedia([{ url, type, blob: file }]);
+        setSelectedMedia(url);
+        setSelectedMediaType(type);
+      }
       window.history.replaceState({}, document.title);
     }
   }, []);
@@ -220,6 +227,34 @@ const CreateReplay = () => {
     if (activeTab === "videos") return media.type === "video";
     return true;
   });
+
+  // Show video trimmer fullscreen
+  if (viewMode === "video-trimmer" && pendingTrimVideo) {
+    return (
+      <VideoTrimmer
+        videoUrl={pendingTrimVideo.url}
+        videoFile={pendingTrimVideo.file}
+        onConfirm={(startTime, endTime) => {
+          // Store trim info and proceed
+          setCapturedMedia([{
+            url: pendingTrimVideo.url,
+            type: "video",
+            blob: pendingTrimVideo.file,
+            trimStart: startTime,
+            trimEnd: endTime,
+          } as any]);
+          setSelectedMedia(pendingTrimVideo.url);
+          setSelectedMediaType("video");
+          setPendingTrimVideo(null);
+          setViewMode("default");
+        }}
+        onCancel={() => {
+          setPendingTrimVideo(null);
+          setViewMode("default");
+        }}
+      />
+    );
+  }
 
   // Show video recorder fullscreen
   if (viewMode === "video-recorder") {
