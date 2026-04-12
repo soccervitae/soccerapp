@@ -199,23 +199,47 @@ const CreateHighlight = () => {
   const [title, setTitle] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingTrimVideos, setPendingTrimVideos] = useState<{ file: File; url: string }[]>([]);
+  const [trimmedFiles, setTrimmedFiles] = useState<{ file: File; url: string }[]>([]);
+  const [previousViewMode, setPreviousViewMode] = useState<ViewMode>("create");
 
   // Handle pre-selected media from MediaPickerSheet
   useEffect(() => {
     const state = location.state as { preSelectedMedia?: File[] } | null;
     if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
       const files = state.preSelectedMedia;
-      const items: MediaPreview[] = files.map(file => {
-        const isVideo = file.type.startsWith("video/");
-        return {
+      const imageFiles: File[] = [];
+      const videoFiles: { file: File; url: string }[] = [];
+
+      files.forEach(file => {
+        if (file.type.startsWith("video/")) {
+          videoFiles.push({ file, url: URL.createObjectURL(file) });
+        } else {
+          imageFiles.push(file);
+        }
+      });
+
+      // Add images immediately
+      if (imageFiles.length > 0) {
+        const items: MediaPreview[] = imageFiles.map(file => ({
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           file,
           preview: URL.createObjectURL(file),
-          type: isVideo ? "video" as const : "image" as const,
-        };
-      });
-      setMediaItems(items);
-      setViewMode("create");
+          type: "image" as const,
+        }));
+        setMediaItems(items);
+      }
+
+      // Queue videos for trimming
+      if (videoFiles.length > 0) {
+        setPendingTrimVideos(videoFiles);
+        setTrimmedFiles([]);
+        setPreviousViewMode("create");
+        setViewMode("video-trimmer");
+      } else {
+        setViewMode("create");
+      }
+
       window.history.replaceState({}, document.title);
     }
   }, []);
