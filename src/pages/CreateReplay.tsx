@@ -189,9 +189,17 @@ const CreateReplay = () => {
     setViewMode("text-sticker-editor");
   };
 
-  const handleFinalPublish = (finalMediaUrl: string, caption: string) => {
-    toast.success("Replay publicado com sucesso!");
-    navigate("/");
+  const handleFinalPublish = async (finalMediaUrl: string, caption: string) => {
+    try {
+      const mediaType = selectedMediaType === "video" ? "video" : "image";
+      const duration = selectedMediaType === "video" ? 90 : 5;
+      await createStory.mutateAsync({ mediaUrl: finalMediaUrl, mediaType, duration });
+      toast.success("Replay publicado com sucesso!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error publishing replay:", error);
+      toast.error("Erro ao publicar replay");
+    }
   };
 
   const handleClose = () => {
