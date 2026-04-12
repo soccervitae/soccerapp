@@ -275,21 +275,13 @@ const CreateHighlight = () => {
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const videoFiles: { file: File; url: string }[] = [];
     
     files.forEach((file) => {
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
-        const preview = URL.createObjectURL(file);
-        setMediaItems((prev) => [
-          ...prev,
-          {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            file,
-            preview,
-            type: 'video',
-          },
-        ]);
+        videoFiles.push({ file, url: URL.createObjectURL(file) });
       } else {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -306,6 +298,13 @@ const CreateHighlight = () => {
         reader.readAsDataURL(file);
       }
     });
+
+    // Route videos through trimmer
+    if (videoFiles.length > 0) {
+      setPendingTrimVideos(videoFiles);
+      setPreviousViewMode("create");
+      setViewMode("video-trimmer");
+    }
     
     e.target.value = "";
   };
