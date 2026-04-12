@@ -10,6 +10,7 @@ import { MusicPicker } from "@/components/feed/MusicPicker";
 import { ReplayTextStickerEditor } from "@/components/feed/ReplayTextStickerEditor";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { VideoTrimmer } from "@/components/feed/VideoTrimmer";
+import { useCreateStory } from "@/hooks/useStories";
 
 type MediaType = "photo" | "video";
 type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor" | "video-trimmer";
