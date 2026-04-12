@@ -10,6 +10,7 @@ import { MusicPicker } from "@/components/feed/MusicPicker";
 import { ReplayTextStickerEditor } from "@/components/feed/ReplayTextStickerEditor";
 import { SelectedMusicWithTrim, formatDuration } from "@/hooks/useMusic";
 import { VideoTrimmer } from "@/components/feed/VideoTrimmer";
+import { useCreateStory } from "@/hooks/useStories";
 
 type MediaType = "photo" | "video";
 type ViewMode = "default" | "video-recorder" | "music-picker" | "text-sticker-editor" | "video-trimmer";
@@ -18,6 +19,7 @@ const CreateReplay = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: replayProfile } = useProfile();
+  const createStory = useCreateStory();
 
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<MediaType>("photo");
@@ -187,9 +189,17 @@ const CreateReplay = () => {
     setViewMode("text-sticker-editor");
   };
 
-  const handleFinalPublish = (finalMediaUrl: string, caption: string) => {
-    toast.success("Replay publicado com sucesso!");
-    navigate("/");
+  const handleFinalPublish = async (finalMediaUrl: string, caption: string) => {
+    try {
+      const mediaType = selectedMediaType === "video" ? "video" : "image";
+      const duration = selectedMediaType === "video" ? 90 : 5;
+      await createStory.mutateAsync({ mediaUrl: finalMediaUrl, mediaType, duration });
+      toast.success("Replay publicado com sucesso!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error publishing replay:", error);
+      toast.error("Erro ao publicar replay");
+    }
   };
 
   const handleClose = () => {
