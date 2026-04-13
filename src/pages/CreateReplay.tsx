@@ -268,7 +268,6 @@ const CreateReplay = () => {
         videoUrl={pendingTrimVideo.url}
         videoFile={pendingTrimVideo.file}
         onConfirm={(startTime, endTime) => {
-          // Store trim info and proceed
           setCapturedMedia([{
             url: pendingTrimVideo.url,
             type: "video",
@@ -279,7 +278,7 @@ const CreateReplay = () => {
           setSelectedMedia(pendingTrimVideo.url);
           setSelectedMediaType("video");
           setPendingTrimVideo(null);
-          setViewMode("default");
+          setViewMode("text-sticker-editor");
         }}
         onCancel={() => {
           setPendingTrimVideo(null);
