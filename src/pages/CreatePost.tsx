@@ -557,6 +557,22 @@ const CreatePost = () => {
     );
   }
 
+  if (viewMode === "video-trimmer" && pendingTrimVideo) {
+    return (
+      <div className="fixed inset-0 bg-black z-50">
+        <VideoTrimmer
+          videoUrl={pendingTrimVideo.url}
+          videoFile={pendingTrimVideo.file}
+          onConfirm={handleTrimConfirm}
+          onCancel={() => {
+            setPendingTrimVideo(null);
+            setViewMode("default");
+          }}
+        />
+      </div>
+    );
+  }
+
   if (viewMode === "photo-editor" && editingPhotoIndex !== null) {
     const mediaToEdit = selectedMediaList[editingPhotoIndex];
     return (
