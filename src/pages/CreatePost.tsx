@@ -99,6 +99,7 @@ const CreatePost = () => {
   const [showModerationSheet, setShowModerationSheet] = useState(false);
   const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [pendingTrimVideo, setPendingTrimVideo] = useState<{ url: string; file: File } | null>(null);
 
   // Handle pre-selected media from MediaPickerSheet
   useEffect(() => {
