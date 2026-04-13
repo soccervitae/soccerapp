@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useDeviceCamera } from "@/hooks/useDeviceCamera";
 import { useDeviceGallery } from "@/hooks/useDeviceGallery";
 import { VideoRecorder } from "@/components/feed/VideoRecorder";
+import { VideoTrimmer } from "@/components/feed/VideoTrimmer";
 import { PhotoFilterEditor } from "@/components/feed/PhotoFilterEditor";
 import { PhotoCropEditor } from "@/components/feed/PhotoCropEditor";
 import { LocationPicker } from "@/components/feed/LocationPicker";
