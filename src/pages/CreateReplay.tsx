@@ -36,7 +36,7 @@ const CreateReplay = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [pendingTrimVideo, setPendingTrimVideo] = useState<{ url: string; file?: File | Blob } | null>(null);
 
-  // Handle pre-selected media from MediaPickerSheet
+  // Handle pre-selected media from MediaPickerSheet - go directly to editor
   useEffect(() => {
     const state = location.state as { preSelectedMedia?: File[] } | null;
     if (state?.preSelectedMedia && state.preSelectedMedia.length > 0) {
@@ -44,12 +44,35 @@ const CreateReplay = () => {
       const url = URL.createObjectURL(file);
       const type: MediaType = file.type.startsWith("video/") ? "video" : "photo";
       if (type === "video") {
-        setPendingTrimVideo({ url, file });
-        setViewMode("video-trimmer");
+        // Check duration - if over 90s, show trimmer first, then editor
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = () => {
+          const duration = video.duration;
+          URL.revokeObjectURL(video.src);
+          if (duration && isFinite(duration) && duration > 90) {
+            setPendingTrimVideo({ url, file });
+            setViewMode("video-trimmer");
+          } else {
+            setCapturedMedia([{ url, type, blob: file }]);
+            setSelectedMedia(url);
+            setSelectedMediaType(type);
+            setViewMode("text-sticker-editor");
+          }
+        };
+        video.onerror = () => {
+          URL.revokeObjectURL(video.src);
+          setCapturedMedia([{ url, type, blob: file }]);
+          setSelectedMedia(url);
+          setSelectedMediaType(type);
+          setViewMode("text-sticker-editor");
+        };
+        video.src = URL.createObjectURL(file);
       } else {
         setCapturedMedia([{ url, type, blob: file }]);
         setSelectedMedia(url);
         setSelectedMediaType(type);
+        setViewMode("text-sticker-editor");
       }
       window.history.replaceState({}, document.title);
     }
