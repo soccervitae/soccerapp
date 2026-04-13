@@ -269,9 +269,40 @@ const CreatePost = () => {
   const handlePickVideoFromGallery = async () => {
     const video = await pickVideoFromGallery();
     if (video) {
-      setSelectedMediaList([{ url: video.webPath, blob: video.blob, isLocal: true }]);
+      const videoEl = document.createElement("video");
+      videoEl.preload = "metadata";
+      videoEl.muted = true;
+      videoEl.src = video.webPath;
+      videoEl.onloadedmetadata = () => {
+        const dur = videoEl.duration;
+        videoEl.removeAttribute("src");
+        videoEl.load();
+        if (dur && isFinite(dur) && dur > 90) {
+          const file = new File([video.blob], "video.mp4", { type: video.blob.type || "video/mp4" });
+          setPendingTrimVideo({ url: video.webPath, file });
+          setSelectedMediaType("video");
+          setViewMode("video-trimmer");
+        } else {
+          setSelectedMediaList([{ url: video.webPath, blob: video.blob, isLocal: true }]);
+          setSelectedMediaType("video");
+          toast.success("Vídeo selecionado!");
+        }
+      };
+      videoEl.onerror = () => {
+        setSelectedMediaList([{ url: video.webPath, blob: video.blob, isLocal: true }]);
+        setSelectedMediaType("video");
+        toast.success("Vídeo selecionado!");
+      };
+    }
+  };
+
+  const handleTrimConfirm = (startTime: number, endTime: number) => {
+    if (pendingTrimVideo) {
+      setSelectedMediaList([{ url: pendingTrimVideo.url, file: pendingTrimVideo.file, isLocal: true }]);
       setSelectedMediaType("video");
-      toast.success("Vídeo selecionado!");
+      setPendingTrimVideo(null);
+      setViewMode("default");
+      toast.success(`Vídeo cortado! Trecho de ${Math.round(endTime - startTime)}s selecionado.`);
     }
   };
 
