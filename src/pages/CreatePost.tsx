@@ -110,8 +110,27 @@ const CreatePost = () => {
       
       if (isVideo) {
         const url = URL.createObjectURL(files[0]);
-        setSelectedMediaList([{ url, file: files[0], isLocal: true }]);
-        setSelectedMediaType("video");
+        const videoEl = document.createElement("video");
+        videoEl.preload = "metadata";
+        videoEl.muted = true;
+        videoEl.src = url;
+        videoEl.onloadedmetadata = () => {
+          const dur = videoEl.duration;
+          videoEl.removeAttribute("src");
+          videoEl.load();
+          if (dur && isFinite(dur) && dur > 90) {
+            setPendingTrimVideo({ url, file: files[0] });
+            setSelectedMediaType("video");
+            setViewMode("video-trimmer");
+          } else {
+            setSelectedMediaList([{ url, file: files[0], isLocal: true }]);
+            setSelectedMediaType("video");
+          }
+        };
+        videoEl.onerror = () => {
+          setSelectedMediaList([{ url, file: files[0], isLocal: true }]);
+          setSelectedMediaType("video");
+        };
       } else {
         const items: MediaItem[] = files.map(file => ({
           url: URL.createObjectURL(file),
