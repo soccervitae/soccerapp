@@ -40,7 +40,7 @@ import { ptBR } from "date-fns/locale";
 import { ModerationInfoSheet } from "@/components/feed/ModerationInfoSheet";
 
 type MediaType = "photo" | "video";
-type ViewMode = "default" | "video-recorder" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker" | "music-picker" | "schedule-picker";
+type ViewMode = "default" | "video-recorder" | "video-trimmer" | "photo-editor" | "photo-crop" | "photo-tag" | "gallery-picker" | "location-picker" | "music-picker" | "schedule-picker";
 
 interface MediaItem {
   url: string;
