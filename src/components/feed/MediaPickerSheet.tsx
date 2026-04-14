@@ -86,34 +86,11 @@ export const MediaPickerSheet = ({ open, onOpenChange, type }: MediaPickerSheetP
     setIsValidating(true);
 
     try {
-      // Validate video durations
-      const validFiles: File[] = [];
-      for (const file of files) {
-        if (file.type.startsWith("video/")) {
-          try {
-            const duration = await getVideoDurationFromFile(file);
-            if (duration > MAX_VIDEO_DURATION) {
-              toast.error(`Vídeo "${file.name}" excede o limite de 90 segundos (${Math.round(duration)}s)`);
-              continue;
-            }
-          } catch {
-            toast.error(`Erro ao verificar duração do vídeo "${file.name}"`);
-            continue;
-          }
-        }
-        validFiles.push(file);
-      }
-
-      if (validFiles.length === 0) {
-        toast.error("Nenhuma mídia válida selecionada");
-        onOpenChange(false);
-        return;
-      }
-
-      // Navigate to creation page with files
+      // Navigate to creation page with files - video duration validation
+      // is handled by the VideoTrimmer in each creation page
       onOpenChange(false);
       navigate(getRoute(type), {
-        state: { preSelectedMedia: validFiles },
+        state: { preSelectedMedia: files },
       });
     } finally {
       setIsValidating(false);
