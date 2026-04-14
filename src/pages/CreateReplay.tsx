@@ -267,15 +267,17 @@ const CreateReplay = () => {
       <VideoTrimmer
         videoUrl={pendingTrimVideo.url}
         videoFile={pendingTrimVideo.file}
-        onConfirm={(startTime, endTime) => {
-          setCapturedMedia([{
-            url: pendingTrimVideo.url,
-            type: "video",
-            blob: pendingTrimVideo.file,
-            trimStart: startTime,
-            trimEnd: endTime,
-          } as any]);
-          setSelectedMedia(pendingTrimVideo.url);
+        onConfirm={async (startTime, endTime) => {
+          try {
+            const { trimVideoBlob } = await import("@/lib/videoTrimUtils");
+            const { blob, url } = await trimVideoBlob(pendingTrimVideo.url, startTime, endTime);
+            setCapturedMedia([{ url, type: "video", blob }]);
+            setSelectedMedia(url);
+          } catch (err) {
+            console.error("Trim error:", err);
+            setCapturedMedia([{ url: pendingTrimVideo.url, type: "video", blob: pendingTrimVideo.file }]);
+            setSelectedMedia(pendingTrimVideo.url);
+          }
           setSelectedMediaType("video");
           setPendingTrimVideo(null);
           setViewMode("text-sticker-editor");

@@ -549,17 +549,29 @@ const CreateHighlight = () => {
       <VideoTrimmer
         videoUrl={currentVideo.url}
         videoFile={currentVideo.file}
-        onConfirm={(startTime, endTime) => {
-          // Add the trimmed video to media items
-          const videoItem: MediaPreview = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            file: currentVideo.file,
-            preview: currentVideo.url,
-            type: "video",
-          };
-          setMediaItems(prev => [...prev, videoItem]);
+        onConfirm={async (startTime, endTime) => {
+          try {
+            const { trimVideoBlob } = await import("@/lib/videoTrimUtils");
+            const { blob, url } = await trimVideoBlob(currentVideo.url, startTime, endTime);
+            const trimmedFile = new File([blob], currentVideo.file.name, { type: blob.type });
+            const videoItem: MediaPreview = {
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              file: trimmedFile,
+              preview: url,
+              type: "video",
+            };
+            setMediaItems(prev => [...prev, videoItem]);
+          } catch (err) {
+            console.error("Trim error:", err);
+            const videoItem: MediaPreview = {
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              file: currentVideo.file,
+              preview: currentVideo.url,
+              type: "video",
+            };
+            setMediaItems(prev => [...prev, videoItem]);
+          }
 
-          // Move to next video or back to create
           const remaining = pendingTrimVideos.slice(1);
           if (remaining.length > 0) {
             setPendingTrimVideos(remaining);
