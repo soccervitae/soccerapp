@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { formatDuration } from "@/hooks/useVideoDuration";
 
 const MAX_DURATION = 90;
+const MIN_DURATION = 3;
 
 interface VideoTrimmerProps {
   videoUrl: string;
@@ -11,23 +12,25 @@ interface VideoTrimmerProps {
   onCancel: () => void;
 }
 
+type DragTarget = "left" | "right" | "middle" | null;
+
 export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: VideoTrimmerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  const thumbnailCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [duration, setDuration] = useState(0);
   const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragTarget, setDragTarget] = useState<DragTarget>(null);
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
+  const dragStartX = useRef(0);
+  const dragStartValues = useRef({ start: 0, end: 0 });
 
-  const endTime = Math.min(startTime + MAX_DURATION, duration);
   const trimDuration = endTime - startTime;
 
-  // Generate thumbnails from video
   const generateThumbnails = useCallback(async (videoDuration: number) => {
     const video = document.createElement("video");
     video.preload = "auto";
@@ -76,6 +79,8 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
       const dur = video.duration;
       if (dur && isFinite(dur)) {
         setDuration(dur);
+        setStartTime(0);
+        setEndTime(Math.min(MAX_DURATION, dur));
         setIsReady(true);
         if (dur > MAX_DURATION) {
           generateThumbnails(dur);
@@ -87,7 +92,6 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
     return () => video.removeEventListener("loadedmetadata", onLoaded);
   }, [generateThumbnails]);
 
-  // Sync video playback with trim window
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isReady) return;
@@ -105,7 +109,6 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
     return () => video.removeEventListener("timeupdate", onTimeUpdate);
   }, [startTime, endTime, isReady]);
 
-  // If video is <= 90s, auto-confirm
   useEffect(() => {
     if (isReady && duration <= MAX_DURATION) {
       onConfirm(0, duration);
@@ -128,63 +131,126 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
     }
   };
 
-  const handleTimelineInteraction = (clientX: number) => {
+  const getTimeFromX = (clientX: number): number => {
     const timeline = timelineRef.current;
-    if (!timeline || !duration) return;
-
+    if (!timeline || !duration) return 0;
     const rect = timeline.getBoundingClientRect();
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-    const ratio = x / rect.width;
-    const newStart = Math.max(0, Math.min(ratio * duration, duration - Math.min(MAX_DURATION, duration)));
+    return (x / rect.width) * duration;
+  };
 
-    setStartTime(newStart);
+  const handleHandleStart = (target: DragTarget, clientX: number) => {
+    setDragTarget(target);
+    dragStartX.current = clientX;
+    dragStartValues.current = { start: startTime, end: endTime };
+  };
 
-    const video = videoRef.current;
-    if (video) {
-      video.currentTime = newStart;
-      setCurrentTime(newStart);
+  const handleDragMove = useCallback((clientX: number) => {
+    if (!dragTarget || !duration) return;
+    const timeline = timelineRef.current;
+    if (!timeline) return;
+
+    const rect = timeline.getBoundingClientRect();
+    const deltaX = clientX - dragStartX.current;
+    const deltaTime = (deltaX / rect.width) * duration;
+    const { start: origStart, end: origEnd } = dragStartValues.current;
+
+    let newStart = startTime;
+    let newEnd = endTime;
+
+    if (dragTarget === "left") {
+      newStart = Math.max(0, Math.min(origStart + deltaTime, endTime - MIN_DURATION));
+      // Enforce max duration
+      if (endTime - newStart > MAX_DURATION) {
+        newStart = endTime - MAX_DURATION;
+      }
+      setStartTime(newStart);
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = newStart;
+        setCurrentTime(newStart);
+      }
+    } else if (dragTarget === "right") {
+      newEnd = Math.min(duration, Math.max(origEnd + deltaTime, startTime + MIN_DURATION));
+      // Enforce max duration
+      if (newEnd - startTime > MAX_DURATION) {
+        newEnd = startTime + MAX_DURATION;
+      }
+      setEndTime(newEnd);
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = Math.max(newEnd - 1, startTime);
+        setCurrentTime(video.currentTime);
+      }
+    } else if (dragTarget === "middle") {
+      const selectionDur = origEnd - origStart;
+      let newMidStart = origStart + deltaTime;
+      newMidStart = Math.max(0, Math.min(newMidStart, duration - selectionDur));
+      setStartTime(newMidStart);
+      setEndTime(newMidStart + selectionDur);
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = newMidStart;
+        setCurrentTime(newMidStart);
+      }
     }
+  }, [dragTarget, duration, startTime, endTime]);
+
+  // Left handle events
+  const onLeftHandleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleHandleStart("left", e.clientX);
+  };
+  const onLeftHandleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    handleHandleStart("left", e.touches[0].clientX);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    handleTimelineInteraction(e.touches[0].clientX);
+  // Right handle events
+  const onRightHandleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleHandleStart("right", e.clientX);
+  };
+  const onRightHandleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    handleHandleStart("right", e.touches[0].clientX);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging) {
-      e.preventDefault();
-      handleTimelineInteraction(e.touches[0].clientX);
-    }
+  // Middle area events
+  const onMiddleMouseDown = (e: React.MouseEvent) => {
+    handleHandleStart("middle", e.clientX);
   };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    handleTimelineInteraction(e.clientX);
+  const onMiddleTouchStart = (e: React.TouchEvent) => {
+    handleHandleStart("middle", e.touches[0].clientX);
   };
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (!dragTarget) return;
 
-    const handleMove = (e: MouseEvent) => handleTimelineInteraction(e.clientX);
-    const handleUp = () => setIsDragging(false);
+    const handleMove = (e: MouseEvent) => handleDragMove(e.clientX);
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      handleDragMove(e.touches[0].clientX);
+    };
+    const handleUp = () => setDragTarget(null);
 
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", handleUp);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleUp);
 
     return () => {
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseup", handleUp);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleUp);
     };
-  }, [isDragging, duration]);
+  }, [dragTarget, handleDragMove]);
 
   const handleConfirm = () => {
     onConfirm(startTime, endTime);
   };
 
-  // Don't render UI if video is short enough
   if (isReady && duration <= MAX_DURATION) {
     return (
       <video ref={videoRef} src={videoUrl} className="hidden" preload="metadata" muted />
@@ -205,7 +271,7 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
 
   const selectionLeftPercent = (startTime / duration) * 100;
   const selectionWidthPercent = (trimDuration / duration) * 100;
-  const playheadPercent = duration > 0 ? ((currentTime - startTime) / trimDuration) * 100 : 0;
+  const playheadPercent = trimDuration > 0 ? ((currentTime - startTime) / trimDuration) * 100 : 0;
 
   return (
     <div className="h-screen w-full bg-black flex flex-col">
@@ -238,7 +304,6 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
           preload="auto"
         />
 
-        {/* Play/Pause overlay */}
         <button
           onClick={handlePlayPause}
           className="absolute inset-0 flex items-center justify-center"
@@ -250,7 +315,6 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
           )}
         </button>
 
-        {/* Duration badge */}
         <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-full">
           <span className="text-white text-xs font-medium">
             {formatDuration(trimDuration)} / {formatDuration(duration)}
@@ -260,12 +324,11 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
 
       {/* Timeline Section */}
       <div className="bg-zinc-950 px-4 pt-4 pb-8 space-y-3">
-        {/* Info */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px] text-primary">content_cut</span>
             <span className="text-xs text-white/60">
-              Deslize para escolher os {MAX_DURATION}s do vídeo
+              Arraste as bordas para ajustar (máx. {MAX_DURATION}s)
             </span>
           </div>
           <span className="text-xs text-white/80 font-medium">
@@ -276,10 +339,7 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
         {/* Timeline with thumbnails */}
         <div
           ref={timelineRef}
-          className="relative h-14 rounded-lg overflow-hidden cursor-pointer select-none touch-none"
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
+          className="relative h-14 rounded-lg overflow-hidden select-none touch-none"
         >
           {/* Thumbnail strip */}
           <div className="absolute inset-0 flex">
@@ -310,19 +370,35 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
 
           {/* Selection window */}
           <div
-            className="absolute top-0 bottom-0 border-2 border-primary rounded-md"
+            className="absolute top-0 bottom-0 border-y-2 border-primary"
             style={{
               left: `${selectionLeftPercent}%`,
               width: `${selectionWidthPercent}%`,
             }}
           >
+            {/* Middle drag area */}
+            <div
+              className="absolute inset-0 cursor-grab active:cursor-grabbing z-[1]"
+              onMouseDown={onMiddleMouseDown}
+              onTouchStart={onMiddleTouchStart}
+              style={{ left: 16, right: 16 }}
+            />
+
             {/* Left handle */}
-            <div className="absolute left-0 top-0 bottom-0 w-3 bg-primary rounded-l-md flex items-center justify-center cursor-grab active:cursor-grabbing">
+            <div
+              className="absolute left-0 top-0 bottom-0 w-4 bg-primary rounded-l-md flex items-center justify-center cursor-ew-resize z-[2]"
+              onMouseDown={onLeftHandleMouseDown}
+              onTouchStart={onLeftHandleTouchStart}
+            >
               <div className="w-0.5 h-5 bg-white/80 rounded-full" />
             </div>
 
             {/* Right handle */}
-            <div className="absolute right-0 top-0 bottom-0 w-3 bg-primary rounded-r-md flex items-center justify-center cursor-grab active:cursor-grabbing">
+            <div
+              className="absolute right-0 top-0 bottom-0 w-4 bg-primary rounded-r-md flex items-center justify-center cursor-ew-resize z-[2]"
+              onMouseDown={onRightHandleMouseDown}
+              onTouchStart={onRightHandleTouchStart}
+            >
               <div className="w-0.5 h-5 bg-white/80 rounded-full" />
             </div>
 
@@ -351,8 +427,6 @@ export const VideoTrimmer = ({ videoUrl, videoFile, onConfirm, onCancel }: Video
           ⏱️ Máximo de {MAX_DURATION} segundos por vídeo
         </p>
       </div>
-
-      <canvas ref={thumbnailCanvasRef} className="hidden" />
     </div>
   );
 };
