@@ -296,13 +296,28 @@ const CreatePost = () => {
     }
   };
 
-  const handleTrimConfirm = (startTime: number, endTime: number) => {
-    if (pendingTrimVideo) {
-      setSelectedMediaList([{ url: pendingTrimVideo.url, file: pendingTrimVideo.file, isLocal: true }]);
+  const [isTrimming, setIsTrimming] = useState(false);
+
+  const handleTrimConfirm = async (startTime: number, endTime: number) => {
+    if (!pendingTrimVideo) return;
+    setIsTrimming(true);
+    try {
+      const { trimVideoBlob } = await import("@/lib/videoTrimUtils");
+      const { blob, url } = await trimVideoBlob(pendingTrimVideo.url, startTime, endTime);
+      setSelectedMediaList([{ url, blob, isLocal: true }]);
       setSelectedMediaType("video");
       setPendingTrimVideo(null);
       setViewMode("default");
       toast.success(`Vídeo cortado! Trecho de ${Math.round(endTime - startTime)}s selecionado.`);
+    } catch (err) {
+      console.error("Trim error:", err);
+      toast.error("Erro ao cortar vídeo. Usando vídeo original.");
+      setSelectedMediaList([{ url: pendingTrimVideo.url, file: pendingTrimVideo.file, isLocal: true }]);
+      setSelectedMediaType("video");
+      setPendingTrimVideo(null);
+      setViewMode("default");
+    } finally {
+      setIsTrimming(false);
     }
   };
 
@@ -560,15 +575,22 @@ const CreatePost = () => {
   if (viewMode === "video-trimmer" && pendingTrimVideo) {
     return (
       <div className="fixed inset-0 bg-black z-50">
-        <VideoTrimmer
-          videoUrl={pendingTrimVideo.url}
-          videoFile={pendingTrimVideo.file}
-          onConfirm={handleTrimConfirm}
-          onCancel={() => {
-            setPendingTrimVideo(null);
-            setViewMode("default");
-          }}
-        />
+        {isTrimming ? (
+          <div className="h-full flex flex-col items-center justify-center gap-3">
+            <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="text-white/60 text-sm">Cortando vídeo...</span>
+          </div>
+        ) : (
+          <VideoTrimmer
+            videoUrl={pendingTrimVideo.url}
+            videoFile={pendingTrimVideo.file}
+            onConfirm={handleTrimConfirm}
+            onCancel={() => {
+              setPendingTrimVideo(null);
+              setViewMode("default");
+            }}
+          />
+        )}
       </div>
     );
   }
