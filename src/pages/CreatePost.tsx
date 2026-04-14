@@ -575,15 +575,22 @@ const CreatePost = () => {
   if (viewMode === "video-trimmer" && pendingTrimVideo) {
     return (
       <div className="fixed inset-0 bg-black z-50">
-        <VideoTrimmer
-          videoUrl={pendingTrimVideo.url}
-          videoFile={pendingTrimVideo.file}
-          onConfirm={handleTrimConfirm}
-          onCancel={() => {
-            setPendingTrimVideo(null);
-            setViewMode("default");
-          }}
-        />
+        {isTrimming ? (
+          <div className="h-full flex flex-col items-center justify-center gap-3">
+            <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="text-white/60 text-sm">Cortando vídeo...</span>
+          </div>
+        ) : (
+          <VideoTrimmer
+            videoUrl={pendingTrimVideo.url}
+            videoFile={pendingTrimVideo.file}
+            onConfirm={handleTrimConfirm}
+            onCancel={() => {
+              setPendingTrimVideo(null);
+              setViewMode("default");
+            }}
+          />
+        )}
       </div>
     );
   }
