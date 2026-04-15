@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Download, Monitor, Smartphone, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Download, Monitor, Smartphone, Loader2, RefreshCw, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
