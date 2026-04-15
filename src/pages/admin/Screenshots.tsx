@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Download, Monitor, Smartphone, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Download, Monitor, Smartphone, Loader2, RefreshCw, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
@@ -31,12 +31,63 @@ type ScreenshotData = {
   desktopDataUrl: string | null;
 };
 
+function ScreenshotPreviewModal({
+  dataUrl,
+  label,
+  onClose,
+  onDownload,
+}: {
+  dataUrl: string;
+  label: string;
+  onClose: () => void;
+  onDownload: (dataUrl: string, name: string) => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-[95vw] max-h-[95vh] flex flex-col items-center gap-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-2 absolute top-2 right-2 z-10">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8"
+            onClick={() => onDownload(dataUrl, label)}
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Baixar
+          </Button>
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <img
+          src={dataUrl}
+          alt={label}
+          className="max-w-full max-h-[90vh] rounded-lg border border-border object-contain"
+        />
+      </div>
+    </div>
+  );
+}
+
 function ScreenshotCard({
   item,
   onDownload,
+  onPreview,
 }: {
   item: ScreenshotData;
   onDownload: (dataUrl: string, name: string) => void;
+  onPreview: (dataUrl: string, label: string) => void;
 }) {
   return (
     <div className="border border-border rounded-lg bg-card p-4 space-y-3">
@@ -55,16 +106,27 @@ function ScreenshotCard({
               <img
                 src={item.mobileDataUrl}
                 alt={`${item.label} mobile`}
-                className="w-full rounded border border-border object-cover object-top"
+                className="w-full rounded border border-border object-cover object-top cursor-pointer"
                 style={{ aspectRatio: "390/844", maxHeight: 200 }}
+                onClick={() => onPreview(item.mobileDataUrl!, `${item.label} - Mobile`)}
               />
-              <Button
-                size="sm"
-                className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 text-xs"
-                onClick={() => onDownload(item.mobileDataUrl!, `${item.label}-mobile`)}
-              >
-                <Download className="h-3 w-3" />
-              </Button>
+              <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 text-xs"
+                  onClick={() => onPreview(item.mobileDataUrl!, `${item.label} - Mobile`)}
+                >
+                  <Eye className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => onDownload(item.mobileDataUrl!, `${item.label}-mobile`)}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
           ) : (
             <div
@@ -87,16 +149,27 @@ function ScreenshotCard({
               <img
                 src={item.desktopDataUrl}
                 alt={`${item.label} desktop`}
-                className="w-full rounded border border-border object-cover object-top"
+                className="w-full rounded border border-border object-cover object-top cursor-pointer"
                 style={{ aspectRatio: "1280/720", maxHeight: 200 }}
+                onClick={() => onPreview(item.desktopDataUrl!, `${item.label} - Desktop`)}
               />
-              <Button
-                size="sm"
-                className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 text-xs"
-                onClick={() => onDownload(item.desktopDataUrl!, `${item.label}-desktop`)}
-              >
-                <Download className="h-3 w-3" />
-              </Button>
+              <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 text-xs"
+                  onClick={() => onPreview(item.desktopDataUrl!, `${item.label} - Desktop`)}
+                >
+                  <Eye className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => onDownload(item.desktopDataUrl!, `${item.label}-desktop`)}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
           ) : (
             <div
@@ -118,6 +191,7 @@ export default function Screenshots() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: ALL_PAGES.length });
+  const [preview, setPreview] = useState<{ dataUrl: string; label: string } | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const origin = window.location.origin;
 
@@ -292,6 +366,7 @@ export default function Screenshots() {
               key={item.path}
               item={item}
               onDownload={downloadScreenshot}
+              onPreview={(dataUrl, label) => setPreview({ dataUrl, label })}
             />
           ))}
         </div>
@@ -311,6 +386,16 @@ export default function Screenshots() {
             pointerEvents: "none",
           }}
         />
+
+
+        {preview && (
+          <ScreenshotPreviewModal
+            dataUrl={preview.dataUrl}
+            label={preview.label}
+            onClose={() => setPreview(null)}
+            onDownload={downloadScreenshot}
+          />
+        )}
       </div>
     </AdminLayout>
   );
