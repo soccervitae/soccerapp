@@ -191,6 +191,7 @@ export default function Screenshots() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: ALL_PAGES.length });
+  const [preview, setPreview] = useState<{ dataUrl: string; label: string } | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const origin = window.location.origin;
 
@@ -365,6 +366,7 @@ export default function Screenshots() {
               key={item.path}
               item={item}
               onDownload={downloadScreenshot}
+              onPreview={(dataUrl, label) => setPreview({ dataUrl, label })}
             />
           ))}
         </div>
