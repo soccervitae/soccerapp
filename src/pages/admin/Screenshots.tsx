@@ -386,6 +386,16 @@ export default function Screenshots() {
             pointerEvents: "none",
           }}
         />
+
+
+        {preview && (
+          <ScreenshotPreviewModal
+            dataUrl={preview.dataUrl}
+            label={preview.label}
+            onClose={() => setPreview(null)}
+            onDownload={downloadScreenshot}
+          />
+        )}
       </div>
     </AdminLayout>
   );
