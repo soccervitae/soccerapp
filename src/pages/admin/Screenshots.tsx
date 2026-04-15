@@ -1,215 +1,316 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Camera, Download, Monitor, Smartphone, Loader2, ExternalLink } from "lucide-react";
+import { Camera, Download, Monitor, Smartphone, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
-const PRESETS = [
+const ALL_PAGES = [
   { label: "Home", path: "/" },
   { label: "Landing", path: "/landing" },
-  { label: "Auth", path: "/auth" },
-  { label: "Explore", path: "/explore" },
+  { label: "Login", path: "/auth" },
   { label: "Explorar", path: "/explorar" },
   { label: "Para Atletas", path: "/para-atletas" },
+  { label: "Para Comissão", path: "/para-comissao" },
   { label: "Para Times", path: "/para-times" },
   { label: "Como Funciona", path: "/como-funciona" },
+  { label: "Saiba Mais", path: "/saiba-mais" },
+  { label: "Blog", path: "/blog" },
+  { label: "Vagas", path: "/vagas" },
+  { label: "Peneiras", path: "/peneiras" },
+  { label: "Termos", path: "/terms" },
+  { label: "Privacidade", path: "/privacy" },
+  { label: "Sobre", path: "/about" },
+  { label: "Diretrizes", path: "/guidelines" },
 ];
 
-export default function Screenshots() {
-  const [route, setRoute] = useState("/landing");
-  const mobileIframeRef = useRef<HTMLIFrameElement>(null);
-  const desktopIframeRef = useRef<HTMLIFrameElement>(null);
-  const [capturingMobile, setCapturingMobile] = useState(false);
-  const [capturingDesktop, setCapturingDesktop] = useState(false);
+type ScreenshotData = {
+  label: string;
+  path: string;
+  mobileDataUrl: string | null;
+  desktopDataUrl: string | null;
+};
 
+function ScreenshotCard({
+  item,
+  onDownload,
+}: {
+  item: ScreenshotData;
+  onDownload: (dataUrl: string, name: string) => void;
+}) {
+  return (
+    <div className="border border-border rounded-lg bg-card p-4 space-y-3">
+      <h3 className="font-semibold text-foreground text-sm">{item.label}</h3>
+      <p className="text-xs text-muted-foreground font-mono">{item.path}</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        {/* Mobile */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Smartphone className="h-3 w-3" />
+            Mobile
+          </div>
+          {item.mobileDataUrl ? (
+            <div className="relative group">
+              <img
+                src={item.mobileDataUrl}
+                alt={`${item.label} mobile`}
+                className="w-full rounded border border-border object-cover object-top"
+                style={{ aspectRatio: "390/844", maxHeight: 200 }}
+              />
+              <Button
+                size="sm"
+                className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 text-xs"
+                onClick={() => onDownload(item.mobileDataUrl!, `${item.label}-mobile`)}
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div
+              className="w-full rounded border border-border bg-muted flex items-center justify-center"
+              style={{ aspectRatio: "390/844", maxHeight: 200 }}
+            >
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+
+        {/* Desktop */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Monitor className="h-3 w-3" />
+            Desktop
+          </div>
+          {item.desktopDataUrl ? (
+            <div className="relative group">
+              <img
+                src={item.desktopDataUrl}
+                alt={`${item.label} desktop`}
+                className="w-full rounded border border-border object-cover object-top"
+                style={{ aspectRatio: "1280/720", maxHeight: 200 }}
+              />
+              <Button
+                size="sm"
+                className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 text-xs"
+                onClick={() => onDownload(item.desktopDataUrl!, `${item.label}-desktop`)}
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div
+              className="w-full rounded border border-border bg-muted flex items-center justify-center"
+              style={{ aspectRatio: "1280/720", maxHeight: 200 }}
+            >
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Screenshots() {
+  const [screenshots, setScreenshots] = useState<ScreenshotData[]>(
+    ALL_PAGES.map((p) => ({ ...p, mobileDataUrl: null, desktopDataUrl: null }))
+  );
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: ALL_PAGES.length });
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const origin = window.location.origin;
 
-  const captureScreenshot = async (
-    iframeRef: React.RefObject<HTMLIFrameElement>,
-    name: string,
-    setCapturing: (v: boolean) => void
-  ) => {
-    setCapturing(true);
-    try {
-      const iframe = iframeRef.current;
-      if (!iframe?.contentDocument?.body) {
-        throw new Error("Iframe não acessível");
-      }
-
-      const canvas = await html2canvas(iframe.contentDocument.body, {
-        useCORS: true,
-        scale: 2,
-        width: iframe.contentDocument.documentElement.scrollWidth,
-        height: iframe.contentDocument.documentElement.scrollHeight,
-        windowWidth: iframe.contentDocument.documentElement.scrollWidth,
-        windowHeight: iframe.contentDocument.documentElement.scrollHeight,
+  const captureIframe = useCallback(
+    (width: number, height: number): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const iframe = iframeRef.current;
+        if (!iframe?.contentDocument?.body) {
+          reject(new Error("Iframe inacessível"));
+          return;
+        }
+        html2canvas(iframe.contentDocument.body, {
+          useCORS: true,
+          scale: 2,
+          width,
+          height,
+          windowWidth: width,
+          windowHeight: height,
+        })
+          .then((canvas) => resolve(canvas.toDataURL("image/png")))
+          .catch(reject);
       });
+    },
+    []
+  );
 
-      const link = document.createElement("a");
-      link.download = `screenshot-${name}-${route.replace(/\//g, "_") || "home"}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      toast.success(`Screenshot ${name} baixado!`);
-    } catch (error) {
-      console.error("Erro ao capturar screenshot:", error);
-      toast.error("Falha na captura. Abrindo em nova aba como alternativa...");
-      const width = name === "mobile" ? 390 : 1280;
-      const height = name === "mobile" ? 844 : 720;
-      window.open(
-        origin + route,
-        "_blank",
-        `width=${width},height=${height},menubar=no,toolbar=no`
-      );
-    } finally {
-      setCapturing(false);
+  const waitForIframeLoad = useCallback((): Promise<void> => {
+    return new Promise((resolve) => {
+      const iframe = iframeRef.current;
+      if (!iframe) { resolve(); return; }
+      const onLoad = () => {
+        iframe.removeEventListener("load", onLoad);
+        // Extra delay for rendering
+        setTimeout(resolve, 1500);
+      };
+      iframe.addEventListener("load", onLoad);
+    });
+  }, []);
+
+  const generateAll = useCallback(async () => {
+    setIsGenerating(true);
+    const results = [...screenshots];
+
+    for (let i = 0; i < ALL_PAGES.length; i++) {
+      const page = ALL_PAGES[i];
+      setProgress({ current: i + 1, total: ALL_PAGES.length });
+
+      try {
+        // Mobile capture
+        const iframe = iframeRef.current;
+        if (!iframe) continue;
+
+        iframe.style.width = "390px";
+        iframe.style.height = "844px";
+        iframe.src = origin + page.path;
+        await waitForIframeLoad();
+
+        let mobileUrl: string | null = null;
+        try {
+          mobileUrl = await captureIframe(390, 844);
+        } catch {
+          console.warn(`Falha captura mobile: ${page.path}`);
+        }
+
+        // Desktop capture
+        iframe.style.width = "1280px";
+        iframe.style.height = "720px";
+        iframe.src = origin + page.path;
+        await waitForIframeLoad();
+
+        let desktopUrl: string | null = null;
+        try {
+          desktopUrl = await captureIframe(1280, 720);
+        } catch {
+          console.warn(`Falha captura desktop: ${page.path}`);
+        }
+
+        results[i] = { ...page, mobileDataUrl: mobileUrl, desktopDataUrl: desktopUrl };
+        setScreenshots([...results]);
+      } catch (err) {
+        console.error(`Erro na página ${page.path}:`, err);
+      }
     }
+
+    setIsGenerating(false);
+    toast.success("Todas as screenshots foram geradas!");
+  }, [screenshots, origin, captureIframe, waitForIframeLoad]);
+
+  useEffect(() => {
+    // Auto-generate on mount
+    const timer = setTimeout(() => generateAll(), 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const downloadScreenshot = (dataUrl: string, name: string) => {
+    const link = document.createElement("a");
+    link.download = `screenshot-${name.toLowerCase().replace(/\s+/g, "-")}.png`;
+    link.href = dataUrl;
+    link.click();
+    toast.success("Screenshot baixado!");
   };
 
-  const reloadIframes = () => {
-    mobileIframeRef.current?.contentWindow?.location.replace(origin + route);
-    desktopIframeRef.current?.contentWindow?.location.replace(origin + route);
+  const downloadAll = () => {
+    let count = 0;
+    screenshots.forEach((s) => {
+      if (s.mobileDataUrl) {
+        setTimeout(() => downloadScreenshot(s.mobileDataUrl!, `${s.label}-mobile`), count * 300);
+        count++;
+      }
+      if (s.desktopDataUrl) {
+        setTimeout(() => downloadScreenshot(s.desktopDataUrl!, `${s.label}-desktop`), count * 300);
+        count++;
+      }
+    });
   };
+
+  const readyCount = screenshots.filter((s) => s.mobileDataUrl && s.desktopDataUrl).length;
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Camera className="h-6 w-6" />
-            Screenshots
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Visualize e capture screenshots do site em diferentes tamanhos
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Camera className="h-6 w-6" />
+              Screenshots
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {isGenerating
+                ? `Gerando... ${progress.current}/${progress.total} páginas`
+                : `${readyCount}/${ALL_PAGES.length} páginas prontas`}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={generateAll}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {isGenerating ? "Gerando..." : "Regenerar"}
+            </Button>
+            <Button
+              onClick={downloadAll}
+              disabled={readyCount === 0}
+            >
+              <Download className="h-4 w-4" />
+              Baixar Todas ({readyCount * 2})
+            </Button>
+          </div>
         </div>
 
-        {/* Route input */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <Input
-              value={route}
-              onChange={(e) => setRoute(e.target.value)}
-              placeholder="Ex: /, /explore, /auth"
-              className="font-mono"
+        {/* Progress bar */}
+        {isGenerating && (
+          <div className="w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-primary h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(progress.current / progress.total) * 100}%` }}
             />
           </div>
-          <Button onClick={reloadIframes} variant="outline">
-            Carregar Rota
-          </Button>
-        </div>
+        )}
 
-        {/* Presets */}
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((p) => (
-            <Button
-              key={p.path}
-              size="sm"
-              variant={route === p.path ? "default" : "outline"}
-              onClick={() => {
-                setRoute(p.path);
-                setTimeout(() => {
-                  mobileIframeRef.current?.contentWindow?.location.replace(origin + p.path);
-                  desktopIframeRef.current?.contentWindow?.location.replace(origin + p.path);
-                }, 50);
-              }}
-            >
-              {p.label}
-            </Button>
+        {/* Screenshot grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {screenshots.map((item) => (
+            <ScreenshotCard
+              key={item.path}
+              item={item}
+              onDownload={downloadScreenshot}
+            />
           ))}
         </div>
 
-        {/* Previews */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Mobile */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-foreground flex items-center gap-2">
-                <Smartphone className="h-4 w-4" />
-                Mobile (390×844)
-              </h2>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.open(origin + route, "_blank", "width=390,height=844,menubar=no,toolbar=no")}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => captureScreenshot(mobileIframeRef, "mobile", setCapturingMobile)}
-                  disabled={capturingMobile}
-                >
-                  {capturingMobile ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                  Baixar
-                </Button>
-              </div>
-            </div>
-            <div
-              className="border border-border rounded-lg overflow-hidden bg-background"
-              style={{ width: "100%", maxWidth: 250, height: 540 }}
-            >
-              <iframe
-                ref={mobileIframeRef}
-                src={origin + route}
-                title="Mobile Preview"
-                style={{
-                  width: 390,
-                  height: 844,
-                  transform: "scale(0.64)",
-                  transformOrigin: "top left",
-                  border: "none",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Desktop */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-foreground flex items-center gap-2">
-                <Monitor className="h-4 w-4" />
-                Desktop (1280×720)
-              </h2>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.open(origin + route, "_blank", "width=1280,height=720,menubar=no,toolbar=no")}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => captureScreenshot(desktopIframeRef, "desktop", setCapturingDesktop)}
-                  disabled={capturingDesktop}
-                >
-                  {capturingDesktop ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                  Baixar
-                </Button>
-              </div>
-            </div>
-            <div
-              className="border border-border rounded-lg overflow-hidden bg-background"
-              style={{ width: "100%", maxWidth: 640, height: 360 }}
-            >
-              <iframe
-                ref={desktopIframeRef}
-                src={origin + route}
-                title="Desktop Preview"
-                style={{
-                  width: 1280,
-                  height: 720,
-                  transform: "scale(0.5)",
-                  transformOrigin: "top left",
-                  border: "none",
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Hidden iframe for capturing */}
+        <iframe
+          ref={iframeRef}
+          title="Capture Frame"
+          style={{
+            position: "fixed",
+            left: "-9999px",
+            top: "-9999px",
+            width: 390,
+            height: 844,
+            border: "none",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        />
       </div>
     </AdminLayout>
   );
