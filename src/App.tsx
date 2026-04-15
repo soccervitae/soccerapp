@@ -68,6 +68,7 @@ import AdminAddTeams from "./pages/admin/AddTeams";
 import AdminChampionships from "./pages/admin/Championships";
 import AdminAchievements from "./pages/admin/Achievements";
 import AdminSettings from "./pages/admin/Settings";
+import AdminScreenshots from "./pages/admin/Screenshots";
 import AdminPremium from "./pages/admin/Premium";
 import AdminVerification from "./pages/admin/Verification";
 import { AdminRoute } from "@/components/admin/AdminRoute";
@@ -343,6 +344,7 @@ const AnimatedRoutes = () => {
       <Route path="/admin/account-types" element={<AdminRoute><AdminAccountTypes /></AdminRoute>} />
       <Route path="/admin/account-types/:slug" element={<AdminRoute><AdminAccountTypeDetail /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+      <Route path="/admin/screenshots" element={<AdminRoute><AdminScreenshots /></AdminRoute>} />
       <Route path="/admin/premium" element={<AdminRoute><AdminPremium /></AdminRoute>} />
       <Route path="/admin/verification" element={<AdminRoute><AdminVerification /></AdminRoute>} />
       

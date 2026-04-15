@@ -19,6 +19,7 @@ import {
   BadgeCheck,
   UserCog,
   ShieldCheck,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +42,7 @@ const menuItems = [
   { icon: Trophy, label: "Campeonatos", path: "/admin/championships" },
   { icon: Medal, label: "Conquistas", path: "/admin/achievements" },
   { icon: UserCog, label: "Tipos de Conta", path: "/admin/account-types" },
+  { icon: Camera, label: "Screenshots", path: "/admin/screenshots" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
 ];
 
