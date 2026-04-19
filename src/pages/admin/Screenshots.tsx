@@ -22,6 +22,8 @@ const ALL_PAGES = [
   { label: "Privacidade", path: "/privacy" },
   { label: "Sobre", path: "/about" },
   { label: "Diretrizes", path: "/guidelines" },
+  { label: "Perfil do Usuário", path: "/soccervitae" },
+  { label: "Post", path: "/post/exemplo" },
 ];
 
 type ScreenshotData = {
