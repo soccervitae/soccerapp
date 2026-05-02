@@ -101,37 +101,21 @@ const Landing = () => {
 
               <div className="flex justify-center md:justify-start gap-3">
                 {isMobile ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/saiba-mais')}
-                      className="border-transparent bg-white/15 text-white hover:bg-white/25 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                    >
-                      Saiba Mais
-                    </Button>
-                    <Button
-                      onClick={() => setShowInstallSheet(true)}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                    >
-                      Baixar App
-                    </Button>
-                  </>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/saiba-mais')}
+                    className="border-transparent bg-white/15 text-white hover:bg-white/25 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                  >
+                    Saiba Mais
+                  </Button>
                 ) : (
-                  <>
-                    <Button
-                      onClick={() => loginCardRef.current?.switchToSignup()}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                    >
-                      Começar Agora
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/saiba-mais')}
-                      className="border-transparent bg-white/15 text-white hover:bg-white/25 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
-                    >
-                      Saiba Mais
-                    </Button>
-                  </>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/saiba-mais')}
+                    className="border-transparent bg-white/15 text-white hover:bg-white/25 font-bold px-8 h-10 rounded text-sm tracking-wider uppercase"
+                  >
+                    Saiba Mais
+                  </Button>
                 )}
               </div>
             </div>
