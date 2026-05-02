@@ -213,16 +213,6 @@ const LoginForm = ({ onSwitchToSignup }: LoginFormProps) => {
         Continuar com Google
       </Button>
 
-      {/* Signup link */}
-      <p className="text-center text-xs text-white/40 mt-5">
-        Não tem conta?{" "}
-        <button
-          onClick={onSwitchToSignup}
-          className="font-medium transition-colors text-emerald-500"
-        >
-          Cadastre-se
-        </button>
-      </p>
     </>
   );
 };
