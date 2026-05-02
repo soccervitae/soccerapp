@@ -100,8 +100,7 @@ const loginInProgressRef = { current: false };
 
 const Auth = () => {
   const location = useLocation();
-  const initialTab = (location.state as any)?.tab === "signup" ? "signup" : "login";
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
+  const [socialError2, setSocialError2] = useState<string | null>(null);
   const [socialError, setSocialError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
