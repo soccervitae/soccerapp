@@ -132,71 +132,20 @@ const Auth = () => {
       {/* Auth Card */}
       <div className="flex-1 bg-white px-6 pt-2 pb-8">
         <div className="max-w-sm mx-auto">
-          <Tabs value={activeTab} onValueChange={(v) => {
-            setActiveTab(v as "login" | "signup");
-            setSocialError(null);
-          }}>
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl h-12">
-              <TabsTrigger 
-                value="login" 
-                className="rounded-lg font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm"
-              >
-                ENTRAR
-              </TabsTrigger>
-              <TabsTrigger 
-                value="signup"
-                className="rounded-lg font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm"
-              >
-                CADASTRAR
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="login" className="mt-6">
+          <Tabs value="login" onValueChange={() => {}}>
+            <TabsContent value="login" className="mt-2">
               <LoginForm />
-            </TabsContent>
-
-            <TabsContent value="signup" className="mt-6">
-              <SignupForm onSuccess={() => setActiveTab("login")} />
             </TabsContent>
           </Tabs>
 
-          {/* Social Login - only show on login tab */}
-          {activeTab === "login" && (
-            <>
-              <SocialLoginButtons onError={setSocialError} />
-              {socialError && (
-                <div className="mt-4 flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                  <X className="h-4 w-4 text-destructive flex-shrink-0" />
-                  <p className="text-sm text-destructive">{socialError}</p>
-                </div>
-              )}
-            </>
+          {/* Social Login */}
+          <SocialLoginButtons onError={setSocialError} />
+          {socialError && (
+            <div className="mt-4 flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <X className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive">{socialError}</p>
+            </div>
           )}
-
-          {/* Toggle text */}
-          <div className="mt-8 text-center">
-            {activeTab === "login" ? (
-              <p className="text-muted-foreground">
-                Não tem uma conta?{" "}
-                <button
-                  onClick={() => setActiveTab("signup")}
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Cadastre-se grátis
-                </button>
-              </p>
-            ) : (
-              <p className="text-muted-foreground">
-                Já tem uma conta?{" "}
-                <button
-                  onClick={() => setActiveTab("login")}
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Entrar
-                </button>
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </div>
