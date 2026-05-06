@@ -308,50 +308,7 @@ export default function AdminTeams() {
             </Button>
           )}
 
-          <Button
-            variant="outline"
-            onClick={async () => {
-              const t = toast.loading("Gerando arquivo...");
-              try {
-                let query = supabase
-                  .from("times")
-                  .select(`nome, escudo_url, created_at, selected_by_users, pais:pais_id(nome), estado:estado_id(nome, uf)`)
-                  .order("nome", { ascending: true });
-                if (search) query = query.ilike("nome", `%${search}%`);
-                if (selectedPaisId) query = query.eq("pais_id", selectedPaisId);
-                if (selectedEstadoId) query = query.eq("estado_id", selectedEstadoId);
-                const { data, error } = await query;
-                if (error) throw error;
-                const rows = (data || []).map((r: any) => ({
-                  Nome: r.nome,
-                  Pais: r.pais?.nome || "",
-                  Estado: r.estado ? `${r.estado.nome} (${r.estado.uf})` : "",
-                  Usuarios: r.selected_by_users?.length || 0,
-                  Escudo: r.escudo_url || "",
-                  Cadastro: r.created_at ? format(new Date(r.created_at), "dd/MM/yyyy") : "",
-                }));
-                const headers = Object.keys(rows[0] || { Nome: "", Pais: "", Estado: "", Usuarios: "", Escudo: "", Cadastro: "" });
-                const escape = (v: any) => {
-                  const s = String(v ?? "");
-                  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-                };
-                const csv = "\uFEFF" + [headers.join(";"), ...rows.map(r => headers.map(h => escape((r as any)[h])).join(";"))].join("\n");
-                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `times_${new Date().toISOString().slice(0,10)}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
-                toast.success(`${rows.length} times exportados`, { id: t });
-              } catch (e: any) {
-                toast.error("Erro ao exportar: " + e.message, { id: t });
-              }
-            }}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Baixar tabela
-          </Button>
+          <DownloadTeamsButton paises={paises || []} />
 
           <Button onClick={() => navigate("/admin/teams/add")} className="ml-auto">
             <Plus className="h-4 w-4 mr-2" />
