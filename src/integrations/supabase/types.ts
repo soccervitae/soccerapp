@@ -699,34 +699,75 @@ export type Database = {
       messages: {
         Row: {
           content: string
+          conversation_id: string | null
           created_at: string | null
+          delete_after_read: boolean | null
+          deleted_at: string | null
+          expires_at: string | null
           id: string
+          is_temporary: boolean | null
+          media_type: string | null
+          media_url: string | null
           read: boolean | null
-          receiver_id: string
+          read_by: string[] | null
+          receiver_id: string | null
+          reply_to_message_id: string | null
           sender_id: string
         }
         Insert: {
           content: string
+          conversation_id?: string | null
           created_at?: string | null
+          delete_after_read?: boolean | null
+          deleted_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_temporary?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
           read?: boolean | null
-          receiver_id: string
+          read_by?: string[] | null
+          receiver_id?: string | null
+          reply_to_message_id?: string | null
           sender_id: string
         }
         Update: {
           content?: string
+          conversation_id?: string | null
           created_at?: string | null
+          delete_after_read?: boolean | null
+          deleted_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_temporary?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
           read?: boolean | null
-          receiver_id?: string
+          read_by?: string[] | null
+          receiver_id?: string | null
+          reply_to_message_id?: string | null
           sender_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_message_id_fkey"
+            columns: ["reply_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
