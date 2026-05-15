@@ -131,9 +131,16 @@ const Auth = () => {
       {/* Auth Card */}
       <div className="flex-1 bg-white px-6 pt-2 pb-8">
         <div className="max-w-sm mx-auto">
-          <Tabs value="login" onValueChange={() => {}}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="login">Entrar</TabsTrigger>
+              <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+            </TabsList>
             <TabsContent value="login" className="mt-2">
               <LoginForm />
+            </TabsContent>
+            <TabsContent value="signup" className="mt-2">
+              <SignupForm onSuccess={() => setActiveTab("login")} />
             </TabsContent>
           </Tabs>
 
