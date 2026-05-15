@@ -102,6 +102,9 @@ const Auth = () => {
   const location = useLocation();
   
   const [socialError, setSocialError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(
+    (location.state as any)?.tab === "signup" ? "signup" : "login"
+  );
   const navigate = useNavigate();
   const { user } = useAuth();
 
