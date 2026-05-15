@@ -205,6 +205,8 @@ export const useMessages = (conversationId: string | null) => {
           expires_at: null,
           is_temporary: isTemporary || null,
           read_by: null,
+          read: false,
+          receiver_id: null,
           sender: null,
           isPending: true,
         };
